@@ -5,6 +5,7 @@ import NetworkTools from './components/tools/NetworkTools'
 import PropertiesPanel from './components/panels/PropertiesPanel'
 import SimulationControls from './components/simulation/SimulationControls'
 import EnergyPlot from './components/visualization/EnergyPlot'
+import ResizablePanel from './components/common/ResizablePanel'
 
 function App() {
   const [selectedElement, setSelectedElement] = useState<any>(null);
@@ -27,29 +28,56 @@ function App() {
   return (
     <MainLayout>
       <div className="flex h-full">
-        {/* Left Sidebar */}
-        <aside className="w-64 border-r border-gray-200 bg-white p-4 overflow-y-auto flex-shrink-0">
-          <NetworkTools onCreateNetwork={handleCreateNetwork} />
-        </aside>
+        {/* Left Sidebar - Resizable */}
+        <ResizablePanel 
+          direction="horizontal" 
+          defaultSize={250} 
+          minSize={200} 
+          maxSize={400} 
+          className="border-r border-gray-200 bg-white overflow-y-auto"
+          handlePosition="end"
+        >
+          <div className="p-4 h-full">
+            <NetworkTools onCreateNetwork={handleCreateNetwork} />
+          </div>
+        </ResizablePanel>
         
         {/* Main Content */}
-        <main className="flex-1 p-4 overflow-auto flex flex-col">
+        <main className="flex-1 flex flex-col overflow-hidden">
           {/* Network Workspace */}
-          <div className="flex-1">
+          <div className="flex-1 p-4 overflow-auto">
             <Workspace onElementSelect={handleElementSelect} />
           </div>
           
-          {/* Energy Visualization */}
-          <div className="h-64 mt-4">
-            <EnergyPlot />
-          </div>
+          {/* Energy Visualization - Resizable */}
+          <ResizablePanel
+            direction="vertical"
+            defaultSize={200}
+            minSize={100}
+            maxSize={400}
+            className="border-t border-gray-200 bg-white overflow-y-auto"
+            handlePosition="start"
+          >
+            <div className="p-4 h-full">
+              <EnergyPlot />
+            </div>
+          </ResizablePanel>
         </main>
         
-        {/* Right Sidebar */}
-        <aside className="w-80 border-l border-gray-200 bg-white overflow-y-auto flex-shrink-0">
-          <PropertiesPanel selectedElement={selectedElement} />
-          <SimulationControls onStartSimulation={handleStartSimulation} />
-        </aside>
+        {/* Right Sidebar - Resizable */}
+        <ResizablePanel 
+          direction="horizontal" 
+          defaultSize={300} 
+          minSize={250} 
+          maxSize={500} 
+          className="border-l border-gray-200 bg-white overflow-y-auto"
+          handlePosition="start"
+        >
+          <div className="h-full">
+            <PropertiesPanel selectedElement={selectedElement} />
+            <SimulationControls onStartSimulation={handleStartSimulation} />
+          </div>
+        </ResizablePanel>
       </div>
     </MainLayout>
   )

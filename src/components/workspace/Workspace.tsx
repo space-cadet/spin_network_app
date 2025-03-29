@@ -65,30 +65,30 @@ const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
     cyInstance.add([
       { 
         group: 'nodes', 
-        data: { id: 'n1', label: 'Node 1' },
+        data: { id: 'n1', label: 'Node 1', intertwiner: 0.5 },
         position: { x: 100, y: 100 }
       },
       { 
         group: 'nodes', 
-        data: { id: 'n2', label: 'Node 2' }, 
+        data: { id: 'n2', label: 'Node 2', intertwiner: 1 }, 
         position: { x: 200, y: 200 }
       },
       { 
         group: 'nodes', 
-        data: { id: 'n3', label: 'Node 3' }, 
+        data: { id: 'n3', label: 'Node 3', intertwiner: 1.5 }, 
         position: { x: 150, y: 250 }
       },
       { 
         group: 'edges', 
-        data: { id: 'e1', source: 'n1', target: 'n2', label: 'j=1/2' } 
+        data: { id: 'e1', source: 'n1', target: 'n2', label: 'j=1/2', spin: 0.5 } 
       },
       { 
         group: 'edges', 
-        data: { id: 'e2', source: 'n2', target: 'n3', label: 'j=1' } 
+        data: { id: 'e2', source: 'n2', target: 'n3', label: 'j=1', spin: 1 } 
       },
       { 
         group: 'edges', 
-        data: { id: 'e3', source: 'n3', target: 'n1', label: 'j=3/2' } 
+        data: { id: 'e3', source: 'n3', target: 'n1', label: 'j=3/2', spin: 1.5 } 
       }
     ]);
 
@@ -105,11 +105,44 @@ const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
     // Set the cytoscape instance
     setCy(cyInstance);
 
+    // Handle window resize to redraw the graph
+    const handleResize = () => {
+      if (cyInstance) {
+        cyInstance.resize();
+        cyInstance.fit();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     // Cleanup function
     return () => {
+      window.removeEventListener('resize', handleResize);
       cyInstance.destroy();
     };
   }, [onElementSelect]);
+
+  // Monitor for size changes in the container (for resizable panels)
+  useEffect(() => {
+    if (!cy) return;
+    
+    // Create a ResizeObserver to detect changes in the container size
+    const resizeObserver = new ResizeObserver(() => {
+      if (cy) {
+        cy.resize();
+      }
+    });
+    
+    if (cyContainerRef.current) {
+      resizeObserver.observe(cyContainerRef.current);
+    }
+    
+    return () => {
+      if (cyContainerRef.current) {
+        resizeObserver.unobserve(cyContainerRef.current);
+      }
+    };
+  }, [cy]);
 
   // Handle mode change
   useEffect(() => {

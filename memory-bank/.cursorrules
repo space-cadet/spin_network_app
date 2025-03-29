@@ -1,0 +1,60 @@
+# Spin Network Visualization App Development Rules
+
+## Project Architecture
+
+1. This is a React application using TypeScript and built with Vite
+2. The project uses Tailwind CSS for styling
+3. Dependencies are managed with pnpm (not npm or yarn)
+4. The app has a component-based architecture with clear separation of concerns
+5. Components are organized by functionality (layouts, tools, panels, visualization)
+
+## Interface Patterns
+
+1. The application uses a resizable panel system for flexible workspace customization
+2. The main layout consists of:
+   - Left panel for network tools
+   - Center area for network visualization
+   - Right panel for properties and simulation controls
+   - Bottom panel for energy/metrics visualization
+3. Resize handles allow users to adjust panel sizes to their preference
+4. Panels maintain minimum and maximum size constraints
+
+## Component Patterns
+
+1. ResizablePanel is a reusable component for creating panels that can be resized by the user
+2. Network visualization is handled by Cytoscape.js integration
+3. The workspace supports different modes (select, pan) for different interaction patterns
+4. Property panels show context-sensitive controls based on selected elements
+5. Interface components use consistent styling from Tailwind CSS
+
+## Visualization Patterns
+
+1. Spin networks are visualized as graphs with nodes (intertwiners) and edges (spins)
+2. Network elements (nodes/edges) should be selectable for property editing
+3. The visualization should support zoom, pan, and selection operations
+4. Visual feedback should indicate the state of elements (selected, active)
+5. The visualization should adapt to panel size changes
+
+## Coding Conventions
+
+1. Use functional components with hooks, not class components
+2. Use TypeScript interfaces for component props and data structures
+3. Maintain clear type definitions for all data structures
+4. Place CSS in the appropriate style files, not inline (except for dynamic values)
+5. Follow the existing naming conventions for files and components
+6. Use consistent indentation (2 spaces) and formatting
+
+## Implementation Priorities
+
+1. Focus on UI functionality first, before implementing simulation logic
+2. Ensure the interface is responsive and handles resizing properly
+3. Make the application visually polished and intuitive
+4. Keep the code modular to support future integration of simulation features
+
+## Development Workflow
+
+1. Understand existing code before making changes
+2. Make incremental changes that can be easily tested
+3. Consider how new features will integrate with the existing architecture
+4. Maintain documentation in the memory-bank alongside code changes
+5. Test UI changes across different panel configurations

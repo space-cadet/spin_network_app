@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaNetworkWired, FaChartLine, FaCog } from 'react-icons/fa';
+import ResizablePanel from '../common/ResizablePanel';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <header className="bg-primary text-white py-2 px-4 shadow-md">
+      <header className="bg-primary text-white py-2 px-4 shadow-md z-10">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <FaNetworkWired size={24} />
@@ -46,13 +47,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {children}
       </div>
       
-      {/* Footer */}
-      <footer className="bg-gray-100 border-t border-gray-200 py-2 px-4">
-        <div className="container mx-auto text-sm text-gray-500 flex justify-between">
-          <div>Spin Network Visualization App v0.1.0</div>
-          <div>© 2023</div>
+      {/* Footer - Resizable */}
+      <ResizablePanel 
+        direction="vertical" 
+        defaultSize={30} 
+        minSize={25} 
+        maxSize={120}
+        className="bg-gray-100 border-t border-gray-200 z-10"
+        handlePosition="start"
+      >
+        <div className="px-4 h-full flex items-center">
+          <div className="container mx-auto text-sm text-gray-500 flex justify-between">
+            <div>Spin Network Visualization App v0.1.0</div>
+            <div>© 2023</div>
+          </div>
         </div>
-      </footer>
+      </ResizablePanel>
     </div>
   );
 };

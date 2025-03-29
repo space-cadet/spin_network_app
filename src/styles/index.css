@@ -56,6 +56,94 @@
   min-height: 500px;
 }
 
+/* Resizable panel styles */
+.resizable-panel {
+  position: relative;
+}
+
+/* Resize handle base styles */
+.resizer-handle {
+  z-index: 20; /* Make sure handles are on top */
+  background-color: transparent;
+}
+
+/* Horizontal resize handle (vertical bar) */
+.horizontal-handle {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 10px !important;
+  cursor: ew-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.horizontal-handle::after {
+  content: "";
+  display: block;
+  height: 40px;
+  width: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.horizontal-handle:hover::after,
+.horizontal-handle:active::after {
+  background-color: var(--primary);
+}
+
+/* Handle positioning */
+.horizontal-handle.handle-end {
+  right: -5px;
+}
+
+.horizontal-handle.handle-start {
+  left: -5px;
+}
+
+/* Vertical resize handle (horizontal bar) */
+.vertical-handle {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 10px !important;
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vertical-handle::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.vertical-handle:hover::after,
+.vertical-handle:active::after {
+  background-color: var(--primary);
+}
+
+/* Handle positioning */
+.vertical-handle.handle-end {
+  bottom: -5px;
+}
+
+.vertical-handle.handle-start {
+  top: -5px;
+}
+
+/* Dragging state styles */
+.resizer-handle:active::after {
+  background-color: var(--primary) !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
