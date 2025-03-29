@@ -35,8 +35,11 @@
 - ✅ Zoom and pan controls for network view
 - ✅ Resize handles for all panels
 - ✅ Panel size constraints (min/max)
-- ✅ Mode switching (select vs. pan)
+- ✅ Mode switching (select, pan, add node, add edge, delete)
 - ✅ Property display for selected elements
+- ✅ Node creation via canvas click
+- ✅ Edge creation via node selection
+- ✅ Element deletion with confirmation
 
 ### Project Infrastructure
 - ✅ Dependency management with pnpm
@@ -48,10 +51,10 @@
 
 ## Current Work In Progress
 
-### Phase 1: Core Network Functionality
-- ✅ Implementing Redux state management
-- 🔄 Developing network operations (add, edit, delete elements)
-- ✅ Connecting UI components to state management
+### Phase 2: Simulation Capabilities
+- 🔄 Preparing for simulation engine development
+- 🔄 Planning matrix representations for networks
+- 🔄 Designing diffusion algorithm implementation
 
 ## What's Left to Build
 
@@ -59,7 +62,8 @@
 - ✅ Redux state management setup
 - ✅ Connect network visualization to Redux
 - ✅ Connect property panel to Redux for element editing
-- ⬜ Implement node/edge creation via UI
+- ✅ Implement node/edge creation via UI
+- ⬜ Fix remaining issues with network operations
 
 ### Phase 2 (High Priority)
 - ⬜ Undo/redo functionality
@@ -86,32 +90,36 @@
 
 ## Current Status
 
-The application now has a functional network data model and generation capabilities. Users can create different types of networks (lattice, circular, random) with configurable parameters. The network visualization correctly displays these networks and allows for element selection. The property panel shows information about selected nodes and edges.
+The application now has a functional network data model with comprehensive UI-based operations for creating and editing networks. Users can create networks from templates (lattice, circular, random), add custom nodes by clicking on the canvas, connect nodes with edges, and delete elements. The property panel allows editing of node and edge properties.
 
-We've successfully implemented Redux state management, replacing the temporary context-based solution. All components are now connected to the Redux store, providing a single source of truth for application state.
+We've implemented a complete set of interaction modes (select, pan, add node, add edge, delete) with visual feedback and intuitive toggling behavior. The application maintains a consistent state through Redux and provides immediate visual feedback for all operations.
 
 ### Recent Achievements
-1. Implemented Redux store with proper TypeScript typing
-2. Created network slice for managing network data
-3. Created UI slice for managing UI state
-4. Connected all components to Redux state
-5. Fixed edge selection display in the properties panel
-6. Enhanced component interaction through Redux actions
+1. Implemented UI-based node creation on canvas click
+2. Added edge creation through source/target node selection
+3. Implemented element deletion with confirmation dialogs
+4. Created mode-switching interface with visual feedback
+5. Added status indicators for guiding users through operations
+6. Fixed issues with Cytoscape.js integration and styling
 
 ### In Progress
-1. Implementing network operations for element manipulation (create, edit, delete)
-2. Enhancing property editing with validation
+1. Addressing edge cases in network operations
+2. Planning simulation engine development
+3. Designing matrix representations for diffusion
 
 ## Known Issues
 
 ### UI/UX Issues
-1. **Resize Handle Positioning**: Resize handles can be difficult to target precisely
-2. **Panel Size Coordination**: When resizing multiple panels, maintaining proportions can be challenging
-3. **Scroll Behavior**: Some panels may have scrolling issues with complex content
+1. **Edge Creation Edge Cases**: Some issues with the edge creation workflow in certain scenarios
+2. **Delete Mode Persistence**: Issues with delete event handlers after network updates
+3. **Resize Handle Positioning**: Resize handles can be difficult to target precisely
+4. **Panel Size Coordination**: When resizing multiple panels, maintaining proportions can be challenging
 
 ### Technical Issues
-1. **Node Positioning**: Need to ensure consistent node positioning during view changes
-2. **Layout Adjustments**: When adding new elements, the layout needs to be adjusted
+1. **Cytoscape.js Styling Warnings**: Some styling warnings related to element mappings
+2. **Event Handler Persistence**: Challenges with maintaining event handlers across operations
+3. **Node Positioning**: Need to ensure consistent node positioning during view changes
+4. **Selection Behavior**: Occasional issues with selection during mode transitions
 
 ## Risk Assessment
 

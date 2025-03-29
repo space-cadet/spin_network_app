@@ -26,6 +26,9 @@
    - Bottom panel for energy/metrics visualization
 3. Resize handles allow users to adjust panel sizes to their preference
 4. Panels maintain minimum and maximum size constraints
+5. Interaction modes (select, pan, add node, add edge, delete) use visual feedback
+6. Status indicators guide users through multi-step operations
+7. Cursor styles change based on the current interaction mode
 
 ## Network Visualization Patterns
 
@@ -33,9 +36,12 @@
 2. Network elements (nodes/edges) are selectable for property editing
 3. Nodes represent intertwiners with position and intertwiner value properties
 4. Edges represent spins with source, target, and spin value properties
-5. The visualization supports multiple modes (select, pan)
+5. The visualization supports multiple modes (select, pan, add node, add edge, delete)
 6. Exercise caution when using Cytoscape.js layout functions - they can cause rendering issues
 7. Always use try/catch blocks around Cytoscape.js operations that might fail
+8. Prefer CSS classes for styling Cytoscape elements over direct style application
+9. Use namespaced event handlers (e.g., 'tap.delete') for better event management
+10. Reattach event handlers after operations that modify the graph
 
 ## Component Patterns
 
@@ -43,6 +49,8 @@
 2. Network generators create different types of networks (lattice, circular, random)
 3. Property panels show context-sensitive controls based on selected elements
 4. Interface components use consistent styling from Tailwind CSS
+5. Mode buttons use toggle behavior (active→inactive) for better UX
+6. Confirmation dialogs are used for destructive operations
 
 ## Coding Conventions
 
@@ -62,6 +70,8 @@
 5. All hooks must be called unconditionally at the top level of components
 6. Use useMemo for conditional logic that depends on state
 7. Keep Redux state normalized and minimal
+8. Network operations are triggered through Redux actions
+9. UI state (modes, selection) is managed through the uiSlice
 
 ## Development Workflow
 
@@ -70,3 +80,5 @@
 3. Consider how new features will integrate with the existing architecture
 4. Maintain documentation in the memory-bank alongside code changes
 5. Test UI changes across different panel configurations
+6. Check different interaction modes when implementing new features
+7. Consider edge cases for user interactions

@@ -40,9 +40,7 @@ This document tracks both accomplished objectives and planned tasks for the proj
 - [x] Connect generators to UI controls
 - [x] Add property display for selected elements
 
-## Phase 1: Core Network Functionality (Current Focus)
-
-### 1. Redux State Management Setup (Highest Priority)
+### Redux State Management
 - [x] Set up Redux store architecture
 - [x] Create network data slice
 - [x] Implement UI state management
@@ -50,76 +48,79 @@ This document tracks both accomplished objectives and planned tasks for the proj
 - [x] Add action creators for all network operations
 - [x] Implement network validation within state management
 
-### 2. Network Operations Implementation (Highest Priority)
-- [ ] Create UI for node creation
-  - [ ] Add mode for placing nodes on canvas
-  - [ ] Implement position calculation based on click
-  - [ ] Support configurable node properties on creation
-- [ ] Implement edge creation functionality
-  - [ ] Add mode for connecting nodes
-  - [ ] Support selection of source and target nodes
-  - [ ] Allow configurable edge properties on creation
-- [ ] Add element deletion operations
-  - [ ] Implement node deletion with connected edge cleanup
-  - [ ] Add edge deletion functionality
-  - [ ] Create confirmation dialog for destructive actions
-- [ ] Connect operations to Cytoscape.js visualization
+### Network Operations Implementation
+- [x] Create UI for node creation
+  - [x] Add mode for placing nodes on canvas
+  - [x] Implement position calculation based on click
+  - [x] Support configurable node properties on creation
+- [x] Implement edge creation functionality
+  - [x] Add mode for connecting nodes
+  - [x] Support selection of source and target nodes
+  - [x] Allow configurable edge properties on creation
+- [x] Add element deletion operations
+  - [x] Implement node deletion with connected edge cleanup
+  - [x] Add edge deletion functionality
+  - [x] Create confirmation dialog for destructive actions
+- [x] Connect operations to Cytoscape.js visualization
+- [x] Implement mode switching with toggle behavior
 
-### 3. Properties Editing (High Priority)
-- [ ] Create editable property fields
-- [ ] Implement property updates for nodes
-- [ ] Implement property updates for edges
+## Current Focus
+
+### 1. Bug Fixes and Refinements
+- [ ] Fix remaining issues with element deletion
+- [ ] Improve edge creation workflow
+- [ ] Enhance visual feedback during operations
+- [ ] Optimize event handling for complex operations
+
+### 2. Properties Editing Enhancement
+- [ ] Improve editable property fields
 - [ ] Add validation for property inputs
-- [ ] Connect property updates to Redux actions
+- [ ] Enhance property updates for elements
+- [ ] Add support for custom properties
 
-## Phase 2: History and Simulation
+### 3. Simulation Engine Development
+- [ ] Implement graph Laplacian calculator
+- [ ] Create matrix representations for networks
+- [ ] Develop ordinary diffusion (heat equation) implementation
+- [ ] Add finite velocity diffusion (telegraph equation) implementation
+- [ ] Create numerical solvers for time evolution
 
-### 4. Undo/Redo Functionality (High Priority)
+## Future Plans
+
+### Phase 2: History and Simulation
+
+#### 1. Undo/Redo Functionality
 - [ ] Implement action history tracking
 - [ ] Create reducers for undo/redo operations
 - [ ] Add state snapshots for efficient history navigation
 - [ ] Implement UI controls for history
 - [ ] Add keyboard shortcuts for undo/redo
 
-### 5. Simulation Engine Development (High Priority)
-- [ ] Implement graph Laplacian calculator
-- [ ] Create matrix representations for networks
-- [ ] Develop ordinary diffusion (heat equation) implementation
-- [ ] Add finite velocity diffusion (telegraph equation) implementation
-- [ ] Create numerical solvers for time evolution
-- [ ] Implement simulation state management
-
-### 6. Initial Data Visualization (Medium Priority)
-- [ ] Implement dynamic node coloring based on field values
-- [ ] Create energy plots with simulation data
-- [ ] Add time-series visualization for node values
-- [ ] Develop statistics calculations for diffusion processes
-- [ ] Connect visualization to simulation results
-
-## Phase 3: User Interface and Experience
-
-### 7. Simulation Control Interface (Medium Priority)
-- [ ] Create simulation parameter configuration UI
+#### 2. Simulation Controls and Visualization
 - [ ] Implement play/pause/step controls
 - [ ] Add simulation speed adjustment
 - [ ] Develop time slider for navigating simulation steps
 - [ ] Create reset and restart functionality
+- [ ] Implement dynamic node coloring based on field values
+- [ ] Create energy plots with simulation data
 
-### 8. Save/Load Functionality (Medium Priority)
+### Phase 3: User Interface and Experience
+
+#### 1. Save/Load Functionality
 - [ ] Implement network export/import capabilities
 - [ ] Create project saving features
 - [ ] Develop local storage integration
 - [ ] Add file management UI
 - [ ] Create sample network library
 
-### 9. UI Refinements (Lower Priority)
+#### 2. UI Refinements
 - [ ] Add tooltips to all controls and buttons
 - [ ] Improve visual feedback for network element selection
 - [ ] Add keyboard shortcuts for common operations
 - [ ] Implement focus indicators for accessibility
 - [ ] Create loading and progress indicators for operations
 
-### 10. User Experience Improvements (Lower Priority)
+#### 3. User Experience Improvements
 - [ ] Add dark/light theme support
 - [ ] Create user preferences system
 - [ ] Implement tutorial or guided tour

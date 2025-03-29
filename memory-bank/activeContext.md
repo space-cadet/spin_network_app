@@ -2,92 +2,93 @@
 
 ## Current Development Focus
 
-We have successfully implemented the network data model, network generation functionality, and Redux state management. The next steps focus on completing the core network functionality with:
+We have successfully implemented the network data model, network generation functionality, Redux state management, and UI-based network operations. The next steps focus on moving towards simulation capabilities:
 
 1. ✅ **Redux State Management**: Implemented Redux for global state management
-2. **Network Operations**: Finalizing the implementation of network editing operations
+2. ✅ **Network Operations**: Implemented UI-based node/edge creation and deletion
 3. ✅ **UI Integration**: Connected UI components to Redux state
-4. **Element Creation**: Implementing UI-based node and edge creation
+4. ✅ **Element Creation**: Implemented UI-based node and edge creation
 
 ## Recent Changes
 
-### Redux State Management Implementation
-- Created Redux store architecture with Redux Toolkit
-- Implemented network slice for managing network data
-- Implemented UI slice for managing UI state
-- Added selectors for accessing state data
-- Created custom hooks for Redux integration
+### Network Operations Implementation
+- Added UI-based interaction modes (select, pan, add node, add edge, delete)
+- Implemented node creation by clicking on the canvas
+- Implemented edge creation through source/target node selection
+- Added element deletion with confirmation dialogs
+- Enhanced the workspace toolbar with visual feedback for active modes
+- Implemented mode toggling for better user experience
 
-### Network Data Model Integration with Redux
-- Connected network operations to Redux actions
-- Ensured immutability in all state updates
-- Laid foundation for future undo/redo functionality
-- Fixed edge selection display issue in properties panel
+### UI Enhancements
+- Added visual feedback for the current interaction mode
+- Implemented status indicators to guide users through operations
+- Added visual highlighting for nodes during edge creation
+- Improved cursor feedback based on the active mode
+- Fixed various issues with Cytoscape.js integration
 
-### UI Integration with Redux
-- Migrated all components from context to Redux
-- Connected network visualization to Redux state
-- Connected properties panel to Redux state
-- Fixed React hook rules violation in properties panel
-- Enhanced property editing with Redux-powered updates
+### Bug Fixes and Technical Improvements
+- Resolved issues with Cytoscape.js styling warnings
+- Fixed edge creation preview functionality
+- Improved event handling for interaction modes
+- Enhanced deletion workflow with proper confirmation dialogs
+- Fixed issues with event handler persistence across operations
 
 ## Current Decisions and Considerations
 
-### Redux Implementation Completed
-We have implemented Redux with Redux Toolkit to manage application state:
+### UI-Based Network Operations Architecture
+We've implemented a comprehensive system for network manipulation:
 
-1. **State Structure**:
-   - Network data (nodes, edges, metadata) managed through networkSlice
-   - UI state (selected elements, mode, view settings) managed through uiSlice
-   - Foundation for simulation state (future)
+1. **Interaction Modes**:
+   - Select mode for selecting elements
+   - Pan mode for navigating the network
+   - Add Node mode for creating nodes by clicking
+   - Add Edge mode for connecting nodes
+   - Delete mode for removing elements
 
-2. **Action Organization**:
-   - Network actions (create, modify, delete)
-   - Selection actions
-   - View actions
+2. **User Experience**:
+   - Toggle behavior for mode buttons (click again to deactivate)
+   - Persistent modes for creating multiple elements
+   - Visual feedback through status indicators
+   - Cursor changes based on active mode
 
-3. **Component Integration**:
-   - All components now use Redux for state management
-   - Properties panel enhanced to show source/target node labels
-   - Network visualization synchronized with Redux state
+3. **Operation Workflow**:
+   - Clear steps for edge creation (source then target)
+   - Confirmation dialogs for destructive operations
+   - Visual highlighting for intermediate states (e.g., selected source node)
 
-### Network Operation Architecture
-For the network operations, we are focusing on:
+### Implementation Challenges
+We addressed several technical challenges:
 
-1. **Immutable Updates**:
-   - All Redux reducers implement immutable state updates
-   - This enables future undo/redo functionality
-   - Network operations are consistent with this pattern
+1. **Cytoscape.js Integration**:
+   - Managed event bindings for different interaction modes
+   - Handled edge creation preview without styling warnings
+   - Fixed selection behavior during operations
+   - Maintained visual consistency during operations
 
-2. **Validation**:
-   - All operations include validation to ensure network integrity
-   - Redux actions enforce data validation
-   - TypeScript provides type safety throughout
-
-3. **User Interface Integration**:
-   - Network operations triggered via Redux actions
-   - UI components respond to state changes
-   - Clear user feedback for all operations
+2. **Redux Integration**:
+   - Connected UI operations to Redux actions
+   - Maintained state consistency during operations
+   - Provided proper user feedback through the UI
 
 ## Next Steps
 
 ### Short-term (Current Focus)
-1. **Network Operations Implementation**:
-   - Add support for UI-based node creation
-   - Implement edge creation between selected nodes
-   - Add element deletion functionality
-   - Enhance property editing with validation
+1. **Simulation Engine Development**:
+   - Implement graph Laplacian calculator
+   - Create matrix representations for networks
+   - Develop diffusion algorithms
+   - Create numerical solvers for time evolution
 
-2. **UI Improvements**:
-   - Add visual feedback for node/edge creation operations
+2. **Bug Fixes and Refinements**:
+   - Address remaining issues with network operations
+   - Fix edge cases in deletion event handling
+   - Improve performance for larger networks
+   - Enhance visual feedback during operations
+
+3. **UI Improvements**:
+   - Add keyboard shortcuts for common operations
    - Improve element selection feedback
-   - Add confirmation for destructive operations
-   - Enhance Cytoscape.js visualization
-
-3. **Bug Fixes and Refinements**:
-   - Address any remaining edge cases in Redux integration
-   - Optimize performance for larger networks
-   - Add error boundary protection
+   - Enhance visual design of the property panel
 
 ### Medium-term (Next Phase)
 1. **Undo/Redo Functionality**:
@@ -95,14 +96,13 @@ For the network operations, we are focusing on:
    - Create reducers for undo/redo operations
    - Add UI controls for history navigation
 
-2. **Simulation Engine Development**:
-   - Implement graph Laplacian calculator
-   - Create matrix representations for networks
-   - Develop diffusion algorithms
-   - Create numerical solvers for time evolution
+2. **Simulation Visualization**:
+   - Implement dynamic node visualization during simulation
+   - Create energy plots with actual simulation data
+   - Add time controls for simulation playback
 
 ### Known Challenges
-1. Managing complex state transitions while maintaining responsive UI
-2. Ensuring consistent network visualization when operations are applied
-3. Balancing flexibility and performance in network operations
-4. Handling large networks efficiently
+1. Implementing accurate diffusion algorithms for different equation types
+2. Balancing computational performance with visualization responsiveness
+3. Creating intuitive controls for simulation parameters
+4. Handling larger networks efficiently during simulations
