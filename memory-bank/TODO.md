@@ -1,6 +1,6 @@
 # Spin Network Visualization and Diffusion App - TODO
 
-This document tracks both accomplished objectives and planned tasks for the project. Items are organized by priority and development phase.
+This document tracks both accomplished objectives and planned tasks for the project. Items are organized by priority and development phase according to the revised plan.
 
 ## Accomplished Objectives
 
@@ -30,82 +30,92 @@ This document tracks both accomplished objectives and planned tasks for the proj
 - [x] Implement visual indicators for interactive elements
 - [x] Design panel layout for optimal workflow
 
-## High Priority (Next Steps)
+## Phase 1: Core Network Functionality
 
-### UI Refinements
+### 1. Basic Network Data Model (Highest Priority)
+- [ ] Define TypeScript interfaces for network elements (nodes, edges)
+- [ ] Implement data structures for spin networks
+- [ ] Create validation logic for network integrity
+- [ ] Establish relationships between network elements
+- [ ] Define serialization format for networks
+- [ ] Implement unit tests for network model
+
+### 2. Network Operations Implementation (Highest Priority)
+- [ ] Develop network creation from templates
+  - [ ] Lattice generator with configurable dimensions
+  - [ ] Circular network generator with configurable nodes
+  - [ ] Random network generator with adjustable parameters
+- [ ] Implement node creation functionality
+  - [ ] Add nodes via UI controls
+  - [ ] Configure node properties (position, intertwiner)
+- [ ] Implement edge creation functionality
+  - [ ] Connect nodes via UI
+  - [ ] Configure edge properties (spin value)
+- [ ] Add element deletion operations
+- [ ] Create element selection and manipulation features
+- [ ] Connect operations to Cytoscape.js visualization
+
+### 3. State Management Setup (High Priority)
+- [ ] Set up Redux store architecture
+- [ ] Create network data slices
+- [ ] Implement UI state management
+- [ ] Connect visualization components to state
+- [ ] Add action creators for all network operations
+- [ ] Implement network validation within state management
+
+## Phase 2: History and Simulation
+
+### 4. Undo/Redo Functionality (High Priority)
+- [ ] Implement action history tracking
+- [ ] Create reducers for undo/redo operations
+- [ ] Add state snapshots for efficient history navigation
+- [ ] Implement UI controls for history
+- [ ] Add keyboard shortcuts for undo/redo
+
+### 5. Simulation Engine Development (High Priority)
+- [ ] Implement graph Laplacian calculator
+- [ ] Create matrix representations for networks
+- [ ] Develop ordinary diffusion (heat equation) implementation
+- [ ] Add finite velocity diffusion (telegraph equation) implementation
+- [ ] Create numerical solvers for time evolution
+- [ ] Implement simulation state management
+
+### 6. Initial Data Visualization (Medium Priority)
+- [ ] Implement dynamic node coloring based on field values
+- [ ] Create energy plots with simulation data
+- [ ] Add time-series visualization for node values
+- [ ] Develop statistics calculations for diffusion processes
+- [ ] Connect visualization to simulation results
+
+## Phase 3: User Interface and Experience
+
+### 7. Simulation Control Interface (Medium Priority)
+- [ ] Create simulation parameter configuration UI
+- [ ] Implement play/pause/step controls
+- [ ] Add simulation speed adjustment
+- [ ] Develop time slider for navigating simulation steps
+- [ ] Create reset and restart functionality
+
+### 8. Save/Load Functionality (Medium Priority)
+- [ ] Implement network export/import capabilities
+- [ ] Create project saving features
+- [ ] Develop local storage integration
+- [ ] Add file management UI
+- [ ] Create sample network library
+
+### 9. UI Refinements (Lower Priority)
 - [ ] Add tooltips to all controls and buttons
 - [ ] Improve visual feedback for network element selection
 - [ ] Add keyboard shortcuts for common operations
 - [ ] Implement focus indicators for accessibility
 - [ ] Create loading and progress indicators for operations
 
-### Network Operations
-- [ ] Implement network creation from templates
-  - [ ] Lattice generator with configurable dimensions
-  - [ ] Circular network generator with configurable nodes
-  - [ ] Random network generator with adjustable parameters
-- [ ] Add node creation functionality
-  - [ ] Add nodes via UI controls
-  - [ ] Configure node properties (position, intertwiner)
-- [ ] Add edge creation functionality
-  - [ ] Connect nodes via UI
-  - [ ] Configure edge properties (spin value)
-- [ ] Implement element deletion
-- [ ] Add undo/redo functionality
-
-### State Management
-- [ ] Set up Redux store for global state
-- [ ] Create network data slices
-- [ ] Implement UI state management
-- [ ] Add network validation
-- [ ] Create persistence layer for saving state
-
-## Medium Priority (Phase 2)
-
-### Simulation Engine
-- [ ] Implement graph Laplacian calculator
-- [ ] Create matrix representations for networks
-- [ ] Implement ordinary diffusion (heat equation)
-- [ ] Implement finite velocity diffusion (telegraph equation)
-- [ ] Add numerical solvers for time evolution
-- [ ] Create simulation controller for step-by-step execution
-
-### Data Visualization
-- [ ] Implement dynamic node coloring based on field values
-- [ ] Create actual energy plot with simulation data
-- [ ] Add time-series visualization for node values
-- [ ] Implement statistics calculations
-- [ ] Add export functionality for simulation results
-
-### User Experience
+### 10. User Experience Improvements (Lower Priority)
 - [ ] Add dark/light theme support
 - [ ] Create user preferences system
 - [ ] Implement tutorial or guided tour
 - [ ] Add context-sensitive help
 - [ ] Improve error handling and user feedback
-
-## Low Priority (Future Enhancements)
-
-### Advanced Features
-- [ ] Add support for different graph layouts
-- [ ] Implement advanced network analysis tools
-- [ ] Create network comparison functionality
-- [ ] Add support for network serialization/deserialization
-- [ ] Implement batch operations on network elements
-
-### Performance Optimizations
-- [ ] Optimize rendering for large networks
-- [ ] Implement level-of-detail for network visualization
-- [ ] Use web workers for simulation calculations
-- [ ] Add caching for repeated calculations
-- [ ] Optimize matrix operations
-
-### Extended Functionality
-- [ ] Add custom diffusion model support
-- [ ] Implement parameter sweeping for simulations
-- [ ] Create presets system for common configurations
-- [ ] Add advanced visualization options
-- [ ] Support for exporting to various formats (JSON, CSV, etc.)
 
 ## Technical Debt
 - [ ] Improve TypeScript type definitions for all components

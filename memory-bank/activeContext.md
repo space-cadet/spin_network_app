@@ -2,12 +2,12 @@
 
 ## Current Development Focus
 
-The project is currently in Phase 1, focusing on implementing the core UI components and establishing the foundation for future development. The main focus areas are:
+The project is transitioning from initial UI development to implementing core network functionality. Based on a revised prioritization, we are now focusing on:
 
-1. **User Interface Framework**: Creating a flexible, responsive layout with resizable panels
-2. **Basic Network Visualization**: Setting up Cytoscape.js integration for network display
-3. **Core UI Components**: Implementing network tools, properties panel, and simulation controls
-4. **Project Infrastructure**: Setting up build system, dependencies, and development environment
+1. **Network Data Model**: Implementing the foundational data structures for spin networks
+2. **Network Operations**: Creating functionality for network generation and manipulation
+3. **State Management**: Establishing Redux for global state management
+4. **Simulation Engine**: Planning for the diffusion algorithms implementation
 
 ## Recent Changes
 
@@ -30,79 +30,82 @@ The project is currently in Phase 1, focusing on implementing the core UI compon
 
 ## Current Decisions and Considerations
 
-### UI Design Decisions
-1. **Resizable Panels**: 
-   - Implemented custom ResizablePanel component instead of using a library
-   - Panels can be resized both horizontally and vertically
-   - Visual handles indicate resize functionality
-   - Panels maintain minimum and maximum size constraints
+### Development Plan
+We have established a three-phase development plan:
 
-2. **Layout Structure**:
-   - Left sidebar for network creation tools
-   - Main center area for network visualization
-   - Bottom panel for energy/metrics visualization
-   - Right sidebar for properties and simulation controls
-   - Resizable panels allow users to customize workspace layout
+1. **Phase 1: Core Network Functionality**
+   - Basic network data model implementation
+   - Network operations development
+   - Redux state management setup
 
-3. **Interaction Model**:
-   - Direct manipulation of network elements via Cytoscape.js
-   - Tool-based approach for network construction
-   - Property panel for detailed element configuration
-   - Mode-switching for different interaction contexts (select, pan, etc.)
+2. **Phase 2: History and Simulation**
+   - Undo/redo functionality
+   - Simulation engine development
+   - Initial data visualization
+
+3. **Phase 3: User Interface and Experience**
+   - Simulation control interface
+   - Save/load functionality
+   - UI refinements and user experience improvements
 
 ### Technical Considerations
 
-1. **Performance Optimization**:
-   - ResizeObserver for efficient panel resize handling
-   - Event throttling to prevent performance issues during resize
-   - Efficient re-rendering strategies for Cytoscape.js
+1. **Data Model Design**:
+   - TypeScript interfaces for all network elements
+   - Validation logic for network integrity
+   - Efficient data structures for simulation operations
 
-2. **Component Architecture**:
-   - Separation of concerns between visualization, tools, and controls
-   - Reusable components like ResizablePanel
-   - Clear interfaces between components
+2. **State Management Architecture**:
+   - Redux slice organization
+   - Action creators for network operations
+   - State normalization for efficient access
 
-3. **Future Integration Planning**:
-   - Planning component structure for simulation logic integration
-   - Creating placeholders for future functionality
-   - Designing state management approach for upcoming features
+3. **Component Integration**:
+   - Connecting Redux state to UI components
+   - Maintaining separation of concerns
+   - Ensuring reactive updates to visualization
 
 ## Next Steps
 
 ### Short-term (Immediate Focus)
-1. Complete the UI polishing:
-   - Fine-tune resize handle behavior
-   - Ensure consistent styling across components
-   - Add tooltips and help text for better usability
+1. **Basic Network Data Model**:
+   - Define TypeScript interfaces for network elements
+   - Implement data structures for spin networks
+   - Create validation logic for network integrity
+   - Establish serialization format
 
-2. Add mock network operations:
-   - Implement network creation from templates
-   - Add basic node/edge creation and editing functionality
-   - Create sample networks for demonstration
+2. **Network Operations Implementation**:
+   - Develop network creation from templates (lattice, circular, random)
+   - Implement node/edge creation and editing functionality
+   - Add element deletion operations
+   - Connect operations to Cytoscape.js visualization
 
-3. Set up state management:
-   - Implement Redux store
-   - Create reducers for network state
-   - Connect UI components to state
+3. **State Management Setup**:
+   - Set up Redux store architecture
+   - Create network data slices
+   - Implement UI state management
+   - Connect visualization components to state
 
 ### Medium-term (Next Phase)
-1. Implement network data model:
-   - Create full TypeScript interfaces for network elements
-   - Implement network validation
-   - Add serialization/deserialization for saving/loading
+1. **Undo/Redo Functionality**:
+   - Implement action history tracking
+   - Create reducers for undo/redo operations
+   - Add UI controls for history navigation
 
-2. Begin diffusion algorithm implementation:
-   - Create mathematical models for diffusion
-   - Implement matrix generation from networks
-   - Create numerical solvers for diffusion equations
+2. **Simulation Engine Development**:
+   - Implement graph Laplacian calculator
+   - Create matrix representations for networks
+   - Develop diffusion algorithms
+   - Create numerical solvers for time evolution
 
-3. Add basic simulation visualization:
-   - Create time-step simulation controller
-   - Implement visual feedback for diffusion process
-   - Connect simulation engine to visualization
+3. **Initial Data Visualization**:
+   - Implement dynamic node coloring based on field values
+   - Create energy plots with simulation data
+   - Add time-series visualization for node values
 
 ### Known Challenges
-1. Maintaining performance for large networks during interactive operations
-2. Creating an intuitive UI for complex mathematical operations
-3. Balancing flexibility and simplicity in the diffusion parameter configuration
-4. Ensuring accurate numerical methods for diffusion simulation
+1. Managing complexity in the network data model while keeping it efficient for simulations
+2. Ensuring smooth integration between Redux state and visualization components
+3. Implementing mathematically accurate diffusion algorithms
+4. Maintaining performance for operations on large networks
+5. Creating an intuitive interface for complex network operations
