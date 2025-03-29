@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Redux integration for centralized state management:
+  - Network slice for managing network data
+  - UI slice for managing interface state
+  - Strongly typed selectors for state access
+  - Custom hooks for Redux integration
+- Enhanced properties panel with source/target node label display
+- Comprehensive Redux documentation in memory-bank
+- Support for immutable state updates in all operations
+- Foundation for future undo/redo functionality
+
+### Changed
+- Migrated from context-based state management to Redux
+- Updated all components to use Redux hooks instead of context
+- Improved property panel to properly display edge connections
+- Refined state update patterns for consistency and type safety
+- Optimized component re-renders with proper selector usage
+
+### Fixed
+- React hooks order violation in properties panel
+- Edge properties display issues when selecting edges
+- Component re-rendering inconsistencies
+- TypeScript type safety issues in state updates
+- State synchronization between components
+
+## [0.2.0] - 2025-03-29
+
+### Added
 - Core network data model with TypeScript interfaces
 - Network validation functions for data integrity
 - Network generator functions for different network types:
@@ -32,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Network layout issues when rendering different network types
 - Zoom and fit functionality for network visualization
 
-## [0.1.0] - 2023-11-24
+## [0.1.0] - 2025-03-25
 
 ### Added
 - Initial project setup with React, TypeScript, and Vite

@@ -55,11 +55,13 @@
 
 ## State Management
 
-1. Currently using a context-based approach (NetworkContext)
-2. Plan to transition to Redux with Redux Toolkit
-3. State updates should be immutable (create new objects rather than modifying existing ones)
-4. Use selector functions to extract data from state where appropriate
-5. Action creators should be well-typed and include validation
+1. Using Redux with Redux Toolkit for state management
+2. State updates are immutable (create new objects rather than modifying existing ones)
+3. Use selector functions to extract data from state where appropriate
+4. Action creators are strongly typed with PayloadAction<T>
+5. All hooks must be called unconditionally at the top level of components
+6. Use useMemo for conditional logic that depends on state
+7. Keep Redux state normalized and minimal
 
 ## Development Workflow
 
