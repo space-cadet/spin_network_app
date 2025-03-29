@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { FaPlus, FaTable, FaCircle, FaRandom } from 'react-icons/fa';
-import { useNetwork } from '../../context/NetworkContext';
-import { createEmptyNetwork } from '../../models/networkModel';
+import { useAppDispatch } from '../../store/hooks';
 import { 
-  createLatticeNetwork, 
-  createCircularNetwork, 
-  createRandomNetwork 
-} from '../../utils/networkGenerators';
+  createEmpty, 
+  createLattice, 
+  createCircular, 
+  createRandom 
+} from '../../store/slices/networkSlice';
 
 const NetworkTools: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'create' | 'templates'>('create');
-  const { setNetwork } = useNetwork();
+  const dispatch = useAppDispatch();
   
   // Network template parameters
   const [latticeParams, setLatticeParams] = useState({
@@ -36,19 +36,19 @@ const NetworkTools: React.FC = () => {
   });
   
   const handleCreateEmpty = () => {
-    setNetwork(createEmptyNetwork('Empty Network'));
+    dispatch(createEmpty('Empty Network'));
   };
   
   const handleCreateLattice = () => {
-    setNetwork(createLatticeNetwork(latticeParams));
+    dispatch(createLattice(latticeParams));
   };
   
   const handleCreateCircular = () => {
-    setNetwork(createCircularNetwork(circularParams));
+    dispatch(createCircular(circularParams));
   };
   
   const handleCreateRandom = () => {
-    setNetwork(createRandomNetwork(randomParams));
+    dispatch(createRandom(randomParams));
   };
 
   return (

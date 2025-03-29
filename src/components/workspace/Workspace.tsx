@@ -1,14 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
 import { FaSearch, FaSearchMinus, FaSearchPlus, FaRegHandPaper } from 'react-icons/fa';
-import { useNetwork } from '../../context/NetworkContext';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { setSelectedElement, setInteractionMode } from '../../store/slices/uiSlice';
+import { selectNetwork, selectInteractionMode } from '../../store/selectors';
 import { networkToCytoscape } from '../../models/networkModel';
 
 const Workspace: React.FC = () => {
   const cyContainerRef = useRef<HTMLDivElement>(null);
   const [cy, setCy] = useState<cytoscape.Core | null>(null);
-  const [mode, setMode] = useState<'select' | 'pan'>('select');
-  const { network, setSelectedElement } = useNetwork();
+  const network = useAppSelector(selectNetwork);
+  const mode = useAppSelector(selectInteractionMode);
+  const dispatch = useAppDispatch();
 
   // Initialize cytoscape
   useEffect(() => {
@@ -60,14 +63,14 @@ const Workspace: React.FC = () => {
     // Add selection event
     cyInstance.on('select', 'node, edge', (event) => {
       const element = event.target;
-      setSelectedElement(
-        element.id(), 
-        element.isNode() ? 'node' : 'edge'
-      );
+      dispatch(setSelectedElement({
+        id: element.id(),
+        type: element.isNode() ? 'node' : 'edge'
+      }));
     });
 
     cyInstance.on('unselect', 'node, edge', () => {
-      setSelectedElement(null, null);
+      dispatch(setSelectedElement({ id: null, type: null }));
     });
 
     // Set the cytoscape instance
@@ -87,7 +90,7 @@ const Workspace: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       cyInstance.destroy();
     };
-  }, [setSelectedElement]);
+  }, [dispatch]);
 
   // Update cytoscape when network changes
   useEffect(() => {
@@ -188,7 +191,7 @@ const Workspace: React.FC = () => {
 
   // Mode functions
   const handleModeChange = (newMode: 'select' | 'pan') => {
-    setMode(newMode);
+    dispatch(setInteractionMode(newMode));
   };
 
   return (

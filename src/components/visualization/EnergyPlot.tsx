@@ -15,10 +15,10 @@ interface EnergyPlotProps {
 const EnergyPlot: React.FC<EnergyPlotProps> = ({ data }) => {
   // Placeholder data for visualization
   const mockData = {
-    time: Array.from({ length: 50 }, (_, i) => i * 0.2),
-    gravitational: Array.from({ length: 50 }, (_, i) => Math.sin(i * 0.2) * 0.5 + 1),
-    matter: Array.from({ length: 50 }, (_, i) => Math.cos(i * 0.2) * 0.5 + 1),
-    total: Array.from({ length: 50 }, (_, i) => 2)
+    time: Array.from({ length: 50 }, (_, index) => index * 0.2),
+    gravitational: Array.from({ length: 50 }, (_, index) => Math.sin(index * 0.2) * 0.5 + 1),
+    matter: Array.from({ length: 50 }, (_, index) => Math.cos(index * 0.2) * 0.5 + 1),
+    total: Array.from({ length: 50 }, () => 2)
   };
 
   const plotData = data || mockData;

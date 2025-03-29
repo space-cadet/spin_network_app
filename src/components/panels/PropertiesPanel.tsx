@@ -1,17 +1,94 @@
-import React from 'react';
-import { useNetwork } from '../../context/NetworkContext';
+import React, { useEffect, useState } from 'react';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { 
+  selectSelectedElement, 
+  selectElementByTypeAndId,
+  selectEdgeNodeDetails,
+  selectNetwork
+} from '../../store/selectors';
+import { 
+  updateNetworkNode, 
+  updateNetworkEdge 
+} from '../../store/slices/networkSlice';
+import { NetworkNode, NetworkEdge } from '../../models/types';
 
 const PropertiesPanel: React.FC = () => {
-  const { network, selectedElementId, selectedElementType } = useNetwork();
+  const selectedElement = useAppSelector(selectSelectedElement);
+  const element = useAppSelector(selectElementByTypeAndId);
+  const network = useAppSelector(selectNetwork);
+  const dispatch = useAppDispatch();
+  
+  // Local state for form values
+  const [formValues, setFormValues] = useState<any>({});
+  
+  // Calculate edge details manually instead of using a conditional selector
+  const edgeDetails = React.useMemo(() => {
+    if (selectedElement.type !== 'edge' || !selectedElement.id) return null;
+    
+    const edge = network.edges.find(edge => edge.id === selectedElement.id);
+    if (!edge) return null;
+    
+    const sourceNode = network.nodes.find(node => node.id === edge.source);
+    const targetNode = network.nodes.find(node => node.id === edge.target);
+    
+    return {
+      edge,
+      sourceNode,
+      targetNode
+    };
+  }, [selectedElement.id, selectedElement.type, network.edges, network.nodes]);
+  
+  // Update local state when selected element changes
+  useEffect(() => {
+    if (element) {
+      setFormValues({ ...element });
+    } else {
+      setFormValues({});
+    }
+  }, [element]);
+  
+  // Handle form input changes
+  const handleInputChange = (field: string, value: any) => {
+    setFormValues((prev: any) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedElement.id || !selectedElement.type) return;
+    
+    if (selectedElement.type === 'node') {
+      const updates: Partial<NetworkNode> = {
+        label: formValues.label,
+        intertwiner: parseFloat(formValues.intertwiner),
+        position: {
+          x: parseFloat(formValues.position.x),
+          y: parseFloat(formValues.position.y)
+        }
+      };
+      
+      dispatch(updateNetworkNode({ 
+        id: selectedElement.id, 
+        updates 
+      }));
+    } else if (selectedElement.type === 'edge') {
+      const updates: Partial<NetworkEdge> = {
+        label: formValues.label,
+        spin: parseFloat(formValues.spin)
+      };
+      
+      dispatch(updateNetworkEdge({ 
+        id: selectedElement.id, 
+        updates 
+      }));
+    }
+  };
 
-  // Find the selected element in the network data
-  const selectedElement = selectedElementId
-    ? selectedElementType === 'node'
-      ? network.nodes.find(node => node.id === selectedElementId)
-      : network.edges.find(edge => edge.id === selectedElementId)
-    : null;
-
-  if (!selectedElement) {
+  if (!element) {
     return (
       <div className="border-b border-gray-200 p-4">
         <h2 className="text-lg font-medium mb-4">Properties</h2>
@@ -23,27 +100,28 @@ const PropertiesPanel: React.FC = () => {
   return (
     <div className="border-b border-gray-200 p-4">
       <h2 className="text-lg font-medium mb-4">
-        {selectedElementType === 'node' ? 'Node' : 'Edge'} Properties
+        {selectedElement.type === 'node' ? 'Node' : 'Edge'} Properties
       </h2>
       
-      <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-group">
           <label className="form-label">ID</label>
           <input
             type="text"
-            value={selectedElement.id}
+            value={element.id}
             readOnly
             className="form-input bg-gray-50"
           />
         </div>
         
-        {selectedElementType === 'node' ? (
+        {selectedElement.type === 'node' && (
           <>
             <div className="form-group">
               <label className="form-label">Label</label>
               <input
                 type="text"
-                defaultValue={(selectedElement as any).label || ''}
+                value={formValues.label || ''}
+                onChange={(e) => handleInputChange('label', e.target.value)}
                 className="form-input"
               />
             </div>
@@ -53,7 +131,8 @@ const PropertiesPanel: React.FC = () => {
               <input
                 type="number"
                 step="0.5"
-                defaultValue={(selectedElement as any).intertwiner}
+                value={formValues.intertwiner || 0}
+                onChange={(e) => handleInputChange('intertwiner', e.target.value)}
                 className="form-input"
               />
             </div>
@@ -63,26 +142,37 @@ const PropertiesPanel: React.FC = () => {
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="number"
-                  defaultValue={(selectedElement as any).position.x}
+                  value={formValues.position?.x || 0}
+                  onChange={(e) => handleInputChange('position', { 
+                    ...formValues.position, 
+                    x: e.target.value 
+                  })}
                   className="form-input"
                   placeholder="X"
                 />
                 <input
                   type="number"
-                  defaultValue={(selectedElement as any).position.y}
+                  value={formValues.position?.y || 0}
+                  onChange={(e) => handleInputChange('position', { 
+                    ...formValues.position, 
+                    y: e.target.value 
+                  })}
                   className="form-input"
                   placeholder="Y"
                 />
               </div>
             </div>
           </>
-        ) : (
+        )}
+        
+        {selectedElement.type === 'edge' && (
           <>
             <div className="form-group">
               <label className="form-label">Label</label>
               <input
                 type="text"
-                defaultValue={(selectedElement as any).label || ''}
+                value={formValues.label || ''}
+                onChange={(e) => handleInputChange('label', e.target.value)}
                 className="form-input"
               />
             </div>
@@ -92,33 +182,54 @@ const PropertiesPanel: React.FC = () => {
               <input
                 type="number"
                 step="0.5"
-                defaultValue={(selectedElement as any).spin}
+                value={formValues.spin || 0}
+                onChange={(e) => handleInputChange('spin', e.target.value)}
                 className="form-input"
               />
             </div>
             
             <div className="form-group">
               <label className="form-label">Source</label>
-              <input
-                type="text"
-                value={(selectedElement as any).source}
-                readOnly
-                className="form-input bg-gray-50"
-              />
+              <div className="flex">
+                <input
+                  type="text"
+                  value={formValues.source || ''}
+                  readOnly
+                  className="form-input bg-gray-50 flex-1"
+                />
+                {edgeDetails?.sourceNode && (
+                  <span className="ml-2 p-2 bg-gray-100 rounded text-sm">
+                    {edgeDetails.sourceNode.label || `Node ${edgeDetails.sourceNode.id}`}
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="form-group">
               <label className="form-label">Target</label>
-              <input
-                type="text"
-                value={(selectedElement as any).target}
-                readOnly
-                className="form-input bg-gray-50"
-              />
+              <div className="flex">
+                <input
+                  type="text"
+                  value={formValues.target || ''}
+                  readOnly
+                  className="form-input bg-gray-50 flex-1"
+                />
+                {edgeDetails?.targetNode && (
+                  <span className="ml-2 p-2 bg-gray-100 rounded text-sm">
+                    {edgeDetails.targetNode.label || `Node ${edgeDetails.targetNode.id}`}
+                  </span>
+                )}
+              </div>
             </div>
           </>
         )}
-      </div>
+        
+        <div className="mt-4">
+          <button type="submit" className="btn btn-primary">
+            Update Properties
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

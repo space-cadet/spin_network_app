@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Provider } from 'react-redux'
 import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
 import NetworkTools from './components/tools/NetworkTools'
@@ -6,7 +6,7 @@ import PropertiesPanel from './components/panels/PropertiesPanel'
 import SimulationControls from './components/simulation/SimulationControls'
 import EnergyPlot from './components/visualization/EnergyPlot'
 import ResizablePanel from './components/common/ResizablePanel'
-import { NetworkProvider } from './context/NetworkContext'
+import { store } from './store'
 
 function App() {
   const handleStartSimulation = (params: any) => {
@@ -15,7 +15,7 @@ function App() {
   };
   
   return (
-    <NetworkProvider>
+    <Provider store={store}>
       <MainLayout>
         <div className="flex h-full">
           {/* Left Sidebar - Resizable */}
@@ -70,7 +70,7 @@ function App() {
           </ResizablePanel>
         </div>
       </MainLayout>
-    </NetworkProvider>
+    </Provider>
   )
 }
 
