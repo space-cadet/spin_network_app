@@ -51,9 +51,6 @@ const Workspace: React.FC = () => {
           }
         }
       ],
-      layout: {
-        name: 'preset' // Use preset layout to respect node positions
-      },
       // Basic interactions
       userZoomingEnabled: true,
       userPanningEnabled: true,
@@ -80,7 +77,6 @@ const Workspace: React.FC = () => {
     const handleResize = () => {
       if (cyInstance) {
         cyInstance.resize();
-        cyInstance.fit();
       }
     };
 
@@ -104,25 +100,26 @@ const Workspace: React.FC = () => {
       // Clear the current graph
       cy.elements().remove();
       
-      // Add the new elements
+      // Only add elements if there are any
       if (elements.length > 0) {
         cy.add(elements);
         
-        // First use no layout to ensure nodes are in their defined positions
-        cy.elements().positions((node) => {
-          // This function returns positions for nodes only
-          if (node.isNode()) {
-            return {
-              x: node.data('position')?.x || 0,
-              y: node.data('position')?.y || 0
-            };
+        // Use a delay to ensure elements are rendered
+        setTimeout(() => {
+          if (cy && cy.elements().length > 0) {
+            try {
+              // Only try to fit if we have visible elements
+              const visibleElements = cy.elements().filter(ele => ele.visible());
+              if (visibleElements.length > 0) {
+                cy.zoom(1); // Reset zoom level first
+                cy.pan({ x: 0, y: 0 }); // Reset pan position
+                cy.fit(visibleElements, 50); // Then fit to visible elements
+              }
+            } catch (error) {
+              console.warn('Non-critical render adjustment error:', error);
+            }
           }
-          return { x: 0, y: 0 }; // Fallback, won't be used for edges
-        });
-        
-        // Fit the view to show all elements with padding
-        cy.fit(undefined, 50);
-        cy.center();
+        }, 100); // Longer delay to ensure rendering is complete
       }
     } catch (error) {
       console.error('Error updating network visualization:', error);
@@ -164,14 +161,30 @@ const Workspace: React.FC = () => {
     }
   }, [cy, mode]);
 
-  // Zoom functions
-  const handleZoomIn = () => cy?.zoom(cy.zoom() * 1.2);
-  const handleZoomOut = () => cy?.zoom(cy.zoom() / 1.2);
-  const handleZoomFit = () => {
-    if (cy && cy.elements().length > 0) {
-      cy.fit(undefined, 50);
+  // Safe fit function with safeguards
+  const safeFit = () => {
+    if (!cy || cy.elements().length === 0) return;
+    
+    try {
+      const visibleElements = cy.elements().filter(ele => ele.visible());
+      if (visibleElements.length > 0) {
+        cy.fit(visibleElements, 50);
+      }
+    } catch (error) {
+      console.warn('Error during fit operation:', error);
     }
   };
+
+  // Zoom functions
+  const handleZoomIn = () => {
+    if (cy) cy.zoom(cy.zoom() * 1.2);
+  };
+  
+  const handleZoomOut = () => {
+    if (cy) cy.zoom(cy.zoom() / 1.2);
+  };
+  
+  const handleZoomFit = () => safeFit();
 
   // Mode functions
   const handleModeChange = (newMode: 'select' | 'pan') => {
