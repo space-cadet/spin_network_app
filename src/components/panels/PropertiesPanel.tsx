@@ -3,7 +3,6 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { 
   selectSelectedElement, 
   selectElementByTypeAndId,
-  selectEdgeNodeDetails,
   selectNetwork
 } from '../../store/selectors';
 import { 

@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTable, FaCircle, FaRandom } from 'react-icons/fa';
-import { useAppDispatch } from '../../store/hooks';
+import { FaPlus, FaTable, FaCircle, FaRandom, FaTrash } from 'react-icons/fa';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { 
   createEmpty, 
   createLattice, 
   createCircular, 
   createRandom 
 } from '../../store/slices/networkSlice';
+import { setInteractionMode } from '../../store/slices/uiSlice';
+import { selectInteractionMode } from '../../store/selectors';
 
 const NetworkTools: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'create' | 'templates'>('create');
   const dispatch = useAppDispatch();
+  const interactionMode = useAppSelector(selectInteractionMode);
   
   // Network template parameters
   const [latticeParams, setLatticeParams] = useState({
@@ -49,6 +52,16 @@ const NetworkTools: React.FC = () => {
   
   const handleCreateRandom = () => {
     dispatch(createRandom(randomParams));
+  };
+  
+  // Toggle interaction modes
+  const handleSetMode = (mode: 'addNode' | 'addEdge' | 'delete') => {
+    // If already in this mode, switch back to select mode
+    if (interactionMode === mode) {
+      dispatch(setInteractionMode('select'));
+    } else {
+      dispatch(setInteractionMode(mode));
+    }
   };
 
   return (
@@ -106,8 +119,11 @@ const NetworkTools: React.FC = () => {
               <h3 className="font-medium">Add Node</h3>
               <p className="text-sm text-gray-500">Add a new node to the network</p>
             </div>
-            <button className="btn btn-sm btn-outline">
-              Add
+            <button 
+              className={`btn btn-sm ${interactionMode === 'addNode' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleSetMode('addNode')}
+            >
+              {interactionMode === 'addNode' ? 'Cancel' : 'Add'}
             </button>
           </div>
           
@@ -119,8 +135,27 @@ const NetworkTools: React.FC = () => {
               <h3 className="font-medium">Add Edge</h3>
               <p className="text-sm text-gray-500">Connect nodes with an edge</p>
             </div>
-            <button className="btn btn-sm btn-outline">
-              Add
+            <button 
+              className={`btn btn-sm ${interactionMode === 'addEdge' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleSetMode('addEdge')}
+            >
+              {interactionMode === 'addEdge' ? 'Cancel' : 'Add'}
+            </button>
+          </div>
+          
+          <div className="card p-4 flex items-center space-x-4">
+            <div className="p-2 bg-gray-100 rounded-full">
+              <FaTrash className="text-red-500" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium">Delete Elements</h3>
+              <p className="text-sm text-gray-500">Remove nodes or edges</p>
+            </div>
+            <button 
+              className={`btn btn-sm ${interactionMode === 'delete' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleSetMode('delete')}
+            >
+              {interactionMode === 'delete' ? 'Cancel' : 'Delete'}
             </button>
           </div>
         </div>

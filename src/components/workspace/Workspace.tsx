@@ -1,10 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
-import { FaSearch, FaSearchMinus, FaSearchPlus, FaRegHandPaper } from 'react-icons/fa';
+import { FaSearch, FaSearchMinus, FaSearchPlus, FaRegHandPaper, FaPlus, FaLink, FaTrash } from 'react-icons/fa';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setSelectedElement, setInteractionMode } from '../../store/slices/uiSlice';
-import { selectNetwork, selectInteractionMode } from '../../store/selectors';
-import { networkToCytoscape } from '../../models/networkModel';
+import { setSelectedElement, setInteractionMode, clearSelection } from '../../store/slices/uiSlice';
+import { 
+  selectNetwork, 
+  selectInteractionMode
+} from '../../store/selectors';
+import { 
+  networkToCytoscape
+} from '../../models/networkModel';
+import { 
+  addNetworkNode, 
+  addNetworkEdge, 
+  removeNetworkNode, 
+  removeNetworkEdge 
+} from '../../store/slices/networkSlice';
+import { NetworkNode, NetworkEdge } from '../../models/types';
 
 const Workspace: React.FC = () => {
   const cyContainerRef = useRef<HTMLDivElement>(null);
@@ -12,6 +24,19 @@ const Workspace: React.FC = () => {
   const network = useAppSelector(selectNetwork);
   const mode = useAppSelector(selectInteractionMode);
   const dispatch = useAppDispatch();
+  
+  // State for edge creation
+  const [edgeCreationState, setEdgeCreationState] = useState<{
+    sourceId: string | null;
+    sourceHandle: any | null;
+  }>({
+    sourceId: null,
+    sourceHandle: null
+  });
+  
+  // Default values for new elements
+  const defaultNodeIntertwiner = 1;
+  const defaultEdgeSpin = 0.5;
 
   // Initialize cytoscape
   useEffect(() => {
@@ -52,6 +77,24 @@ const Workspace: React.FC = () => {
             'border-width': 2,
             'border-color': '#fef2f2'
           }
+        },
+        {
+          selector: '.edge-preview',
+          style: {
+            'width': 3,
+            'line-color': '#9ca3af',
+            'line-style': 'dashed',
+            'curve-style': 'bezier',
+            'target-arrow-shape': 'none',
+            'opacity': 0.75
+          }
+        },
+        {
+          selector: '.preview-node',
+          style: {
+            'opacity': 0,
+            'events': 'no'
+          }
         }
       ],
       // Basic interactions
@@ -63,18 +106,73 @@ const Workspace: React.FC = () => {
     // Add selection event
     cyInstance.on('select', 'node, edge', (event) => {
       const element = event.target;
-      dispatch(setSelectedElement({
-        id: element.id(),
-        type: element.isNode() ? 'node' : 'edge'
-      }));
+      
+      // Ignore preview node
+      if (element.id() === 'preview-target-node') return;
+      
+      // Only update selection if in select mode or if we need to select for edge creation
+      if (mode === 'select' || (mode === 'addEdge' && element.isNode())) {
+        dispatch(setSelectedElement({
+          id: element.id(),
+          type: element.isNode() ? 'node' : 'edge'
+        }));
+      }
     });
 
     cyInstance.on('unselect', 'node, edge', () => {
-      dispatch(setSelectedElement({ id: null, type: null }));
+      // Only update selection if in select mode and not if we're in edge creation mode
+      if (mode === 'select') {
+        dispatch(setSelectedElement({ id: null, type: null }));
+      }
+    });
+    
+    // Add click handler for canvas and elements
+    cyInstance.on('tap', (event) => {
+      // If we clicked on the background
+      if (event.target === cyInstance) {
+        if (mode === 'addNode') {
+          handleAddNode(event.position);
+        } else if (mode !== 'addEdge') {
+          // Clear selection when clicking background (except in addEdge mode)
+          dispatch(clearSelection());
+        }
+      }
+    });
+    
+    // Click handler for nodes
+    cyInstance.on('tap', 'node', (event) => {
+      const node = event.target;
+      
+      // Ignore preview node
+      if (node.id() === 'preview-target-node') return;
+      
+      if (mode === 'addEdge') {
+        handleAddEdgeNodeSelection(node);
+        // Prevent event propagation
+        event.originalEvent?.stopPropagation();
+      } else if (mode === 'delete') {
+        handleDeleteElement('node', node.id());
+        // Prevent event propagation
+        event.originalEvent?.stopPropagation();
+      }
+    });
+    
+    // Click handler for edges
+    cyInstance.on('tap', 'edge', (event) => {
+      const edge = event.target;
+      
+      if (mode === 'delete') {
+        handleDeleteElement('edge', edge.id());
+      }
     });
 
     // Set the cytoscape instance
     setCy(cyInstance);
+    
+    // Visual indicator for addNode mode - change cursor
+    if (cyContainerRef.current) {
+      cyContainerRef.current.style.cursor = 'default';
+    }
 
     // Handle window resize to redraw the graph
     const handleResize = () => {
@@ -90,7 +188,7 @@ const Workspace: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       cyInstance.destroy();
     };
-  }, [dispatch]);
+  }, [dispatch, mode]);
 
   // Update cytoscape when network changes
   useEffect(() => {
@@ -155,14 +253,207 @@ const Workspace: React.FC = () => {
   useEffect(() => {
     if (!cy) return;
     
+    // Reset edge creation state when changing modes
+    if (mode !== 'addEdge') {
+      setEdgeCreationState({
+        sourceId: null,
+        sourceHandle: null
+      });
+      
+      // Remove any preview elements
+      cy.$('#edge-preview, #preview-target-node').remove();
+    }
+    
+    // Set appropriate interaction settings based on mode
     if (mode === 'select') {
       cy.userPanningEnabled(false);
       cy.boxSelectionEnabled(true);
+      if (cyContainerRef.current) {
+        cyContainerRef.current.style.cursor = 'default';
+      }
     } else if (mode === 'pan') {
       cy.userPanningEnabled(true);
       cy.boxSelectionEnabled(false);
+      if (cyContainerRef.current) {
+        cyContainerRef.current.style.cursor = 'grab';
+      }
+    } else if (mode === 'addNode') {
+      cy.userPanningEnabled(false);
+      cy.boxSelectionEnabled(false);
+      if (cyContainerRef.current) {
+        cyContainerRef.current.style.cursor = 'cell';
+      }
+    } else if (mode === 'addEdge') {
+      cy.userPanningEnabled(false);
+      cy.boxSelectionEnabled(false);
+      if (cyContainerRef.current) {
+        cyContainerRef.current.style.cursor = 'crosshair';
+      }
+    } else if (mode === 'delete') {
+      cy.userPanningEnabled(false);
+      cy.boxSelectionEnabled(false);
+      if (cyContainerRef.current) {
+        cyContainerRef.current.style.cursor = 'not-allowed';
+      }
     }
   }, [cy, mode]);
+  
+  // Handler for adding a new node at the specified position
+  const handleAddNode = (position: { x: number, y: number }): void => {
+    const timestamp = Date.now();
+    const newNodeId = `node-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+    
+    const newNode: NetworkNode = {
+      id: newNodeId,
+      position: {
+        x: position.x,
+        y: position.y
+      },
+      intertwiner: defaultNodeIntertwiner,
+      label: `Node ${network.nodes.length + 1}`
+    };
+    
+    dispatch(addNetworkNode(newNode));
+    
+    // Optionally select the new node
+    setTimeout(() => {
+      dispatch(setSelectedElement({
+        id: newNodeId,
+        type: 'node'
+      }));
+    }, 100);
+  };
+  
+  // Track mouse position for edge preview
+  useEffect(() => {
+    if (!cy || !cyContainerRef.current || mode !== 'addEdge' || !edgeCreationState.sourceId) return;
+    
+    // Add specific styles just for preview elements
+    cy.style().selector('#preview-target-node').style({
+      'background-opacity': 0,
+      'border-width': 0,
+      'overlay-opacity': 0,
+      'label': ''
+    }).update();
+    
+    cy.style().selector('#edge-preview').style({
+      'width': 3,
+      'line-color': '#9ca3af',
+      'line-style': 'dashed',
+      'curve-style': 'bezier',
+      'target-arrow-shape': 'none',
+      'opacity': 0.75,
+      'label': ''
+    }).update();
+    
+    // Create or update edge preview when we have a source node
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!cy || !cyContainerRef.current) return;
+      
+      // Get the position of the source node
+      const sourceNode = cy.$(`#${edgeCreationState.sourceId}`);
+      if (!sourceNode) return;
+      
+      // Remove any existing preview elements
+      cy.$('#edge-preview, #preview-target-node').remove();
+      
+      // Convert mouse position to relative to the container
+      const containerRect = cyContainerRef.current.getBoundingClientRect();
+      const x = event.clientX - containerRect.left;
+      const y = event.clientY - containerRect.top;
+      
+      // Add a temporary target node (invisible)
+      cy.add({
+        data: { id: 'preview-target-node' },
+        position: { x, y },
+        selectable: false
+      });
+      
+      // Add the preview edge
+      cy.add({
+        data: { 
+          id: 'edge-preview',
+          source: edgeCreationState.sourceId,
+          target: 'preview-target-node'
+        },
+        selectable: false
+      });
+    };
+    
+    cyContainerRef.current.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      if (cyContainerRef.current) {
+        cyContainerRef.current.removeEventListener('mousemove', handleMouseMove);
+      }
+      cy.$('#edge-preview, #preview-target-node').remove();
+    };
+  }, [cy, mode, edgeCreationState.sourceId]);
+  
+  // Handler for node selection during edge creation
+  const handleAddEdgeNodeSelection = (node: cytoscape.NodeSingular): void => {
+    // If we don't have a source node yet, set this as the source
+    if (!edgeCreationState.sourceId) {
+      console.log('Selected source node:', node.id());
+      setEdgeCreationState({
+        sourceId: node.id(),
+        sourceHandle: node
+      });
+      return;
+    }
+    
+    // If we have a source and now selected a target
+    if (edgeCreationState.sourceId && node.id() !== edgeCreationState.sourceId) {
+      console.log('Selected target node:', node.id());
+      console.log('Creating edge from', edgeCreationState.sourceId, 'to', node.id());
+      
+      const timestamp = Date.now();
+      const newEdgeId = `edge-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+      
+      const newEdge: NetworkEdge = {
+        id: newEdgeId,
+        source: edgeCreationState.sourceId,
+        target: node.id(),
+        spin: defaultEdgeSpin,
+        label: `j=${defaultEdgeSpin}`
+      };
+      
+      // Create the edge
+      dispatch(addNetworkEdge(newEdge));
+      
+      // Reset edge creation state
+      setEdgeCreationState({
+        sourceId: null,
+        sourceHandle: null
+      });
+      
+      // Clear any preview elements
+      if (cy) {
+        cy.$('.edge-preview').remove();
+        cy.$('#preview-target-node').remove();
+      }
+      
+      // Select the new edge
+      setTimeout(() => {
+        dispatch(setSelectedElement({
+          id: newEdgeId,
+          type: 'edge'
+        }));
+      }, 100);
+    }
+  };
+  
+  // Handler for deleting elements
+  const handleDeleteElement = (type: 'node' | 'edge', id: string): void => {
+    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+      if (type === 'node') {
+        dispatch(removeNetworkNode(id));
+      } else {
+        dispatch(removeNetworkEdge(id));
+      }
+      dispatch(clearSelection());
+    }
+  };
 
   // Safe fit function with safeguards
   const safeFit = () => {
@@ -190,8 +481,13 @@ const Workspace: React.FC = () => {
   const handleZoomFit = () => safeFit();
 
   // Mode functions
-  const handleModeChange = (newMode: 'select' | 'pan') => {
+  const handleModeChange = (newMode: 'select' | 'pan' | 'addNode' | 'addEdge' | 'delete') => {
     dispatch(setInteractionMode(newMode));
+    
+    // Clear selection when switching to certain modes
+    if (newMode === 'addNode' || newMode === 'delete') {
+      dispatch(setSelectedElement({ id: null, type: null }));
+    }
   };
 
   return (
@@ -215,6 +511,30 @@ const Workspace: React.FC = () => {
           title="Pan Mode"
         >
           <FaRegHandPaper />
+        </button>
+        
+        <button 
+          className={`btn btn-sm ${mode === 'addNode' ? 'btn-primary' : 'btn-outline'}`}
+          onClick={() => handleModeChange('addNode')}
+          title="Add Node"
+        >
+          <FaPlus />
+        </button>
+        
+        <button 
+          className={`btn btn-sm ${mode === 'addEdge' ? 'btn-primary' : 'btn-outline'}`}
+          onClick={() => handleModeChange('addEdge')}
+          title="Add Edge"
+        >
+          <FaLink />
+        </button>
+        
+        <button 
+          className={`btn btn-sm ${mode === 'delete' ? 'btn-primary' : 'btn-outline'}`}
+          onClick={() => handleModeChange('delete')}
+          title="Delete Element"
+        >
+          <FaTrash />
         </button>
         
         {/* Zoom controls */}
@@ -244,13 +564,25 @@ const Workspace: React.FC = () => {
       </div>
       
       {/* Network information */}
-      <div className="text-sm text-gray-500 mb-2">
-        <span>
-          {network.nodes.length} nodes, {network.edges.length} edges
-        </span>
-        <span className="ml-4">
-          {network.metadata.name} {network.metadata.type ? `(${network.metadata.type})` : ''}
-        </span>
+      <div className="text-sm text-gray-500 mb-2 flex items-center justify-between">
+        <div>
+          <span>
+            {network.nodes.length} nodes, {network.edges.length} edges
+          </span>
+          <span className="ml-4">
+            {network.metadata.name} {network.metadata.type ? `(${network.metadata.type})` : ''}
+          </span>
+        </div>
+        
+        {/* Status indicator */}
+        <div>
+          {mode === 'select' && <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Select Mode</span>}
+          {mode === 'pan' && <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Pan Mode</span>}
+          {mode === 'addNode' && <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Click anywhere to add a node</span>}
+          {mode === 'addEdge' && !edgeCreationState.sourceId && <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Select a source node</span>}
+          {mode === 'addEdge' && edgeCreationState.sourceId && <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Select a target node</span>}
+          {mode === 'delete' && <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Click on an element to delete it</span>}
+        </div>
       </div>
       
       {/* Cytoscape container */}
