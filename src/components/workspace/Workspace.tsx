@@ -182,6 +182,16 @@ const Workspace: React.FC = () => {
                 cy.pan({ x: 0, y: 0 }); // Reset pan position
                 cy.fit(visibleElements, 50); // Then fit to visible elements
               }
+              
+              // Reattach handlers after network update
+              if (mode === 'delete') {
+                setupDeleteHandlers();
+              }
+              
+              // Restore source node highlight if in edge creation mode
+              if (mode === 'addEdge' && edgeSourceId) {
+                cy.$(`#${edgeSourceId}`).addClass('source-node');
+              }
             } catch (error) {
               console.warn('Non-critical render adjustment error:', error);
             }
@@ -252,22 +262,15 @@ const Workspace: React.FC = () => {
         else if (node.id() !== edgeSourceId) {
           createEdge(edgeSourceId, node.id());
         }
-      } else if (mode === 'delete') {
-        deleteNode(node.id());
       } else if (mode === 'select') {
         // Selection is handled by the select event
       }
     });
     
-    // Add edge click handler for delete mode
-    cy.edges().unbind('tap');
-    cy.edges().bind('tap', (event) => {
-      const edge = event.target;
-      
-      if (mode === 'delete') {
-        deleteEdge(edge.id());
-      }
-    });
+    // Set up delete handlers if in delete mode
+    if (mode === 'delete') {
+      setupDeleteHandlers();
+    }
     
     // Reset any styling when changing modes
     if (mode !== 'addEdge' && edgeSourceId) {
@@ -297,13 +300,17 @@ const Workspace: React.FC = () => {
     }
     setEdgeSourceId(null);
     
-    // Select the new edge and switch back to select mode
+    // Select the new edge but stay in edge creation mode
     setTimeout(() => {
       dispatch(setSelectedElement({
         id: newEdgeId,
         type: 'edge'
       }));
-      dispatch(setInteractionMode('select'));
+      
+      // Clear selection after a moment to prepare for the next edge
+      setTimeout(() => {
+        dispatch(clearSelection());
+      }, 500);
     }, 100);
   };
   
@@ -324,12 +331,17 @@ const Workspace: React.FC = () => {
     
     dispatch(addNetworkNode(newNode));
     
-    // Optionally select the new node
+    // Briefly select the new node, then clear selection to prepare for next node
     setTimeout(() => {
       dispatch(setSelectedElement({
         id: newNodeId,
         type: 'node'
       }));
+      
+      // Clear selection after a moment
+      setTimeout(() => {
+        dispatch(clearSelection());
+      }, 500);
     }, 100);
   };
   
@@ -338,6 +350,13 @@ const Workspace: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this node?')) {
       dispatch(removeNetworkNode(nodeId));
       dispatch(clearSelection());
+      
+      // Reattach delete event handlers after deletion
+      setTimeout(() => {
+        if (cy && mode === 'delete') {
+          setupDeleteHandlers();
+        }
+      }, 100);
     }
   };
   
@@ -346,7 +365,33 @@ const Workspace: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this edge?')) {
       dispatch(removeNetworkEdge(edgeId));
       dispatch(clearSelection());
+      
+      // Reattach delete event handlers after deletion
+      setTimeout(() => {
+        if (cy && mode === 'delete') {
+          setupDeleteHandlers();
+        }
+      }, 100);
     }
+  };
+  
+  // Setup handlers for delete mode
+  const setupDeleteHandlers = () => {
+    if (!cy) return;
+    
+    // Remove existing handlers
+    cy.nodes().unbind('tap.delete');
+    cy.edges().unbind('tap.delete');
+    
+    // Add node click handler for delete mode
+    cy.nodes().bind('tap.delete', (event) => {
+      deleteNode(event.target.id());
+    });
+    
+    // Add edge click handler for delete mode
+    cy.edges().bind('tap.delete', (event) => {
+      deleteEdge(event.target.id());
+    });
   };
 
   // Safe fit function with safeguards
@@ -376,12 +421,15 @@ const Workspace: React.FC = () => {
 
   // Mode functions
   const handleModeChange = (newMode: 'select' | 'pan' | 'addNode' | 'addEdge' | 'delete') => {
-    dispatch(setInteractionMode(newMode));
-    
-    // Clear selection when switching to certain modes
-    if (newMode === 'addNode' || newMode === 'delete') {
-      dispatch(setSelectedElement({ id: null, type: null }));
+    // If already in this mode, switch back to select mode (toggle behavior)
+    if (mode === newMode) {
+      dispatch(setInteractionMode('select'));
+    } else {
+      dispatch(setInteractionMode(newMode));
     }
+    
+    // Clear selection when switching modes
+    dispatch(setSelectedElement({ id: null, type: null }));
   };
 
   return (
