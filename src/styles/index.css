@@ -33,6 +33,10 @@
     @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
   }
   
+  .btn-sm {
+    @apply px-3 py-1 text-sm;
+  }
+  
   .card {
     @apply bg-white rounded-lg border border-gray-200 shadow-sm p-4;
   }
@@ -54,6 +58,15 @@
 .cy-container {
   @apply w-full h-full bg-white rounded-md border border-gray-200;
   min-height: 500px;
+}
+
+/* Network element styling */
+.node-info {
+  @apply text-xs bg-white p-1 rounded border border-gray-200 shadow-sm absolute;
+}
+
+.edge-info {
+  @apply text-xs bg-white p-1 rounded border border-gray-200 shadow-sm absolute;
 }
 
 /* Resizable panel styles */
@@ -160,4 +173,26 @@
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400;
+}
+
+/* Simulation controls */
+.simulation-control-panel {
+  @apply p-4 border-t border-gray-200;
+}
+
+.simulation-btn {
+  @apply flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors;
+}
+
+.simulation-btn-active {
+  @apply bg-primary text-white hover:bg-primary-700;
+}
+
+/* Network tools panel styling */
+.template-option {
+  @apply rounded-lg border border-gray-200 p-3 transition-colors hover:border-primary;
+}
+
+.template-option-active {
+  @apply border-primary bg-blue-50;
 }

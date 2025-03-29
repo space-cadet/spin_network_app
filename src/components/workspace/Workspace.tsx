@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
 import { FaSearch, FaSearchMinus, FaSearchPlus, FaRegHandPaper } from 'react-icons/fa';
+import { useNetwork } from '../../context/NetworkContext';
+import { networkToCytoscape } from '../../models/networkModel';
 
-interface WorkspaceProps {
-  onElementSelect: (element: any) => void;
-}
-
-const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
+const Workspace: React.FC = () => {
   const cyContainerRef = useRef<HTMLDivElement>(null);
   const [cy, setCy] = useState<cytoscape.Core | null>(null);
   const [mode, setMode] = useState<'select' | 'pan'>('select');
+  const { network, setSelectedElement } = useNetwork();
 
   // Initialize cytoscape
   useEffect(() => {
@@ -53,7 +52,7 @@ const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
         }
       ],
       layout: {
-        name: 'grid'
+        name: 'preset' // Use preset layout to respect node positions
       },
       // Basic interactions
       userZoomingEnabled: true,
@@ -61,45 +60,17 @@ const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
       boxSelectionEnabled: true
     });
 
-    // Add some sample data just for visualization purposes
-    cyInstance.add([
-      { 
-        group: 'nodes', 
-        data: { id: 'n1', label: 'Node 1', intertwiner: 0.5 },
-        position: { x: 100, y: 100 }
-      },
-      { 
-        group: 'nodes', 
-        data: { id: 'n2', label: 'Node 2', intertwiner: 1 }, 
-        position: { x: 200, y: 200 }
-      },
-      { 
-        group: 'nodes', 
-        data: { id: 'n3', label: 'Node 3', intertwiner: 1.5 }, 
-        position: { x: 150, y: 250 }
-      },
-      { 
-        group: 'edges', 
-        data: { id: 'e1', source: 'n1', target: 'n2', label: 'j=1/2', spin: 0.5 } 
-      },
-      { 
-        group: 'edges', 
-        data: { id: 'e2', source: 'n2', target: 'n3', label: 'j=1', spin: 1 } 
-      },
-      { 
-        group: 'edges', 
-        data: { id: 'e3', source: 'n3', target: 'n1', label: 'j=3/2', spin: 1.5 } 
-      }
-    ]);
-
     // Add selection event
     cyInstance.on('select', 'node, edge', (event) => {
       const element = event.target;
-      onElementSelect({
-        id: element.id(),
-        type: element.isNode() ? 'node' : 'edge',
-        data: element.data()
-      });
+      setSelectedElement(
+        element.id(), 
+        element.isNode() ? 'node' : 'edge'
+      );
+    });
+
+    cyInstance.on('unselect', 'node, edge', () => {
+      setSelectedElement(null, null);
     });
 
     // Set the cytoscape instance
@@ -120,7 +91,43 @@ const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
       window.removeEventListener('resize', handleResize);
       cyInstance.destroy();
     };
-  }, [onElementSelect]);
+  }, [setSelectedElement]);
+
+  // Update cytoscape when network changes
+  useEffect(() => {
+    if (!cy) return;
+    
+    try {
+      // Convert network to cytoscape format
+      const elements = networkToCytoscape(network);
+      
+      // Clear the current graph
+      cy.elements().remove();
+      
+      // Add the new elements
+      if (elements.length > 0) {
+        cy.add(elements);
+        
+        // First use no layout to ensure nodes are in their defined positions
+        cy.elements().positions((node) => {
+          // This function returns positions for nodes only
+          if (node.isNode()) {
+            return {
+              x: node.data('position')?.x || 0,
+              y: node.data('position')?.y || 0
+            };
+          }
+          return { x: 0, y: 0 }; // Fallback, won't be used for edges
+        });
+        
+        // Fit the view to show all elements with padding
+        cy.fit(undefined, 50);
+        cy.center();
+      }
+    } catch (error) {
+      console.error('Error updating network visualization:', error);
+    }
+  }, [cy, network]);
 
   // Monitor for size changes in the container (for resizable panels)
   useEffect(() => {
@@ -160,7 +167,11 @@ const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
   // Zoom functions
   const handleZoomIn = () => cy?.zoom(cy.zoom() * 1.2);
   const handleZoomOut = () => cy?.zoom(cy.zoom() / 1.2);
-  const handleZoomFit = () => cy?.fit();
+  const handleZoomFit = () => {
+    if (cy && cy.elements().length > 0) {
+      cy.fit(undefined, 50);
+    }
+  };
 
   // Mode functions
   const handleModeChange = (newMode: 'select' | 'pan') => {
@@ -216,10 +227,20 @@ const Workspace: React.FC<WorkspaceProps> = ({ onElementSelect }) => {
         </button>
       </div>
       
+      {/* Network information */}
+      <div className="text-sm text-gray-500 mb-2">
+        <span>
+          {network.nodes.length} nodes, {network.edges.length} edges
+        </span>
+        <span className="ml-4">
+          {network.metadata.name} {network.metadata.type ? `(${network.metadata.type})` : ''}
+        </span>
+      </div>
+      
       {/* Cytoscape container */}
       <div 
         ref={cyContainerRef} 
-        className="cy-container flex-1"
+        className="cy-container flex-1 border border-gray-200 rounded-md"
       ></div>
     </div>
   );

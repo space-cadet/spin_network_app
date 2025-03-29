@@ -282,9 +282,13 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
         id: node.id,
         label: node.label || `Node ${node.id}`,
         intertwiner: node.intertwiner,
+        position: node.position, // Store position in data for later access
         ...node.properties
       },
-      position: node.position
+      position: { // Set position directly for cytoscape
+        x: node.position.x,
+        y: node.position.y
+      }
     });
   });
   
