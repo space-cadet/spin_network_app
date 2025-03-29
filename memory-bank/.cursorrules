@@ -8,6 +8,14 @@
 4. The app has a component-based architecture with clear separation of concerns
 5. Components are organized by functionality (layouts, tools, panels, visualization)
 
+## Data Model Patterns
+
+1. The network data model uses TypeScript interfaces for all elements
+2. Network operations return new objects rather than modifying existing ones (immutability)
+3. Node IDs are unique strings with format 'node-{timestamp}-{random}'
+4. Edge IDs are unique strings with format 'edge-{timestamp}-{random}'
+5. All operations include validation to ensure network integrity
+
 ## Interface Patterns
 
 1. The application uses a resizable panel system for flexible workspace customization
@@ -19,21 +27,22 @@
 3. Resize handles allow users to adjust panel sizes to their preference
 4. Panels maintain minimum and maximum size constraints
 
+## Network Visualization Patterns
+
+1. Cytoscape.js is used for network visualization
+2. Network elements (nodes/edges) are selectable for property editing
+3. Nodes represent intertwiners with position and intertwiner value properties
+4. Edges represent spins with source, target, and spin value properties
+5. The visualization supports multiple modes (select, pan)
+6. Exercise caution when using Cytoscape.js layout functions - they can cause rendering issues
+7. Always use try/catch blocks around Cytoscape.js operations that might fail
+
 ## Component Patterns
 
 1. ResizablePanel is a reusable component for creating panels that can be resized by the user
-2. Network visualization is handled by Cytoscape.js integration
-3. The workspace supports different modes (select, pan) for different interaction patterns
-4. Property panels show context-sensitive controls based on selected elements
-5. Interface components use consistent styling from Tailwind CSS
-
-## Visualization Patterns
-
-1. Spin networks are visualized as graphs with nodes (intertwiners) and edges (spins)
-2. Network elements (nodes/edges) should be selectable for property editing
-3. The visualization should support zoom, pan, and selection operations
-4. Visual feedback should indicate the state of elements (selected, active)
-5. The visualization should adapt to panel size changes
+2. Network generators create different types of networks (lattice, circular, random)
+3. Property panels show context-sensitive controls based on selected elements
+4. Interface components use consistent styling from Tailwind CSS
 
 ## Coding Conventions
 
@@ -44,12 +53,13 @@
 5. Follow the existing naming conventions for files and components
 6. Use consistent indentation (2 spaces) and formatting
 
-## Implementation Priorities
+## State Management
 
-1. Focus on UI functionality first, before implementing simulation logic
-2. Ensure the interface is responsive and handles resizing properly
-3. Make the application visually polished and intuitive
-4. Keep the code modular to support future integration of simulation features
+1. Currently using a context-based approach (NetworkContext)
+2. Plan to transition to Redux with Redux Toolkit
+3. State updates should be immutable (create new objects rather than modifying existing ones)
+4. Use selector functions to extract data from state where appropriate
+5. Action creators should be well-typed and include validation
 
 ## Development Workflow
 

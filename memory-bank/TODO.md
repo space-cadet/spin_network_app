@@ -24,44 +24,53 @@ This document tracks both accomplished objectives and planned tasks for the proj
 - [x] Improve resize handles for better visibility and usability
 - [x] Ensure responsive design works across different panel configurations
 
-### Visual Design
-- [x] Design application icon
-- [x] Create consistent UI styling with Tailwind
-- [x] Implement visual indicators for interactive elements
-- [x] Design panel layout for optimal workflow
+### Network Data Model Implementation
+- [x] Define TypeScript interfaces for network elements (nodes, edges)
+- [x] Implement data structures for spin networks
+- [x] Create validation logic for network integrity
+- [x] Establish relationships between network elements
+- [x] Define serialization format for networks
 
-## Phase 1: Core Network Functionality
+### Network Generation Implementation
+- [x] Develop network creation from templates
+  - [x] Lattice generator with configurable dimensions
+  - [x] Circular network generator with configurable nodes
+  - [x] Random network generator with adjustable parameters
+- [x] Implement basic network visualization
+- [x] Connect generators to UI controls
+- [x] Add property display for selected elements
 
-### 1. Basic Network Data Model (Highest Priority)
-- [ ] Define TypeScript interfaces for network elements (nodes, edges)
-- [ ] Implement data structures for spin networks
-- [ ] Create validation logic for network integrity
-- [ ] Establish relationships between network elements
-- [ ] Define serialization format for networks
-- [ ] Implement unit tests for network model
+## Phase 1: Core Network Functionality (Current Focus)
 
-### 2. Network Operations Implementation (Highest Priority)
-- [ ] Develop network creation from templates
-  - [ ] Lattice generator with configurable dimensions
-  - [ ] Circular network generator with configurable nodes
-  - [ ] Random network generator with adjustable parameters
-- [ ] Implement node creation functionality
-  - [ ] Add nodes via UI controls
-  - [ ] Configure node properties (position, intertwiner)
-- [ ] Implement edge creation functionality
-  - [ ] Connect nodes via UI
-  - [ ] Configure edge properties (spin value)
-- [ ] Add element deletion operations
-- [ ] Create element selection and manipulation features
-- [ ] Connect operations to Cytoscape.js visualization
-
-### 3. State Management Setup (High Priority)
+### 1. Redux State Management Setup (Highest Priority)
 - [ ] Set up Redux store architecture
-- [ ] Create network data slices
+- [ ] Create network data slice
 - [ ] Implement UI state management
 - [ ] Connect visualization components to state
 - [ ] Add action creators for all network operations
 - [ ] Implement network validation within state management
+
+### 2. Network Operations Implementation (Highest Priority)
+- [ ] Create UI for node creation
+  - [ ] Add mode for placing nodes on canvas
+  - [ ] Implement position calculation based on click
+  - [ ] Support configurable node properties on creation
+- [ ] Implement edge creation functionality
+  - [ ] Add mode for connecting nodes
+  - [ ] Support selection of source and target nodes
+  - [ ] Allow configurable edge properties on creation
+- [ ] Add element deletion operations
+  - [ ] Implement node deletion with connected edge cleanup
+  - [ ] Add edge deletion functionality
+  - [ ] Create confirmation dialog for destructive actions
+- [ ] Connect operations to Cytoscape.js visualization
+
+### 3. Properties Editing (High Priority)
+- [ ] Create editable property fields
+- [ ] Implement property updates for nodes
+- [ ] Implement property updates for edges
+- [ ] Add validation for property inputs
+- [ ] Connect property updates to Redux actions
 
 ## Phase 2: History and Simulation
 

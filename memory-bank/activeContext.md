@@ -2,89 +2,89 @@
 
 ## Current Development Focus
 
-The project is transitioning from initial UI development to implementing core network functionality. Based on a revised prioritization, we are now focusing on:
+We have successfully implemented the network data model and network generation functionality. The next steps focus on completing the core network functionality with:
 
-1. **Network Data Model**: Implementing the foundational data structures for spin networks
-2. **Network Operations**: Creating functionality for network generation and manipulation
-3. **State Management**: Establishing Redux for global state management
-4. **Simulation Engine**: Planning for the diffusion algorithms implementation
+1. **Redux State Management**: Implementing Redux for global state management
+2. **Network Operations**: Finalizing the implementation of network editing operations
+3. **UI Integration**: Connecting UI components to Redux state
+4. **Element Creation**: Implementing UI-based node and edge creation
 
 ## Recent Changes
 
-### UI Implementation
-- Created the basic application structure with React and TypeScript
-- Implemented a responsive layout with resizable panels for all sides
-- Added network visualization canvas using Cytoscape.js
-- Created tool panels for network creation and editing
-- Added property panel for editing network elements
-- Implemented simulation control interface
-- Added placeholder energy plot visualization
-- Improved resize handles for better visibility and usability
+### Network Data Model Implementation
+- Created TypeScript interfaces for network elements (nodes, edges, networks)
+- Implemented network validation functions
+- Developed utility functions for network manipulation (add, update, remove)
+- Added serialization support for Cytoscape.js integration
 
-### Project Setup
-- Set up Vite as the build tool
-- Configured Tailwind CSS for styling
-- Set up pnpm as the package manager
-- Added linting and formatting tools (ESLint, Prettier)
-- Created basic project documentation
+### Network Generation
+- Implemented generators for different network types:
+  - Lattice networks (grid pattern with configurable rows and columns)
+  - Circular networks (ring pattern with configurable nodes and connectivity)
+  - Random networks (randomly positioned nodes with probabilistic edge creation)
+- Added parameter controls for each network type
+
+### UI Integration
+- Implemented temporary context-based state management
+- Connected network visualization to data model
+- Updated properties panel to display selected element information
+- Added network information display (node count, edge count, network type)
+- Fixed Cytoscape.js rendering issues for reliable network visualization
 
 ## Current Decisions and Considerations
 
-### Development Plan
-We have established a three-phase development plan:
+### Redux Implementation Plan
+We will be implementing Redux with Redux Toolkit to manage application state:
 
-1. **Phase 1: Core Network Functionality**
-   - Basic network data model implementation
-   - Network operations development
-   - Redux state management setup
+1. **State Structure**:
+   - Network data (nodes, edges, metadata)
+   - UI state (selected elements, mode, view settings)
+   - Simulation state (future)
 
-2. **Phase 2: History and Simulation**
-   - Undo/redo functionality
-   - Simulation engine development
-   - Initial data visualization
+2. **Action Organization**:
+   - Network actions (create, modify, delete)
+   - Selection actions
+   - View actions
 
-3. **Phase 3: User Interface and Experience**
-   - Simulation control interface
-   - Save/load functionality
-   - UI refinements and user experience improvements
+3. **Slice Approach**:
+   - networkSlice for network data
+   - uiSlice for UI state
+   - simulationSlice (future)
 
-### Technical Considerations
+### Network Operation Architecture
+For the network operations, we are focusing on:
 
-1. **Data Model Design**:
-   - TypeScript interfaces for all network elements
-   - Validation logic for network integrity
-   - Efficient data structures for simulation operations
+1. **Immutable Updates**:
+   - All operations return new network objects rather than modifying existing ones
+   - This approach works well with Redux and enables future undo/redo functionality
 
-2. **State Management Architecture**:
-   - Redux slice organization
-   - Action creators for network operations
-   - State normalization for efficient access
+2. **Validation**:
+   - All operations include validation to ensure network integrity
+   - Prevents invalid states like edges connecting non-existent nodes
 
-3. **Component Integration**:
-   - Connecting Redux state to UI components
-   - Maintaining separation of concerns
-   - Ensuring reactive updates to visualization
+3. **User Interface Integration**:
+   - Operations will be triggered through UI actions
+   - Feedback will be provided for invalid operations
 
 ## Next Steps
 
-### Short-term (Immediate Focus)
-1. **Basic Network Data Model**:
-   - Define TypeScript interfaces for network elements
-   - Implement data structures for spin networks
-   - Create validation logic for network integrity
-   - Establish serialization format
+### Short-term (Current Focus)
+1. **Redux Setup**:
+   - Configure Redux store
+   - Create network slice for managing network data
+   - Create UI slice for managing UI state
+   - Connect existing components to Redux
 
 2. **Network Operations Implementation**:
-   - Develop network creation from templates (lattice, circular, random)
-   - Implement node/edge creation and editing functionality
-   - Add element deletion operations
-   - Connect operations to Cytoscape.js visualization
+   - Add support for UI-based node creation
+   - Implement edge creation between selected nodes
+   - Add element deletion functionality
+   - Support property editing for existing elements
 
-3. **State Management Setup**:
-   - Set up Redux store architecture
-   - Create network data slices
-   - Implement UI state management
-   - Connect visualization components to state
+3. **UI Improvements**:
+   - Add visual feedback for node/edge creation operations
+   - Improve element selection feedback
+   - Add confirmation for destructive operations
 
 ### Medium-term (Next Phase)
 1. **Undo/Redo Functionality**:
@@ -98,14 +98,8 @@ We have established a three-phase development plan:
    - Develop diffusion algorithms
    - Create numerical solvers for time evolution
 
-3. **Initial Data Visualization**:
-   - Implement dynamic node coloring based on field values
-   - Create energy plots with simulation data
-   - Add time-series visualization for node values
-
 ### Known Challenges
-1. Managing complexity in the network data model while keeping it efficient for simulations
-2. Ensuring smooth integration between Redux state and visualization components
-3. Implementing mathematically accurate diffusion algorithms
-4. Maintaining performance for operations on large networks
-5. Creating an intuitive interface for complex network operations
+1. Managing complex state transitions while maintaining responsive UI
+2. Ensuring consistent network visualization when operations are applied
+3. Balancing flexibility and performance in network operations
+4. Handling large networks efficiently
