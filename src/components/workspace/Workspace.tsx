@@ -77,24 +77,6 @@ const Workspace: React.FC = () => {
             'border-width': 2,
             'border-color': '#fef2f2'
           }
-        },
-        {
-          selector: '.edge-preview',
-          style: {
-            'width': 3,
-            'line-color': '#9ca3af',
-            'line-style': 'dashed',
-            'curve-style': 'bezier',
-            'target-arrow-shape': 'none',
-            'opacity': 0.75
-          }
-        },
-        {
-          selector: '.preview-node',
-          style: {
-            'opacity': 0,
-            'events': 'no'
-          }
         }
       ],
       // Basic interactions
@@ -329,22 +311,23 @@ const Workspace: React.FC = () => {
     if (!cy || !cyContainerRef.current || mode !== 'addEdge' || !edgeCreationState.sourceId) return;
     
     // Add specific styles just for preview elements
-    cy.style().selector('#preview-target-node').style({
-      'background-opacity': 0,
-      'border-width': 0,
-      'overlay-opacity': 0,
-      'label': ''
-    }).update();
-    
-    cy.style().selector('#edge-preview').style({
-      'width': 3,
-      'line-color': '#9ca3af',
-      'line-style': 'dashed',
-      'curve-style': 'bezier',
-      'target-arrow-shape': 'none',
-      'opacity': 0.75,
-      'label': ''
-    }).update();
+    cy.style()
+      .selector('#preview-target-node')
+      .style({
+        'background-opacity': 0,
+        'border-width': 0,
+        'label': ''
+      })
+      .selector('#edge-preview')
+      .style({
+        'width': 2,
+        'line-color': '#9ca3af',
+        'line-style': 'dashed',
+        'curve-style': 'bezier',
+        'target-arrow-shape': 'none',
+        'opacity': 0.75,
+        'label': ''
+      }).update();
     
     // Create or update edge preview when we have a source node
     const handleMouseMove = (event: MouseEvent) => {
@@ -362,22 +345,25 @@ const Workspace: React.FC = () => {
       const x = event.clientX - containerRect.left;
       const y = event.clientY - containerRect.top;
       
-      // Add a temporary target node (invisible)
-      cy.add({
-        data: { id: 'preview-target-node' },
-        position: { x, y },
-        selectable: false
-      });
-      
-      // Add the preview edge
-      cy.add({
-        data: { 
-          id: 'edge-preview',
-          source: edgeCreationState.sourceId,
-          target: 'preview-target-node'
-        },
-        selectable: false
-      });
+      try {
+        // Add a temporary target node (invisible)
+        cy.add([{
+          group: 'nodes',
+          data: { id: 'preview-target-node' },
+          position: { x, y },
+          selectable: false
+        }, {
+          group: 'edges',
+          data: { 
+            id: 'edge-preview',
+            source: edgeCreationState.sourceId,
+            target: 'preview-target-node'
+          },
+          selectable: false
+        }]);
+      } catch (error) {
+        console.error("Error creating preview:", error);
+      }
     };
     
     cyContainerRef.current.addEventListener('mousemove', handleMouseMove);
@@ -386,7 +372,9 @@ const Workspace: React.FC = () => {
       if (cyContainerRef.current) {
         cyContainerRef.current.removeEventListener('mousemove', handleMouseMove);
       }
-      cy.$('#edge-preview, #preview-target-node').remove();
+      if (cy) {
+        cy.$('#edge-preview, #preview-target-node').remove();
+      }
     };
   }, [cy, mode, edgeCreationState.sourceId]);
   
@@ -429,8 +417,7 @@ const Workspace: React.FC = () => {
       
       // Clear any preview elements
       if (cy) {
-        cy.$('.edge-preview').remove();
-        cy.$('#preview-target-node').remove();
+        cy.$('#edge-preview, #preview-target-node').remove();
       }
       
       // Select the new edge
@@ -439,6 +426,9 @@ const Workspace: React.FC = () => {
           id: newEdgeId,
           type: 'edge'
         }));
+        
+        // Switch back to select mode after edge creation
+        dispatch(setInteractionMode('select'));
       }, 100);
     }
   };
