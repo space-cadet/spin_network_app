@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTable, FaCircle, FaRandom, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTable, FaCircle, FaRandom, FaTrash, FaSave, FaFileUpload } from 'react-icons/fa';
+import FileOperations from '../common/FileOperations';
+import ResetButton from '../common/ResetButton';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { 
   createEmpty, 
@@ -331,6 +333,17 @@ const NetworkTools: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* File Operations */}
+      <div className="pt-4 border-t border-gray-200">
+        <h3 className="text-sm font-medium text-gray-700 mb-2">File Operations</h3>
+        <div className="flex justify-between mb-4">
+          <FileOperations />
+        </div>
+        <div className="flex justify-end">
+          <ResetButton />
+        </div>
+      </div>
       
       {/* Additional Tools */}
       <div className="pt-4 border-t border-gray-200">

@@ -9,7 +9,8 @@
 
 ### State Management
 - **Redux Toolkit 1.9.7**: State management library
-- *(Planned)* **Redux Persist**: For state persistence across sessions
+- **Redux Persist 6.0.0**: For state persistence across sessions
+- **Localforage 1.10.0**: IndexedDB wrapper for improved storage capabilities
 
 ### Visualization Libraries
 - **Cytoscape.js 3.26.0**: Core library for network visualization
@@ -143,6 +144,12 @@ Features:
    - Diffusion simulations involve matrix operations that can be computationally intensive
    - Strategic use of web workers for heavy calculations
    - Optimized data structures for simulation state
+
+3. **Storage Considerations**:
+   - IndexedDB (via localforage) used for state persistence with improved storage limits
+   - Large networks are stored efficiently using JSON serialization
+   - File-based save/load implemented for explicit user control over network storage
+   - Migration system in place for future state structure changes
 
 ### Browser Compatibility
 

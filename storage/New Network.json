@@ -1,0 +1,97 @@
+{
+  "nodes": [
+    {
+      "id": "node-1743948803546-496",
+      "position": {
+        "x": 73.41643520835589,
+        "y": 287.3402793357038
+      },
+      "intertwiner": 1,
+      "label": "Node 1"
+    },
+    {
+      "id": "node-1743948804170-447",
+      "position": {
+        "x": 205.67786906837446,
+        "y": 198.92239983833133
+      },
+      "intertwiner": 1,
+      "label": "Node 1"
+    },
+    {
+      "id": "placeholder-1743948805526-451",
+      "position": {
+        "x": -125.53057758626177,
+        "y": 224.68513669574617
+      },
+      "intertwiner": 0,
+      "label": "",
+      "type": "placeholder"
+    },
+    {
+      "id": "placeholder-1743948807092-227",
+      "position": {
+        "x": -29.374741707256437,
+        "y": 127.74844234522648
+      },
+      "intertwiner": 0,
+      "label": "",
+      "type": "placeholder"
+    },
+    {
+      "id": "placeholder-1743948807881-97",
+      "position": {
+        "x": 80.28218964698297,
+        "y": 75.40670288997623
+      },
+      "intertwiner": 0,
+      "label": "",
+      "type": "placeholder"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1743948806222-38",
+      "source": "placeholder-1743948805526-451",
+      "target": "node-1743948803546-496",
+      "spin": 0.5,
+      "label": "j=0.5",
+      "sourcePosition": {
+        "x": -125.53057758626177,
+        "y": 224.68513669574617
+      }
+    },
+    {
+      "id": "edge-1743948809120-951",
+      "source": "placeholder-1743948807881-97",
+      "target": "placeholder-1743948807092-227",
+      "spin": 0.5,
+      "label": "j=0.5",
+      "sourcePosition": {
+        "x": 80.28218964698297,
+        "y": 75.40670288997623
+      },
+      "targetPosition": {
+        "x": -29.374741707256437,
+        "y": 127.74844234522648
+      }
+    },
+    {
+      "id": "edge-1743948810746-660",
+      "source": "node-1743948804170-447",
+      "target": "placeholder-1743948807881-97",
+      "spin": 0.5,
+      "label": "j=0.5",
+      "targetPosition": {
+        "x": 80.28218964698297,
+        "y": 75.40670288997623
+      }
+    }
+  ],
+  "metadata": {
+    "name": "New Network",
+    "created": 1743948279596,
+    "modified": 1743948810746,
+    "type": "empty"
+  }
+}

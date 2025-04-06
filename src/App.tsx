@@ -1,4 +1,3 @@
-import { Provider } from 'react-redux'
 import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
 import NetworkTools from './components/tools/NetworkTools'
@@ -6,7 +5,7 @@ import PropertiesPanel from './components/panels/PropertiesPanel'
 import SimulationControls from './components/simulation/SimulationControls'
 import EnergyPlot from './components/visualization/EnergyPlot'
 import ResizablePanel from './components/common/ResizablePanel'
-import { store } from './store'
+import PersistenceStatus from './components/common/PersistenceStatus'
 
 function App() {
   const handleStartSimulation = (params: any) => {
@@ -15,9 +14,9 @@ function App() {
   };
   
   return (
-    <Provider store={store}>
-      <MainLayout>
-        <div className="flex h-full">
+    <MainLayout>
+      <div className="flex h-full">
+        <PersistenceStatus />
           {/* Left Sidebar - Resizable */}
           <ResizablePanel 
             direction="horizontal" 
@@ -70,7 +69,6 @@ function App() {
           </ResizablePanel>
         </div>
       </MainLayout>
-    </Provider>
   )
 }
 
