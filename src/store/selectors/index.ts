@@ -6,6 +6,13 @@ export const selectNodes = (state: RootState) => state.network.currentNetwork.no
 export const selectEdges = (state: RootState) => state.network.currentNetwork.edges;
 export const selectNetworkMetadata = (state: RootState) => state.network.currentNetwork.metadata;
 
+// History state
+export const selectCanUndo = (state: RootState) => state.network.canUndo;
+export const selectCanRedo = (state: RootState) => state.network.canRedo;
+
+// Recent networks
+export const selectRecentNetworks = (state: RootState) => state.recentNetworks.entries;
+
 // Find specific nodes and edges
 export const selectNodeById = (id: string) => (state: RootState) => 
   state.network.currentNetwork.nodes.find(node => node.id === id);
@@ -17,6 +24,10 @@ export const selectEdgeById = (id: string) => (state: RootState) =>
 export const selectSelectedElement = (state: RootState) => state.ui.selectedElement;
 export const selectInteractionMode = (state: RootState) => state.ui.interactionMode;
 export const selectViewSettings = (state: RootState) => state.ui.viewSettings;
+export const selectSidebarVisibility = (state: RootState) => state.ui.sidebarVisibility;
+export const selectLeftSidebarVisible = (state: RootState) => state.ui.sidebarVisibility.left;
+export const selectRightSidebarVisible = (state: RootState) => state.ui.sidebarVisibility.right;
+export const selectBottomSidebarVisible = (state: RootState) => state.ui.sidebarVisibility.bottom;
 
 // Selected element details
 export const selectSelectedNode = (state: RootState) => {

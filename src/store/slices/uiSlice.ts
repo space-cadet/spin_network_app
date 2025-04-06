@@ -11,6 +11,11 @@ interface UIState {
     showLabels: boolean;
     showProperties: boolean;
   };
+  sidebarVisibility: {
+    left: boolean;
+    right: boolean;
+    bottom: boolean;
+  };
 }
 
 // Initial state
@@ -23,6 +28,11 @@ const initialState: UIState = {
   viewSettings: {
     showLabels: true,
     showProperties: true,
+  },
+  sidebarVisibility: {
+    left: true,
+    right: true,
+    bottom: true,
   },
 };
 
@@ -54,6 +64,21 @@ const uiSlice = createSlice({
       };
     },
     
+    // Toggle sidebar visibility
+    toggleSidebar: (state, action: PayloadAction<keyof UIState['sidebarVisibility']>) => {
+      const sidebar = action.payload;
+      state.sidebarVisibility[sidebar] = !state.sidebarVisibility[sidebar];
+    },
+    
+    // Set sidebar visibility
+    setSidebarVisibility: (
+      state, 
+      action: PayloadAction<{ sidebar: keyof UIState['sidebarVisibility']; isVisible: boolean }>
+    ) => {
+      const { sidebar, isVisible } = action.payload;
+      state.sidebarVisibility[sidebar] = isVisible;
+    },
+    
     // Clear selection
     clearSelection: (state) => {
       state.selectedElement = {
@@ -69,6 +94,8 @@ export const {
   setSelectedElement, 
   setInteractionMode, 
   setViewSettings,
+  toggleSidebar,
+  setSidebarVisibility,
   clearSelection
 } = uiSlice.actions;
 

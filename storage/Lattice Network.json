@@ -1,0 +1,179 @@
+{
+  "nodes": [
+    {
+      "id": "node-1743949231105-989",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "intertwiner": 1,
+      "label": "(0,0)"
+    },
+    {
+      "id": "node-1743949231105-722",
+      "position": {
+        "x": 100,
+        "y": 180
+      },
+      "intertwiner": 1,
+      "label": "(1,0)"
+    },
+    {
+      "id": "node-1743949231105-739",
+      "position": {
+        "x": 100,
+        "y": 260
+      },
+      "intertwiner": 1,
+      "label": "(2,0)"
+    },
+    {
+      "id": "node-1743949231105-859",
+      "position": {
+        "x": 180,
+        "y": 260
+      },
+      "intertwiner": 1,
+      "label": "(2,1)"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1743949231105-877",
+      "source": "node-1743949231105-989",
+      "target": null,
+      "spin": 0.5,
+      "label": "j=0.5",
+      "targetPosition": {
+        "x": 180,
+        "y": 100
+      }
+    },
+    {
+      "id": "edge-1743949231105-960",
+      "source": "node-1743949231105-989",
+      "target": "node-1743949231105-722",
+      "spin": 0.5,
+      "label": "j=0.5"
+    },
+    {
+      "id": "edge-1743949231105-503",
+      "source": "node-1743949231105-722",
+      "target": null,
+      "spin": 0.5,
+      "label": "j=0.5",
+      "targetPosition": {
+        "x": 180,
+        "y": 180
+      }
+    },
+    {
+      "id": "edge-1743949231105-62",
+      "source": null,
+      "target": null,
+      "spin": 0.5,
+      "label": "j=0.5",
+      "targetPosition": {
+        "x": 180,
+        "y": 180
+      },
+      "sourcePosition": {
+        "x": 180,
+        "y": 100
+      }
+    },
+    {
+      "id": "edge-1743949231105-430",
+      "source": null,
+      "target": null,
+      "spin": 0.5,
+      "label": "j=0.5",
+      "targetPosition": {
+        "x": 260,
+        "y": 180
+      },
+      "sourcePosition": {
+        "x": 180,
+        "y": 180
+      }
+    },
+    {
+      "id": "edge-1743949231105-299",
+      "source": null,
+      "target": null,
+      "spin": 0.5,
+      "label": "j=0.5",
+      "sourcePosition": {
+        "x": 260,
+        "y": 100
+      },
+      "targetPosition": {
+        "x": 260,
+        "y": 180
+      }
+    },
+    {
+      "id": "edge-1743949231105-888",
+      "source": "node-1743949231105-722",
+      "target": "node-1743949231105-739",
+      "spin": 0.5,
+      "label": "j=0.5"
+    },
+    {
+      "id": "edge-1743949231105-377",
+      "source": "node-1743949231105-739",
+      "target": "node-1743949231105-859",
+      "spin": 0.5,
+      "label": "j=0.5"
+    },
+    {
+      "id": "edge-1743949231105-184",
+      "source": null,
+      "target": "node-1743949231105-859",
+      "spin": 0.5,
+      "label": "j=0.5",
+      "sourcePosition": {
+        "x": 180,
+        "y": 180
+      }
+    },
+    {
+      "id": "edge-1743949231105-444",
+      "source": "node-1743949231105-859",
+      "target": null,
+      "spin": 0.5,
+      "label": "j=0.5",
+      "targetPosition": {
+        "x": 260,
+        "y": 260
+      }
+    },
+    {
+      "id": "edge-1743949231105-972",
+      "source": null,
+      "target": null,
+      "spin": 0.5,
+      "label": "j=0.5",
+      "targetPosition": {
+        "x": 260,
+        "y": 260
+      },
+      "sourcePosition": {
+        "x": 260,
+        "y": 180
+      }
+    }
+  ],
+  "metadata": {
+    "name": "Lattice Network",
+    "created": 1743949231105,
+    "modified": 1743949463583,
+    "type": "lattice",
+    "properties": {
+      "rows": 3,
+      "columns": 3,
+      "defaultIntertwiner": 1,
+      "defaultSpin": 0.5
+    }
+  }
+}
