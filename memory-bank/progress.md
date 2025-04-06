@@ -62,6 +62,19 @@
 
 ## Current Work In Progress
 
+### UI Improvements
+- ✅ Moved undo/redo buttons to main toolbar for better accessibility
+- ✅ Fixed sidebar scrolling for better content access
+- ✅ Added timestamps to saved network filenames
+- ✅ Improved "Recent" networks feature functionality
+- 🔄 Working on network history restoration when loading from recent list
+
+### History State Management
+- ✅ Enhanced undo/redo for complex operations
+- ✅ Improved state consistency between operations
+- ✅ Added better error handling and logging
+- 🔄 Fixing history restoration during network loading
+
 ### Phase 2: Simulation Capabilities
 - 🔄 Preparing for simulation engine development
 - 🔄 Planning matrix representations for networks
@@ -124,6 +137,11 @@ We've implemented state persistence so the network and UI state are preserved be
 8. Implemented support for dangling edges with placeholder node visualization
 9. Enhanced node deletion to preserve connected edges as dangling edges
 10. Added conversion of placeholder nodes to real nodes on demand
+11. Moved undo/redo buttons to the main toolbar for better visibility and access
+12. Fixed vertical scrolling in sidebar panels for better content accessibility
+13. Added timestamps to filenames when saving networks for better version tracking
+14. Enhanced undo/redo functionality for complex operations
+15. Improved group operations to ensure consistent history tracking
 
 ### In Progress
 1. Addressing remaining edge creation issues (particularly creating edges between empty points)
@@ -137,12 +155,14 @@ We've implemented state persistence so the network and UI state are preserved be
 2. **Delete Mode Persistence**: Some issues with delete event handlers after network updates
 3. **Resize Handle Positioning**: Resize handles can be difficult to target precisely
 4. **Panel Size Coordination**: When resizing multiple panels, maintaining proportions can be challenging
+5. **Recent Networks History**: Network history state is not consistently restored when loading from recent list
 
 ### Technical Issues
 1. **Placeholder Node Behavior**: Some edge cases with placeholder node event handling
 2. **Event Handler Persistence**: Challenges with maintaining event handlers across operations
 3. **Edge Creation Workflow**: Need to refine the edge creation process for all scenarios
 4. **Cytoscape.js Event Management**: Occasional event conflicts between different handlers
+5. **History Serialization**: Complexity in properly saving and restoring complete history state
 
 ## Risk Assessment
 

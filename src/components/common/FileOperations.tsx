@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SpinNetwork } from '../../models/types';
-import { setNetwork } from '../../store/slices/networkSlice';
+import { setNetwork, setNetworkWithHistory } from '../../store/slices/networkSlice';
 import { addToRecentNetworks, removeFromRecentNetworks } from '../../store/slices/recentNetworksSlice';
 import { RootState } from '../../store';
 import store from '../../store';
@@ -220,14 +220,12 @@ const FileOperations: React.FC = () => {
       
       // Dispatch action to set the network
       if (history) {
-        // Use a custom action to restore both network and history
-        dispatch({
-          type: 'network/setNetworkWithHistory',
-          payload: {
-            network: loadedNetwork,
-            history: history
-          }
-        });
+        console.log('Loading network with history:', history);
+        // Use the named action creator to restore both network and history
+        dispatch(setNetworkWithHistory({
+          network: loadedNetwork,
+          history: history
+        }));
       } else {
         // Just set the network without history
         dispatch(setNetwork(loadedNetwork));
@@ -255,20 +253,35 @@ const FileOperations: React.FC = () => {
       const networkData = await NetworkStorage.loadNetwork(networkId);
       
       if (networkData) {
+        console.log('Network data loaded:', networkData);
+        
         // Process the loaded data
         if (typeof networkData === 'object' && 'network' in networkData && 'history' in networkData) {
-          // This is a network with history
-          dispatch({
-            type: 'network/setNetworkWithHistory',
-            payload: {
-              network: networkData.network,
-              history: networkData.history
-            }
-          });
+          console.log('Found network with history, dispatching setNetworkWithHistory');
+          
+          // This is a network with history - make sure to properly structure the payload
+          const payload = {
+            network: networkData.network,
+            history: networkData.history
+          };
+          
+          // Use the explicitly imported action creator for better type safety
+          dispatch(setNetworkWithHistory(payload));
+          
+          console.log('Network with history dispatched successfully');
         } else {
           // This is just a network
+          console.log('Found network without history, using setNetwork');
           dispatch(setNetwork(networkData));
         }
+        
+        // Add to recent networks list
+        if (typeof networkData === 'object' && 'network' in networkData) {
+          dispatch(addToRecentNetworks(networkData.network));
+        } else {
+          dispatch(addToRecentNetworks(networkData));
+        }
+        
         console.log('Network loaded successfully from recent list');
       } else {
         throw new Error('Network not found in storage');

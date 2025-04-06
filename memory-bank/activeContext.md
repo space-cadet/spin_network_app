@@ -59,6 +59,29 @@ We have successfully implemented the network data model, network generation func
 
 ## Current Decisions and Considerations
 
+### UI Improvements and Bug Fixes
+We've made several key improvements to the UI and workflow:
+
+1. **Toolbar Organization**:
+   - Moved undo/redo buttons from left sidebar to main toolbar for better visibility and accessibility
+   - Standardized button placement for more intuitive navigation
+   - Improved workflow efficiency by grouping related actions together
+
+2. **File Management Enhancements**:
+   - Added timestamps to filenames when saving networks (format: `network-name-YYYY-MM-DDTHH-MM-SS.json`)
+   - Improved the "Recent" networks feature to properly load saved networks
+   - Enhanced error handling to provide more specific feedback on operation failures
+
+3. **Scrollability Improvements**:
+   - Fixed vertical scrolling in all sidebar panels to ensure content is accessible
+   - Ensured proper sizing and overflow handling for panel content
+   - Added consistent scroll behavior across all resizable panels
+
+4. **Undo/Redo Refinement**:
+   - Enhanced history tracking for complex operations involving multiple elements
+   - Improved consistency of undo/redo when working with placeholder nodes and edges
+   - Added comprehensive logging for better debugging of history state
+
 ### Dangling Edge Implementation
 We've implemented a comprehensive system for handling dangling edges:
 
@@ -91,6 +114,11 @@ We addressed several technical challenges:
    - Implemented specialized handlers for different node types
    - Added support for connecting edges to placeholder nodes
 
+3. **State Persistence**:
+   - Implemented robust network saving with history state
+   - Improved error handling and validation during save/load operations
+   - Added detailed logging throughout the persistence flow for better debugging
+
 ## Next Steps
 
 ### Short-term (Current Focus)
@@ -99,22 +127,28 @@ We addressed several technical challenges:
    - Added hideable sidebars for maximizing workspace
    - Created recent networks feature for quick access to previous work
    - Added keyboard shortcuts for common operations
+   - Moved undo/redo buttons to the main toolbar for better visibility and access
 
 2. **State Persistence** ✅:
    - Implemented automatic state persistence with IndexedDB
    - Added explicit save/load functionality for network files
    - Added visual feedback for persistence operations
    - Created reset functionality to clear persisted state
+   - Added timestamps to filenames for better version tracking
 
-3. **Fix Remaining Edge Creation Issues**:
-   - Fix edge creation between empty points
-   - Enhance the edge creation workflow for all scenarios
-   - Address edge cases in the interaction modes
+3. **Fix Remaining UI Issues** 🔄:
+   - Fixed sidebar scrolling for better content viewing
+   - Improved undo/redo functionality for complex operations
+   - Enhanced network save/load with history preservation
+   - Fixed file saving mechanisms for better reliability
+   - Improved error handling and logging
 
-4. **Bug Fixes and Refinements**:
-   - Address remaining issues with network operations
-   - Fix event handler persistence across operations
-   - Improve visual feedback for user actions
+4. **Bug Fixes and Refinements** 🔄:
+   - Fixed node/edge operation consistency with undo/redo
+   - Improved handling of placeholder nodes in network operations
+   - Enhanced complex operation history tracking
+   - Optimized state serialization for network storage
+   - Improved file operation error feedback
 
 5. **Simulation Engine Development**:
    - Implement graph Laplacian calculator 

@@ -24,14 +24,16 @@
 1. The application uses a resizable panel system for flexible workspace customization
 2. The main layout consists of:
    - Left panel for network tools
-   - Center area for network visualization
+   - Center area for network visualization (containing toolbar with undo/redo, mode buttons, and zoom controls)
    - Right panel for properties and simulation controls
    - Bottom panel for energy/metrics visualization
 3. Resize handles allow users to adjust panel sizes to their preference
 4. Panels maintain minimum and maximum size constraints
-5. Interaction modes (select, pan, add node, add edge, delete) use visual feedback
-6. Status indicators guide users through multi-step operations
-7. Cursor styles change based on the current interaction mode
+5. All panels must have proper vertical scrolling with overflow-y-auto
+6. Interaction modes (select, pan, add node, add edge, delete) use visual feedback
+7. Status indicators guide users through multi-step operations
+8. Cursor styles change based on the current interaction mode
+9. Timestamps are added to filenames when saving networks
 
 ## Network Visualization Patterns
 
@@ -58,6 +60,9 @@
 6. Use filters like `cy.nodes().filter('[type != "placeholder"]')` to target specific node types
 7. Separate handlers for different interaction modes
 8. Centralize complex operations in helper functions (createEdge, createDanglingEdge, etc.)
+9. Use saveHistoryBeforeGroupOperation and finalizeGroupOperation for composite operations
+10. Ensure deletion handlers properly clean up related elements
+11. Add detailed console logging for debugging complex event chains
 
 ## Placeholder Node Patterns
 
@@ -98,6 +103,10 @@
 7. Keep Redux state normalized and minimal
 8. Network operations are triggered through Redux actions
 9. UI state (modes, selection) is managed through the uiSlice
+10. Use the store.getState() method to access Redux state outside of components
+11. History state is maintained alongside network state for undo/redo functionality
+12. Group operations should be tracked as atomic units in history
+13. Save and restore the entire history state when persisting networks
 
 ## Development Workflow
 
