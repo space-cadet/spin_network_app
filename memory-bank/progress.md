@@ -7,8 +7,10 @@
 - ✅ Project structure and organization
 - ✅ Layout components and responsive design
 - ✅ Resizable panels with visual handles
+- ✅ Hideable sidebars with toggle buttons
 - ✅ Styling with Tailwind CSS
 - ✅ Redux state management
+- ✅ State persistence with IndexedDB
 
 ### UI Components
 - ✅ Main application layout with header and footer
@@ -37,6 +39,8 @@
 - ✅ Zoom and pan controls for network view
 - ✅ Resize handles for all panels
 - ✅ Panel size constraints (min/max)
+- ✅ Hideable panels for cleaner workspace
+- ✅ Toggle controls for panel visibility
 - ✅ Mode switching (select, pan, add node, add edge, delete)
 - ✅ Property display for selected elements
 - ✅ Node creation via canvas click
@@ -45,6 +49,8 @@
 - ✅ Placeholder nodes for dangling edges
 - ✅ Placeholder to real node conversion
 - ✅ Fixed node sizing and better visualization
+- ✅ Undo/redo functionality for all operations
+- ✅ Keyboard shortcuts (Ctrl+Z, Ctrl+Y)
 
 ### Project Infrastructure
 - ✅ Dependency management with pnpm
@@ -77,7 +83,7 @@
 - 🔄 Fix remaining issues with network operations
 
 ### Phase 2 (High Priority)
-- ⬜ Undo/redo functionality
+- ✅ Undo/redo functionality
 - ⬜ Spin network mathematics (Graph Laplacian)
 - ⬜ Diffusion algorithm implementations
 - ⬜ Numerical methods for time evolution
@@ -92,8 +98,8 @@
 - ⬜ Energy conservation plots with actual data
 
 ### Additional Features (Lower Priority)
-- ⬜ User preference persistence
-- ⬜ Keyboard shortcuts
+- ✅ User preference persistence (sidebar visibility, view settings)
+- ✅ Keyboard shortcuts (Ctrl+Z, Ctrl+Y for undo/redo)
 - ⬜ Tutorial or help system
 - ⬜ Dark/light theme support
 - ⬜ Statistics and metrics calculation
@@ -105,13 +111,19 @@ The application now has a functional network data model with comprehensive UI-ba
 
 We've enhanced the system to support dangling edges through placeholder nodes, which improves the network editing experience by allowing edges to persist when nodes are deleted. The visualization now uses fixed node sizing for better visual consistency and improved layout.
 
+We've implemented state persistence so the network and UI state are preserved between page reloads or application restarts. We've also added undo/redo functionality, recent networks tracking, and hideable sidebars to improve the user experience.
+
 ### Recent Achievements
-1. Fixed node sizing issues to prevent nodes from expanding to fill the viewing area
-2. Implemented support for dangling edges with placeholder node visualization
-3. Enhanced node deletion to preserve connected edges as dangling edges
-4. Added conversion of placeholder nodes to real nodes on demand
-5. Implemented different styling for regular nodes, placeholder nodes, and dangling edges
-6. Improved event handling for complex node/edge interactions
+1. Implemented undo/redo functionality with history tracking for all network operations
+2. Added sidebar visibility controls to maximize workspace area when needed
+3. Created recent networks feature for quickly accessing previous work
+4. Implemented state persistence using IndexedDB for reliable storage
+5. Added explicit save/load functionality for network files
+6. Enhanced UI with visual feedback for state changes and operations
+7. Fixed node sizing issues to prevent nodes from expanding to fill the viewing area
+8. Implemented support for dangling edges with placeholder node visualization
+9. Enhanced node deletion to preserve connected edges as dangling edges
+10. Added conversion of placeholder nodes to real nodes on demand
 
 ### In Progress
 1. Addressing remaining edge creation issues (particularly creating edges between empty points)

@@ -11,6 +11,7 @@
 - **Redux Toolkit 1.9.7**: State management library
 - **Redux Persist 6.0.0**: For state persistence across sessions
 - **Localforage 1.10.0**: IndexedDB wrapper for improved storage capabilities
+- **Custom History Tracking**: For undo/redo functionality
 
 ### Visualization Libraries
 - **Cytoscape.js 3.26.0**: Core library for network visualization
@@ -158,12 +159,15 @@ Features:
   - WebGL 1.0 support
   - ES6 compatibility
   - Modern CSS feature support
+  - LocalStorage/IndexedDB support for persistence
 
 ### Responsive Design Challenges
 
 - Maintaining usability on different screen sizes
 - Handling resize events without performance degradation
 - Preserving visualization quality when panels are resized
+- Optimizing workspace with hideable panels
+- Supporting keyboard shortcuts for important operations
 
 ## Development Practices
 

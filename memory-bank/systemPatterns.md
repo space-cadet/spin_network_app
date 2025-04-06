@@ -33,12 +33,38 @@ The UI is built using a composition of smaller, focused components:
 - **Container Components**: Manage state and data flow
 - **Presentational Components**: Handle rendering and user interaction
 - **Layout Components**: Manage application structure and resizable panels
+- **Interactive Controls**: Handle user input and provide feedback
 
 This approach promotes reusability and simplifies testing and maintenance.
 
-### 2. Resizable Panel Pattern
+### 2. Command History Pattern
 
-A key architectural pattern is the resizable panel system:
+The application implements the Command History pattern for undo/redo functionality:
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Command     │    │ Command     │    │ Current     │
+│ History     │    │ Execution   │    │ State       │
+└─────────────┘    └─────────────┘    └─────────────┘
+      ▲ ▼                ▲                   │
+      │                  │                   │
+      │                  │                   ▼
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Undo/Redo   │◄───┤ Redux       │◄───┤ User        │
+│ Controls    │    │ Actions     │    │ Interaction │
+└─────────────┘    └─────────────┘    └─────────────┘
+```
+
+This pattern:
+- Tracks all network-modifying operations
+- Maintains a history stack with current index
+- Allows reverting to previous states (undo)
+- Allows reapplying reverted operations (redo)
+- Optimizes by storing only needed state changes
+
+### 3. Resizable and Hideable Panel Pattern
+
+A key architectural pattern is the resizable and hideable panel system:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -47,25 +73,28 @@ A key architectural pattern is the resizable panel system:
 │ │ Header                                          │ │
 │ └─────────────────────────────────────────────────┘ │
 │ ┌───────────┐ ┌───────────────────┐ ┌───────────┐ │
-│ │           │ │                   │ │           │ │
+│ │ ◀ Toggle  │ │                   │ │  Toggle ▶ │ │
 │ │           │ │                   │ │           │ │
 │ │  Left     │ │     Main          │ │  Right    │ │
 │ │  Sidebar  │ │     Content       │ │  Sidebar  │ │
 │ │  Panel    │ │     Panel         │ │  Panel    │ │
 │ │           │ │                   │ │           │ │
-│ │           │ │                   │ │           │ │
-│ │           │ ├───────────────────┤ │           │ │
+│ │  Resize   │ │                   │ │  Resize   │ │
+│ │  Handle ▶ │ ├───────────────────┤ │ ◀ Handle  │ │
 │ │           │ │  Bottom Panel     │ │           │ │
 │ └───────────┘ └───────────────────┘ └───────────┘ │
+│                    ▲ Toggle                        │
 │ ┌─────────────────────────────────────────────────┐ │
 │ │ Footer                                          │ │
 │ └─────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────┘
 ```
 
-- Each panel can be resized by the user
+- Each panel can be resized by the user with resize handles
+- Panels can be hidden/shown with toggle buttons
 - Panels communicate size changes to maintain a responsive layout
 - Content within panels adapts to available space
+- Panel visibility state is persisted between sessions
 
 ### 3. State Management
 
@@ -74,6 +103,28 @@ The application uses a centralized state management approach:
 - **Global State**: Application-wide state managed by Redux
 - **Component State**: Local state for UI-specific concerns
 - **Derived State**: Calculated from the global state for visualization
+- **Persistent State**: State preserved between sessions using Redux Persist
+- **History State**: Tracks operations for undo/redo functionality
+
+#### History Tracking Pattern
+
+```
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│ User Action  │───►│ Store Action │───►│ State Update │
+└──────────────┘    └──────────────┘    └──────────────┘
+                           │                    │
+                           ▼                    ▼
+                    ┌──────────────┐    ┌──────────────┐
+                    │ Add to       │◄───┤ Persist to   │
+                    │ History Stack│    │ Storage      │
+                    └──────────────┘    └──────────────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ Update Undo/ │
+                    │ Redo State   │
+                    └──────────────┘
+```
 
 ### 4. Event-Driven Interaction
 
@@ -82,7 +133,36 @@ User interactions follow an event-driven pattern:
 1. User initiates action (e.g., selecting a node)
 2. Component generates event
 3. Event handlers update state
-4. UI re-renders to reflect changes
+4. State changes are tracked in history (for undo/redo)
+5. UI re-renders to reflect changes
+6. Changes are persisted to storage
+
+#### Sidebar Visibility Pattern
+
+```
+┌──────────────────────────────────────────────────────┐
+│ MainLayout                                          │
+│ ┌─────────────────────────────────────────────────┐ │
+│ │ Header                                          │ │
+│ └─────────────────────────────────────────────────┘ │
+│ ┌─────────┐ ┌───────────────────┐ ┌─────────┐      │
+│ │         │ │                   │ │         │      │
+│ │ Toggle  │ │                   │ │ Toggle  │      │
+│ │ Button◄─┼─┤     Main          ├─┼─►Button │      │
+│ │         │ │     Content       │ │         │      │
+│ │         │ │     Panel         │ │         │      │
+│ │         │ │                   │ │         │      │
+│ │         │ │                   │ │         │      │
+│ │         │ ├───────────────────┤ │         │      │
+│ │         │ │  Toggle Button    │ │         │      │
+│ └─────────┘ └───────────────────┘ └─────────┘      │
+│ ┌─────────────────────────────────────────────────┐ │
+│ │ Footer                                          │ │
+│ └─────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────┘
+```
+
+This pattern allows users to toggle the visibility of panels to maximize workspace area.
 
 ### 5. Graph Data Structure
 
