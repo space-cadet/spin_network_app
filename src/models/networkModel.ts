@@ -47,7 +47,7 @@ export function validateNetwork(network: SpinNetwork): string[] {
     }
   });
   
-  // Validate edges have required properties and refer to existing nodes
+  // Validate edges have required properties
   const nodeIds = new Set(network.nodes.map(node => node.id));
   
   network.edges.forEach(edge => {
@@ -55,16 +55,20 @@ export function validateNetwork(network: SpinNetwork): string[] {
       errors.push(`Edge is missing an ID`);
     }
     
-    if (!edge.source) {
-      errors.push(`Edge ${edge.id || 'unknown'} is missing source node ID`);
-    } else if (!nodeIds.has(edge.source)) {
-      errors.push(`Edge ${edge.id || 'unknown'} references non-existent source node ${edge.source}`);
+    // Source can be null for dangling edges, but if it's a string, it should refer to a valid node
+    if (edge.source !== null && !nodeIds.has(edge.source)) {
+      // For dangling edges with source, make sure it has a position
+      if (!edge.sourcePosition) {
+        errors.push(`Dangling edge ${edge.id || 'unknown'} with invalid source ${edge.source} needs a sourcePosition`);
+      }
     }
     
-    if (!edge.target) {
-      errors.push(`Edge ${edge.id || 'unknown'} is missing target node ID`);
-    } else if (!nodeIds.has(edge.target)) {
-      errors.push(`Edge ${edge.id || 'unknown'} references non-existent target node ${edge.target}`);
+    // Target can be null for dangling edges, but if it's a string, it should refer to a valid node
+    if (edge.target !== null && !nodeIds.has(edge.target)) {
+      // For dangling edges with target, make sure it has a position
+      if (!edge.targetPosition) {
+        errors.push(`Dangling edge ${edge.id || 'unknown'} with invalid target ${edge.target} needs a targetPosition`);
+      }
     }
     
     if (typeof edge.spin !== 'number') {
@@ -154,7 +158,7 @@ export function updateNode(
 }
 
 /**
- * Removes a node from the network and any connected edges
+ * Removes a node from the network while preserving connected edges as dangling
  */
 export function removeNode(network: SpinNetwork, nodeId: string): SpinNetwork {
   const nodeExists = network.nodes.some(n => n.id === nodeId);
@@ -163,13 +167,34 @@ export function removeNode(network: SpinNetwork, nodeId: string): SpinNetwork {
     return network;
   }
   
+  // Find the node to get its position before removal
+  const nodeToRemove = network.nodes.find(n => n.id === nodeId);
+  if (!nodeToRemove) return network; // Safety check
+  
+  const nodePosition = nodeToRemove.position;
+  
   // Remove node
   const updatedNodes = network.nodes.filter(n => n.id !== nodeId);
   
-  // Remove any edges connected to this node
-  const updatedEdges = network.edges.filter(
-    e => e.source !== nodeId && e.target !== nodeId
-  );
+  // Update edges connected to this node - make them dangling instead of removing
+  const updatedEdges = network.edges.map(edge => {
+    // If this edge connects to the node we're removing, update it
+    if (edge.source === nodeId) {
+      return {
+        ...edge,
+        source: null,
+        sourcePosition: nodePosition // Save the position where the node was
+      };
+    }
+    if (edge.target === nodeId) {
+      return {
+        ...edge,
+        target: null,
+        targetPosition: nodePosition // Save the position where the node was
+      };
+    }
+    return edge;
+  });
   
   return {
     ...network,
@@ -196,13 +221,21 @@ export function addEdge(network: SpinNetwork, edge: NetworkEdge): SpinNetwork {
     };
   }
   
-  // Check if source and target nodes exist
-  const sourceExists = network.nodes.some(n => n.id === edge.source);
-  const targetExists = network.nodes.some(n => n.id === edge.target);
+  // For non-null sources/targets, verify they exist
+  if (edge.source !== null) {
+    const sourceExists = network.nodes.some(n => n.id === edge.source);
+    if (!sourceExists && !edge.sourcePosition) {
+      // Source node doesn't exist and no position provided for dangling end
+      console.warn(`Adding edge with nonexistent source ${edge.source} but no sourcePosition`);
+    }
+  }
   
-  if (!sourceExists || !targetExists) {
-    // Source or target node doesn't exist, return network unchanged
-    return network;
+  if (edge.target !== null) {
+    const targetExists = network.nodes.some(n => n.id === edge.target);
+    if (!targetExists && !edge.targetPosition) {
+      // Target node doesn't exist and no position provided for dangling end
+      console.warn(`Adding edge with nonexistent target ${edge.target} but no targetPosition`);
+    }
   }
   
   return {
@@ -283,6 +316,7 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
         label: node.label || `Node ${node.id}`,
         intertwiner: node.intertwiner,
         position: node.position, // Store position in data for later access
+        type: 'regular', // Mark as a regular node
         ...node.properties
       },
       position: { // Set position directly for cytoscape
@@ -292,16 +326,60 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
     });
   });
   
+  // Create placeholder nodes for dangling edge endpoints
+  const placeholderNodes: Set<string> = new Set();
+  
   // Convert edges
   network.edges.forEach(edge => {
+    // Create placeholder nodes for dangling endpoints
+    if (edge.source === null) {
+      const placeholderId = `placeholder-source-${edge.id}`;
+      if (!placeholderNodes.has(placeholderId)) {
+        placeholderNodes.add(placeholderId);
+        elements.push({
+          group: 'nodes',
+          data: {
+            id: placeholderId,
+            label: '',
+            type: 'placeholder',
+            edgeId: edge.id,
+            endpoint: 'source'
+          },
+          position: edge.sourcePosition || { x: 0, y: 0 },
+          classes: 'placeholder-node'
+        });
+      }
+    }
+    
+    if (edge.target === null) {
+      const placeholderId = `placeholder-target-${edge.id}`;
+      if (!placeholderNodes.has(placeholderId)) {
+        placeholderNodes.add(placeholderId);
+        elements.push({
+          group: 'nodes',
+          data: {
+            id: placeholderId,
+            label: '',
+            type: 'placeholder',
+            edgeId: edge.id,
+            endpoint: 'target'
+          },
+          position: edge.targetPosition || { x: 0, y: 0 },
+          classes: 'placeholder-node'
+        });
+      }
+    }
+    
+    // Create the edge, connecting to placeholder nodes if needed
     elements.push({
       group: 'edges',
       data: {
         id: edge.id,
-        source: edge.source,
-        target: edge.target,
+        source: edge.source === null ? `placeholder-source-${edge.id}` : edge.source,
+        target: edge.target === null ? `placeholder-target-${edge.id}` : edge.target,
         label: edge.label || `j=${edge.spin}`,
         spin: edge.spin,
+        hasDangling: edge.source === null || edge.target === null,
         ...edge.properties
       }
     });

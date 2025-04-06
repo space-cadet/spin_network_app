@@ -14,7 +14,8 @@ import {
   addNetworkNode, 
   addNetworkEdge, 
   removeNetworkNode, 
-  removeNetworkEdge 
+  removeNetworkEdge,
+  updateNetworkEdge
 } from '../../store/slices/networkSlice';
 import { NetworkNode, NetworkEdge } from '../../models/types';
 
@@ -40,7 +41,7 @@ const Workspace: React.FC = () => {
       container: cyContainerRef.current,
       style: [
         {
-          selector: 'node',
+          selector: 'node[type="regular"]',
           style: {
             'background-color': '#4f46e5',
             'label': 'data(label)',
@@ -54,6 +55,20 @@ const Workspace: React.FC = () => {
           }
         },
         {
+          selector: 'node[type="placeholder"]',
+          style: {
+            'background-color': '#f97316', // Orange for placeholders
+            'border-width': 2,
+            'border-color': '#fb923c',
+            'border-style': 'dashed',
+            'width': 30,
+            'height': 30,
+            'shape': 'diamond',
+            'opacity': 0.7,
+            'label': ''
+          }
+        },
+        {
           selector: 'edge',
           style: {
             'width': 3,
@@ -64,6 +79,16 @@ const Workspace: React.FC = () => {
             'text-background-color': '#fff',
             'text-background-opacity': 1,
             'text-background-padding': '2px'
+          }
+        },
+        {
+          selector: 'edge[hasDangling]',
+          style: {
+            'line-style': 'dashed',
+            'line-color': '#f97316', // Match placeholder color
+            'width': 2,
+            'target-arrow-shape': 'none',
+            'source-arrow-shape': 'none'
           }
         },
         {
@@ -269,8 +294,8 @@ const Workspace: React.FC = () => {
       // Delete mode gets its own specialized handlers
       setupDeleteHandlers();
     } else if (mode === 'addEdge') {
-      // Add edge mode handlers
-      cy.nodes().bind('tap', (event) => {
+      // Add edge mode handlers - filter out placeholder nodes
+      cy.nodes().filter('[type != "placeholder"]').bind('tap', (event) => {
         const node = event.target;
         
         // First selection: set as source
@@ -282,6 +307,17 @@ const Workspace: React.FC = () => {
         // Second selection: create edge
         else if (node.id() !== edgeSourceId) {
           createEdge(edgeSourceId, node.id());
+        }
+      });
+      
+      // For placeholder nodes, allow conversion to real nodes when clicked
+      cy.nodes().filter('[type = "placeholder"]').bind('tap', (event) => {
+        const node = event.target;
+        console.log('Clicked on placeholder node:', node.id());
+        
+        // Ask if the user wants to convert the placeholder to a real node
+        if (window.confirm('Convert this placeholder to a real node?')) {
+          convertPlaceholderToNode(node.id());
         }
       });
     }
@@ -327,6 +363,53 @@ const Workspace: React.FC = () => {
         dispatch(clearSelection());
       }, 500);
     }, 100);
+  };
+  
+  // Helper function to convert a placeholder node to a real node
+  const convertPlaceholderToNode = (placeholderId: string) => {
+    if (!cy) return;
+    
+    const placeholder = cy.$(`#${placeholderId}`);
+    if (placeholder.length === 0) return;
+    
+    const position = placeholder.position();
+    const timestamp = Date.now();
+    const newNodeId = `node-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Create a new real node at the placeholder position
+    const newNode: NetworkNode = {
+      id: newNodeId,
+      position: {
+        x: position.x,
+        y: position.y
+      },
+      intertwiner: defaultNodeIntertwiner,
+      label: `Node ${network.nodes.length + 1}`
+    };
+    
+    dispatch(addNetworkNode(newNode));
+    
+    // Get the associated edge from the placeholder
+    const edgeId = placeholder.data('edgeId');
+    const endpoint = placeholder.data('endpoint');
+    
+    if (edgeId && endpoint) {
+      // Update the edge to connect to the new node
+      const updates: Partial<NetworkEdge> = {};
+      
+      if (endpoint === 'source') {
+        updates.source = newNodeId;
+        updates.sourcePosition = undefined;
+      } else if (endpoint === 'target') {
+        updates.target = newNodeId;
+        updates.targetPosition = undefined;
+      }
+      
+      dispatch(updateNetworkEdge({
+        id: edgeId,
+        updates: updates
+      }));
+    }
   };
   
   // Handler for adding a new node at the specified position
@@ -410,11 +493,28 @@ const Workspace: React.FC = () => {
     cy.nodes().unbind('tap');
     cy.edges().unbind('tap');
     
-    // Add node click handler for delete mode
-    cy.nodes().bind('tap', (event) => {
+    // Add regular node click handler for delete mode
+    cy.nodes().filter('[type != "placeholder"]').bind('tap', (event) => {
       event.preventDefault(); // Prevent other handlers from firing
       event.stopPropagation(); // Stop event from bubbling
       deleteNode(event.target.id());
+    });
+    
+    // Add placeholder node click handler
+    cy.nodes().filter('[type = "placeholder"]').bind('tap', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      // Get the edge ID associated with this placeholder
+      const node = event.target;
+      const edgeId = node.data('edgeId');
+      
+      if (edgeId) {
+        console.log("Deleting edge attached to placeholder:", edgeId);
+        deleteEdge(edgeId);
+      } else {
+        console.log("Placeholder node has no associated edge");
+      }
     });
     
     // Add edge click handler for delete mode

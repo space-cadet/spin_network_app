@@ -21,10 +21,12 @@ export interface NetworkNode {
  */
 export interface NetworkEdge {
   id: string;
-  source: string; // ID of the source node
-  target: string; // ID of the target node
+  source: string | null; // ID of the source node (null if dangling)
+  target: string | null; // ID of the target node (null if dangling)
   spin: number; // The spin value (typically a half-integer)
   label?: string; // Optional display label
+  sourcePosition?: { x: number, y: number }; // Position for dangling source end
+  targetPosition?: { x: number, y: number }; // Position for dangling target end
   properties?: Record<string, any>; // Additional custom properties
 }
 
