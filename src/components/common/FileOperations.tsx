@@ -4,6 +4,7 @@ import { SpinNetwork } from '../../models/types';
 import { setNetwork } from '../../store/slices/networkSlice';
 import { addToRecentNetworks, removeFromRecentNetworks } from '../../store/slices/recentNetworksSlice';
 import { RootState } from '../../store';
+import store from '../../store';
 import { selectRecentNetworks } from '../../store/selectors';
 import { FaSave, FaFileUpload, FaHistory, FaTimes } from 'react-icons/fa';
 import { NetworkStorage } from '../../utils/networkStorage';
@@ -45,16 +46,22 @@ const FileOperations: React.FC = () => {
         console.warn('Could not save to storage, but recent list updated:', storageError);
       }
       
+      // Get the current state directly from the store
+      const currentState = store.getState();
+      const networkState = currentState.network;
+      
       // Include history state when saving
       const networkWithHistory = {
         network: currentNetwork,
         history: {
-          history: state.network.history,
-          historyIndex: state.network.historyIndex,
-          canUndo: state.network.canUndo,
-          canRedo: state.network.canRedo
+          history: networkState.history,
+          historyIndex: networkState.historyIndex,
+          canUndo: networkState.canUndo,
+          canRedo: networkState.canRedo
         }
       };
+      
+      console.log('Saving network with history:', networkWithHistory);
       
       // Create a JSON string of the current network with history
       const networkJson = JSON.stringify(networkWithHistory, null, 2);
@@ -93,7 +100,12 @@ const FileOperations: React.FC = () => {
       }
     } catch (error) {
       console.error('Error saving network:', error);
-      alert('Failed to save network. Please try again.');
+      // Show more detailed error message
+      if (error instanceof Error) {
+        alert(`Failed to save network: ${error.message}`);
+      } else {
+        alert('Failed to save network. Please try again.');
+      }
     }
   };
   

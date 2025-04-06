@@ -60,7 +60,7 @@ const persistedRecentNetworksReducer = persistReducer(recentNetworksPersistConfi
 /**
  * Configure the Redux store with persisted reducers
  */
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     network: persistedNetworkReducer,
     ui: persistedUiReducer,
@@ -81,3 +81,7 @@ export const persistor = persistStore(store);
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+// Export both as named exports and default
+export { store };
+export default store;
