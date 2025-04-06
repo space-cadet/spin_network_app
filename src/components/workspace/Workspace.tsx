@@ -368,6 +368,9 @@ const Workspace: React.FC = () => {
     let targetPlaceholderId: string | null = null;
     const sourceNode = cy?.$(`#${sourceId}`);
     
+    // Save history before the composite operation
+    dispatch({ type: 'network/saveHistoryBeforeGroupOperation' });
+    
     // If source is a placeholder, use its position
     if (sourceNode?.data('type') === 'placeholder') {
       targetPlaceholderId = createPlaceholderNode(targetPosition);
@@ -387,6 +390,9 @@ const Workspace: React.FC = () => {
     
     // Add the edge
     dispatch(addNetworkEdge(newEdge));
+    
+    // Save history after the composite operation
+    dispatch({ type: 'network/finalizeGroupOperation' });
     
     // Reset source node styling
     if (cy) {
@@ -408,6 +414,9 @@ const Workspace: React.FC = () => {
       sourceNode = cy.$(`#${sourceId}`);
       targetNode = cy.$(`#${targetId}`);
     }
+    
+    // Save history before the composite operation
+    dispatch({ type: 'network/saveHistoryBeforeGroupOperation' });
     
     const newEdge: NetworkEdge = {
       id: newEdgeId,
@@ -431,6 +440,9 @@ const Workspace: React.FC = () => {
     // Create the edge
     dispatch(addNetworkEdge(newEdge));
     
+    // Save history after the composite operation
+    dispatch({ type: 'network/finalizeGroupOperation' });
+    
     // Reset source node
     if (cy) {
       cy.$(`#${sourceId}`).removeClass('source-node');
@@ -451,7 +463,7 @@ const Workspace: React.FC = () => {
     }, 100);
   };
   
-  // Helper function to convert a placeholder node to a real node
+  // Helper function to create a placeholder node
   const createPlaceholderNode = (position: { x: number, y: number }): string => {
     const timestamp = Date.now();
     const placeholderId = `placeholder-${timestamp}-${Math.floor(Math.random() * 1000)}`;
@@ -464,6 +476,8 @@ const Workspace: React.FC = () => {
       type: 'placeholder'
     };
 
+    // We don't need to save history here since this is part of a group operation
+    // and the calling functions will handle the history management
     dispatch(addNetworkNode(placeholderNode));
     return placeholderId;
   };
@@ -473,6 +487,9 @@ const Workspace: React.FC = () => {
     
     const placeholder = cy.$(`#${placeholderId}`);
     if (placeholder.length === 0) return;
+    
+    // Save history before the composite operation
+    dispatch({ type: 'network/saveHistoryBeforeGroupOperation' });
     
     const position = placeholder.position();
     const timestamp = Date.now();
@@ -512,12 +529,18 @@ const Workspace: React.FC = () => {
         updates: updates
       }));
     }
+    
+    // Save history after the composite operation
+    dispatch({ type: 'network/finalizeGroupOperation' });
   };
   
   // Handler for adding a new node at the specified position
   const handleAddNode = (position: { x: number, y: number }) => {
     const timestamp = Date.now();
     const newNodeId = `node-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Save history before the operation
+    dispatch({ type: 'network/saveHistoryBeforeGroupOperation' });
     
     // Create new node
     const newNode: NetworkNode = {
@@ -531,6 +554,9 @@ const Workspace: React.FC = () => {
     };
     
     dispatch(addNetworkNode(newNode));
+    
+    // Finalize the operation for proper history tracking
+    dispatch({ type: 'network/finalizeGroupOperation' });
     
     // Briefly select the new node, then clear selection to prepare for next node
     setTimeout(() => {
@@ -562,8 +588,16 @@ const Workspace: React.FC = () => {
   // Handler for deleting a node
   const deleteNode = (nodeId: string) => {
     console.log("Deleting node:", nodeId);
+    
+    // Save history before the deletion
+    dispatch({ type: 'network/saveHistoryBeforeGroupOperation' });
+    
+    // Perform the deletion
     dispatch(removeNetworkNode(nodeId));
     dispatch(clearSelection());
+    
+    // Finalize the operation for proper history tracking
+    dispatch({ type: 'network/finalizeGroupOperation' });
     
     // Reattach delete event handlers after deletion
     setTimeout(() => {
@@ -576,8 +610,16 @@ const Workspace: React.FC = () => {
   // Handler for deleting an edge
   const deleteEdge = (edgeId: string) => {
     console.log("Deleting edge:", edgeId);
+    
+    // Save history before the deletion
+    dispatch({ type: 'network/saveHistoryBeforeGroupOperation' });
+    
+    // Perform the deletion
     dispatch(removeNetworkEdge(edgeId));
     dispatch(clearSelection());
+    
+    // Finalize the operation for proper history tracking
+    dispatch({ type: 'network/finalizeGroupOperation' });
     
     // Reattach delete event handlers after deletion
     setTimeout(() => {

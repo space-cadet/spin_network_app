@@ -14,9 +14,13 @@ export const NetworkStorage = {
   /**
    * Save a network to storage
    */
-  saveNetwork: async (network: SpinNetwork): Promise<string> => {
+  saveNetwork: async (networkData: any): Promise<string> => {
+    // Check if this is a network or a network with history
+    const isNetworkWithHistory = typeof networkData === 'object' && 'network' in networkData;
+    const network = isNetworkWithHistory ? networkData.network : networkData;
+    
     const id = network.metadata?.id || `network-${Date.now()}`;
-    const networkJson = JSON.stringify(network);
+    const networkJson = JSON.stringify(networkData);
     
     try {
       await networkStorage.setItem(id, networkJson);

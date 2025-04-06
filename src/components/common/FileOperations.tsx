@@ -45,8 +45,19 @@ const FileOperations: React.FC = () => {
         console.warn('Could not save to storage, but recent list updated:', storageError);
       }
       
-      // Create a JSON string of the current network
-      const networkJson = JSON.stringify(currentNetwork, null, 2);
+      // Include history state when saving
+      const networkWithHistory = {
+        network: currentNetwork,
+        history: {
+          history: state.network.history,
+          historyIndex: state.network.historyIndex,
+          canUndo: state.network.canUndo,
+          canRedo: state.network.canRedo
+        }
+      };
+      
+      // Create a JSON string of the current network with history
+      const networkJson = JSON.stringify(networkWithHistory, null, 2);
       const blob = new Blob([networkJson], { type: 'application/json' });
       
       // Generate default filename from network metadata with timestamp
@@ -165,7 +176,19 @@ const FileOperations: React.FC = () => {
    */
   const loadNetworkFromJson = (jsonString: string) => {
     try {
-      const network = JSON.parse(jsonString) as SpinNetwork;
+      // Try parsing as a network with history first
+      const parsed = JSON.parse(jsonString);
+      let network: SpinNetwork;
+      let history = null;
+      
+      // Check if this is a network with history or just a network
+      if (parsed.network && parsed.history) {
+        network = parsed.network;
+        history = parsed.history;
+      } else {
+        // Legacy format - just a network without history
+        network = parsed as SpinNetwork;
+      }
       
       // Basic validation
       if (!network.nodes || !network.edges) {
@@ -184,7 +207,19 @@ const FileOperations: React.FC = () => {
       };
       
       // Dispatch action to set the network
-      dispatch(setNetwork(loadedNetwork));
+      if (history) {
+        // Use a custom action to restore both network and history
+        dispatch({
+          type: 'network/setNetworkWithHistory',
+          payload: {
+            network: loadedNetwork,
+            history: history
+          }
+        });
+      } else {
+        // Just set the network without history
+        dispatch(setNetwork(loadedNetwork));
+      }
       
       // Add to recent networks
       console.log('Adding loaded network to recent list:', loadedNetwork);
@@ -205,11 +240,23 @@ const FileOperations: React.FC = () => {
       console.log('Loading recent network with ID:', networkId);
       
       // Try to load the network from storage
-      const loadedNetwork = await NetworkStorage.loadNetwork(networkId);
+      const networkData = await NetworkStorage.loadNetwork(networkId);
       
-      if (loadedNetwork) {
-        // Set the network state
-        dispatch(setNetwork(loadedNetwork));
+      if (networkData) {
+        // Process the loaded data
+        if (typeof networkData === 'object' && 'network' in networkData && 'history' in networkData) {
+          // This is a network with history
+          dispatch({
+            type: 'network/setNetworkWithHistory',
+            payload: {
+              network: networkData.network,
+              history: networkData.history
+            }
+          });
+        } else {
+          // This is just a network
+          dispatch(setNetwork(networkData));
+        }
         console.log('Network loaded successfully from recent list');
       } else {
         throw new Error('Network not found in storage');

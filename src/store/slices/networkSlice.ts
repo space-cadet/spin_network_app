@@ -83,23 +83,64 @@ const networkSlice = createSlice({
   name: 'network',
   initialState,
   reducers: {
-    // Undo the last action
+    // Add a special action to save history before a group operation
+    saveHistoryBeforeGroupOperation: (state) => {
+      console.log("Saving history before group operation");
+      saveStateForHistory(state);
+      // We don't modify the network here, just save the current state
+    },
+    
+    // Add a special action to finalize a group operation
+    finalizeGroupOperation: (state) => {
+      console.log("Finalizing group operation");
+      // Create a history entry with the final state after all operations
+      
+      // If we're not at the end of the history, truncate it
+      if (state.historyIndex < state.history.length - 1) {
+        state.history = state.history.slice(0, state.historyIndex + 1);
+      }
+      
+      // Add the current state as a single history entry
+      state.history.push(JSON.parse(JSON.stringify(state.currentNetwork)));
+      
+      // Trim history if it exceeds the maximum length
+      if (state.history.length > MAX_HISTORY_LENGTH) {
+        state.history = state.history.slice(state.history.length - MAX_HISTORY_LENGTH);
+      }
+      
+      // Update index to point to the end
+      state.historyIndex = state.history.length - 1;
+      
+      // Update undo/redo state
+      state.canUndo = state.historyIndex > 0;
+      state.canRedo = false;
+    },
+    
+    // Undo the last action with improved state restoration
     undo: (state) => {
       if (state.historyIndex > 0) {
         state.historyIndex--;
+        // Restore the exact state from history
         state.currentNetwork = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+        // Update flags
         state.canUndo = state.historyIndex > 0;
-        state.canRedo = true;
+        state.canRedo = state.historyIndex < state.history.length - 1;
+        
+        console.log("Undo operation - restored state at index:", state.historyIndex);
       }
     },
     
-    // Redo the previously undone action
+    // Redo the previously undone action with improved state restoration
     redo: (state) => {
       if (state.historyIndex < state.history.length - 1) {
         state.historyIndex++;
+        // Restore the exact state from history
         state.currentNetwork = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+        // Update flags
         state.canUndo = state.historyIndex > 0;
         state.canRedo = state.historyIndex < state.history.length - 1;
+        
+        console.log("Redo operation - restored state at index:", state.historyIndex);
       }
     },
     // Create an empty network
@@ -180,6 +221,28 @@ const networkSlice = createSlice({
       state.historyIndex = 0;
       state.canUndo = false;
       state.canRedo = false;
+    },
+    
+    // Set the network with history (for loading saved networks with history)
+    setNetworkWithHistory: (state, action: PayloadAction<{
+      network: SpinNetwork;
+      history: {
+        history: SpinNetwork[];
+        historyIndex: number;
+        canUndo: boolean;
+        canRedo: boolean;
+      };
+    }>) => {
+      const { network, history } = action.payload;
+      
+      // Set the network
+      state.currentNetwork = network;
+      
+      // Restore history state
+      state.history = history.history;
+      state.historyIndex = history.historyIndex;
+      state.canUndo = history.canUndo;
+      state.canRedo = history.canRedo;
     },
     
     // Update network metadata
