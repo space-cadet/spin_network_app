@@ -40,12 +40,18 @@ pnpm dev
 
 The application features a flexible, customizable interface:
 
-- **Left Panel**: Network creation tools and templates
-- **Main Area**: Interactive network visualization with zoom and pan controls
+- **Left Panel**: Network creation tools, templates, and file operations
+- **Main Area**: Interactive network visualization with zoom/pan controls and mode selection
 - **Right Panel**: Properties editor and simulation controls
 - **Bottom Panel**: Energy plots and simulation metrics
 
-All panels are resizable to accommodate different workflows and preferences.
+Key features:
+- All panels are resizable to accommodate different workflows and preferences
+- Panels can be hidden/shown to maximize workspace
+- Undo/redo functionality with keyboard shortcuts (Ctrl+Z, Ctrl+Y)
+- Multiple interaction modes (select, pan, add node, add edge, delete)
+- Network saving and loading with timestamp versioning
+- Recent networks quick access menu
 
 ## Development
 
@@ -104,16 +110,24 @@ For more detailed technical information, see the files in the `resources/` direc
 - **Cytoscape.js** - Network visualization
 - **D3.js** - Data visualization for metrics and plots
 - **Redux Toolkit** - State management
+- **Redux Persist** - State persistence with IndexedDB
 - **Tailwind CSS** - Utility-first CSS framework
 - **Vite** - Build tool
 - **pnpm** - Fast, disk space efficient package manager
 
 ## Current Status
 
-The project is in active development. The current version features a working UI with:
-- Resizable panel layout
-- Basic network visualization
-- UI components for network creation, property editing, and simulation control
+The project is in active development. The current version features:
+- Comprehensive network data model with TypeScript interfaces
+- Multiple network generation options (lattice, circular, random)
+- Interactive network visualization with Cytoscape.js
+- Full undo/redo support for all network operations
+- State persistence to preserve work between sessions
+- Save/load functionality with recent networks tracking
+- Support for dangling edges with placeholder nodes
+- Hideable panels to maximize workspace
+- Customizable workspace with resizable panels
+- Property editing for network elements
 
 See the [CHANGELOG.md](CHANGELOG.md) for recent updates and the current development status.
 

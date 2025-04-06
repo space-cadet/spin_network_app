@@ -7,30 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### In Progress
+- Simulation engine development (Graph Laplacian calculation)
+- Matrix representations for network data
+- Diffusion algorithm implementations
+- Network history restoration improvements
+
+### Planned
+- Numerical methods for time evolution
+- Simulation visualization improvements
+- Advanced network manipulation features
+- Dark/light theme support
+- Statistics and metrics calculation
+- Export functionality for results
+
+## [0.3.0] - 2025-04-06
+
 ### Added
-- Redux integration for centralized state management:
-  - Network slice for managing network data
-  - UI slice for managing interface state
-  - Strongly typed selectors for state access
-  - Custom hooks for Redux integration
-- Enhanced properties panel with source/target node label display
-- Comprehensive Redux documentation in memory-bank
-- Support for immutable state updates in all operations
-- Foundation for future undo/redo functionality
+- State persistence with IndexedDB (Redux Persist)
+- Undo/redo functionality with keyboard shortcuts (Ctrl+Z, Ctrl+Y)
+- History tracking for all network operations
+- Hideable panels with toggle buttons for workspace maximization
+- Recent networks list with quick access to previous work
+- Save/load functionality for network files with history preservation
+- Support for dangling edges with placeholder node visualization
+- Timestamps in filenames when saving networks
+- Group operation tracking for complex interactions
+- Enhanced error handling and validation for network operations
 
 ### Changed
-- Migrated from context-based state management to Redux
-- Updated all components to use Redux hooks instead of context
-- Improved property panel to properly display edge connections
-- Refined state update patterns for consistency and type safety
-- Optimized component re-renders with proper selector usage
+- Moved undo/redo buttons to main toolbar for better accessibility
+- Improved sidebar scrolling for all panels
+- Enhanced UI feedback during operations
+- Refined network element creation workflows
+- Updated network visualization to use fixed node dimensions
+- Improved interaction mode indicators
 
 ### Fixed
-- React hooks order violation in properties panel
-- Edge properties display issues when selecting edges
-- Component re-rendering inconsistencies
-- TypeScript type safety issues in state updates
-- State synchronization between components
+- Vertical scrolling in sidebar panels
+- Node sizing issues in network visualization
+- Event handler persistence across operations
+- Edge creation workflow with placeholder nodes
+- History state tracking for composite operations
+- File operation error handling and feedback
+- Visual feedback for interaction modes
 
 ## [0.2.0] - 2025-03-29
 
