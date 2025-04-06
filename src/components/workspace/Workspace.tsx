@@ -47,7 +47,10 @@ const Workspace: React.FC = () => {
             'color': '#fff',
             'text-outline-color': '#4f46e5',
             'text-outline-width': 2,
-            'text-valign': 'center'
+            'text-valign': 'center',
+            'width': 80,
+            'height': 80,
+            'font-size': '14px'
           }
         },
         {
@@ -178,9 +181,20 @@ const Workspace: React.FC = () => {
               // Only try to fit if we have visible elements
               const visibleElements = cy.elements().filter(ele => ele.visible());
               if (visibleElements.length > 0) {
-                cy.zoom(1); // Reset zoom level first
-                cy.pan({ x: 0, y: 0 }); // Reset pan position
-                cy.fit(visibleElements, 50); // Then fit to visible elements
+                // If this is a new network with just 1-2 nodes, set a reasonable zoom
+                if (visibleElements.length <= 2) {
+                  cy.zoom(1.2); // Slightly zoomed in for better visibility
+                  cy.center(visibleElements);
+                } else {
+                  // For networks with more nodes, fit with padding
+                  cy.fit(visibleElements, 100);
+                  
+                  // Limit maximum zoom level
+                  if (cy.zoom() > 1.5) {
+                    cy.zoom(1.5);
+                    cy.center(visibleElements);
+                  }
+                }
               }
               
               // Reattach handlers after network update
@@ -246,12 +260,19 @@ const Workspace: React.FC = () => {
       cy.boxSelectionEnabled(false);
     }
     
-    // Add node click handler for different modes
+    // First remove all tap handlers to start fresh
     cy.nodes().unbind('tap');
-    cy.nodes().bind('tap', (event) => {
-      const node = event.target;
-      
-      if (mode === 'addEdge') {
+    cy.edges().unbind('tap');
+    
+    // Set up mode-specific handlers
+    if (mode === 'delete') {
+      // Delete mode gets its own specialized handlers
+      setupDeleteHandlers();
+    } else if (mode === 'addEdge') {
+      // Add edge mode handlers
+      cy.nodes().bind('tap', (event) => {
+        const node = event.target;
+        
         // First selection: set as source
         if (!edgeSourceId) {
           setEdgeSourceId(node.id());
@@ -262,15 +283,9 @@ const Workspace: React.FC = () => {
         else if (node.id() !== edgeSourceId) {
           createEdge(edgeSourceId, node.id());
         }
-      } else if (mode === 'select') {
-        // Selection is handled by the select event
-      }
-    });
-    
-    // Set up delete handlers if in delete mode
-    if (mode === 'delete') {
-      setupDeleteHandlers();
+      });
     }
+    // Select mode handlers are managed by the select/unselect events
     
     // Reset any styling when changing modes
     if (mode !== 'addEdge' && edgeSourceId) {
@@ -319,6 +334,7 @@ const Workspace: React.FC = () => {
     const timestamp = Date.now();
     const newNodeId = `node-${timestamp}-${Math.floor(Math.random() * 1000)}`;
     
+    // Create new node
     const newNode: NetworkNode = {
       id: newNodeId,
       position: {
@@ -333,6 +349,19 @@ const Workspace: React.FC = () => {
     
     // Briefly select the new node, then clear selection to prepare for next node
     setTimeout(() => {
+      if (cy) {
+        // Ensure we don't zoom in too close when adding a node
+        if (cy.zoom() > 1.5) {
+          cy.zoom(1.5);
+        }
+        
+        // Center on the new node with a slight offset to avoid stacking
+        const nodeElement = cy.$(`#${newNodeId}`);
+        if (nodeElement.length > 0) {
+          cy.center(nodeElement);
+        }
+      }
+      
       dispatch(setSelectedElement({
         id: newNodeId,
         type: 'node'
@@ -347,49 +376,51 @@ const Workspace: React.FC = () => {
   
   // Handler for deleting a node
   const deleteNode = (nodeId: string) => {
-    if (window.confirm('Are you sure you want to delete this node?')) {
-      dispatch(removeNetworkNode(nodeId));
-      dispatch(clearSelection());
-      
-      // Reattach delete event handlers after deletion
-      setTimeout(() => {
-        if (cy && mode === 'delete') {
-          setupDeleteHandlers();
-        }
-      }, 100);
-    }
+    console.log("Deleting node:", nodeId);
+    dispatch(removeNetworkNode(nodeId));
+    dispatch(clearSelection());
+    
+    // Reattach delete event handlers after deletion
+    setTimeout(() => {
+      if (cy && mode === 'delete') {
+        setupDeleteHandlers();
+      }
+    }, 100);
   };
   
   // Handler for deleting an edge
   const deleteEdge = (edgeId: string) => {
-    if (window.confirm('Are you sure you want to delete this edge?')) {
-      dispatch(removeNetworkEdge(edgeId));
-      dispatch(clearSelection());
-      
-      // Reattach delete event handlers after deletion
-      setTimeout(() => {
-        if (cy && mode === 'delete') {
-          setupDeleteHandlers();
-        }
-      }, 100);
-    }
+    console.log("Deleting edge:", edgeId);
+    dispatch(removeNetworkEdge(edgeId));
+    dispatch(clearSelection());
+    
+    // Reattach delete event handlers after deletion
+    setTimeout(() => {
+      if (cy && mode === 'delete') {
+        setupDeleteHandlers();
+      }
+    }, 100);
   };
   
   // Setup handlers for delete mode
   const setupDeleteHandlers = () => {
     if (!cy) return;
     
-    // Remove existing handlers
-    cy.nodes().unbind('tap.delete');
-    cy.edges().unbind('tap.delete');
+    // Remove all existing tap handlers to avoid conflicts
+    cy.nodes().unbind('tap');
+    cy.edges().unbind('tap');
     
     // Add node click handler for delete mode
-    cy.nodes().bind('tap.delete', (event) => {
+    cy.nodes().bind('tap', (event) => {
+      event.preventDefault(); // Prevent other handlers from firing
+      event.stopPropagation(); // Stop event from bubbling
       deleteNode(event.target.id());
     });
     
     // Add edge click handler for delete mode
-    cy.edges().bind('tap.delete', (event) => {
+    cy.edges().bind('tap', (event) => {
+      event.preventDefault(); // Prevent other handlers from firing
+      event.stopPropagation(); // Stop event from bubbling
       deleteEdge(event.target.id());
     });
   };
@@ -401,7 +432,14 @@ const Workspace: React.FC = () => {
     try {
       const visibleElements = cy.elements().filter(ele => ele.visible());
       if (visibleElements.length > 0) {
-        cy.fit(visibleElements, 50);
+        // Use more padding (100px) to avoid nodes at the edges
+        cy.fit(visibleElements, 100);
+        
+        // Limit maximum zoom level to prevent nodes from becoming too large
+        if (cy.zoom() > 1.5) {
+          cy.zoom(1.5);
+          cy.center(visibleElements);
+        }
       }
     } catch (error) {
       console.warn('Error during fit operation:', error);
