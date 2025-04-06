@@ -13,6 +13,7 @@ export interface NetworkNode {
   };
   intertwiner: number; // The intertwiner value (typically a half-integer)
   label?: string; // Optional display label
+  type?: 'regular' | 'placeholder'; // Node type (default: regular)
   properties?: Record<string, any>; // Additional custom properties
 }
 

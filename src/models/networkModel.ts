@@ -316,7 +316,7 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
         label: node.label || `Node ${node.id}`,
         intertwiner: node.intertwiner,
         position: node.position, // Store position in data for later access
-        type: 'regular', // Mark as a regular node
+        type: node.type || 'regular', // Use node type or default to regular
         ...node.properties
       },
       position: { // Set position directly for cytoscape

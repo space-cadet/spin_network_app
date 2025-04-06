@@ -57,7 +57,7 @@ const Workspace: React.FC = () => {
         {
           selector: 'node[type="placeholder"]',
           style: {
-            'background-color': '#f97316', // Orange for placeholders
+            'background-color': '#f97316',
             'border-width': 2,
             'border-color': '#fb923c',
             'border-style': 'dashed',
@@ -144,9 +144,16 @@ const Workspace: React.FC = () => {
         } else if (mode === 'select') {
           // Clear selection when clicking background in select mode
           dispatch(clearSelection());
-        } else if (mode === 'addEdge' && edgeSourceId) {
-          // Create a dangling edge to empty space if we have a source node selected
-          createDanglingEdge(edgeSourceId, event.position);
+        } else if (mode === 'addEdge') {
+          if (edgeSourceId) {
+            // Create dangling edge from existing source to empty space
+            createDanglingEdge(edgeSourceId, event.position);
+          } else {
+            // Start new edge from empty space by creating placeholder node
+            const placeholderId = createPlaceholderNode(event.position);
+            setEdgeSourceId(placeholderId);
+            cyInstance.$(`#${placeholderId}`).addClass('source-node');
+          }
         }
       }
     });
@@ -356,12 +363,21 @@ const Workspace: React.FC = () => {
     const timestamp = Date.now();
     const newEdgeId = `edge-${timestamp}-${Math.floor(Math.random() * 1000)}`;
     
-    // Create the edge with null target and position information
+    // Check if source is a placeholder node
+    let targetPlaceholderId: string | null = null;
+    const sourceNode = cy?.$(`#${sourceId}`);
+    
+    // If source is a placeholder, use its position
+    if (sourceNode?.data('type') === 'placeholder') {
+      targetPlaceholderId = createPlaceholderNode(targetPosition);
+    }
+    
+    // Create the edge with target information
     const newEdge: NetworkEdge = {
       id: newEdgeId,
       source: sourceId,
-      target: null,
-      targetPosition: targetPosition,
+      target: targetPlaceholderId, // null or new placeholder ID
+      targetPosition: targetPlaceholderId ? undefined : targetPosition,
       spin: defaultEdgeSpin,
       label: `j=${defaultEdgeSpin}`
     };
@@ -435,6 +451,22 @@ const Workspace: React.FC = () => {
   };
   
   // Helper function to convert a placeholder node to a real node
+  const createPlaceholderNode = (position: { x: number, y: number }): string => {
+    const timestamp = Date.now();
+    const placeholderId = `placeholder-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+
+    const placeholderNode: NetworkNode = {
+      id: placeholderId,
+      position,
+      intertwiner: 0, // Placeholder nodes have 0 intertwiner
+      label: '',
+      type: 'placeholder'
+    };
+
+    dispatch(addNetworkNode(placeholderNode));
+    return placeholderId;
+  };
+
   const convertPlaceholderToNode = (placeholderId: string) => {
     if (!cy) return;
     
