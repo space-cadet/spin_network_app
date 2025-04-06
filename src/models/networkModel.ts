@@ -336,6 +336,7 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
       const placeholderId = `placeholder-source-${edge.id}`;
       if (!placeholderNodes.has(placeholderId)) {
         placeholderNodes.add(placeholderId);
+        console.log(`Creating source placeholder node at position:`, edge.sourcePosition);
         elements.push({
           group: 'nodes',
           data: {
@@ -355,6 +356,7 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
       const placeholderId = `placeholder-target-${edge.id}`;
       if (!placeholderNodes.has(placeholderId)) {
         placeholderNodes.add(placeholderId);
+        console.log(`Creating target placeholder node at position:`, edge.targetPosition);
         elements.push({
           group: 'nodes',
           data: {

@@ -144,6 +144,9 @@ const Workspace: React.FC = () => {
         } else if (mode === 'select') {
           // Clear selection when clicking background in select mode
           dispatch(clearSelection());
+        } else if (mode === 'addEdge' && edgeSourceId) {
+          // Create a dangling edge to empty space if we have a source node selected
+          createDanglingEdge(edgeSourceId, event.position);
         }
       }
     });
@@ -293,8 +296,19 @@ const Workspace: React.FC = () => {
     if (mode === 'delete') {
       // Delete mode gets its own specialized handlers
       setupDeleteHandlers();
+    } else if (mode === 'select') {
+      // In select mode, allow converting placeholders to real nodes
+      cy.nodes().filter('[type = "placeholder"]').bind('tap', (event) => {
+        const node = event.target;
+        console.log('Clicked on placeholder node in select mode:', node.id());
+        
+        // Ask if the user wants to convert the placeholder to a real node
+        if (window.confirm('Convert this placeholder to a real node?')) {
+          convertPlaceholderToNode(node.id());
+        }
+      });
     } else if (mode === 'addEdge') {
-      // Add edge mode handlers - filter out placeholder nodes
+      // Add edge mode handlers for regular nodes
       cy.nodes().filter('[type != "placeholder"]').bind('tap', (event) => {
         const node = event.target;
         
@@ -310,16 +324,24 @@ const Workspace: React.FC = () => {
         }
       });
       
-      // For placeholder nodes, allow conversion to real nodes when clicked
+      // For placeholder nodes, allow connecting to them directly
       cy.nodes().filter('[type = "placeholder"]').bind('tap', (event) => {
         const node = event.target;
-        console.log('Clicked on placeholder node:', node.id());
+        console.log('Clicked on placeholder node in edge mode:', node.id());
         
-        // Ask if the user wants to convert the placeholder to a real node
-        if (window.confirm('Convert this placeholder to a real node?')) {
-          convertPlaceholderToNode(node.id());
+        // If we're already creating an edge, connect to this placeholder
+        if (edgeSourceId) {
+          createEdge(edgeSourceId, node.id());
+        }
+        // If this is the first click, we can use this placeholder as source
+        else {
+          setEdgeSourceId(node.id());
+          cy.$(`#${node.id()}`).addClass('source-node');
         }
       });
+      
+      // We'll handle the background click in the main canvas handler instead
+      // This prevents multiple event handlers from conflicting
     }
     // Select mode handlers are managed by the select/unselect events
     
@@ -329,10 +351,46 @@ const Workspace: React.FC = () => {
     }
   }, [cy, mode, edgeSourceId]);
   
+  // Helper function to create an edge with a dangling end
+  const createDanglingEdge = (sourceId: string, targetPosition: { x: number, y: number }) => {
+    const timestamp = Date.now();
+    const newEdgeId = `edge-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Create the edge with null target and position information
+    const newEdge: NetworkEdge = {
+      id: newEdgeId,
+      source: sourceId,
+      target: null,
+      targetPosition: targetPosition,
+      spin: defaultEdgeSpin,
+      label: `j=${defaultEdgeSpin}`
+    };
+    
+    console.log("Creating dangling edge:", newEdge);
+    
+    // Add the edge
+    dispatch(addNetworkEdge(newEdge));
+    
+    // Reset source node styling
+    if (cy) {
+      cy.$(`#${sourceId}`).removeClass('source-node');
+    }
+    setEdgeSourceId(null);
+  };
+  
   // Function to create an edge between source and target nodes
   const createEdge = (sourceId: string, targetId: string) => {
     const timestamp = Date.now();
     const newEdgeId = `edge-${timestamp}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Check if source and target exist as actual nodes (vs. placeholders)
+    let sourceNode = null;
+    let targetNode = null;
+    
+    if (cy) {
+      sourceNode = cy.$(`#${sourceId}`);
+      targetNode = cy.$(`#${targetId}`);
+    }
     
     const newEdge: NetworkEdge = {
       id: newEdgeId,
@@ -341,6 +399,17 @@ const Workspace: React.FC = () => {
       spin: defaultEdgeSpin,
       label: `j=${defaultEdgeSpin}`
     };
+    
+    // If the source or target is a placeholder, get its position
+    if (sourceNode && sourceNode.data('type') === 'placeholder') {
+      const pos = sourceNode.position();
+      newEdge.sourcePosition = { x: pos.x, y: pos.y };
+    }
+    
+    if (targetNode && targetNode.data('type') === 'placeholder') {
+      const pos = targetNode.position();
+      newEdge.targetPosition = { x: pos.x, y: pos.y };
+    }
     
     // Create the edge
     dispatch(addNetworkEdge(newEdge));
