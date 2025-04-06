@@ -50,22 +50,34 @@ const initialState: NetworkState = {
  */
 const saveStateForHistory = (state: NetworkState) => {
   // Don't record history for identical states
-  if (state.historyIndex >= 0 && 
-      JSON.stringify(state.history[state.historyIndex]) === JSON.stringify(state.currentNetwork)) {
-    return;
+  if (state.historyIndex >= 0) {
+    const currentJson = JSON.stringify(state.currentNetwork);
+    const historyJson = JSON.stringify(state.history[state.historyIndex]);
+    
+    if (currentJson === historyJson) {
+      console.log("Skipping history save for identical state");
+      return;
+    }
   }
 
   // If we're not at the end of the history, truncate it
   if (state.historyIndex < state.history.length - 1) {
+    console.log(`Truncating history from ${state.history.length} to ${state.historyIndex + 1}`);
     state.history = state.history.slice(0, state.historyIndex + 1);
   }
   
   // Add current network to history (create a deep copy)
-  state.history.push(JSON.parse(JSON.stringify(state.currentNetwork)));
+  const historyCopy = JSON.parse(JSON.stringify(state.currentNetwork));
+  state.history.push(historyCopy);
+  console.log(`Added state to history at index ${state.history.length - 1}`);
   
   // Trim history if it exceeds the maximum length
   if (state.history.length > MAX_HISTORY_LENGTH) {
-    state.history = state.history.slice(state.history.length - MAX_HISTORY_LENGTH);
+    const trimAmount = state.history.length - MAX_HISTORY_LENGTH;
+    console.log(`Trimming ${trimAmount} items from history`);
+    state.history = state.history.slice(trimAmount);
+    // Adjust historyIndex since we removed items from the beginning
+    state.historyIndex = state.historyIndex - trimAmount;
   }
   
   // Update index to point to the end
@@ -74,6 +86,8 @@ const saveStateForHistory = (state: NetworkState) => {
   // Update undo/redo state
   state.canUndo = state.historyIndex > 0;
   state.canRedo = false;
+  
+  console.log(`History state updated: index=${state.historyIndex}, length=${state.history.length}, canUndo=${state.canUndo}, canRedo=${state.canRedo}`);
 };
 
 /**
@@ -93,19 +107,44 @@ const networkSlice = createSlice({
     // Add a special action to finalize a group operation
     finalizeGroupOperation: (state) => {
       console.log("Finalizing group operation");
-      // Create a history entry with the final state after all operations
+      
+      // Edge case: If there's no valid history yet, add the initial state first
+      if (state.history.length === 0) {
+        console.log("No history exists, adding initial state");
+        state.history.push(JSON.parse(JSON.stringify(state.currentNetwork)));
+        state.historyIndex = 0;
+        state.canUndo = false;
+        state.canRedo = false;
+        return;
+      }
+      
+      // Compare the current state with the last history entry
+      const lastHistoryJson = JSON.stringify(state.history[state.historyIndex]);
+      const currentJson = JSON.stringify(state.currentNetwork);
+      
+      if (lastHistoryJson === currentJson) {
+        console.log("No changes detected, skipping finalization");
+        return;
+      }
       
       // If we're not at the end of the history, truncate it
       if (state.historyIndex < state.history.length - 1) {
+        console.log(`Truncating history from ${state.history.length} to ${state.historyIndex + 1}`);
         state.history = state.history.slice(0, state.historyIndex + 1);
       }
       
-      // Add the current state as a single history entry
-      state.history.push(JSON.parse(JSON.stringify(state.currentNetwork)));
+      // Add the current state as a single history entry (deep copy)
+      const finalState = JSON.parse(JSON.stringify(state.currentNetwork));
+      state.history.push(finalState);
+      console.log(`Added finalized state to history at index ${state.history.length - 1}`);
       
       // Trim history if it exceeds the maximum length
       if (state.history.length > MAX_HISTORY_LENGTH) {
-        state.history = state.history.slice(state.history.length - MAX_HISTORY_LENGTH);
+        const trimAmount = state.history.length - MAX_HISTORY_LENGTH;
+        console.log(`Trimming ${trimAmount} items from history`);
+        state.history = state.history.slice(trimAmount);
+        // Adjust historyIndex since we removed items from the beginning
+        state.historyIndex = state.historyIndex - trimAmount;
       }
       
       // Update index to point to the end
@@ -114,33 +153,81 @@ const networkSlice = createSlice({
       // Update undo/redo state
       state.canUndo = state.historyIndex > 0;
       state.canRedo = false;
+      
+      console.log(`History state finalized: index=${state.historyIndex}, length=${state.history.length}, canUndo=${state.canUndo}, canRedo=${state.canRedo}`);
     },
     
     // Undo the last action with improved state restoration
     undo: (state) => {
-      if (state.historyIndex > 0) {
+      if (state.historyIndex <= 0) {
+        console.log("Cannot undo - at earliest state or no history");
+        return;
+      }
+      
+      try {
+        console.log(`Undoing from history index ${state.historyIndex} to ${state.historyIndex - 1}`);
+        
+        // Move to previous state in history
         state.historyIndex--;
-        // Restore the exact state from history
-        state.currentNetwork = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+        
+        // Ensure the index is valid
+        if (state.historyIndex < 0 || state.historyIndex >= state.history.length) {
+          console.error(`Invalid history index after undo: ${state.historyIndex}`);
+          state.historyIndex = Math.min(Math.max(0, state.historyIndex), state.history.length - 1);
+        }
+        
+        // Deep copy to ensure complete state restoration
+        if (state.history[state.historyIndex]) {
+          state.currentNetwork = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+          console.log(`Restored network state: ${state.currentNetwork.nodes.length} nodes, ${state.currentNetwork.edges.length} edges`);
+        } else {
+          console.error(`No history state found at index ${state.historyIndex}`);
+        }
+        
         // Update flags
         state.canUndo = state.historyIndex > 0;
         state.canRedo = state.historyIndex < state.history.length - 1;
         
-        console.log("Undo operation - restored state at index:", state.historyIndex);
+        console.log(`Undo complete - new state at index: ${state.historyIndex}, canUndo=${state.canUndo}, canRedo=${state.canRedo}`);
+      } catch (error) {
+        console.error("Error during undo operation:", error);
       }
     },
     
     // Redo the previously undone action with improved state restoration
     redo: (state) => {
-      if (state.historyIndex < state.history.length - 1) {
+      if (state.historyIndex >= state.history.length - 1) {
+        console.log("Cannot redo - at latest state or no future states");
+        return;
+      }
+      
+      try {
+        console.log(`Redoing from history index ${state.historyIndex} to ${state.historyIndex + 1}`);
+        
+        // Move to next state in history
         state.historyIndex++;
-        // Restore the exact state from history
-        state.currentNetwork = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+        
+        // Ensure the index is valid
+        if (state.historyIndex < 0 || state.historyIndex >= state.history.length) {
+          console.error(`Invalid history index after redo: ${state.historyIndex}`);
+          state.historyIndex = Math.min(Math.max(0, state.historyIndex), state.history.length - 1);
+        }
+        
+        // Deep copy to ensure complete state restoration
+        if (state.history[state.historyIndex]) {
+          state.currentNetwork = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+          console.log(`Restored network state: ${state.currentNetwork.nodes.length} nodes, ${state.currentNetwork.edges.length} edges`);
+        } else {
+          console.error(`No history state found at index ${state.historyIndex}`);
+        }
+        
         // Update flags
         state.canUndo = state.historyIndex > 0;
         state.canRedo = state.historyIndex < state.history.length - 1;
         
-        console.log("Redo operation - restored state at index:", state.historyIndex);
+        console.log(`Redo complete - new state at index: ${state.historyIndex}, canUndo=${state.canUndo}, canRedo=${state.canRedo}`);
+      } catch (error) {
+        console.error("Error during redo operation:", error);
       }
     },
     // Create an empty network

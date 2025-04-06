@@ -164,13 +164,18 @@ export function removeNode(network: SpinNetwork, nodeId: string): SpinNetwork {
   const nodeExists = network.nodes.some(n => n.id === nodeId);
   if (!nodeExists) {
     // Node not found, return network unchanged
+    console.log(`Node ${nodeId} not found for removal`);
     return network;
   }
   
   // Find the node to get its position before removal
   const nodeToRemove = network.nodes.find(n => n.id === nodeId);
-  if (!nodeToRemove) return network; // Safety check
+  if (!nodeToRemove) {
+    console.log(`Node ${nodeId} found in initial check but missing in detailed lookup`);
+    return network; // Safety check
+  }
   
+  console.log(`Removing node ${nodeId} and updating connected edges`);
   const nodePosition = nodeToRemove.position;
   
   // Remove node
@@ -180,6 +185,7 @@ export function removeNode(network: SpinNetwork, nodeId: string): SpinNetwork {
   const updatedEdges = network.edges.map(edge => {
     // If this edge connects to the node we're removing, update it
     if (edge.source === nodeId) {
+      console.log(`Making edge ${edge.id} dangling at source`);
       return {
         ...edge,
         source: null,
@@ -187,6 +193,7 @@ export function removeNode(network: SpinNetwork, nodeId: string): SpinNetwork {
       };
     }
     if (edge.target === nodeId) {
+      console.log(`Making edge ${edge.id} dangling at target`);
       return {
         ...edge,
         target: null,
@@ -195,6 +202,10 @@ export function removeNode(network: SpinNetwork, nodeId: string): SpinNetwork {
     }
     return edge;
   });
+  
+  // Check the before/after count of nodes and edges for debugging
+  console.log(`Nodes: ${network.nodes.length} -> ${updatedNodes.length}`);
+  console.log(`Edges: ${network.edges.length} -> ${updatedEdges.length}`);
   
   return {
     ...network,
@@ -285,14 +296,45 @@ export function removeEdge(network: SpinNetwork, edgeId: string): SpinNetwork {
   const edgeExists = network.edges.some(e => e.id === edgeId);
   if (!edgeExists) {
     // Edge not found, return network unchanged
+    console.log(`Edge ${edgeId} not found for removal`);
     return network;
+  }
+  
+  // Get edge details before removal (for logging)
+  const edgeToRemove = network.edges.find(e => e.id === edgeId);
+  if (edgeToRemove) {
+    console.log(`Removing edge ${edgeId} connecting ${edgeToRemove.source || 'null'} to ${edgeToRemove.target || 'null'}`);
   }
   
   // Remove edge
   const updatedEdges = network.edges.filter(e => e.id !== edgeId);
   
+  // Also find and remove any placeholder nodes associated with this edge
+  // This ensures clean undo/redo behavior
+  const placeholderPrefixSource = `placeholder-source-${edgeId}`;
+  const placeholderPrefixTarget = `placeholder-target-${edgeId}`;
+  
+  const updatedNodes = network.nodes.filter(node => {
+    const isPlaceholderForThisEdge = 
+      node.type === 'placeholder' && 
+      (node.id.startsWith(placeholderPrefixSource) || node.id.startsWith(placeholderPrefixTarget));
+    
+    if (isPlaceholderForThisEdge) {
+      console.log(`Also removing placeholder node ${node.id} associated with edge ${edgeId}`);
+    }
+    
+    return !isPlaceholderForThisEdge;
+  });
+  
+  // Log the node count change if any placeholders were removed
+  if (network.nodes.length !== updatedNodes.length) {
+    console.log(`Nodes: ${network.nodes.length} -> ${updatedNodes.length}`);
+  }
+  console.log(`Edges: ${network.edges.length} -> ${updatedEdges.length}`);
+  
   return {
     ...network,
+    nodes: updatedNodes,
     edges: updatedEdges,
     metadata: {
       ...network.metadata,
