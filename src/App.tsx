@@ -8,7 +8,6 @@ import EnergyPlot from './components/visualization/EnergyPlot'
 import ResizablePanel from './components/common/ResizablePanel'
 import PersistenceStatus from './components/common/PersistenceStatus'
 import SidebarToggle from './components/common/SidebarToggle'
-import UndoRedo from './components/common/UndoRedo'
 import { selectLeftSidebarVisible, selectRightSidebarVisible, selectBottomSidebarVisible } from './store/selectors'
 
 function App() {
@@ -41,13 +40,10 @@ function App() {
                 defaultSize={250} 
                 minSize={200} 
                 maxSize={400} 
-                className="border-r border-gray-200 bg-white overflow-y-auto"
+                className="border-r border-gray-200 bg-white overflow-y-auto h-full"
                 handlePosition="end"
               >
-                <div className="p-4 h-full">
-                  <div className="flex justify-between items-center mb-4">
-                    <UndoRedo />
-                  </div>
+                <div className="p-4 h-full overflow-y-auto">
                   <NetworkTools />
                 </div>
               </ResizablePanel>
@@ -77,10 +73,10 @@ function App() {
                   defaultSize={200}
                   minSize={100}
                   maxSize={400}
-                  className="border-t border-gray-200 bg-white overflow-y-auto"
+                  className="border-t border-gray-200 bg-white overflow-y-auto h-full"
                   handlePosition="start"
                 >
-                  <div className="p-4 h-full">
+                  <div className="p-4 h-full overflow-y-auto">
                     <EnergyPlot />
                   </div>
                 </ResizablePanel>
@@ -104,10 +100,10 @@ function App() {
                 defaultSize={300} 
                 minSize={250} 
                 maxSize={500} 
-                className="border-l border-gray-200 bg-white overflow-y-auto"
+                className="border-l border-gray-200 bg-white overflow-y-auto h-full"
                 handlePosition="start"
               >
-                <div className="h-full">
+                <div className="h-full overflow-y-auto">
                   <PropertiesPanel />
                   <SimulationControls onStartSimulation={handleStartSimulation} />
                 </div>

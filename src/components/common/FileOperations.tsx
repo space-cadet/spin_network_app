@@ -49,10 +49,11 @@ const FileOperations: React.FC = () => {
       const networkJson = JSON.stringify(currentNetwork, null, 2);
       const blob = new Blob([networkJson], { type: 'application/json' });
       
-      // Generate default filename from network metadata or timestamp
+      // Generate default filename from network metadata with timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19); // Format: YYYY-MM-DDTHH-MM-SS
       const defaultFilename = currentNetwork.metadata?.name 
-        ? `${currentNetwork.metadata.name}.json`
-        : `spin-network-${new Date().toISOString().slice(0, 10)}.json`;
+        ? `${currentNetwork.metadata.name}-${timestamp}.json`
+        : `spin-network-${timestamp}.json`;
       
       // Use File System Access API if available
       if ('showSaveFilePicker' in window) {
@@ -201,12 +202,18 @@ const FileOperations: React.FC = () => {
    */
   const handleLoadRecentNetwork = async (networkId: string) => {
     try {
-      // Since we're just using the recent networks for tracking and not actual storage,
-      // we need to load from the current state
       console.log('Loading recent network with ID:', networkId);
       
-      // For now, let's just show an alert until we implement proper storage
-      alert(`This feature is still being implemented. Network ID: ${networkId}`);
+      // Try to load the network from storage
+      const loadedNetwork = await NetworkStorage.loadNetwork(networkId);
+      
+      if (loadedNetwork) {
+        // Set the network state
+        dispatch(setNetwork(loadedNetwork));
+        console.log('Network loaded successfully from recent list');
+      } else {
+        throw new Error('Network not found in storage');
+      }
       
       setShowRecentMenu(false);
     } catch (error) {

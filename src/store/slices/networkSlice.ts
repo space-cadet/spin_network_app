@@ -46,9 +46,9 @@ const initialState: NetworkState = {
 };
 
 /**
- * Helper function to add current network to history
+ * Helper function to add current network to history before making a change
  */
-const addToHistory = (state: NetworkState) => {
+const saveStateForHistory = (state: NetworkState) => {
   // Don't record history for identical states
   if (state.historyIndex >= 0 && 
       JSON.stringify(state.history[state.historyIndex]) === JSON.stringify(state.currentNetwork)) {
@@ -60,7 +60,7 @@ const addToHistory = (state: NetworkState) => {
     state.history = state.history.slice(0, state.historyIndex + 1);
   }
   
-  // Add current network to history
+  // Add current network to history (create a deep copy)
   state.history.push(JSON.parse(JSON.stringify(state.currentNetwork)));
   
   // Trim history if it exceeds the maximum length
@@ -106,7 +106,7 @@ const networkSlice = createSlice({
     createEmpty: (state, action: PayloadAction<string | undefined>) => {
       // Add current network to history before changing
       if (state.currentNetwork.nodes.length > 0 || state.currentNetwork.edges.length > 0) {
-        addToHistory(state);
+        saveStateForHistory(state);
       }
       
       state.currentNetwork = createEmptyNetwork(action.payload);
@@ -122,7 +122,7 @@ const networkSlice = createSlice({
     createLattice: (state, action: PayloadAction<LatticeNetworkParams>) => {
       // Add current network to history before changing
       if (state.currentNetwork.nodes.length > 0 || state.currentNetwork.edges.length > 0) {
-        addToHistory(state);
+        saveStateForHistory(state);
       }
       
       state.currentNetwork = createLatticeNetwork(action.payload);
@@ -138,7 +138,7 @@ const networkSlice = createSlice({
     createCircular: (state, action: PayloadAction<CircularNetworkParams>) => {
       // Add current network to history before changing
       if (state.currentNetwork.nodes.length > 0 || state.currentNetwork.edges.length > 0) {
-        addToHistory(state);
+        saveStateForHistory(state);
       }
       
       state.currentNetwork = createCircularNetwork(action.payload);
@@ -154,7 +154,7 @@ const networkSlice = createSlice({
     createRandom: (state, action: PayloadAction<RandomNetworkParams>) => {
       // Add current network to history before changing
       if (state.currentNetwork.nodes.length > 0 || state.currentNetwork.edges.length > 0) {
-        addToHistory(state);
+        saveStateForHistory(state);
       }
       
       state.currentNetwork = createRandomNetwork(action.payload);
@@ -170,7 +170,7 @@ const networkSlice = createSlice({
     setNetwork: (state, action: PayloadAction<SpinNetwork>) => {
       // Add current network to history before changing
       if (state.currentNetwork.nodes.length > 0 || state.currentNetwork.edges.length > 0) {
-        addToHistory(state);
+        saveStateForHistory(state);
       }
       
       state.currentNetwork = action.payload;
@@ -184,51 +184,63 @@ const networkSlice = createSlice({
     
     // Update network metadata
     updateMetadata: (state, action: PayloadAction<Partial<SpinNetwork['metadata']>>) => {
-      addToHistory(state);
+      saveStateForHistory(state);
       state.currentNetwork = updateNetworkMetadata(state.currentNetwork, action.payload);
     },
     
     // Add a node to the network
     addNetworkNode: (state, action: PayloadAction<NetworkNode>) => {
-      addToHistory(state);
+      // Save the current state before modification
+      saveStateForHistory(state);
+      // Apply the change
       state.currentNetwork = addNode(state.currentNetwork, action.payload);
     },
     
     // Update a node in the network
     updateNetworkNode: (state, action: PayloadAction<{ id: string; updates: Partial<NetworkNode> }>) => {
-      addToHistory(state);
+      // Save the current state before modification
+      saveStateForHistory(state);
       const { id, updates } = action.payload;
+      // Apply the change
       state.currentNetwork = updateNode(state.currentNetwork, id, updates);
     },
     
     // Remove a node from the network
     removeNetworkNode: (state, action: PayloadAction<string>) => {
-      addToHistory(state);
+      // Save the current state before modification
+      saveStateForHistory(state);
+      // Apply the change
       state.currentNetwork = removeNode(state.currentNetwork, action.payload);
     },
     
     // Add an edge to the network
     addNetworkEdge: (state, action: PayloadAction<NetworkEdge>) => {
-      addToHistory(state);
+      // Save the current state before modification
+      saveStateForHistory(state);
+      // Apply the change
       state.currentNetwork = addEdge(state.currentNetwork, action.payload);
     },
     
     // Update an edge in the network
     updateNetworkEdge: (state, action: PayloadAction<{ id: string; updates: Partial<NetworkEdge> }>) => {
-      addToHistory(state);
+      // Save the current state before modification
+      saveStateForHistory(state);
       const { id, updates } = action.payload;
+      // Apply the change
       state.currentNetwork = updateEdge(state.currentNetwork, id, updates);
     },
     
     // Remove an edge from the network
     removeNetworkEdge: (state, action: PayloadAction<string>) => {
-      addToHistory(state);
+      // Save the current state before modification
+      saveStateForHistory(state);
+      // Apply the change
       state.currentNetwork = removeEdge(state.currentNetwork, action.payload);
     },
     
     // Clear the network (remove all nodes and edges)
     clearNetwork: (state) => {
-      addToHistory(state);
+      saveStateForHistory(state);
       state.currentNetwork = {
         ...state.currentNetwork,
         nodes: [],

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
 import { FaSearch, FaSearchMinus, FaSearchPlus, FaRegHandPaper, FaPlus, FaLink, FaTrash } from 'react-icons/fa';
+import UndoRedo from '../common/UndoRedo';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setSelectedElement, setInteractionMode, clearSelection } from '../../store/slices/uiSlice';
 import { 
@@ -676,6 +677,9 @@ const Workspace: React.FC = () => {
       <div className="flex items-center space-x-2 mb-4">
         <h2 className="text-lg font-medium">Network Visualization</h2>
         <div className="flex-1"></div>
+        
+        {/* Undo/Redo buttons */}
+        <UndoRedo />
         
         {/* Mode buttons */}
         <button 
