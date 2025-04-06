@@ -15,6 +15,9 @@
 3. Node IDs are unique strings with format 'node-{timestamp}-{random}'
 4. Edge IDs are unique strings with format 'edge-{timestamp}-{random}'
 5. All operations include validation to ensure network integrity
+6. Edges can have null source/target to support "dangling" edges
+7. Dangling edges store position information for their unconnected endpoints
+8. Placeholder nodes are created for visualization of dangling edge endpoints
 
 ## Interface Patterns
 
@@ -40,8 +43,31 @@
 6. Exercise caution when using Cytoscape.js layout functions - they can cause rendering issues
 7. Always use try/catch blocks around Cytoscape.js operations that might fail
 8. Prefer CSS classes for styling Cytoscape elements over direct style application
-9. Use namespaced event handlers (e.g., 'tap.delete') for better event management
-10. Reattach event handlers after operations that modify the graph
+9. Use appropriate selectors for filtering nodes by type (regular vs. placeholder)
+10. Set fixed node dimensions to prevent automatic scaling
+11. Use more padding when fitting elements to the view
+12. Limit maximum zoom level to maintain visual consistency
+
+## Event Handling Patterns
+
+1. Use namespaced event handlers (e.g., 'tap.delete') for better event management
+2. Remove existing handlers before adding new ones to prevent duplicates
+3. Use `preventDefault()` and `stopPropagation()` to control event bubbling
+4. Handle events differently based on node type (regular vs. placeholder)
+5. Reattach handlers after operations that modify the graph
+6. Use filters like `cy.nodes().filter('[type != "placeholder"]')` to target specific node types
+7. Separate handlers for different interaction modes
+8. Centralize complex operations in helper functions (createEdge, createDanglingEdge, etc.)
+
+## Placeholder Node Patterns
+
+1. Placeholder nodes are used to visualize dangling edge endpoints
+2. Placeholder nodes have a different visual style (diamond shape, orange color, dashed border)
+3. Placeholder nodes store metadata about their associated edge
+4. Placeholder nodes can be converted to real nodes in select mode
+5. Clicking on a placeholder node in select mode prompts for conversion
+6. Placeholder nodes can be used as connection points in edge creation mode
+7. Deleting a placeholder also deletes its associated edge
 
 ## Component Patterns
 
