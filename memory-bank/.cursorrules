@@ -49,6 +49,8 @@
 10. Set fixed node dimensions to prevent automatic scaling
 11. Use more padding when fitting elements to the view
 12. Limit maximum zoom level to maintain visual consistency
+13. Use the useNetworkStyles hook to apply view settings to Cytoscape
+14. Update Cytoscape styles when view settings change using useEffect
 
 ## Event Handling Patterns
 
@@ -82,6 +84,10 @@
 4. Interface components use consistent styling from Tailwind CSS
 5. Mode buttons use toggle behavior (active→inactive) for better UX
 6. Confirmation dialogs are used for destructive operations
+7. HeaderDropdown provides consistent dropdown functionality in the header
+8. SettingsDropdown organizes application settings with submenus
+9. Dropdown menus use a consistent back-button pattern for submenu navigation
+10. Custom CSS classes (menu-item, menu-label) ensure consistent styling in dropdowns
 
 ## Coding Conventions
 
@@ -107,6 +113,19 @@
 11. History state is maintained alongside network state for undo/redo functionality
 12. Group operations should be tracked as atomic units in history
 13. Save and restore the entire history state when persisting networks
+14. Theme settings are stored in Redux and applied using ThemeProvider
+15. Visual settings (nodeSize, edgeThickness, labels) are persisted in Redux
+16. Performance settings control rendering quality and animation smoothness
+
+## Theme Management
+
+1. The application supports light, dark, and system themes
+2. ThemeProvider applies the current theme based on Redux state
+3. Dark mode uses CSS class 'dark-mode' applied to the document root
+4. Theme colors are defined using CSS variables for consistent styling
+5. All color values should use the CSS variables rather than hardcoded values
+6. System theme detection uses window.matchMedia('(prefers-color-scheme: dark)')
+7. Dropdown menus and UI components should have proper dark mode styling
 
 ## Development Workflow
 

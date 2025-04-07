@@ -19,6 +19,7 @@
 - ✅ Properties panel for selected elements
 - ✅ Simulation controls interface
 - ✅ Energy plot placeholder visualization
+- ✅ Settings dropdown with view, theme, and performance options
 
 ### Network Data Model
 - ✅ TypeScript interfaces for network elements (nodes, edges, networks)
@@ -52,6 +53,9 @@
 - ✅ Fixed node sizing and better visualization
 - ✅ Undo/redo functionality for all operations
 - ✅ Keyboard shortcuts (Ctrl+Z, Ctrl+Y)
+- ✅ Configurable view settings (node size, edge thickness, labels)
+- ✅ Theme switching (light/dark/system modes)
+- ✅ Panel layout presets for different workflow needs
 
 ### Project Infrastructure
 - ✅ Dependency management with pnpm
@@ -68,7 +72,14 @@
 - ✅ Fixed sidebar scrolling for better content access
 - ✅ Added timestamps to saved network filenames
 - ✅ Improved "Recent" networks feature functionality
+- ✅ Implemented comprehensive settings dropdown in header
 - 🔄 Working on network history restoration when loading from recent list
+
+### View Settings and Theming
+- ✅ Created dynamic view settings for network visualization
+- ✅ Implemented theme support with light and dark modes
+- ✅ Added custom hook for network styling based on settings
+- 🔄 Improving dark mode consistency across all components
 
 ### History State Management
 - ✅ Enhanced undo/redo for complex operations
@@ -114,8 +125,8 @@
 ### Additional Features (Lower Priority)
 - ✅ User preference persistence (sidebar visibility and sizes, view settings)
 - ✅ Keyboard shortcuts (Ctrl+Z, Ctrl+Y for undo/redo)
+- ✅ Dark/light theme support
 - ⬜ Tutorial or help system
-- ⬜ Dark/light theme support
 - ⬜ Statistics and metrics calculation
 - ⬜ Export functionality for results
 - ⬜ 3D network visualization for non-planar graphs
@@ -138,15 +149,19 @@ We've implemented state persistence so the network and UI state are preserved be
 7. Added persistence for sidebar sizes/widths between sessions
 8. Added dedicated zoom controls with percentage indicator
 9. Implemented collapsible sections in panels to improve organization and reduce scrolling
-7. Fixed node sizing issues to prevent nodes from expanding to fill the viewing area
-8. Implemented support for dangling edges with placeholder node visualization
-9. Enhanced node deletion to preserve connected edges as dangling edges
-10. Added conversion of placeholder nodes to real nodes on demand
-11. Moved undo/redo buttons to the main toolbar for better visibility and access
-12. Fixed vertical scrolling in sidebar panels for better content accessibility
-13. Added timestamps to filenames when saving networks for better version tracking
-14. Enhanced undo/redo functionality for complex operations
-15. Improved group operations to ensure consistent history tracking
+10. Fixed node sizing issues to prevent nodes from expanding to fill the viewing area
+11. Implemented support for dangling edges with placeholder node visualization
+12. Enhanced node deletion to preserve connected edges as dangling edges
+13. Added conversion of placeholder nodes to real nodes on demand
+14. Moved undo/redo buttons to the main toolbar for better visibility and access
+15. Fixed vertical scrolling in sidebar panels for better content accessibility
+16. Added timestamps to filenames when saving networks for better version tracking
+17. Enhanced undo/redo functionality for complex operations
+18. Improved group operations to ensure consistent history tracking
+19. Implemented comprehensive settings dropdown in header with view options
+20. Added theme support with light, dark, and system modes
+21. Integrated view settings with network visualization for dynamic styling
+22. Created custom hook for applying view settings to Cytoscape
 
 ### In Progress
 1. Addressing remaining edge creation issues (particularly creating edges between empty points)
