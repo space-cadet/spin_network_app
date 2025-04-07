@@ -16,7 +16,7 @@ const SidebarToggle: React.FC<SidebarToggleProps> = ({ side, isVisible, classNam
   const dispatch = useAppDispatch();
   
   const handleToggle = () => {
-    dispatch(toggleSidebar(side));
+    dispatch(toggleSidebar({ side }));
   };
   
   // Determine which icon to use based on side and visibility

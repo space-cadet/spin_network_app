@@ -120,10 +120,10 @@ const uiSlice = createSlice({
     // Set sidebar visibility
     setSidebarVisibility: (
       state, 
-      action: PayloadAction<{ sidebar: keyof UIState['sidebarVisibility']; isVisible: boolean }>
+      action: PayloadAction<{ side: keyof UIState['sidebarVisibility']; isVisible: boolean }>
     ) => {
-      const { sidebar, isVisible } = action.payload;
-      state.sidebarVisibility[sidebar] = isVisible;
+      const { side, isVisible } = action.payload;
+      state.sidebarVisibility[side] = isVisible;
     },
     
     // Set sidebar size

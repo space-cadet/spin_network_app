@@ -45,7 +45,7 @@ const PersistentResizablePanel: React.FC<PersistentResizablePanelProps> = ({
     
     // Debounce the Redux update to avoid too many state changes during resize
     const timeoutId = setTimeout(() => {
-      dispatch(setSidebarSize({ sidebar: sidebarKey, size: newSize }));
+      dispatch(setSidebarSize({ side: sidebarKey, size: newSize }));
     }, 100);
     
     return () => clearTimeout(timeoutId);

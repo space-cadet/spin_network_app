@@ -31,7 +31,7 @@ const persistConfig = {
   storage: localforage,
   migrate: migrationFunction,
   // We can blacklist any reducers we don't want to persist
-  // blacklist: []
+  blacklist: ['ui', 'recentNetworks'] // We handle these with their own persist configs
 };
 
 // Configure UI persist options (selective persistence)
