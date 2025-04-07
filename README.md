@@ -40,18 +40,21 @@ pnpm dev
 
 The application features a flexible, customizable interface:
 
-- **Left Panel**: Network creation tools, templates, and file operations
-- **Main Area**: Interactive network visualization with zoom/pan controls and mode selection
-- **Right Panel**: Properties editor and simulation controls
+- **Left Panel**: Network creation tools, templates, and file operations with collapsible sections
+- **Main Area**: Interactive network visualization with dedicated zoom controls and mode selection
+- **Right Panel**: Properties editor and simulation controls with collapsible sections
 - **Bottom Panel**: Energy plots and simulation metrics
 
 Key features:
 - All panels are resizable to accommodate different workflows and preferences
 - Panels can be hidden/shown to maximize workspace
+- Panel sizes are remembered between sessions
+- Dedicated zoom controls with percentage indicator
 - Undo/redo functionality with keyboard shortcuts (Ctrl+Z, Ctrl+Y)
 - Multiple interaction modes (select, pan, add node, add edge, delete)
 - Network saving and loading with timestamp versioning
 - Recent networks quick access menu
+- Organized panels with collapsible sections to reduce scrolling
 
 ## Development
 
@@ -121,13 +124,15 @@ The project is in active development. The current version features:
 - Comprehensive network data model with TypeScript interfaces
 - Multiple network generation options (lattice, circular, random)
 - Interactive network visualization with Cytoscape.js
+- Dedicated zoom controls with percentage indicator
 - Full undo/redo support for all network operations
 - State persistence to preserve work between sessions
 - Save/load functionality with recent networks tracking
 - Support for dangling edges with placeholder nodes
 - Hideable panels to maximize workspace
-- Customizable workspace with resizable panels
-- Property editing for network elements
+- Customizable workspace with resizable panels that remember their sizes
+- Property editing for network elements in organized collapsible sections
+- Organized UI with collapsible sections to reduce scrolling
 
 See the [CHANGELOG.md](CHANGELOG.md) for recent updates and the current development status.
 
