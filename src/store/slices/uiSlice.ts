@@ -37,6 +37,9 @@ interface UIState {
     right: number;
     bottom: number;
   };
+  collapsedSections: {
+    [sectionId: string]: boolean;
+  };
   theme: 'light' | 'dark' | 'system';
   performanceSettings: PerformanceSettings;
 }
@@ -67,6 +70,10 @@ const initialState: UIState = {
     right: 300,   // Default width for right sidebar
     bottom: 200,  // Default height for bottom sidebar
   },
+  collapsedSections: {
+    // Default expanded/collapsed state for sections
+    // true means collapsed, false means expanded
+  },
   theme: 'light',
   performanceSettings: {
     renderingQuality: 'high',
@@ -89,6 +96,19 @@ const uiSlice = createSlice({
       action: PayloadAction<{ id: string | null; type: 'node' | 'edge' | null }>
     ) => {
       state.selectedElement = action.payload;
+    },
+
+    // Toggle section collapse state
+    toggleSectionCollapsed: (
+      state,
+      action: PayloadAction<{ sectionId: string; collapsed?: boolean }>
+    ) => {
+      const { sectionId, collapsed } = action.payload;
+      if (collapsed !== undefined) {
+        state.collapsedSections[sectionId] = collapsed;
+      } else {
+        state.collapsedSections[sectionId] = !state.collapsedSections[sectionId];
+      }
     },
     
     // Change the interaction mode
@@ -159,6 +179,7 @@ const uiSlice = createSlice({
       state.viewSettings = initialState.viewSettings;
       state.sidebarVisibility = initialState.sidebarVisibility;
       state.sidebarSizes = initialState.sidebarSizes;
+      state.collapsedSections = initialState.collapsedSections;
       state.theme = initialState.theme;
       state.performanceSettings = initialState.performanceSettings;
     },
@@ -181,6 +202,7 @@ export const {
   toggleSidebar,
   setSidebarVisibility,
   setSidebarSize,
+  toggleSectionCollapsed,
   setTheme,
   setPerformanceSettings,
   resetAllSettings,

@@ -35,6 +35,11 @@ export const selectLeftSidebarSize = (state: RootState) => state.ui.sidebarSizes
 export const selectRightSidebarSize = (state: RootState) => state.ui.sidebarSizes.right;
 export const selectBottomSidebarSize = (state: RootState) => state.ui.sidebarSizes.bottom;
 
+// Section collapse state selectors
+export const selectCollapsedSections = (state: RootState) => state.ui.collapsedSections;
+export const selectSectionCollapsed = (sectionId: string) => (state: RootState) =>
+  state.ui.collapsedSections[sectionId] || false;
+
 // Settings selectors
 export const selectTheme = (state: RootState) => state.ui.theme;
 export const selectPerformanceSettings = (state: RootState) => state.ui.performanceSettings;
