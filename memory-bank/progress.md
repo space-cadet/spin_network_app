@@ -118,6 +118,7 @@
 - ⬜ Dark/light theme support
 - ⬜ Statistics and metrics calculation
 - ⬜ Export functionality for results
+- ⬜ 3D network visualization for non-planar graphs
 
 ## Current Status
 

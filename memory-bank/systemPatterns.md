@@ -240,3 +240,102 @@ This structure is optimized for visualization with Cytoscape.js and for diffusio
 4. **Synchronization**:
    - UI updates are synchronized with simulation steps
    - Visualization components respond to window/panel resize events
+
+## Proposed 3D Visualization Architecture
+
+For visualizing non-planar graphs, a 3D network viewer is being considered with the following architectural approach:
+
+```
+┌─────────────────────┐
+│                     │
+│   NetworkViewer     │
+│   (Container)       │
+│                     │
+└─────────────┬───────┘
+              │
+              ▼
+┌─────────────┴───────┐
+│                     │
+│   ViewerSelector    │
+│                     │
+└─┬───────────────────┘
+  │
+  ├─────────────┬─────────────┐
+  │             │             │
+  ▼             ▼             ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│         │ │         │ │         │
+│ 2D View │ │ 3D View │ │ 2.5D    │
+│         │ │         │ │ View    │
+│         │ │         │ │         │
+└─────────┘ └─────────┘ └─────────┘
+```
+
+### Technology Options
+
+The 3D visualization would extend the current architecture with:
+
+1. **Core Rendering Library**:
+   - Three.js for full 3D WebGL rendering capabilities
+   - react-three-fiber for React integration
+   - drei for common 3D controls and helpers
+
+2. **Data Adaptation Pattern**:
+   - Adapter between network data model and 3D visualization
+   - Consistent mapping of network properties to visual elements
+   - Synchronization between 2D and 3D representations
+
+3. **Layout Algorithms**:
+   - 3D force-directed layouts for non-planar graphs
+   - 3D hierarchical layouts for structured networks
+   - Spherical layouts for certain network types
+
+4. **User Interaction Model**:
+   - Orbit controls for network rotation and exploration
+   - 3D selection and manipulation capabilities
+   - Consistent operation between 2D and 3D modes
+
+### State Management Extension
+
+The Redux state would be extended with:
+
+```typescript
+interface ViewState {
+  viewMode: '2d' | '3d' | '2.5d';
+  camera3D: {
+    position: { x: number, y: number, z: number };
+    target: { x: number, y: number, z: number };
+    zoom: number;
+  };
+  layout3D: {
+    algorithm: '3d-force' | '3d-hierarchical' | 'spherical';
+    settings: Record<string, any>;
+  };
+}
+```
+
+### Visualization Component Structure
+
+The 3D visualization would follow this component structure:
+
+```
+┌─────────────────────────┐
+│ ThreeNetworkViewer      │
+├─────────────────────────┤
+│ ┌─────────────────────┐ │
+│ │ Scene               │ │
+│ │ ┌─────────────────┐ │ │
+│ │ │ Camera Controls │ │ │
+│ │ └─────────────────┘ │ │
+│ │ ┌─────────────────┐ │ │
+│ │ │ Nodes           │ │ │
+│ │ └─────────────────┘ │ │
+│ │ ┌─────────────────┐ │ │
+│ │ │ Edges           │ │ │
+│ │ └─────────────────┘ │ │
+│ │ ┌─────────────────┐ │ │
+│ │ │ Visual Helpers  │ │ │
+│ │ └─────────────────┘ │ │
+│ └─────────────────────┘ │
+└─────────────────────────┘
+```

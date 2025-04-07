@@ -170,6 +170,12 @@ We addressed several technical challenges:
    - Node/edge grouping functionality
    - Advanced layout algorithms
 
+3. **3D Network Visualization** (Proposed):
+   - Implement 3D network viewer for non-planar graphs
+   - Add 3D navigation controls (rotate, zoom, pan in 3D space)
+   - Create 3D force-directed layouts for better visualization of complex networks
+   - Support seamless switching between 2D and 3D views
+
 ### Known Challenges
 1. Implementing accurate diffusion algorithms for different equation types
 2. Balancing computational performance with visualization responsiveness
