@@ -68,6 +68,8 @@ We've made several key improvements to the UI and workflow:
    - Moved undo/redo buttons from left sidebar to main toolbar for better visibility and accessibility
    - Standardized button placement for more intuitive navigation
    - Improved workflow efficiency by grouping related actions together
+   - Added dedicated zoom controls with percentage indicator
+   - Implemented collapsible sections to reduce scrolling in panels
 
 2. **File Management Enhancements**:
    - Added timestamps to filenames when saving networks (format: `network-name-YYYY-MM-DDTHH-MM-SS.json`)

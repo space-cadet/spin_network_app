@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaPlay, FaPause, FaStepForward, FaStop, FaCog } from 'react-icons/fa';
+import CollapsibleSection from '../common/CollapsibleSection';
 
 interface SimulationControlsProps {
   onStartSimulation: (params: any) => void;
@@ -47,99 +48,102 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({ onStartSimulati
       <h2 className="text-lg font-medium text-gray-900 mb-4">Simulation Controls</h2>
       
       <div className="space-y-4">
-        {/* Simulation Type */}
-        <div className="form-group">
-          <label className="form-label">Diffusion Type</label>
-          <select 
-            className="form-input"
-            value={simType}
-            onChange={(e) => setSimType(e.target.value as any)}
-          >
-            <option value="ordinary">Ordinary Diffusion</option>
-            <option value="finite-velocity">Finite Velocity Diffusion</option>
-          </select>
-        </div>
-        
-        {/* Damping Coefficients */}
-        <div className="grid grid-cols-2 gap-4">
+        <CollapsibleSection title="Diffusion Type" defaultExpanded={true}>
           <div className="form-group">
-            <label className="form-label">Alpha</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="range"
-                min="0"
-                max="2"
-                step="0.1"
-                value={alpha}
-                onChange={(e) => setAlpha(parseFloat(e.target.value))}
-                className="flex-1"
-              />
-              <span className="w-12 text-center">{alpha.toFixed(1)}</span>
+            <select 
+              className="form-input"
+              value={simType}
+              onChange={(e) => setSimType(e.target.value as any)}
+            >
+              <option value="ordinary">Ordinary Diffusion</option>
+              <option value="finite-velocity">Finite Velocity Diffusion</option>
+            </select>
+          </div>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title="Diffusion Parameters" defaultExpanded={true}>
+          {/* Damping Coefficients */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">Alpha</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="0.1"
+                  value={alpha}
+                  onChange={(e) => setAlpha(parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="w-12 text-center">{alpha.toFixed(1)}</span>
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Beta</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="0.1"
+                  value={beta}
+                  onChange={(e) => setBeta(parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="w-12 text-center">{beta.toFixed(1)}</span>
+              </div>
             </div>
           </div>
           
-          <div className="form-group">
-            <label className="form-label">Beta</label>
+          {/* Wave Speed */}
+          <div className="form-group mt-3">
+            <label className="form-label">Wave Speed (c)</label>
             <div className="flex items-center space-x-2">
               <input
                 type="range"
-                min="0"
-                max="2"
+                min="0.1"
+                max="5"
                 step="0.1"
-                value={beta}
-                onChange={(e) => setBeta(parseFloat(e.target.value))}
+                value={c}
+                onChange={(e) => setC(parseFloat(e.target.value))}
                 className="flex-1"
               />
-              <span className="w-12 text-center">{beta.toFixed(1)}</span>
+              <span className="w-12 text-center">{c.toFixed(1)}</span>
             </div>
           </div>
-        </div>
+        </CollapsibleSection>
         
-        {/* Wave Speed */}
-        <div className="form-group">
-          <label className="form-label">Wave Speed (c)</label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="range"
-              min="0.1"
-              max="5"
-              step="0.1"
-              value={c}
-              onChange={(e) => setC(parseFloat(e.target.value))}
-              className="flex-1"
-            />
-            <span className="w-12 text-center">{c.toFixed(1)}</span>
+        <CollapsibleSection title="Time Configuration" defaultExpanded={false}>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">Time Step</label>
+              <input
+                type="number"
+                min="0.001"
+                max="0.1"
+                step="0.001"
+                value={timeStep}
+                onChange={(e) => setTimeStep(parseFloat(e.target.value))}
+                className="form-input"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Total Time</label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                step="1"
+                value={totalTime}
+                onChange={(e) => setTotalTime(parseFloat(e.target.value))}
+                className="form-input"
+              />
+            </div>
           </div>
-        </div>
-        
-        {/* Time Parameters */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
-            <label className="form-label">Time Step</label>
-            <input
-              type="number"
-              min="0.001"
-              max="0.1"
-              step="0.001"
-              value={timeStep}
-              onChange={(e) => setTimeStep(parseFloat(e.target.value))}
-              className="form-input"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Total Time</label>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              step="1"
-              value={totalTime}
-              onChange={(e) => setTotalTime(parseFloat(e.target.value))}
-              className="form-input"
-            />
-          </div>
-        </div>
+        </CollapsibleSection>
         
         {/* Advanced Settings Button */}
         <button className="btn btn-outline w-full flex items-center justify-center space-x-2">

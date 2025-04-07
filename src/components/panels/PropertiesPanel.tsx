@@ -10,6 +10,7 @@ import {
   updateNetworkEdge 
 } from '../../store/slices/networkSlice';
 import { NetworkNode, NetworkEdge } from '../../models/types';
+import CollapsibleSection from '../common/CollapsibleSection';
 
 const PropertiesPanel: React.FC = () => {
   const selectedElement = useAppSelector(selectSelectedElement);
@@ -103,28 +104,30 @@ const PropertiesPanel: React.FC = () => {
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="form-group">
-          <label className="form-label">ID</label>
-          <input
-            type="text"
-            value={element.id}
-            readOnly
-            className="form-input bg-gray-50"
-          />
-        </div>
+        <CollapsibleSection title="Basic Information" defaultExpanded={true}>
+          <div className="form-group">
+            <label className="form-label">ID</label>
+            <input
+              type="text"
+              value={element.id}
+              readOnly
+              className="form-input bg-gray-50"
+            />
+          </div>
+          
+          <div className="form-group mt-3">
+            <label className="form-label">Label</label>
+            <input
+              type="text"
+              value={formValues.label || ''}
+              onChange={(e) => handleInputChange('label', e.target.value)}
+              className="form-input"
+            />
+          </div>
+        </CollapsibleSection>
         
         {selectedElement.type === 'node' && (
-          <>
-            <div className="form-group">
-              <label className="form-label">Label</label>
-              <input
-                type="text"
-                value={formValues.label || ''}
-                onChange={(e) => handleInputChange('label', e.target.value)}
-                className="form-input"
-              />
-            </div>
-            
+          <CollapsibleSection title="Node Properties" defaultExpanded={true}>
             <div className="form-group">
               <label className="form-label">Intertwiner Value</label>
               <input
@@ -136,7 +139,7 @@ const PropertiesPanel: React.FC = () => {
               />
             </div>
             
-            <div className="form-group">
+            <div className="form-group mt-3">
               <label className="form-label">Position</label>
               <div className="grid grid-cols-2 gap-2">
                 <input
@@ -161,65 +164,59 @@ const PropertiesPanel: React.FC = () => {
                 />
               </div>
             </div>
-          </>
+          </CollapsibleSection>
         )}
         
         {selectedElement.type === 'edge' && (
           <>
-            <div className="form-group">
-              <label className="form-label">Label</label>
-              <input
-                type="text"
-                value={formValues.label || ''}
-                onChange={(e) => handleInputChange('label', e.target.value)}
-                className="form-input"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Spin Value</label>
-              <input
-                type="number"
-                step="0.5"
-                value={formValues.spin || 0}
-                onChange={(e) => handleInputChange('spin', e.target.value)}
-                className="form-input"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Source</label>
-              <div className="flex">
+            <CollapsibleSection title="Edge Properties" defaultExpanded={true}>
+              <div className="form-group">
+                <label className="form-label">Spin Value</label>
                 <input
-                  type="text"
-                  value={formValues.source || ''}
-                  readOnly
-                  className="form-input bg-gray-50 flex-1"
+                  type="number"
+                  step="0.5"
+                  value={formValues.spin || 0}
+                  onChange={(e) => handleInputChange('spin', e.target.value)}
+                  className="form-input"
                 />
-                {edgeDetails?.sourceNode && (
-                  <span className="ml-2 p-2 bg-gray-100 rounded text-sm">
-                    {edgeDetails.sourceNode.label || `Node ${edgeDetails.sourceNode.id}`}
-                  </span>
-                )}
               </div>
-            </div>
+            </CollapsibleSection>
             
-            <div className="form-group">
-              <label className="form-label">Target</label>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={formValues.target || ''}
-                  readOnly
-                  className="form-input bg-gray-50 flex-1"
-                />
-                {edgeDetails?.targetNode && (
-                  <span className="ml-2 p-2 bg-gray-100 rounded text-sm">
-                    {edgeDetails.targetNode.label || `Node ${edgeDetails.targetNode.id}`}
-                  </span>
-                )}
+            <CollapsibleSection title="Connections" defaultExpanded={true}>
+              <div className="form-group">
+                <label className="form-label">Source</label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={formValues.source || ''}
+                    readOnly
+                    className="form-input bg-gray-50 flex-1"
+                  />
+                  {edgeDetails?.sourceNode && (
+                    <span className="ml-2 p-2 bg-gray-100 rounded text-sm">
+                      {edgeDetails.sourceNode.label || `Node ${edgeDetails.sourceNode.id}`}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+              
+              <div className="form-group mt-3">
+                <label className="form-label">Target</label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={formValues.target || ''}
+                    readOnly
+                    className="form-input bg-gray-50 flex-1"
+                  />
+                  {edgeDetails?.targetNode && (
+                    <span className="ml-2 p-2 bg-gray-100 rounded text-sm">
+                      {edgeDetails.targetNode.label || `Node ${edgeDetails.targetNode.id}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </CollapsibleSection>
           </>
         )}
         
