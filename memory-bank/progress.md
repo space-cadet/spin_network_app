@@ -149,6 +149,7 @@ We've implemented state persistence so the network and UI state are preserved be
 7. Added persistence for sidebar sizes/widths between sessions
 8. Added dedicated zoom controls with percentage indicator
 9. Implemented collapsible sections in panels to improve organization and reduce scrolling
+10. Added persistence for collapsible section states between sessions
 10. Fixed node sizing issues to prevent nodes from expanding to fill the viewing area
 11. Implemented support for dangling edges with placeholder node visualization
 12. Enhanced node deletion to preserve connected edges as dangling edges
@@ -177,7 +178,7 @@ We've implemented state persistence so the network and UI state are preserved be
 3. **Resize Handle Positioning**: Resize handles can be difficult to target precisely
 4. **Panel Size Coordination**: When resizing multiple panels, maintaining proportions can be challenging
 5. **Recent Networks History**: Network history state is not consistently restored when loading from recent list
-6. **Panel Scrolling**: Long panels with collapsible sections may need improved scroll behavior
+6. ~~**Panel Scrolling**: Long panels with collapsible sections may need improved scroll behavior~~ ✓ FIXED
 
 ### Technical Issues
 1. **Placeholder Node Behavior**: Some edge cases with placeholder node event handling

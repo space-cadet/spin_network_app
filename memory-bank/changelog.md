@@ -12,6 +12,15 @@ This document tracks key decisions, major milestones, and pivots in the project'
 - Documented in a dedicated file: `3d-viewer-development-plan.md`
 - Updated relevant memory bank files to reference the proposed feature
 
+## [2025-04-07] Enhanced UI Persistence with Collapsible Section State
+
+- Implemented persistence for collapsible section states in sidebars
+- Extended Redux state to track collapsed/expanded state of all panel sections
+- Refactored CollapsibleSection component to use Redux instead of local state
+- Added automatic section ID generation based on titles for consistent tracking
+- Enhanced the UI persistence configuration to include section states
+- Fixed issue where sidebar panel collapse states were lost between sessions
+
 ## [Previous Development]
 
 - Implemented comprehensive undo/redo functionality with history tracking
