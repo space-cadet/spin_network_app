@@ -57,6 +57,7 @@ const initialState: UIState = {
     nodeSize: 'medium',
     edgeThickness: 'medium'
   },
+=======
   sidebarVisibility: {
     left: true,
     right: true,

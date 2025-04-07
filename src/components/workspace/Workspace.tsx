@@ -7,8 +7,10 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setSelectedElement, setInteractionMode, clearSelection } from '../../store/slices/uiSlice';
 import { 
   selectNetwork, 
-  selectInteractionMode
+  selectInteractionMode,
+  selectViewSettings
 } from '../../store/selectors';
+import { useNetworkStyles } from '../../hooks/useNetworkStyles';
 import { 
   networkToCytoscape
 } from '../../models/networkModel';
@@ -26,6 +28,7 @@ const Workspace: React.FC = () => {
   const [cy, setCy] = useState<cytoscape.Core | null>(null);
   const network = useAppSelector(selectNetwork);
   const mode = useAppSelector(selectInteractionMode);
+  const viewSettings = useAppSelector(selectViewSettings);
   const dispatch = useAppDispatch();
   
   // State for edge creation - just store the source node ID
@@ -33,6 +36,9 @@ const Workspace: React.FC = () => {
   
   // State for zoom level
   const [zoomLevel, setZoomLevel] = useState<number>(1.0);
+  
+  // Get network styles based on view settings
+  const networkStyles = useNetworkStyles();
   
   // Default values for new elements
   const defaultNodeIntertwiner = 1;
@@ -44,76 +50,8 @@ const Workspace: React.FC = () => {
 
     const cyInstance = cytoscape({
       container: cyContainerRef.current,
-      style: [
-        {
-          selector: 'node[type="regular"]',
-          style: {
-            'background-color': '#4f46e5',
-            'label': 'data(label)',
-            'color': '#fff',
-            'text-outline-color': '#4f46e5',
-            'text-outline-width': 2,
-            'text-valign': 'center',
-            'width': 80,
-            'height': 80,
-            'font-size': '14px'
-          }
-        },
-        {
-          selector: 'node[type="placeholder"]',
-          style: {
-            'background-color': '#f97316',
-            'border-width': 2,
-            'border-color': '#fb923c',
-            'border-style': 'dashed',
-            'width': 30,
-            'height': 30,
-            'shape': 'diamond',
-            'opacity': 0.7,
-            'label': ''
-          }
-        },
-        {
-          selector: 'edge',
-          style: {
-            'width': 3,
-            'line-color': '#3b82f6',
-            'curve-style': 'bezier',
-            'label': 'data(label)',
-            'color': '#334155',
-            'text-background-color': '#fff',
-            'text-background-opacity': 1,
-            'text-background-padding': '2px'
-          }
-        },
-        {
-          selector: 'edge[hasDangling]',
-          style: {
-            'line-style': 'dashed',
-            'line-color': '#f97316', // Match placeholder color
-            'width': 2,
-            'target-arrow-shape': 'none',
-            'source-arrow-shape': 'none'
-          }
-        },
-        {
-          selector: ':selected',
-          style: {
-            'background-color': '#ef4444',
-            'line-color': '#ef4444',
-            'border-width': 2,
-            'border-color': '#fef2f2'
-          }
-        },
-        {
-          selector: '.source-node',
-          style: {
-            'border-width': 3,
-            'border-color': '#10b981',
-            'border-style': 'solid'
-          }
-        }
-      ],
+      style: networkStyles,
+=======
       // Basic interactions
       userZoomingEnabled: true,
       userPanningEnabled: true,
@@ -204,6 +142,14 @@ const Workspace: React.FC = () => {
       cyContainerRef.current.style.cursor = 'not-allowed';
     }
   }, [mode]);
+
+  // Update Cytoscape styles when view settings change
+  useEffect(() => {
+    if (!cy) return;
+    
+    // Apply the new styles
+    cy.style(networkStyles);
+  }, [cy, viewSettings, networkStyles]);
 
   // Update cytoscape when network changes
   useEffect(() => {

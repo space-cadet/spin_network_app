@@ -224,9 +224,9 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
             <h3 className="title">View Settings</h3>
           </div>
           <ul className="submenu-content">
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Show Node Labels</span>
+            <li>
+              <div className="menu-item">
+                <span className="menu-label">Show Node Labels</span>
                 <input
                   type="checkbox"
                   checked={viewSettings?.showNodeLabels ?? true}
@@ -235,9 +235,9 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
                 />
               </div>
             </li>
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Show Edge Labels</span>
+            <li>
+              <div className="menu-item">
+                <span className="menu-label">Show Edge Labels</span>
                 <input
                   type="checkbox"
                   checked={viewSettings?.showEdgeLabels ?? false}
@@ -246,9 +246,9 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
                 />
               </div>
             </li>
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Show Grid</span>
+            <li>
+              <div className="menu-item">
+                <span className="menu-label">Show Grid</span>
                 <input
                   type="checkbox"
                   checked={viewSettings?.showGrid ?? false}
@@ -257,33 +257,33 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
                 />
               </div>
             </li>
-            <li className="px-4 py-2">
-              <label className="block">
-                <span className="text-gray-700">Node Size</span>
+            <li>
+              <div className="menu-item flex-col items-start">
+                <span className="menu-label mb-1">Node Size</span>
                 <select
                   value={viewSettings?.nodeSize ?? 'medium'}
                   onChange={(e) => handleViewSettingChange('nodeSize', e.target.value)}
-                  className="form-select block w-full mt-1 text-sm"
+                  className="form-select block w-full text-sm"
                 >
                   <option value="small">Small</option>
                   <option value="medium">Medium</option>
                   <option value="large">Large</option>
                 </select>
-              </label>
+              </div>
             </li>
-            <li className="px-4 py-2">
-              <label className="block">
-                <span className="text-gray-700">Edge Thickness</span>
+            <li>
+              <div className="menu-item flex-col items-start">
+                <span className="menu-label mb-1">Edge Thickness</span>
                 <select
                   value={viewSettings?.edgeThickness ?? 'medium'}
                   onChange={(e) => handleViewSettingChange('edgeThickness', e.target.value)}
-                  className="form-select block w-full mt-1 text-sm"
+                  className="form-select block w-full text-sm"
                 >
                   <option value="thin">Thin</option>
                   <option value="medium">Medium</option>
                   <option value="thick">Thick</option>
                 </select>
-              </label>
+              </div>
             </li>
           </ul>
         </div>
@@ -304,10 +304,10 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
           <ul className="submenu-content">
             <li>
               <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
+                className="menu-item justify-between"
                 onClick={() => handlePanelLayoutChange('default')}
               >
-                <span>Default Layout</span>
+                <span className="menu-label">Default Layout</span>
                 {leftSidebarVisible && rightSidebarVisible && bottomSidebarVisible && (
                   <FaCheck className="text-green-500" />
                 )}
@@ -315,10 +315,10 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
             </li>
             <li>
               <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
+                className="menu-item justify-between"
                 onClick={() => handlePanelLayoutChange('maximized')}
               >
-                <span>Maximized Visualization</span>
+                <span className="menu-label">Maximized Visualization</span>
                 {!leftSidebarVisible && !rightSidebarVisible && !bottomSidebarVisible && (
                   <FaCheck className="text-green-500" />
                 )}
@@ -326,49 +326,52 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
             </li>
             <li>
               <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                className="menu-item"
                 onClick={() => handlePanelLayoutChange('analysis')}
               >
-                <span>Analysis Focus</span>
+                <span className="menu-label">Analysis Focus</span>
               </button>
             </li>
             <li>
               <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                className="menu-item"
                 onClick={() => handlePanelLayoutChange('compact')}
               >
-                <span>Compact Tools</span>
+                <span className="menu-label">Compact Tools</span>
               </button>
             </li>
-            <li className="px-4 py-2 border-t border-gray-200 mt-1">
-              <h4 className="font-medium text-sm text-gray-700 mb-2">Individual Panels</h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span>Left Panel</span>
-                  <input
-                    type="checkbox"
-                    checked={leftSidebarVisible}
-                    onChange={() => dispatch(toggleSidebar({ side: 'left', visible: !leftSidebarVisible }))}
-                    className="form-checkbox h-4 w-4 text-primary"
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Right Panel</span>
-                  <input
-                    type="checkbox"
-                    checked={rightSidebarVisible}
-                    onChange={() => dispatch(toggleSidebar({ side: 'right', visible: !rightSidebarVisible }))}
-                    className="form-checkbox h-4 w-4 text-primary"
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Bottom Panel</span>
-                  <input
-                    type="checkbox"
-                    checked={bottomSidebarVisible}
-                    onChange={() => dispatch(toggleSidebar({ side: 'bottom', visible: !bottomSidebarVisible }))}
-                    className="form-checkbox h-4 w-4 text-primary"
-                  />
+            <div className="menu-divider"></div>
+            <li>
+              <div className="menu-item flex-col items-start">
+                <h4 className="font-medium text-sm mb-2 text-gray-900 w-full">Individual Panels</h4>
+                <div className="space-y-2 w-full">
+                  <div className="flex items-center justify-between w-full">
+                    <span>Left Panel</span>
+                    <input
+                      type="checkbox"
+                      checked={leftSidebarVisible}
+                      onChange={() => dispatch(toggleSidebar({ side: 'left', visible: !leftSidebarVisible }))}
+                      className="form-checkbox h-4 w-4 text-primary"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full">
+                    <span>Right Panel</span>
+                    <input
+                      type="checkbox"
+                      checked={rightSidebarVisible}
+                      onChange={() => dispatch(toggleSidebar({ side: 'right', visible: !rightSidebarVisible }))}
+                      className="form-checkbox h-4 w-4 text-primary"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full">
+                    <span>Bottom Panel</span>
+                    <input
+                      type="checkbox"
+                      checked={bottomSidebarVisible}
+                      onChange={() => dispatch(toggleSidebar({ side: 'bottom', visible: !bottomSidebarVisible }))}
+                      className="form-checkbox h-4 w-4 text-primary"
+                    />
+                  </div>
                 </div>
               </div>
             </li>
@@ -391,28 +394,28 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
           <ul className="submenu-content">
             <li>
               <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
+                className="menu-item justify-between"
                 onClick={() => handleThemeChange('light')}
               >
-                <span>Light Mode</span>
+                <span className="menu-label">Light Mode</span>
                 {theme === 'light' && <FaCheck className="text-green-500" />}
               </button>
             </li>
             <li>
               <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
+                className="menu-item justify-between"
                 onClick={() => handleThemeChange('dark')}
               >
-                <span>Dark Mode</span>
+                <span className="menu-label">Dark Mode</span>
                 {theme === 'dark' && <FaCheck className="text-green-500" />}
               </button>
             </li>
             <li>
               <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
+                className="menu-item justify-between"
                 onClick={() => handleThemeChange('system')}
               >
-                <span>System Default</span>
+                <span className="menu-label">System Default</span>
                 {theme === 'system' && <FaCheck className="text-green-500" />}
               </button>
             </li>
@@ -433,37 +436,37 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
             <h3 className="title">Performance</h3>
           </div>
           <ul className="submenu-content">
-            <li className="px-4 py-2">
-              <label className="block">
-                <span className="text-gray-700">Rendering Quality</span>
+            <li>
+              <div className="menu-item flex-col items-start">
+                <span className="menu-label mb-1">Rendering Quality</span>
                 <select
                   value={performanceSettings?.renderingQuality ?? 'high'}
                   onChange={(e) => handlePerformanceSettingChange('renderingQuality', e.target.value)}
-                  className="form-select block w-full mt-1 text-sm"
+                  className="form-select block w-full text-sm"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
-              </label>
+              </div>
             </li>
-            <li className="px-4 py-2">
-              <label className="block">
-                <span className="text-gray-700">Animation Smoothness</span>
+            <li>
+              <div className="menu-item flex-col items-start">
+                <span className="menu-label mb-1">Animation Smoothness</span>
                 <select
                   value={performanceSettings?.animationSmoothness ?? 'medium'}
                   onChange={(e) => handlePerformanceSettingChange('animationSmoothness', e.target.value)}
-                  className="form-select block w-full mt-1 text-sm"
+                  className="form-select block w-full text-sm"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
-              </label>
+              </div>
             </li>
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Auto-Simplify Large Networks</span>
+            <li>
+              <div className="menu-item justify-between">
+                <span className="menu-label">Auto-Simplify Large Networks</span>
                 <input
                   type="checkbox"
                   checked={performanceSettings?.autoSimplify ?? true}
@@ -472,9 +475,9 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
                 />
               </div>
             </li>
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Hardware Acceleration</span>
+            <li>
+              <div className="menu-item justify-between">
+                <span className="menu-label">Hardware Acceleration</span>
                 <input
                   type="checkbox"
                   checked={performanceSettings?.hardwareAcceleration ?? true}
@@ -569,22 +572,22 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
             <h3 className="title">Export Preferences</h3>
           </div>
           <ul className="submenu-content">
-            <li className="px-4 py-2">
-              <label className="block">
-                <span className="text-gray-700">Default File Format</span>
+            <li>
+              <div className="menu-item flex-col items-start">
+                <span className="menu-label mb-1">Default File Format</span>
                 <select
-                  className="form-select block w-full mt-1 text-sm"
+                  className="form-select block w-full text-sm"
                 >
                   <option value="json">JSON</option>
                   <option value="png">PNG Image</option>
                   <option value="svg">SVG Image</option>
                   <option value="csv">CSV Data</option>
                 </select>
-              </label>
+              </div>
             </li>
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Include Metadata</span>
+            <li>
+              <div className="menu-item justify-between">
+                <span className="menu-label">Include Metadata</span>
                 <input
                   type="checkbox"
                   defaultChecked
@@ -592,9 +595,9 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
                 />
               </div>
             </li>
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Include History State</span>
+            <li>
+              <div className="menu-item justify-between">
+                <span className="menu-label">Include History State</span>
                 <input
                   type="checkbox"
                   defaultChecked
@@ -602,9 +605,9 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
                 />
               </div>
             </li>
-            <li className="px-4 py-2">
-              <div className="flex items-center justify-between">
-                <span>Pretty Print JSON</span>
+            <li>
+              <div className="menu-item justify-between">
+                <span className="menu-label">Pretty Print JSON</span>
                 <input
                   type="checkbox"
                   defaultChecked
