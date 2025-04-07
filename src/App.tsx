@@ -8,6 +8,7 @@ import EnergyPlot from './components/visualization/EnergyPlot'
 import PersistentResizablePanel from './components/common/PersistentResizablePanel'
 import PersistenceStatus from './components/common/PersistenceStatus'
 import SidebarToggle from './components/common/SidebarToggle'
+import ThemeProvider from './components/settings/ThemeProvider'
 import { 
   selectLeftSidebarVisible, 
   selectRightSidebarVisible, 
@@ -26,8 +27,9 @@ function App() {
   const bottomSidebarVisible = useSelector(selectBottomSidebarVisible);
   
   return (
-    <MainLayout>
-      <div className="flex h-full">
+    <ThemeProvider>
+      <MainLayout>
+        <div className="flex h-full">
         <PersistenceStatus />
           {/* Left Sidebar Toggle (Outside) */}
           {!leftSidebarVisible && (
@@ -117,6 +119,7 @@ function App() {
           )}
         </div>
       </MainLayout>
+    </ThemeProvider>
   )
 }
 

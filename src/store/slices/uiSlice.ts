@@ -1,5 +1,24 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+// View settings interface
+interface ViewSettings {
+  showLabels: boolean;
+  showProperties: boolean;
+  showNodeLabels: boolean;
+  showEdgeLabels: boolean;
+  showGrid: boolean;
+  nodeSize: 'small' | 'medium' | 'large';
+  edgeThickness: 'thin' | 'medium' | 'thick';
+}
+
+// Performance settings interface
+interface PerformanceSettings {
+  renderingQuality: 'low' | 'medium' | 'high';
+  animationSmoothness: 'low' | 'medium' | 'high';
+  autoSimplify: boolean;
+  hardwareAcceleration: boolean;
+}
+
 // Define the state structure for UI elements
 interface UIState {
   selectedElement: {
@@ -7,10 +26,7 @@ interface UIState {
     type: 'node' | 'edge' | null;
   };
   interactionMode: 'select' | 'pan' | 'addNode' | 'addEdge' | 'delete';
-  viewSettings: {
-    showLabels: boolean;
-    showProperties: boolean;
-  };
+  viewSettings: ViewSettings;
   sidebarVisibility: {
     left: boolean;
     right: boolean;
@@ -21,6 +37,8 @@ interface UIState {
     right: number;
     bottom: number;
   };
+  theme: 'light' | 'dark' | 'system';
+  performanceSettings: PerformanceSettings;
 }
 
 // Initial state
@@ -33,6 +51,11 @@ const initialState: UIState = {
   viewSettings: {
     showLabels: true,
     showProperties: true,
+    showNodeLabels: true,
+    showEdgeLabels: false,
+    showGrid: false,
+    nodeSize: 'medium',
+    edgeThickness: 'medium'
   },
   sidebarVisibility: {
     left: true,
@@ -44,6 +67,13 @@ const initialState: UIState = {
     right: 300,   // Default width for right sidebar
     bottom: 200,  // Default height for bottom sidebar
   },
+  theme: 'light',
+  performanceSettings: {
+    renderingQuality: 'high',
+    animationSmoothness: 'medium',
+    autoSimplify: true,
+    hardwareAcceleration: true
+  }
 };
 
 /**
@@ -75,9 +105,16 @@ const uiSlice = createSlice({
     },
     
     // Toggle sidebar visibility
-    toggleSidebar: (state, action: PayloadAction<keyof UIState['sidebarVisibility']>) => {
-      const sidebar = action.payload;
-      state.sidebarVisibility[sidebar] = !state.sidebarVisibility[sidebar];
+    toggleSidebar: (
+      state, 
+      action: PayloadAction<{ side: keyof UIState['sidebarVisibility'], visible?: boolean }>
+    ) => {
+      const { side, visible } = action.payload;
+      if (visible !== undefined) {
+        state.sidebarVisibility[side] = visible;
+      } else {
+        state.sidebarVisibility[side] = !state.sidebarVisibility[side];
+      }
     },
     
     // Set sidebar visibility
@@ -92,10 +129,38 @@ const uiSlice = createSlice({
     // Set sidebar size
     setSidebarSize: (
       state,
-      action: PayloadAction<{ sidebar: keyof UIState['sidebarSizes']; size: number }>
+      action: PayloadAction<{ side: keyof UIState['sidebarSizes']; size: number }>
     ) => {
-      const { sidebar, size } = action.payload;
-      state.sidebarSizes[sidebar] = size;
+      const { side, size } = action.payload;
+      state.sidebarSizes[side] = size;
+    },
+    
+    // Set theme
+    setTheme: (
+      state,
+      action: PayloadAction<UIState['theme']>
+    ) => {
+      state.theme = action.payload;
+    },
+    
+    // Set performance settings
+    setPerformanceSettings: (
+      state,
+      action: PayloadAction<Partial<UIState['performanceSettings']>>
+    ) => {
+      state.performanceSettings = {
+        ...state.performanceSettings,
+        ...action.payload
+      };
+    },
+    
+    // Reset all settings to defaults
+    resetAllSettings: (state) => {
+      state.viewSettings = initialState.viewSettings;
+      state.sidebarVisibility = initialState.sidebarVisibility;
+      state.sidebarSizes = initialState.sidebarSizes;
+      state.theme = initialState.theme;
+      state.performanceSettings = initialState.performanceSettings;
     },
     
     // Clear selection
@@ -116,6 +181,9 @@ export const {
   toggleSidebar,
   setSidebarVisibility,
   setSidebarSize,
+  setTheme,
+  setPerformanceSettings,
+  resetAllSettings,
   clearSelection
 } = uiSlice.actions;
 

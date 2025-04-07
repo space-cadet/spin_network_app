@@ -35,6 +35,10 @@ export const selectLeftSidebarSize = (state: RootState) => state.ui.sidebarSizes
 export const selectRightSidebarSize = (state: RootState) => state.ui.sidebarSizes.right;
 export const selectBottomSidebarSize = (state: RootState) => state.ui.sidebarSizes.bottom;
 
+// Settings selectors
+export const selectTheme = (state: RootState) => state.ui.theme;
+export const selectPerformanceSettings = (state: RootState) => state.ui.performanceSettings;
+
 // Selected element details
 export const selectSelectedNode = (state: RootState) => {
   const { id, type } = state.ui.selectedElement;

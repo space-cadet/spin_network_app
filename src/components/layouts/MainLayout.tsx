@@ -1,6 +1,8 @@
 import React from 'react';
 import { FaNetworkWired, FaChartLine, FaCog } from 'react-icons/fa';
 import ResizablePanel from '../common/ResizablePanel';
+import HeaderDropdown from '../settings/HeaderDropdown';
+import SettingsDropdown from '../settings/SettingsDropdown';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -20,23 +22,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <nav>
             <ul className="flex space-x-6">
               <li className="flex items-center">
-                <a href="#" className="flex items-center space-x-1 hover:text-primary-100">
-                  <FaNetworkWired />
-                  <span>Network</span>
+                <a href="#" className="flex items-center hover:text-primary-100">
+                  <FaNetworkWired className="text-white" />
+                  <span className="text-white ml-1">Network</span>
                 </a>
               </li>
               <li className="flex items-center">
-                <a href="#" className="flex items-center space-x-1 hover:text-primary-100">
-                  <FaChartLine />
-                  <span>Simulation</span>
+                <a href="#" className="flex items-center hover:text-primary-100">
+                  <FaChartLine className="text-white" />
+                  <span className="text-white ml-1">Simulation</span>
                 </a>
               </li>
-              <li className="flex items-center">
-                <a href="#" className="flex items-center space-x-1 hover:text-primary-100">
-                  <FaCog />
-                  <span>Settings</span>
-                </a>
-              </li>
+              <HeaderDropdown
+                label="Settings"
+                icon={<FaCog className="text-white" />}
+              >
+                {(isOpen, onClose) => (
+                  <SettingsDropdown isOpen={isOpen} onClose={onClose} />
+                )}
+              </HeaderDropdown>
             </ul>
           </nav>
         </div>

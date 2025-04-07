@@ -10,6 +10,76 @@
   --border: #e2e8f0;
 }
 
+/* Dark mode variables */
+.dark-mode {
+  --primary: #60a5fa;
+  --secondary: #818cf8;
+  --background: #1e293b;
+  --text: #f8fafc;
+  --border: #334155;
+}
+
+/* Dark mode styles */
+.dark-mode body {
+  @apply bg-slate-900 text-gray-100;
+}
+
+.dark-mode .card,
+.dark-mode .cy-container,
+.dark-mode .form-input,
+.dark-mode .btn-outline {
+  @apply bg-slate-800 border-slate-700 text-gray-100;
+}
+
+.dark-mode .btn-outline {
+  @apply hover:bg-slate-700;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+  @apply bg-slate-800;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  @apply bg-slate-600;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500;
+}
+
+.dark-mode .form-label,
+.dark-mode .text-gray-700 {
+  @apply text-gray-300;
+}
+
+.dark-mode .bg-white {
+  @apply bg-slate-800;
+}
+
+.dark-mode .text-gray-500 {
+  @apply text-gray-400;
+}
+
+.dark-mode .text-gray-900 {
+  @apply text-gray-100;
+}
+
+.dark-mode .border-gray-200 {
+  @apply border-slate-700;
+}
+
+.dark-mode .hover\:bg-gray-100:hover {
+  @apply hover:bg-slate-700;
+}
+
+.dark-mode .bg-gray-100 {
+  @apply bg-slate-700;
+}
+
+.dark-mode .bg-gray-50 {
+  @apply bg-slate-800;
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 min-h-screen;
