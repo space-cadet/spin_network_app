@@ -51,7 +51,6 @@ const Workspace: React.FC = () => {
     const cyInstance = cytoscape({
       container: cyContainerRef.current,
       style: networkStyles,
-=======
       // Basic interactions
       userZoomingEnabled: true,
       userPanningEnabled: true,
