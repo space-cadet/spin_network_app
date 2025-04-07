@@ -16,6 +16,11 @@ interface UIState {
     right: boolean;
     bottom: boolean;
   };
+  sidebarSizes: {
+    left: number;
+    right: number;
+    bottom: number;
+  };
 }
 
 // Initial state
@@ -33,6 +38,11 @@ const initialState: UIState = {
     left: true,
     right: true,
     bottom: true,
+  },
+  sidebarSizes: {
+    left: 250,    // Default width for left sidebar
+    right: 300,   // Default width for right sidebar
+    bottom: 200,  // Default height for bottom sidebar
   },
 };
 
@@ -79,6 +89,15 @@ const uiSlice = createSlice({
       state.sidebarVisibility[sidebar] = isVisible;
     },
     
+    // Set sidebar size
+    setSidebarSize: (
+      state,
+      action: PayloadAction<{ sidebar: keyof UIState['sidebarSizes']; size: number }>
+    ) => {
+      const { sidebar, size } = action.payload;
+      state.sidebarSizes[sidebar] = size;
+    },
+    
     // Clear selection
     clearSelection: (state) => {
       state.selectedElement = {
@@ -96,6 +115,7 @@ export const {
   setViewSettings,
   toggleSidebar,
   setSidebarVisibility,
+  setSidebarSize,
   clearSelection
 } = uiSlice.actions;
 

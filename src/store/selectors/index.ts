@@ -29,6 +29,12 @@ export const selectLeftSidebarVisible = (state: RootState) => state.ui.sidebarVi
 export const selectRightSidebarVisible = (state: RootState) => state.ui.sidebarVisibility.right;
 export const selectBottomSidebarVisible = (state: RootState) => state.ui.sidebarVisibility.bottom;
 
+// Sidebar size selectors
+export const selectSidebarSizes = (state: RootState) => state.ui.sidebarSizes;
+export const selectLeftSidebarSize = (state: RootState) => state.ui.sidebarSizes.left;
+export const selectRightSidebarSize = (state: RootState) => state.ui.sidebarSizes.right;
+export const selectBottomSidebarSize = (state: RootState) => state.ui.sidebarSizes.bottom;
+
 // Selected element details
 export const selectSelectedNode = (state: RootState) => {
   const { id, type } = state.ui.selectedElement;

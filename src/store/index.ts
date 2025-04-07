@@ -40,8 +40,8 @@ const uiPersistConfig = {
   version: 1,
   storage: localforage,
   migrate: migrationFunction,
-  // Only persist certain UI settings
-  whitelist: ['viewSettings']
+  // Persist UI settings, sidebar visibility, and sidebar sizes
+  whitelist: ['viewSettings', 'sidebarVisibility', 'sidebarSizes']
 };
 
 // Configure recent networks persist options

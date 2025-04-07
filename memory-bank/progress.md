@@ -41,6 +41,7 @@
 - ✅ Panel size constraints (min/max)
 - ✅ Hideable panels for cleaner workspace
 - ✅ Toggle controls for panel visibility
+- ✅ Persistent panel sizes between sessions
 - ✅ Mode switching (select, pan, add node, add edge, delete)
 - ✅ Property display for selected elements
 - ✅ Node creation via canvas click
@@ -105,13 +106,13 @@
 ### Phase 3 (Medium Priority)
 - ⬜ Simulation control interface
 - ✅ Save/load functionality
-- ⬜ UI refinements
+- ✅ UI refinements (sidebar persistence)
 - ⬜ User experience improvements
 - ⬜ Dynamic network visualization during simulation
 - ⬜ Energy conservation plots with actual data
 
 ### Additional Features (Lower Priority)
-- ✅ User preference persistence (sidebar visibility, view settings)
+- ✅ User preference persistence (sidebar visibility and sizes, view settings)
 - ✅ Keyboard shortcuts (Ctrl+Z, Ctrl+Y for undo/redo)
 - ⬜ Tutorial or help system
 - ⬜ Dark/light theme support
@@ -133,6 +134,7 @@ We've implemented state persistence so the network and UI state are preserved be
 4. Implemented state persistence using IndexedDB for reliable storage
 5. Added explicit save/load functionality for network files
 6. Enhanced UI with visual feedback for state changes and operations
+7. Added persistence for sidebar sizes/widths between sessions
 7. Fixed node sizing issues to prevent nodes from expanding to fill the viewing area
 8. Implemented support for dangling edges with placeholder node visualization
 9. Enhanced node deletion to preserve connected edges as dangling edges

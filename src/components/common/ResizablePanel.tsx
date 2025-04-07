@@ -9,6 +9,7 @@ interface ResizablePanelProps {
   className?: string;
   handleClassName?: string;
   handlePosition?: 'start' | 'end';
+  onResize?: (newSize: number) => void;
 }
 
 const ResizablePanel: React.FC<ResizablePanelProps> = ({
@@ -20,6 +21,7 @@ const ResizablePanel: React.FC<ResizablePanelProps> = ({
   className = '',
   handleClassName = '',
   handlePosition = 'end',
+  onResize,
 }) => {
   const [size, setSize] = useState(defaultSize);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -69,6 +71,11 @@ const ResizablePanel: React.FC<ResizablePanelProps> = ({
       newSize = Math.max(minSize, Math.min(maxSize, newSize));
       
       setSize(newSize);
+      
+      // Call onResize callback if provided
+      if (onResize) {
+        onResize(newSize);
+      }
     };
 
     const handleMouseUp = () => {

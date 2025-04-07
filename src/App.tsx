@@ -5,10 +5,14 @@ import NetworkTools from './components/tools/NetworkTools'
 import PropertiesPanel from './components/panels/PropertiesPanel'
 import SimulationControls from './components/simulation/SimulationControls'
 import EnergyPlot from './components/visualization/EnergyPlot'
-import ResizablePanel from './components/common/ResizablePanel'
+import PersistentResizablePanel from './components/common/PersistentResizablePanel'
 import PersistenceStatus from './components/common/PersistenceStatus'
 import SidebarToggle from './components/common/SidebarToggle'
-import { selectLeftSidebarVisible, selectRightSidebarVisible, selectBottomSidebarVisible } from './store/selectors'
+import { 
+  selectLeftSidebarVisible, 
+  selectRightSidebarVisible, 
+  selectBottomSidebarVisible 
+} from './store/selectors'
 
 function App() {
   const handleStartSimulation = (params: any) => {
@@ -35,9 +39,9 @@ function App() {
           {/* Left Sidebar - Resizable & Hideable */}
           {leftSidebarVisible && (
             <div className="relative">
-              <ResizablePanel 
+              <PersistentResizablePanel 
                 direction="horizontal" 
-                defaultSize={250} 
+                sidebarKey="left"
                 minSize={200} 
                 maxSize={400} 
                 className="border-r border-gray-200 bg-white overflow-y-auto h-full"
@@ -46,7 +50,7 @@ function App() {
                 <div className="p-4 h-full overflow-y-auto">
                   <NetworkTools />
                 </div>
-              </ResizablePanel>
+              </PersistentResizablePanel>
               <SidebarToggle side="left" isVisible={leftSidebarVisible} />
             </div>
           )}
@@ -68,9 +72,9 @@ function App() {
             {/* Energy Visualization - Resizable & Hideable */}
             {bottomSidebarVisible && (
               <div className="relative">
-                <ResizablePanel
+                <PersistentResizablePanel
                   direction="vertical"
-                  defaultSize={200}
+                  sidebarKey="bottom"
                   minSize={100}
                   maxSize={400}
                   className="border-t border-gray-200 bg-white overflow-y-auto h-full"
@@ -79,7 +83,7 @@ function App() {
                   <div className="p-4 h-full overflow-y-auto">
                     <EnergyPlot />
                   </div>
-                </ResizablePanel>
+                </PersistentResizablePanel>
                 <SidebarToggle side="bottom" isVisible={bottomSidebarVisible} />
               </div>
             )}
@@ -95,9 +99,9 @@ function App() {
           {/* Right Sidebar - Resizable & Hideable */}
           {rightSidebarVisible && (
             <div className="relative">
-              <ResizablePanel 
+              <PersistentResizablePanel 
                 direction="horizontal" 
-                defaultSize={300} 
+                sidebarKey="right"
                 minSize={250} 
                 maxSize={500} 
                 className="border-l border-gray-200 bg-white overflow-y-auto h-full"
@@ -107,7 +111,7 @@ function App() {
                   <PropertiesPanel />
                   <SimulationControls onStartSimulation={handleStartSimulation} />
                 </div>
-              </ResizablePanel>
+              </PersistentResizablePanel>
               <SidebarToggle side="right" isVisible={rightSidebarVisible} />
             </div>
           )}

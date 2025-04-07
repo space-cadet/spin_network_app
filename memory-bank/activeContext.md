@@ -28,6 +28,7 @@ We have successfully implemented the network data model, network generation func
 - Created toggle buttons with intuitive icons
 - Implemented smooth transitions when hiding/showing panels
 - Persisted sidebar visibility state between sessions
+- Added persistence for sidebar widths/heights between sessions
 
 ### State Persistence Implementation
 - Added Redux Persist with IndexedDB for automatic state persistence
@@ -36,6 +37,7 @@ We have successfully implemented the network data model, network generation func
 - Created a reset button to clear persisted state if needed
 - Set up migration system for handling future state structure changes
 - Persisted UI settings (view settings) between sessions
+- Enhanced sidebar persistence to remember both visibility and size/width
 
 ### Network Operations Enhancement
 - Added support for "dangling" edges (edges with one or both endpoints missing)
