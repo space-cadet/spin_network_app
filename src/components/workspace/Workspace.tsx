@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
-import { FaSearch, FaSearchMinus, FaSearchPlus, FaRegHandPaper, FaPlus, FaLink, FaTrash } from 'react-icons/fa';
+import { FaSearch, FaRegHandPaper, FaPlus, FaLink, FaTrash } from 'react-icons/fa';
 import UndoRedo from '../common/UndoRedo';
+import ZoomControls from './ZoomControls';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setSelectedElement, setInteractionMode, clearSelection } from '../../store/slices/uiSlice';
 import { 
@@ -29,6 +30,9 @@ const Workspace: React.FC = () => {
   
   // State for edge creation - just store the source node ID
   const [edgeSourceId, setEdgeSourceId] = useState<string | null>(null);
+  
+  // State for zoom level
+  const [zoomLevel, setZoomLevel] = useState<number>(1.0);
   
   // Default values for new elements
   const defaultNodeIntertwiner = 1;
@@ -159,8 +163,14 @@ const Workspace: React.FC = () => {
       }
     });
 
-    // Set the cytoscape instance
+    // Set the cytoscape instance and initial zoom level
     setCy(cyInstance);
+    setZoomLevel(cyInstance.zoom());
+    
+    // Add zoom event handler to update zoom level
+    cyInstance.on('zoom', () => {
+      setZoomLevel(cyInstance.zoom());
+    });
     
     // Handle window resize to redraw the graph
     const handleResize = () => {
@@ -692,14 +702,28 @@ const Workspace: React.FC = () => {
 
   // Zoom functions
   const handleZoomIn = () => {
-    if (cy) cy.zoom(cy.zoom() * 1.2);
+    if (cy) {
+      const newZoom = cy.zoom() * 1.2;
+      cy.zoom(newZoom);
+      setZoomLevel(newZoom);
+    }
   };
   
   const handleZoomOut = () => {
-    if (cy) cy.zoom(cy.zoom() / 1.2);
+    if (cy) {
+      const newZoom = cy.zoom() / 1.2;
+      cy.zoom(newZoom);
+      setZoomLevel(newZoom);
+    }
   };
   
-  const handleZoomFit = () => safeFit();
+  const handleZoomFit = () => {
+    safeFit();
+    // Update zoom level after fit
+    if (cy) {
+      setZoomLevel(cy.zoom());
+    }
+  };
 
   // Mode functions
   const handleModeChange = (newMode: 'select' | 'pan' | 'addNode' | 'addEdge' | 'delete') => {
@@ -763,31 +787,7 @@ const Workspace: React.FC = () => {
         >
           <FaTrash />
         </button>
-        
-        {/* Zoom controls */}
-        <button 
-          className="btn btn-sm btn-outline"
-          onClick={handleZoomIn}
-          title="Zoom In"
-        >
-          <FaSearchPlus />
-        </button>
-        
-        <button 
-          className="btn btn-sm btn-outline"
-          onClick={handleZoomOut}
-          title="Zoom Out"
-        >
-          <FaSearchMinus />
-        </button>
-        
-        <button 
-          className="btn btn-sm btn-outline"
-          onClick={handleZoomFit}
-          title="Fit View"
-        >
-          <FaSearch />
-        </button>
+
       </div>
       
       {/* Network information */}
@@ -812,11 +812,23 @@ const Workspace: React.FC = () => {
         </div>
       </div>
       
-      {/* Cytoscape container */}
-      <div 
-        ref={cyContainerRef} 
-        className="cy-container flex-1 border border-gray-200 rounded-md"
-      ></div>
+      {/* Cytoscape container with absolute positioned zoom controls */}
+      <div className="relative flex-1">
+        <div 
+          ref={cyContainerRef} 
+          className="cy-container h-full w-full border border-gray-200 rounded-md"
+        ></div>
+        
+        {/* Positioned zoom controls */}
+        <div className="absolute bottom-4 right-4 z-10">
+          <ZoomControls
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onZoomFit={handleZoomFit}
+            zoomLevel={zoomLevel}
+          />
+        </div>
+      </div>
     </div>
   );
 };
