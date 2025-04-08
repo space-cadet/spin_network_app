@@ -15,6 +15,7 @@ import localforage from 'localforage';
 import networkReducer from './slices/networkSlice';
 import uiReducer from './slices/uiSlice';
 import recentNetworksReducer from './slices/recentNetworksSlice';
+import typeReducer from './slices/typeSlice';
 import { migrationFunction } from '../utils/migrations';
 
 // Configure localforage
@@ -31,7 +32,7 @@ const persistConfig = {
   storage: localforage,
   migrate: migrationFunction,
   // We can blacklist any reducers we don't want to persist
-  blacklist: ['ui', 'recentNetworks'] // We handle these with their own persist configs
+  blacklist: ['ui', 'recentNetworks', 'types'] // We handle these with their own persist configs
 };
 
 // Configure UI persist options (selective persistence)
@@ -52,10 +53,19 @@ const recentNetworksPersistConfig = {
   migrate: migrationFunction,
 };
 
+// Configure types persist options
+const typesPersistConfig = {
+  key: 'types',
+  version: 1,
+  storage: localforage,
+  migrate: migrationFunction,
+};
+
 // Create persisted reducers
 const persistedNetworkReducer = persistReducer(persistConfig, networkReducer);
 const persistedUiReducer = persistReducer(uiPersistConfig, uiReducer);
 const persistedRecentNetworksReducer = persistReducer(recentNetworksPersistConfig, recentNetworksReducer);
+const persistedTypeReducer = persistReducer(typesPersistConfig, typeReducer);
 
 /**
  * Configure the Redux store with persisted reducers
@@ -65,6 +75,7 @@ const store = configureStore({
     network: persistedNetworkReducer,
     ui: persistedUiReducer,
     recentNetworks: persistedRecentNetworksReducer,
+    types: persistedTypeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
