@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaCopy, FaExclamationTriangle } from 'react-icons/fa';
 import EdgeTypeForm from './EdgeTypeForm';
 import ConfirmationDialog from '../../common/ConfirmationDialog';
@@ -6,16 +6,49 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { 
   addEdgeType, 
   updateEdgeType, 
-  removeEdgeType 
+  removeEdgeType,
+  resetEdgeTypes 
 } from '../../../store/slices/typeSlice';
 import { selectAllEdgeTypes } from '../../../store/selectors/typeSelectors';
-import { EdgeType } from '../../../models/typeModels';
+import { EdgeType, DEFAULT_EDGE_TYPES } from '../../../models/typeModels';
 
 const EdgeTypeManager: React.FC = () => {
   // Connect to Redux store
   const dispatch = useAppDispatch();
-  const edgeTypes = useAppSelector(selectAllEdgeTypes);
+  const edgeTypesFromStore = useAppSelector(selectAllEdgeTypes);
   const edgeTypeUsage = useAppSelector(state => state.types.edgeTypeUsage);
+  
+  // Fix for edgeTypes not being an array
+  const [edgeTypes, setEdgeTypes] = useState<EdgeType[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Add type checking and safety
+    try {
+      if (!edgeTypesFromStore) {
+        console.error("edgeTypes is undefined or null, resetting to defaults");
+        setError("Edge types data was corrupted. Reset to defaults.");
+        setEdgeTypes(DEFAULT_EDGE_TYPES);
+        // Reset in the store as well
+        dispatch(resetEdgeTypes());
+      } else if (!Array.isArray(edgeTypesFromStore)) {
+        console.error("edgeTypes is not an array, resetting to defaults", edgeTypesFromStore);
+        setError("Edge types data was corrupted. Reset to defaults.");
+        setEdgeTypes(DEFAULT_EDGE_TYPES);
+        // Reset in the store as well
+        dispatch(resetEdgeTypes());
+      } else {
+        setEdgeTypes(edgeTypesFromStore);
+        setError(null);
+      }
+    } catch (err) {
+      console.error("Error processing edgeTypes:", err);
+      setError("Error processing edge types data. Reset to defaults.");
+      setEdgeTypes(DEFAULT_EDGE_TYPES);
+      // Reset in the store as well
+      dispatch(resetEdgeTypes());
+    }
+  }, [edgeTypesFromStore, dispatch]);
   
   const [selectedType, setSelectedType] = useState<EdgeType | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -82,8 +115,26 @@ const EdgeTypeManager: React.FC = () => {
     return edgeTypeUsage[typeId] || 0;
   };
 
+  // Reset to default handler
+  const handleResetToDefaults = () => {
+    dispatch(resetEdgeTypes());
+  };
+
   return (
     <div className="h-full flex flex-col">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded relative">
+          <strong className="font-bold">Error:</strong>
+          <span className="block sm:inline"> {error}</span>
+          <button 
+            className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+            onClick={handleResetToDefaults}
+          >
+            Reset to defaults
+          </button>
+        </div>
+      )}
+
       {!isFormVisible ? (
         <>
           <div className="flex justify-between items-center mb-4">
@@ -118,7 +169,7 @@ const EdgeTypeManager: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {edgeTypes.map(edgeType => (
+                {Array.isArray(edgeTypes) && edgeTypes.map(edgeType => (
                   <tr key={edgeType.id}>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="w-12 flex items-center">

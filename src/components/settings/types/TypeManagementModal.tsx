@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import { FaChevronLeft, FaTimes } from 'react-icons/fa';
+import { FaChevronLeft, FaTimes, FaUndo } from 'react-icons/fa';
 import NodeTypeManager from './NodeTypeManager';
 import EdgeTypeManager from './EdgeTypeManager';
+import { useAppDispatch } from '../../../store/hooks';
+import { resetAllTypes } from '../../../store/slices/typeSlice';
 
 interface TypeManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onReset?: () => void;
 }
 
-const TypeManagementModal: React.FC<TypeManagementModalProps> = ({ isOpen, onClose, onReset }) => {
+const TypeManagementModal: React.FC<TypeManagementModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'node' | 'edge'>('node');
+  const dispatch = useAppDispatch();
+
+  const handleResetAllTypes = () => {
+    if (confirm('Are you sure you want to reset all types to defaults? This action cannot be undone.')) {
+      dispatch(resetAllTypes());
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -71,14 +79,13 @@ const TypeManagementModal: React.FC<TypeManagementModalProps> = ({ isOpen, onClo
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
-          {onReset && (
-            <button
-              onClick={onReset}
-              className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              Reset to Defaults
-            </button>
-          )}
+          <button
+            onClick={handleResetAllTypes}
+            className="px-4 py-2 flex items-center gap-2 bg-gray-200 text-gray-700 font-medium rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            <FaUndo size={14} />
+            Reset All Types
+          </button>
           <button
             onClick={onClose}
             className="px-4 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"

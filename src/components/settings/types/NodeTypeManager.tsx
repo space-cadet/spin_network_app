@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaCopy, FaExclamationTriangle } from 'react-icons/fa';
 import NodeTypeForm from './NodeTypeForm';
 import ConfirmationDialog from '../../common/ConfirmationDialog';
@@ -6,18 +6,51 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { 
   addNodeType, 
   updateNodeType, 
-  removeNodeType 
+  removeNodeType,
+  resetNodeTypes 
 } from '../../../store/slices/typeSlice';
 import { 
   selectAllNodeTypes
 } from '../../../store/selectors/typeSelectors';
-import { NodeType } from '../../../models/typeModels';
+import { NodeType, DEFAULT_NODE_TYPES } from '../../../models/typeModels';
 
 const NodeTypeManager: React.FC = () => {
   // Connect to Redux store
   const dispatch = useAppDispatch();
-  const nodeTypes = useAppSelector(selectAllNodeTypes);
+  const nodeTypesFromStore = useAppSelector(selectAllNodeTypes);
   const nodeTypeUsage = useAppSelector(state => state.types.nodeTypeUsage);
+  
+  // Fix for nodeTypes not being an array
+  const [nodeTypes, setNodeTypes] = useState<NodeType[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Add type checking and safety
+    try {
+      if (!nodeTypesFromStore) {
+        console.error("nodeTypes is undefined or null, resetting to defaults");
+        setError("Node types data was corrupted. Reset to defaults.");
+        setNodeTypes(DEFAULT_NODE_TYPES);
+        // Reset in the store as well
+        dispatch(resetNodeTypes());
+      } else if (!Array.isArray(nodeTypesFromStore)) {
+        console.error("nodeTypes is not an array, resetting to defaults", nodeTypesFromStore);
+        setError("Node types data was corrupted. Reset to defaults.");
+        setNodeTypes(DEFAULT_NODE_TYPES);
+        // Reset in the store as well
+        dispatch(resetNodeTypes());
+      } else {
+        setNodeTypes(nodeTypesFromStore);
+        setError(null);
+      }
+    } catch (err) {
+      console.error("Error processing nodeTypes:", err);
+      setError("Error processing node types data. Reset to defaults.");
+      setNodeTypes(DEFAULT_NODE_TYPES);
+      // Reset in the store as well
+      dispatch(resetNodeTypes());
+    }
+  }, [nodeTypesFromStore, dispatch]);
   
   const [selectedType, setSelectedType] = useState<NodeType | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -84,8 +117,26 @@ const NodeTypeManager: React.FC = () => {
     return nodeTypeUsage[typeId] || 0;
   };
 
+  // Reset to default handler
+  const handleResetToDefaults = () => {
+    dispatch(resetNodeTypes());
+  };
+  
   return (
     <div className="h-full flex flex-col">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded relative">
+          <strong className="font-bold">Error:</strong>
+          <span className="block sm:inline"> {error}</span>
+          <button 
+            className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+            onClick={handleResetToDefaults}
+          >
+            Reset to defaults
+          </button>
+        </div>
+      )}
+
       {!isFormVisible ? (
         <>
           <div className="flex justify-between items-center mb-4">
@@ -120,7 +171,7 @@ const NodeTypeManager: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {nodeTypes.map(nodeType => (
+                {Array.isArray(nodeTypes) && nodeTypes.map(nodeType => (
                   <tr key={nodeType.id}>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div

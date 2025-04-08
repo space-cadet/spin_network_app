@@ -1,5 +1,119 @@
 # Error Log
 
+## 2025-04-09: nodeTypes.map is not a function in Type Manager
+
+**File:** `src/components/settings/types/NodeTypeManager.tsx` (Line 123)
+
+**Error Message:**
+```
+NodeTypeManager.tsx:123 Uncaught TypeError: nodeTypes.map is not a function at NodeTypeManager (NodeTypeManager.tsx:123:28)
+NodeTypeManager.tsx:123 Uncaught TypeError: nodeTypes.map is not a function at NodeTypeManager (NodeTypeManager.tsx:123:28)
+```
+
+**Cause:**
+The `nodeTypes` value from the Redux store was not an array, causing the `.map()` method to fail. This was likely due to:
+1. Redux persistence corruption in the local storage
+2. Lack of type validation when retrieving the stored data
+3. No fallback mechanism when the data structure was invalid
+
+The error occurred specifically when trying to map over the `nodeTypes` array to render the list of node types in the Node Type Manager component.
+
+**Fix:**
+Implemented a comprehensive solution with multiple layers of protection:
+
+1. **Enhanced Component Safety:**
+   - Added proper error handling in NodeTypeManager.tsx and EdgeTypeManager.tsx
+   - Added local state management to validate and fix data before rendering
+   - Provided UI feedback when corruption is detected, with a reset option
+   - Added explicit type checking with `Array.isArray()` before using array methods
+
+2. **Improved Redux Store Validation:**
+   - Enhanced typeSlice.ts with data validation helpers
+   - Added a validateState helper function to ensure proper state structure
+   - Implemented proper type safety in all reducers
+   - Added safety measures to reset actions to ensure proper state reconstruction
+
+3. **Enhanced Type Selectors:**
+   - Updated typeSelectors.ts with validation functions
+   - Added fallbacks to default types for all selectors
+   - Ensured selectors always return properly typed arrays
+
+4. **Added Data Migration:**
+   - Added a new migration (version 2) in migrations.ts
+   - Implemented a data validation function to fix corrupted type data
+   - Updated all Redux persist config versions to match
+
+5. **Type Management UI Improvements:**
+   - Enhanced the TypeManagementModal with error feedback
+   - Added a more accessible reset button with confirmation dialog
+   - Improved the useTypeManagement hook for better component integration
+
+**Key Code Changes:**
+
+```typescript
+// In NodeTypeManager.tsx:
+useEffect(() => {
+  // Add type checking and safety
+  try {
+    if (!nodeTypesFromStore) {
+      console.error("nodeTypes is undefined or null, resetting to defaults");
+      setError("Node types data was corrupted. Reset to defaults.");
+      setNodeTypes(DEFAULT_NODE_TYPES);
+      // Reset in the store as well
+      dispatch(resetNodeTypes());
+    } else if (!Array.isArray(nodeTypesFromStore)) {
+      console.error("nodeTypes is not an array, resetting to defaults", nodeTypesFromStore);
+      setError("Node types data was corrupted. Reset to defaults.");
+      setNodeTypes(DEFAULT_NODE_TYPES);
+      // Reset in the store as well
+      dispatch(resetNodeTypes());
+    } else {
+      setNodeTypes(nodeTypesFromStore);
+      setError(null);
+    }
+  } catch (err) {
+    console.error("Error processing nodeTypes:", err);
+    setError("Error processing node types data. Reset to defaults.");
+    setNodeTypes(DEFAULT_NODE_TYPES);
+    // Reset in the store as well
+    dispatch(resetNodeTypes());
+  }
+}, [nodeTypesFromStore, dispatch]);
+```
+
+```typescript
+// In typeSelectors.ts:
+// Helper functions for type safety
+const ensureNodeTypeArray = (types: any): NodeType[] => {
+  if (!types) return DEFAULT_NODE_TYPES;
+  if (!Array.isArray(types)) return DEFAULT_NODE_TYPES;
+  return types;
+};
+
+// Node type selectors
+export const selectAllNodeTypes = (state: RootState): NodeType[] => 
+  ensureNodeTypeArray(state.types.nodeTypes);
+```
+
+```typescript
+// In migrations.ts:
+// Migration to fix potential type corruption issues
+2: (state: any) => {
+  // Fix any type array corruption issues
+  return ensureTypesAreArrays(state);
+}
+```
+
+**Affected Files:**
+- src/components/settings/types/NodeTypeManager.tsx
+- src/components/settings/types/EdgeTypeManager.tsx
+- src/components/settings/types/TypeManagementModal.tsx
+- src/components/settings/types/useTypeManagement.tsx
+- src/store/slices/typeSlice.ts
+- src/store/selectors/typeSelectors.ts
+- src/utils/migrations.ts
+- src/store/index.ts
+
 ## 2025-04-09 15:30 IST - Build Errors in TypeScript Compilation
 
 **File:** Multiple files across the project (see list below)
@@ -89,7 +203,7 @@ The dropdown component (`SettingsDropdown.tsx`) used `position: absolute` CSS st
 +++ b/src/components/settings/Settings.tsx
 @@ -24,7 +24,7 @@
    };
- 
+
    return (
 -    <>
 +    <div className="relative"> {/* Added relative positioning wrapper */}
@@ -98,14 +212,12 @@ The dropdown component (`SettingsDropdown.tsx`) used `position: absolute` CSS st
          className="flex items-center hover:text-primary-100"
 @@ -40,7 +40,7 @@
        />
- 
+
        <TypeManagementComponent />
 -    </>
 +    </div>
    );
  };
- 
-
 ```
 
 ---

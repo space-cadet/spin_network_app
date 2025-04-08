@@ -16,12 +16,33 @@ const initialState: TypeState = {
   edgeTypeUsage: {}
 };
 
+// Helper function to ensure types are arrays
+const ensureArray = <T>(value: any, defaultValue: T[]): T[] => {
+  if (!value) return defaultValue;
+  if (!Array.isArray(value)) return defaultValue;
+  return value;
+};
+
+// Helper to validate the entire state for type safety
+const validateState = (state: any): TypeState => {
+  return {
+    nodeTypes: ensureArray(state?.nodeTypes, DEFAULT_NODE_TYPES),
+    edgeTypes: ensureArray(state?.edgeTypes, DEFAULT_EDGE_TYPES),
+    nodeTypeUsage: state?.nodeTypeUsage || {},
+    edgeTypeUsage: state?.edgeTypeUsage || {}
+  };
+};
+
 const typeSlice = createSlice({
   name: 'types',
   initialState,
   reducers: {
     // Node type management actions
     addNodeType: (state, action: PayloadAction<NodeType>) => {
+      // Validate state
+      const validState = validateState(state);
+      state.nodeTypes = validState.nodeTypes;
+      
       // Check if type with this ID already exists
       if (state.nodeTypes.some(type => type.id === action.payload.id)) {
         // Generate a unique ID if needed
@@ -35,6 +56,10 @@ const typeSlice = createSlice({
     },
     
     updateNodeType: (state, action: PayloadAction<NodeType>) => {
+      // Validate state
+      const validState = validateState(state);
+      state.nodeTypes = validState.nodeTypes;
+      
       const index = state.nodeTypes.findIndex(type => type.id === action.payload.id);
       if (index !== -1) {
         // Preserve the isSystem flag if it exists
@@ -47,6 +72,10 @@ const typeSlice = createSlice({
     },
     
     removeNodeType: (state, action: PayloadAction<string>) => {
+      // Validate state
+      const validState = validateState(state);
+      state.nodeTypes = validState.nodeTypes;
+      
       // Don't remove system types
       const typeToRemove = state.nodeTypes.find(type => type.id === action.payload);
       if (typeToRemove?.isSystem) {
@@ -60,6 +89,10 @@ const typeSlice = createSlice({
     
     // Edge type management actions
     addEdgeType: (state, action: PayloadAction<EdgeType>) => {
+      // Validate state
+      const validState = validateState(state);
+      state.edgeTypes = validState.edgeTypes;
+      
       // Check if type with this ID already exists
       if (state.edgeTypes.some(type => type.id === action.payload.id)) {
         // Generate a unique ID if needed
@@ -73,6 +106,10 @@ const typeSlice = createSlice({
     },
     
     updateEdgeType: (state, action: PayloadAction<EdgeType>) => {
+      // Validate state
+      const validState = validateState(state);
+      state.edgeTypes = validState.edgeTypes;
+      
       const index = state.edgeTypes.findIndex(type => type.id === action.payload.id);
       if (index !== -1) {
         // Preserve the isSystem flag if it exists
@@ -85,6 +122,10 @@ const typeSlice = createSlice({
     },
     
     removeEdgeType: (state, action: PayloadAction<string>) => {
+      // Validate state
+      const validState = validateState(state);
+      state.edgeTypes = validState.edgeTypes;
+      
       // Don't remove system types
       const typeToRemove = state.edgeTypes.find(type => type.id === action.payload);
       if (typeToRemove?.isSystem) {
@@ -98,25 +139,13 @@ const typeSlice = createSlice({
     
     // Reset to default types
     resetNodeTypes: (state) => {
-      // Filter out only non-system types to preserve system types
-      state.nodeTypes = state.nodeTypes.filter(type => type.isSystem);
-      // Add back the default types that are missing
-      DEFAULT_NODE_TYPES.forEach(defaultType => {
-        if (!state.nodeTypes.some(type => type.id === defaultType.id)) {
-          state.nodeTypes.push(defaultType);
-        }
-      });
+      // Reset to default node types
+      state.nodeTypes = [...DEFAULT_NODE_TYPES];
     },
     
     resetEdgeTypes: (state) => {
-      // Filter out only non-system types to preserve system types
-      state.edgeTypes = state.edgeTypes.filter(type => type.isSystem);
-      // Add back the default types that are missing
-      DEFAULT_EDGE_TYPES.forEach(defaultType => {
-        if (!state.edgeTypes.some(type => type.id === defaultType.id)) {
-          state.edgeTypes.push(defaultType);
-        }
-      });
+      // Reset to default edge types
+      state.edgeTypes = [...DEFAULT_EDGE_TYPES];
     },
     
     // Update type usage counts
@@ -130,8 +159,8 @@ const typeSlice = createSlice({
     
     // Completely reset to initial state (for testing or app reset)
     resetAllTypes: (state) => {
-      state.nodeTypes = DEFAULT_NODE_TYPES;
-      state.edgeTypes = DEFAULT_EDGE_TYPES;
+      state.nodeTypes = [...DEFAULT_NODE_TYPES];
+      state.edgeTypes = [...DEFAULT_EDGE_TYPES];
       state.nodeTypeUsage = {};
       state.edgeTypeUsage = {};
     }

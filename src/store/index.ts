@@ -29,7 +29,7 @@ localforage.config({
 // Configure persist options
 const persistConfig = {
   key: 'root',
-  version: 1,
+  version: 2, // Updated to latest migration version
   storage: localforage,
   migrate: migrationFunction,
   // We can blacklist any reducers we don't want to persist
@@ -39,7 +39,7 @@ const persistConfig = {
 // Configure UI persist options (selective persistence)
 const uiPersistConfig = {
   key: 'ui',
-  version: 1,
+  version: 2, // Updated to latest migration version
   storage: localforage,
   migrate: migrationFunction,
   // Persist UI settings, sidebar visibility, sidebar sizes, and collapsed sections
@@ -49,7 +49,7 @@ const uiPersistConfig = {
 // Configure recent networks persist options
 const recentNetworksPersistConfig = {
   key: 'recentNetworks',
-  version: 1,
+  version: 2, // Updated to latest migration version
   storage: localforage,
   migrate: migrationFunction,
 };
@@ -57,7 +57,7 @@ const recentNetworksPersistConfig = {
 // Configure types persist options
 const typesPersistConfig = {
   key: 'types',
-  version: 1,
+  version: 2, // Updated to latest migration version
   storage: localforage,
   migrate: migrationFunction,
 };
