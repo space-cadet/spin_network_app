@@ -2,53 +2,24 @@ import React, { useState } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaCopy, FaExclamationTriangle } from 'react-icons/fa';
 import NodeTypeForm from './NodeTypeForm';
 import ConfirmationDialog from '../../common/ConfirmationDialog';
-
-// Temporary type definitions until we implement the actual Redux state
-interface NodeType {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  borderColor: string;
-  borderWidth: number;
-  borderStyle: 'solid' | 'dashed' | 'dotted';
-  shape: 'ellipse' | 'rectangle' | 'triangle' | 'diamond' | 'hexagon';
-  size: number;
-  labelPosition: 'center' | 'top' | 'bottom';
-  useCount: number; // Number of nodes using this type in the current network
-}
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { 
+  addNodeType, 
+  updateNodeType, 
+  removeNodeType 
+} from '../../../store/slices/typeSlice';
+import { 
+  selectAllNodeTypes, 
+  selectNodeTypeUsageById 
+} from '../../../store/selectors/typeSelectors';
+import { NodeType } from '../../../models/typeModels';
 
 const NodeTypeManager: React.FC = () => {
-  // This will be replaced with Redux state in the final implementation
-  const [nodeTypes, setNodeTypes] = useState<NodeType[]>([
-    {
-      id: 'regular',
-      name: 'Regular Node',
-      description: 'Default node style',
-      color: '#4f46e5',
-      borderColor: '#4338ca',
-      borderWidth: 2,
-      borderStyle: 'solid',
-      shape: 'ellipse',
-      size: 80,
-      labelPosition: 'center',
-      useCount: 12 // Example count
-    },
-    {
-      id: 'placeholder',
-      name: 'Placeholder Node',
-      description: 'Visual indicator for dangling edge endpoints',
-      color: '#f97316',
-      borderColor: '#fb923c',
-      borderWidth: 2,
-      borderStyle: 'dashed',
-      shape: 'diamond',
-      size: 32,
-      labelPosition: 'center',
-      useCount: 4 // Example count
-    }
-  ]);
-
+  // Connect to Redux store
+  const dispatch = useAppDispatch();
+  const nodeTypes = useAppSelector(selectAllNodeTypes);
+  const nodeTypeUsage = useAppSelector(state => state.types.nodeTypeUsage);
+  
   const [selectedType, setSelectedType] = useState<NodeType | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -72,7 +43,7 @@ const NodeTypeManager: React.FC = () => {
       ...nodeType,
       id: `${nodeType.id}-copy-${Date.now()}`,
       name: `${nodeType.name} (Copy)`,
-      useCount: 0
+      isSystem: false // Duplicates are never system types
     };
     setSelectedType(newType);
     setIsEditing(false);
@@ -86,19 +57,19 @@ const NodeTypeManager: React.FC = () => {
 
   const confirmDelete = () => {
     if (typeToDelete) {
-      // This will be replaced with a Redux action
-      setNodeTypes(nodeTypes.filter(t => t.id !== typeToDelete.id));
+      // Dispatch delete action to Redux
+      dispatch(removeNodeType(typeToDelete.id));
       setShowDeleteConfirmation(false);
       setTypeToDelete(null);
     }
   };
 
   const handleFormSubmit = (nodeType: NodeType) => {
-    // This will be replaced with Redux actions
+    // Dispatch appropriate action to Redux
     if (isEditing) {
-      setNodeTypes(nodeTypes.map(t => (t.id === nodeType.id ? nodeType : t)));
+      dispatch(updateNodeType(nodeType));
     } else {
-      setNodeTypes([...nodeTypes, { ...nodeType, useCount: 0 }]);
+      dispatch(addNodeType(nodeType));
     }
     setIsFormVisible(false);
   };
@@ -107,7 +78,12 @@ const NodeTypeManager: React.FC = () => {
     setIsFormVisible(false);
   };
 
-  const isSystemType = (id: string) => ['regular', 'placeholder'].includes(id);
+  const isSystemType = (type: NodeType) => type.isSystem === true;
+  
+  // Get usage count for a type
+  const getTypeUsage = (typeId: string): number => {
+    return nodeTypeUsage[typeId] || 0;
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -164,7 +140,7 @@ const NodeTypeManager: React.FC = () => {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {nodeType.name}
-                        {isSystemType(nodeType.id) && (
+                        {isSystemType(nodeType) && (
                           <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                             System
                           </span>
@@ -177,7 +153,7 @@ const NodeTypeManager: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {nodeType.useCount} nodes
+                      {getTypeUsage(nodeType.id)} nodes
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
@@ -195,7 +171,7 @@ const NodeTypeManager: React.FC = () => {
                         >
                           <FaCopy />
                         </button>
-                        {!isSystemType(nodeType.id) && (
+                        {!isSystemType(nodeType) && (
                           <button
                             onClick={() => handleDeleteType(nodeType)}
                             className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
@@ -230,9 +206,9 @@ const NodeTypeManager: React.FC = () => {
             <p>
               Are you sure you want to delete the node type <span className="font-bold">{typeToDelete?.name}</span>?
             </p>
-            {(typeToDelete?.useCount || 0) > 0 && (
+            {typeToDelete && getTypeUsage(typeToDelete.id) > 0 && (
               <p className="mt-2 text-red-600 dark:text-red-400">
-                This type is currently used by {typeToDelete?.useCount} nodes in your network.
+                This type is currently used by {getTypeUsage(typeToDelete.id)} nodes in your network.
                 Deleting it will reset these nodes to the default type.
               </p>
             )}

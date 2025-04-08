@@ -6,9 +6,10 @@ import EdgeTypeManager from './EdgeTypeManager';
 interface TypeManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onReset?: () => void;
 }
 
-const TypeManagementModal: React.FC<TypeManagementModalProps> = ({ isOpen, onClose }) => {
+const TypeManagementModal: React.FC<TypeManagementModalProps> = ({ isOpen, onClose, onReset }) => {
   const [activeTab, setActiveTab] = useState<'node' | 'edge'>('node');
 
   if (!isOpen) return null;
@@ -69,7 +70,15 @@ const TypeManagementModal: React.FC<TypeManagementModalProps> = ({ isOpen, onClo
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+          {onReset && (
+            <button
+              onClick={onReset}
+              className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              Reset to Defaults
+            </button>
+          )}
           <button
             onClick={onClose}
             className="px-4 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"

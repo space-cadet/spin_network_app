@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaInfoCircle } from 'react-icons/fa';
-
-// Use the same type from NodeTypeManager
-interface NodeType {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  borderColor: string;
-  borderWidth: number;
-  borderStyle: 'solid' | 'dashed' | 'dotted';
-  shape: 'ellipse' | 'rectangle' | 'triangle' | 'diamond' | 'hexagon';
-  size: number;
-  labelPosition: 'center' | 'top' | 'bottom';
-  useCount?: number;
-}
+import { NodeType } from '../../../models/typeModels';
 
 interface NodeTypeFormProps {
   nodeType: NodeType | null;

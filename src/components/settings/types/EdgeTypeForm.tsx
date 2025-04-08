@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
-
-// Use the same type from EdgeTypeManager
-interface EdgeType {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  thickness: number;
-  lineStyle: 'solid' | 'dashed' | 'dotted';
-  arrow: 'none' | 'triangle' | 'vee';
-  arrowScale: number;
-  useCount?: number;
-}
+import { EdgeType } from '../../../models/typeModels';
 
 interface EdgeTypeFormProps {
   edgeType: EdgeType | null;

@@ -45,6 +45,7 @@ export interface SpinNetwork {
  * Metadata for the spin network
  */
 export interface NetworkMetadata {
+  id?: string; // Unique identifier for the network
   name: string; // Network name
   description?: string; // Optional description
   created: number; // Creation timestamp

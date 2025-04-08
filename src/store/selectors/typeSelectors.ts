@@ -10,7 +10,7 @@ export const selectAllNodeTypes = (state: RootState): NodeType[] =>
   state.types.nodeTypes;
 
 export const selectNodeTypeById = (state: RootState, id: string): NodeType | undefined => 
-  state.types.nodeTypes.find(type => type.id === id);
+  state.types.nodeTypes.find((type: NodeType) => type.id === id);
 
 export const selectNodeTypeUsage = (state: RootState): Record<string, number> => 
   state.types.nodeTypeUsage;
@@ -33,17 +33,17 @@ export const selectEdgeTypeUsageById = (state: RootState, id: string): number =>
 
 // System type selectors
 export const selectSystemNodeTypes = (state: RootState): NodeType[] => 
-  state.types.nodeTypes.filter(type => type.isSystem === true);
+  state.types.nodeTypes.filter((type: NodeType) => type.isSystem === true);
 
 export const selectSystemEdgeTypes = (state: RootState): EdgeType[] => 
-  state.types.edgeTypes.filter(type => type.isSystem === true);
+  state.types.edgeTypes.filter((type: EdgeType) => type.isSystem === true);
 
 // Custom (non-system) type selectors
 export const selectCustomNodeTypes = (state: RootState): NodeType[] => 
-  state.types.nodeTypes.filter(type => type.isSystem !== true);
+  state.types.nodeTypes.filter((type: NodeType) => type.isSystem !== true);
 
 export const selectCustomEdgeTypes = (state: RootState): EdgeType[] => 
-  state.types.edgeTypes.filter(type => type.isSystem !== true);
+  state.types.edgeTypes.filter((type: EdgeType) => type.isSystem !== true);
 
 // Default type selectors (for when no specific type is selected)
 export const selectDefaultNodeType = (state: RootState): NodeType | undefined => 

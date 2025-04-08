@@ -2,47 +2,21 @@ import React, { useState } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaCopy, FaExclamationTriangle } from 'react-icons/fa';
 import EdgeTypeForm from './EdgeTypeForm';
 import ConfirmationDialog from '../../common/ConfirmationDialog';
-
-// Temporary type definitions until we implement the actual Redux state
-interface EdgeType {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  thickness: number;
-  lineStyle: 'solid' | 'dashed' | 'dotted';
-  arrow: 'none' | 'triangle' | 'vee';
-  arrowScale: number;
-  useCount: number; // Number of edges using this type in the current network
-}
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { 
+  addEdgeType, 
+  updateEdgeType, 
+  removeEdgeType 
+} from '../../../store/slices/typeSlice';
+import { selectAllEdgeTypes } from '../../../store/selectors/typeSelectors';
+import { EdgeType } from '../../../models/typeModels';
 
 const EdgeTypeManager: React.FC = () => {
-  // This will be replaced with Redux state in the final implementation
-  const [edgeTypes, setEdgeTypes] = useState<EdgeType[]>([
-    {
-      id: 'regular',
-      name: 'Regular Edge',
-      description: 'Default edge style',
-      color: '#3b82f6',
-      thickness: 3,
-      lineStyle: 'solid',
-      arrow: 'none',
-      arrowScale: 1,
-      useCount: 15 // Example count
-    },
-    {
-      id: 'dangling',
-      name: 'Dangling Edge',
-      description: 'Edge with one or both endpoints missing',
-      color: '#f97316',
-      thickness: 2,
-      lineStyle: 'dashed',
-      arrow: 'none',
-      arrowScale: 1,
-      useCount: 3 // Example count
-    }
-  ]);
-
+  // Connect to Redux store
+  const dispatch = useAppDispatch();
+  const edgeTypes = useAppSelector(selectAllEdgeTypes);
+  const edgeTypeUsage = useAppSelector(state => state.types.edgeTypeUsage);
+  
   const [selectedType, setSelectedType] = useState<EdgeType | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -66,7 +40,7 @@ const EdgeTypeManager: React.FC = () => {
       ...edgeType,
       id: `${edgeType.id}-copy-${Date.now()}`,
       name: `${edgeType.name} (Copy)`,
-      useCount: 0
+      isSystem: false // Duplicates are never system types
     };
     setSelectedType(newType);
     setIsEditing(false);
@@ -80,19 +54,19 @@ const EdgeTypeManager: React.FC = () => {
 
   const confirmDelete = () => {
     if (typeToDelete) {
-      // This will be replaced with a Redux action
-      setEdgeTypes(edgeTypes.filter(t => t.id !== typeToDelete.id));
+      // Dispatch delete action to Redux
+      dispatch(removeEdgeType(typeToDelete.id));
       setShowDeleteConfirmation(false);
       setTypeToDelete(null);
     }
   };
 
   const handleFormSubmit = (edgeType: EdgeType) => {
-    // This will be replaced with Redux actions
+    // Dispatch appropriate action to Redux
     if (isEditing) {
-      setEdgeTypes(edgeTypes.map(t => (t.id === edgeType.id ? edgeType : t)));
+      dispatch(updateEdgeType(edgeType));
     } else {
-      setEdgeTypes([...edgeTypes, { ...edgeType, useCount: 0 }]);
+      dispatch(addEdgeType(edgeType));
     }
     setIsFormVisible(false);
   };
@@ -101,7 +75,12 @@ const EdgeTypeManager: React.FC = () => {
     setIsFormVisible(false);
   };
 
-  const isSystemType = (id: string) => ['regular', 'dangling'].includes(id);
+  const isSystemType = (type: EdgeType) => type.isSystem === true;
+  
+  // Get usage count for a type
+  const getTypeUsage = (typeId: string): number => {
+    return edgeTypeUsage[typeId] || 0;
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -156,7 +135,7 @@ const EdgeTypeManager: React.FC = () => {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {edgeType.name}
-                        {isSystemType(edgeType.id) && (
+                        {isSystemType(edgeType) && (
                           <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                             System
                           </span>
@@ -169,7 +148,7 @@ const EdgeTypeManager: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {edgeType.useCount} edges
+                      {getTypeUsage(edgeType.id)} edges
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
@@ -187,7 +166,7 @@ const EdgeTypeManager: React.FC = () => {
                         >
                           <FaCopy />
                         </button>
-                        {!isSystemType(edgeType.id) && (
+                        {!isSystemType(edgeType) && (
                           <button
                             onClick={() => handleDeleteType(edgeType)}
                             className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
@@ -222,9 +201,9 @@ const EdgeTypeManager: React.FC = () => {
             <p>
               Are you sure you want to delete the edge type <span className="font-bold">{typeToDelete?.name}</span>?
             </p>
-            {(typeToDelete?.useCount || 0) > 0 && (
+            {typeToDelete && getTypeUsage(typeToDelete.id) > 0 && (
               <p className="mt-2 text-red-600 dark:text-red-400">
-                This type is currently used by {typeToDelete?.useCount} edges in your network.
+                This type is currently used by {getTypeUsage(typeToDelete.id)} edges in your network.
                 Deleting it will reset these edges to the default type.
               </p>
             )}
