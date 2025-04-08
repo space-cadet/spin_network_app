@@ -10,7 +10,7 @@ import {
   selectInteractionMode,
   selectViewSettings
 } from '../../store/selectors';
-import { useNetworkStyles } from '../../hooks/useNetworkStyles';
+import { useTypeBasedStyles } from '../../hooks/useTypeBasedStyles';
 import { 
   networkToCytoscape
 } from '../../models/networkModel';
@@ -37,8 +37,8 @@ const Workspace: React.FC = () => {
   // State for zoom level
   const [zoomLevel, setZoomLevel] = useState<number>(1.0);
   
-  // Get network styles based on view settings
-  const networkStyles = useNetworkStyles();
+  // Get network styles based on node/edge types and view settings
+  const networkStyles = useTypeBasedStyles();
   
   // Default values for new elements
   const defaultNodeIntertwiner = 1;
@@ -338,7 +338,8 @@ const Workspace: React.FC = () => {
       target: targetPlaceholderId, // null or new placeholder ID
       targetPosition: targetPlaceholderId ? undefined : targetPosition,
       spin: defaultEdgeSpin,
-      label: `j=${defaultEdgeSpin}`
+      label: `j=${defaultEdgeSpin}`,
+      type: 'dangling' // Use the dangling edge type
     };
     
     console.log("Creating dangling edge:", newEdge);
@@ -378,7 +379,8 @@ const Workspace: React.FC = () => {
       source: sourceId,
       target: targetId,
       spin: defaultEdgeSpin,
-      label: `j=${defaultEdgeSpin}`
+      label: `j=${defaultEdgeSpin}`,
+      type: 'regular' // Use the default regular type
     };
     
     // If the source or target is a placeholder, get its position
@@ -505,7 +507,8 @@ const Workspace: React.FC = () => {
         y: position.y
       },
       intertwiner: defaultNodeIntertwiner,
-      label: `Node ${network.nodes.length + 1}`
+      label: `Node ${network.nodes.length + 1}`,
+      type: 'regular' // Use the default regular type
     };
     
     dispatch(addNetworkNode(newNode));
