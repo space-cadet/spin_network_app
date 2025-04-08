@@ -196,6 +196,7 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose, on
             >
               <FaTags className="icon text-gray-600" />
               <span className="menu-label">Manage Types</span>
+              <span className="text-xs text-gray-500 ml-2">(also in sidebar)</span>
               <FaChevronRight className="menu-arrow text-gray-500" size={12} />
             </button>
           </li>
