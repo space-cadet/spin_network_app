@@ -68,11 +68,14 @@ const NetworkTools: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-medium text-gray-900">Network Tools</h2>
-      
+    <CollapsibleSection
+      title="Network Tools"
+      defaultExpanded={true}
+      className="border-b border-gray-200"
+      contentClassName="p-4"
+    >
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 mb-4">
         <button
           className={`px-4 py-2 ${
             activeTab === 'create'
@@ -374,7 +377,7 @@ const NetworkTools: React.FC = () => {
           </div>
         </div>
       </CollapsibleSection>
-    </div>
+    </CollapsibleSection>
   );
 };
 

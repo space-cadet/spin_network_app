@@ -49,7 +49,7 @@ function App() {
                 className="border-r border-gray-200 bg-white overflow-y-auto h-full"
                 handlePosition="end"
               >
-                <div className="p-4 h-full overflow-y-auto">
+                <div className="h-full overflow-y-auto">
                   <NetworkTools />
                 </div>
               </PersistentResizablePanel>

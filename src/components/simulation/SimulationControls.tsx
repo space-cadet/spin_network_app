@@ -44,9 +44,12 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({ onStartSimulati
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Simulation Controls</h2>
-      
+    <CollapsibleSection
+      title="Simulation Controls"
+      defaultExpanded={false}
+      className="border-b border-gray-200"
+      contentClassName="p-4"
+    >
       <div className="space-y-4">
         <CollapsibleSection title="Diffusion Type" defaultExpanded={true}>
           <div className="form-group">
@@ -194,7 +197,7 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({ onStartSimulati
           <span>Time: 0.00 / {totalTime.toFixed(2)}</span>
         </div>
       </div>
-    </div>
+    </CollapsibleSection>
   );
 };
 
