@@ -8,6 +8,7 @@ import CollapsibleSection from '../common/CollapsibleSection';
 
 /**
  * Panel version of the type management UI for the right sidebar
+ * The entire panel is collapsible
  */
 const TypeManagementPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'node' | 'edge'>('node');
@@ -20,9 +21,12 @@ const TypeManagementPanel: React.FC = () => {
   };
 
   return (
-    <div className="border-b border-gray-200 p-4">
-      <h2 className="text-lg font-medium mb-4">Type Management</h2>
-      
+    <CollapsibleSection
+      title="Type Management"
+      defaultExpanded={false}
+      className="border-b border-gray-200"
+      contentClassName="p-4"
+    >
       {/* Tabs */}
       <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
         <button
@@ -47,19 +51,14 @@ const TypeManagementPanel: React.FC = () => {
         </button>
       </div>
       
-      {/* Content */}
-      <CollapsibleSection 
-        title={activeTab === 'node' ? "Node Type Management" : "Edge Type Management"} 
-        defaultExpanded={true}
-      >
-        <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
-          {activeTab === 'node' ? (
-            <NodeTypeManager />
-          ) : (
-            <EdgeTypeManager />
-          )}
-        </div>
-      </CollapsibleSection>
+      {/* Type Manager Content */}
+      <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
+        {activeTab === 'node' ? (
+          <NodeTypeManager />
+        ) : (
+          <EdgeTypeManager />
+        )}
+      </div>
       
       {/* Reset Button */}
       <div className="mt-4">
@@ -71,7 +70,7 @@ const TypeManagementPanel: React.FC = () => {
           Reset All Types
         </button>
       </div>
-    </div>
+    </CollapsibleSection>
   );
 };
 
