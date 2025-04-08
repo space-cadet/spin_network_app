@@ -8,9 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Real-time type management updates with immediate visualization feedback
+- Type Management panel in the right sidebar as a collapsible element
+- Collapsible panels for all sidebar components (Properties, Type Management, Simulation Controls, Network Tools)
 - Dedicated zoom controls with percentage indicator
 - Collapsible sections in panels to reduce scrolling and improve organization
 - Persistent sidebar width/height between sessions
+
+### Changed
+- Improved Type Management workflow with real-time updates instead of requiring "Update" button clicks
+- Enhanced organization of sidebar components with consistent collapsible sections
+- Updated Settings dropdown to indicate Type Management is also available in the sidebar
+- Modified Type Management modal with tip about sidebar alternative
 
 ### In Progress
 - Simulation engine development (Graph Laplacian calculation)
@@ -22,17 +31,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerical methods for time evolution
 - Simulation visualization improvements
 - Advanced network manipulation features
-- Dark/light theme support
 - Statistics and metrics calculation
 - Export functionality for results
 
 ### UI Improvements Roadmap (Prioritized)
 1. **Panel Tabs**: Convert right sidebar into tabbed interface (Easy)
-2. **Dark/Light Theme Support**: Implement theme switching (Medium)
+2. ~~**Dark/Light Theme Support**: Implement theme switching (Medium)~~ ✓ IMPLEMENTED
 3. **Fullscreen Mode**: Add button to expand workspace to fullscreen (Easy)
 4. **Context Menus**: Right-click context menus for nodes and edges (Medium)
 5. **Multi-select Operations**: Enable selecting and operating on multiple nodes/edges (Medium)
-6. **Visual Node Categorization**: Use different shapes/colors for node types (Easy)
+6. ~~**Visual Node Categorization**: Use different shapes/colors for node types (Easy)~~ ✓ IMPLEMENTED
 7. **History Navigation UI**: Create visual timeline for undo/redo operations (Medium)
 8. **Interactive Tutorial**: Step-by-step walkthrough for first-time users (Complex)
 

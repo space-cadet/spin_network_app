@@ -42,11 +42,12 @@ The application features a flexible, customizable interface:
 
 - **Left Panel**: Network creation tools, templates, and file operations with collapsible sections
 - **Main Area**: Interactive network visualization with dedicated zoom controls and mode selection
-- **Right Panel**: Properties editor and simulation controls with collapsible sections
+- **Right Panel**: Properties editor, type management, and simulation controls with collapsible sections
 - **Bottom Panel**: Energy plots and simulation metrics
 
 Key features:
 - All panels are resizable to accommodate different workflows and preferences
+- Each panel contains collapsible sections for better organization
 - Panels can be hidden/shown to maximize workspace
 - Panel sizes are remembered between sessions
 - Dedicated zoom controls with percentage indicator
@@ -54,7 +55,8 @@ Key features:
 - Multiple interaction modes (select, pan, add node, add edge, delete)
 - Network saving and loading with timestamp versioning
 - Recent networks quick access menu
-- Organized panels with collapsible sections to reduce scrolling
+- Real-time type management updates with immediate visualization feedback
+- Dark/light theme support with system detection
 
 ## Development
 
@@ -132,7 +134,9 @@ The project is in active development. The current version features:
 - Hideable panels to maximize workspace
 - Customizable workspace with resizable panels that remember their sizes
 - Property editing for network elements in organized collapsible sections
-- Organized UI with collapsible sections to reduce scrolling
+- Type management with real-time updates and immediate visualization feedback
+- Collapsible panels and sections for better organization and reduced scrolling
+- Dark/light theme support with system detection
 
 See the [CHANGELOG.md](CHANGELOG.md) for recent updates and the current development status.
 
