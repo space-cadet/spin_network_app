@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
 import NetworkTools from './components/tools/NetworkTools'
-import PropertiesPanel from './components/panels/PropertiesPanel'
+import { PropertiesPanel, TypeManagementPanel } from './components/panels'
 import SimulationControls from './components/simulation/SimulationControls'
 import EnergyPlot from './components/visualization/EnergyPlot'
 import PersistentResizablePanel from './components/common/PersistentResizablePanel'
@@ -111,6 +111,7 @@ function App() {
               >
                 <div className="h-full overflow-y-auto">
                   <PropertiesPanel />
+                  <TypeManagementPanel />
                   <SimulationControls onStartSimulation={handleStartSimulation} />
                 </div>
               </PersistentResizablePanel>
