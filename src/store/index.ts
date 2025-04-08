@@ -16,6 +16,7 @@ import networkReducer from './slices/networkSlice';
 import uiReducer from './slices/uiSlice';
 import recentNetworksReducer from './slices/recentNetworksSlice';
 import typeReducer from './slices/typeSlice';
+import typeUsageMiddleware from './middleware/typeUsageMiddleware';
 import { migrationFunction } from '../utils/migrations';
 
 // Configure localforage
@@ -83,7 +84,7 @@ const store = configureStore({
         // Ignore redux-persist actions for serializable check to avoid warnings
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(typeUsageMiddleware),
 });
 
 // Create the persistor

@@ -19,7 +19,14 @@ function generateId(prefix: string): string {
  * Creates a lattice (grid) network with the specified parameters
  */
 export function createLatticeNetwork(params: LatticeNetworkParams): SpinNetwork {
-  const { rows, columns, defaultIntertwiner = 1, defaultSpin = 0.5 } = params;
+  const { 
+    rows, 
+    columns, 
+    defaultIntertwiner = 1, 
+    defaultSpin = 0.5,
+    defaultNodeType = 'regular',
+    defaultEdgeType = 'regular'
+  } = params;
   
   // Create empty network with metadata
   const network = createEmptyNetwork('Lattice Network');
@@ -28,7 +35,9 @@ export function createLatticeNetwork(params: LatticeNetworkParams): SpinNetwork 
     rows,
     columns,
     defaultIntertwiner,
-    defaultSpin
+    defaultSpin,
+    defaultNodeType,
+    defaultEdgeType
   };
   
   const nodes: NetworkNode[] = [];
@@ -48,6 +57,7 @@ export function createLatticeNetwork(params: LatticeNetworkParams): SpinNetwork 
         },
         intertwiner: defaultIntertwiner,
         label: `(${r},${c})`,
+        type: params.defaultNodeType || 'regular',
       });
       
       // Connect to left neighbor if not first column
@@ -58,7 +68,8 @@ export function createLatticeNetwork(params: LatticeNetworkParams): SpinNetwork 
           source: leftNodeId,
           target: nodeId,
           spin: defaultSpin,
-          label: `j=${defaultSpin}`
+          label: `j=${defaultSpin}`,
+          type: params.defaultEdgeType || 'regular'
         });
       }
       
@@ -70,7 +81,8 @@ export function createLatticeNetwork(params: LatticeNetworkParams): SpinNetwork 
           source: topNodeId,
           target: nodeId,
           spin: defaultSpin,
-          label: `j=${defaultSpin}`
+          label: `j=${defaultSpin}`,
+          type: params.defaultEdgeType || 'regular'
         });
       }
     }
@@ -92,6 +104,8 @@ export function createCircularNetwork(params: CircularNetworkParams): SpinNetwor
     radius = 200, 
     defaultIntertwiner = 1, 
     defaultSpin = 0.5, 
+    defaultNodeType = 'regular',
+    defaultEdgeType = 'regular',
     connectAll = false 
   } = params;
   
@@ -103,6 +117,8 @@ export function createCircularNetwork(params: CircularNetworkParams): SpinNetwor
     radius,
     defaultIntertwiner,
     defaultSpin,
+    defaultNodeType,
+    defaultEdgeType,
     connectAll
   };
   
@@ -125,6 +141,7 @@ export function createCircularNetwork(params: CircularNetworkParams): SpinNetwor
       position: { x, y },
       intertwiner: defaultIntertwiner,
       label: `${i + 1}`,
+      type: params.defaultNodeType || 'regular',
     });
     
     // Connect to previous node
@@ -134,7 +151,8 @@ export function createCircularNetwork(params: CircularNetworkParams): SpinNetwor
         source: nodes[i - 1].id,
         target: nodeId,
         spin: defaultSpin,
-        label: `j=${defaultSpin}`
+        label: `j=${defaultSpin}`,
+        type: params.defaultEdgeType || 'regular'
       });
     }
   }
@@ -146,7 +164,8 @@ export function createCircularNetwork(params: CircularNetworkParams): SpinNetwor
       source: nodes[nodes.length - 1].id,
       target: nodes[0].id,
       spin: defaultSpin,
-      label: `j=${defaultSpin}`
+      label: `j=${defaultSpin}`,
+      type: params.defaultEdgeType || 'regular'
     });
   }
   
@@ -162,7 +181,8 @@ export function createCircularNetwork(params: CircularNetworkParams): SpinNetwor
           source: nodes[i].id,
           target: nodes[j].id,
           spin: defaultSpin,
-          label: `j=${defaultSpin}`
+          label: `j=${defaultSpin}`,
+          type: params.defaultEdgeType || 'regular'
         });
       }
     }
@@ -183,7 +203,9 @@ export function createRandomNetwork(params: RandomNetworkParams): SpinNetwork {
     nodes: nodeCount, 
     edgeProbability, 
     defaultIntertwiner = 1, 
-    defaultSpin = 0.5 
+    defaultSpin = 0.5,
+    defaultNodeType = 'regular',
+    defaultEdgeType = 'regular'
   } = params;
   
   // Create empty network with metadata
@@ -193,7 +215,9 @@ export function createRandomNetwork(params: RandomNetworkParams): SpinNetwork {
     nodes: nodeCount,
     edgeProbability,
     defaultIntertwiner,
-    defaultSpin
+    defaultSpin,
+    defaultNodeType,
+    defaultEdgeType
   };
   
   const nodes: NetworkNode[] = [];
@@ -212,6 +236,7 @@ export function createRandomNetwork(params: RandomNetworkParams): SpinNetwork {
       position: { x, y },
       intertwiner: defaultIntertwiner,
       label: `${i + 1}`,
+      type: params.defaultNodeType || 'regular',
     });
   }
   
@@ -224,7 +249,8 @@ export function createRandomNetwork(params: RandomNetworkParams): SpinNetwork {
           source: nodes[i].id,
           target: nodes[j].id,
           spin: defaultSpin,
-          label: `j=${defaultSpin}`
+          label: `j=${defaultSpin}`,
+          type: params.defaultEdgeType || 'regular'
         });
       }
     }

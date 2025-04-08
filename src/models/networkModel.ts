@@ -315,8 +315,10 @@ export function removeEdge(network: SpinNetwork, edgeId: string): SpinNetwork {
   const placeholderPrefixTarget = `placeholder-target-${edgeId}`;
   
   const updatedNodes = network.nodes.filter(node => {
+    // Support both string type IDs and the legacy 'placeholder' string
+    const isPlaceholder = node.type === 'placeholder';
     const isPlaceholderForThisEdge = 
-      node.type === 'placeholder' && 
+      isPlaceholder && 
       (node.id.startsWith(placeholderPrefixSource) || node.id.startsWith(placeholderPrefixTarget));
     
     if (isPlaceholderForThisEdge) {
@@ -423,6 +425,7 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
         target: edge.target === null ? `placeholder-target-${edge.id}` : edge.target,
         label: edge.label || `j=${edge.spin}`,
         spin: edge.spin,
+        type: edge.type || 'regular', // Use edge type or default to regular
         hasDangling: edge.source === null || edge.target === null,
         ...edge.properties
       }

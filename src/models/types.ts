@@ -13,7 +13,7 @@ export interface NetworkNode {
   };
   intertwiner: number; // The intertwiner value (typically a half-integer)
   label?: string; // Optional display label
-  type?: 'regular' | 'placeholder'; // Node type (default: regular)
+  type?: string; // Node type ID (default: 'regular')
   properties?: Record<string, any>; // Additional custom properties
 }
 
@@ -26,6 +26,7 @@ export interface NetworkEdge {
   target: string | null; // ID of the target node (null if dangling)
   spin: number; // The spin value (typically a half-integer)
   label?: string; // Optional display label
+  type?: string; // Edge type ID (default: 'regular')
   sourcePosition?: { x: number, y: number }; // Position for dangling source end
   targetPosition?: { x: number, y: number }; // Position for dangling target end
   properties?: Record<string, any>; // Additional custom properties
@@ -60,6 +61,8 @@ export interface LatticeNetworkParams {
   columns: number; // Number of columns
   defaultIntertwiner?: number; // Default intertwiner value for all nodes
   defaultSpin?: number; // Default spin value for all edges
+  defaultNodeType?: string; // Default node type ID
+  defaultEdgeType?: string; // Default edge type ID
 }
 
 /**
@@ -70,6 +73,8 @@ export interface CircularNetworkParams {
   radius?: number; // Circle radius
   defaultIntertwiner?: number; // Default intertwiner value for all nodes
   defaultSpin?: number; // Default spin value for all edges
+  defaultNodeType?: string; // Default node type ID
+  defaultEdgeType?: string; // Default edge type ID
   connectAll?: boolean; // If true, all nodes are connected to all others
 }
 
@@ -81,6 +86,8 @@ export interface RandomNetworkParams {
   edgeProbability: number; // Probability of edge between any two nodes (0-1)
   defaultIntertwiner?: number; // Default intertwiner value for all nodes
   defaultSpin?: number; // Default spin value for all edges
+  defaultNodeType?: string; // Default node type ID
+  defaultEdgeType?: string; // Default edge type ID
 }
 
 /**
