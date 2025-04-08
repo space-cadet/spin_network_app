@@ -24,7 +24,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="relative"> {/* Added relative positioning wrapper */}
       <button
         onClick={toggleDropdown}
         className="flex items-center hover:text-primary-100"
@@ -41,7 +41,7 @@ const Settings: React.FC = () => {
       />
 
       <TypeManagementComponent />
-    </>
+    </div>
   );
 };
 
