@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { EdgeType } from '../../../models/typeModels';
+import { useAppDispatch } from '../../../store/hooks';
+import { updateEdgeType, addEdgeType } from '../../../store/slices/typeSlice';
 
 interface EdgeTypeFormProps {
   edgeType: EdgeType | null;
@@ -10,6 +12,7 @@ interface EdgeTypeFormProps {
 }
 
 const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubmit, onCancel }) => {
+  const dispatch = useAppDispatch();
   const [type, setType] = useState<EdgeType>({
     id: '',
     name: '',
@@ -35,21 +38,43 @@ const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubm
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setType(prev => ({ ...prev, [name]: value }));
+    const updatedType = { ...type, [name]: value };
+    setType(updatedType);
+    
+    // For real-time updates, dispatch to Redux if we're editing an existing type
+    if (isEditing) {
+      dispatch(updateEdgeType(updatedType));
+    }
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const numValue = value === '' ? 0 : Number(value);
-    setType(prev => ({ ...prev, [name]: numValue }));
+    const updatedType = { ...type, [name]: numValue };
+    setType(updatedType);
+    
+    // For real-time updates, dispatch to Redux if we're editing an existing type
+    if (isEditing) {
+      dispatch(updateEdgeType(updatedType));
+    }
   };
 
   const handleColorChange = (value: string) => {
-    setType(prev => ({ ...prev, color: value }));
+    const updatedType = { ...type, color: value };
+    setType(updatedType);
+    
+    // For real-time updates, dispatch to Redux if we're editing an existing type
+    if (isEditing) {
+      dispatch(updateEdgeType(updatedType));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // If we're not editing, we need to create a new type
+    if (!isEditing) {
+      dispatch(addEdgeType(type));
+    }
     onSubmit(type);
   };
 
@@ -260,7 +285,7 @@ const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubm
             type="submit"
             className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
           >
-            {isEditing ? 'Update' : 'Create'}
+            {isEditing ? 'Done' : 'Create'}
           </button>
         </div>
       </form>

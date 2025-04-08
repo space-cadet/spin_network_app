@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { NodeType } from '../../../models/typeModels';
+import { useAppDispatch } from '../../../store/hooks';
+import { updateNodeType, addNodeType } from '../../../store/slices/typeSlice';
 
 interface NodeTypeFormProps {
   nodeType: NodeType | null;
@@ -10,6 +12,7 @@ interface NodeTypeFormProps {
 }
 
 const NodeTypeForm: React.FC<NodeTypeFormProps> = ({ nodeType, isEditing, onSubmit, onCancel }) => {
+  const dispatch = useAppDispatch();
   const [type, setType] = useState<NodeType>({
     id: '',
     name: '',
@@ -37,21 +40,43 @@ const NodeTypeForm: React.FC<NodeTypeFormProps> = ({ nodeType, isEditing, onSubm
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setType(prev => ({ ...prev, [name]: value }));
+    const updatedType = { ...type, [name]: value };
+    setType(updatedType);
+    
+    // For real-time updates, dispatch to Redux if we're editing an existing type
+    if (isEditing) {
+      dispatch(updateNodeType(updatedType));
+    }
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const numValue = value === '' ? 0 : Number(value);
-    setType(prev => ({ ...prev, [name]: numValue }));
+    const updatedType = { ...type, [name]: numValue };
+    setType(updatedType);
+    
+    // For real-time updates, dispatch to Redux if we're editing an existing type
+    if (isEditing) {
+      dispatch(updateNodeType(updatedType));
+    }
   };
 
   const handleColorChange = (colorName: string, value: string) => {
-    setType(prev => ({ ...prev, [colorName]: value }));
+    const updatedType = { ...type, [colorName]: value };
+    setType(updatedType);
+    
+    // For real-time updates, dispatch to Redux if we're editing an existing type
+    if (isEditing) {
+      dispatch(updateNodeType(updatedType));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // If we're not editing, we need to create a new type
+    if (!isEditing) {
+      dispatch(addNodeType(type));
+    }
     onSubmit(type);
   };
 
@@ -301,7 +326,7 @@ const NodeTypeForm: React.FC<NodeTypeFormProps> = ({ nodeType, isEditing, onSubm
             type="submit"
             className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
           >
-            {isEditing ? 'Update' : 'Create'}
+            {isEditing ? 'Done' : 'Create'}
           </button>
         </div>
       </form>
