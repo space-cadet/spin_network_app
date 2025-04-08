@@ -11,7 +11,8 @@ import {
   FaFileExport,
   FaUndo,
   FaChevronRight,
-  FaCheck
+  FaCheck,
+  FaTags
 } from 'react-icons/fa';
 import { 
   toggleSidebar,
@@ -33,9 +34,10 @@ import {
 interface SettingsDropdownProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenTypeManagement?: () => void;
 }
 
-const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) => {
+const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose, onOpenTypeManagement }) => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector(selectTheme);
   const viewSettings = useAppSelector(selectViewSettings);
@@ -185,6 +187,16 @@ const SettingsDropdown: React.FC<SettingsDropdownProps> = ({ isOpen, onClose }) 
             >
               <FaKeyboard className="icon text-gray-600" />
               <span className="menu-label">Keyboard Shortcuts</span>
+              <FaChevronRight className="menu-arrow text-gray-500" size={12} />
+            </button>
+          </li>
+          <li>
+            <button
+              className="menu-item"
+              onClick={onOpenTypeManagement}
+            >
+              <FaTags className="icon text-gray-600" />
+              <span className="menu-label">Manage Types</span>
               <FaChevronRight className="menu-arrow text-gray-500" size={12} />
             </button>
           </li>

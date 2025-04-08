@@ -1,8 +1,7 @@
 import React from 'react';
-import { FaNetworkWired, FaChartLine, FaCog } from 'react-icons/fa';
+import { FaNetworkWired, FaChartLine } from 'react-icons/fa';
 import ResizablePanel from '../common/ResizablePanel';
-import HeaderDropdown from '../settings/HeaderDropdown';
-import SettingsDropdown from '../settings/SettingsDropdown';
+import { Settings } from '../settings';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -33,14 +32,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   <span className="text-white ml-1">Simulation</span>
                 </a>
               </li>
-              <HeaderDropdown
-                label="Settings"
-                icon={<FaCog className="text-white" />}
-              >
-                {(isOpen, onClose) => (
-                  <SettingsDropdown isOpen={isOpen} onClose={onClose} />
-                )}
-              </HeaderDropdown>
+              <li className="flex items-center">
+                <Settings />
+              </li>
             </ul>
           </nav>
         </div>
