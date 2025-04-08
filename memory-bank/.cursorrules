@@ -18,6 +18,9 @@
 6. Edges can have null source/target to support "dangling" edges
 7. Dangling edges store position information for their unconnected endpoints
 8. Placeholder nodes are created for visualization of dangling edge endpoints
+9. Node and edge types have unique string IDs for reference in the data model
+10. Type IDs with pattern 'node-type-{timestamp}' and 'edge-type-{timestamp}'
+11. Built-in system types ('regular', 'placeholder', 'dangling') have special handling
 
 ## Interface Patterns
 
@@ -51,6 +54,9 @@
 12. Limit maximum zoom level to maintain visual consistency
 13. Use the useNetworkStyles hook to apply view settings to Cytoscape
 14. Update Cytoscape styles when view settings change using useEffect
+15. Node and edge types define visual properties (color, size, shape, etc.)
+16. The Type Management UI allows customization of element visual properties
+17. Type-specific styles override global view settings when applied
 
 ## Event Handling Patterns
 
@@ -88,6 +94,9 @@
 8. SettingsDropdown organizes application settings with submenus
 9. Dropdown menus use a consistent back-button pattern for submenu navigation
 10. Custom CSS classes (menu-item, menu-label) ensure consistent styling in dropdowns
+11. Type management uses a tabbed modal interface for different element types
+12. Type creation/editing forms provide live preview of appearance changes
+13. Type managers handle CRUD operations for node/edge types
 
 ## Coding Conventions
 

@@ -34,6 +34,7 @@ The UI is built using a composition of smaller, focused components:
 - **Presentational Components**: Handle rendering and user interaction
 - **Layout Components**: Manage application structure and resizable panels
 - **Interactive Controls**: Handle user input and provide feedback
+- **Type Management Components**: Handle creation and customization of node and edge types
 
 This approach promotes reusability and simplifies testing and maintenance.
 
@@ -173,6 +174,7 @@ interface Node {
   id: string;
   position: { x: number, y: number };
   intertwiner: number | null;
+  type?: string; // Node type identifier for styling
   properties: Record<string, any>;
 }
 
@@ -181,6 +183,7 @@ interface Edge {
   source: string;
   target: string;
   spin: number;
+  type?: string; // Edge type identifier for styling
   properties: Record<string, any>;
 }
 
@@ -191,7 +194,8 @@ interface SpinNetwork {
 }
 ```
 
-This structure is optimized for visualization with Cytoscape.js and for diffusion calculations.
+This structure is optimized for visualization with Cytoscape.js and for diffusion calculations. 
+The type field allows for dynamic styling based on node and edge types defined in the Type Management system.
 
 ## Component Relationships
 
@@ -202,11 +206,19 @@ This structure is optimized for visualization with Cytoscape.js and for diffusio
 │ Network Data │───►│ Cytoscape.js │───►│ Rendered     │
 │ Model        │    │ Adapter      │    │ Network      │
 └──────────────┘    └──────────────┘    └──────────────┘
-       ▲                                        │
-       │                                        │
+       ▲                  ▲                    │
+       │                  │                    │
+       │                  │                    │
+       │            ┌──────────────┐           │
+       │            │ Type         │           │
+       │            │ Registry     │           │
+       │            └──────────────┘           │
+       │                                       │
        └───────────────────────────────────────┘
                   User Interaction
 ```
+
+The Type Registry provides styling information to the Cytoscape.js Adapter, which applies the appropriate visual properties to each node and edge based on its assigned type.
 
 ### Simulation Data Flow
 
