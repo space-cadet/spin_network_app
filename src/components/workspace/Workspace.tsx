@@ -50,7 +50,7 @@ const Workspace: React.FC = () => {
 
     const cyInstance = cytoscape({
       container: cyContainerRef.current,
-      style: networkStyles,
+      style: networkStyles as any,
       // Basic interactions
       userZoomingEnabled: true,
       userPanningEnabled: true,
@@ -112,7 +112,7 @@ const Workspace: React.FC = () => {
     // Handle window resize to redraw the graph
     const handleResize = () => {
       if (cyInstance) {
-        cyInstance.resize();
+        (cyInstance as any).resize();
       }
     };
 
@@ -147,7 +147,7 @@ const Workspace: React.FC = () => {
     if (!cy) return;
     
     // Apply the new styles
-    cy.style(networkStyles);
+    cy.style(networkStyles as any);
   }, [cy, viewSettings, networkStyles]);
 
   // Update cytoscape when network changes
@@ -215,7 +215,7 @@ const Workspace: React.FC = () => {
     // Create a ResizeObserver to detect changes in the container size
     const resizeObserver = new ResizeObserver(() => {
       if (cy) {
-        cy.resize();
+        (cy as any).resize();
       }
     });
     

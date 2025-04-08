@@ -9,8 +9,7 @@ import {
   removeNodeType 
 } from '../../../store/slices/typeSlice';
 import { 
-  selectAllNodeTypes, 
-  selectNodeTypeUsageById 
+  selectAllNodeTypes
 } from '../../../store/selectors/typeSelectors';
 import { NodeType } from '../../../models/typeModels';
 

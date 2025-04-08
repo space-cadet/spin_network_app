@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaPlus, FaMinus, FaExpand } from 'react-icons/fa';
+import { FaPlus, FaMinus } from 'react-icons/fa';
 import { BsArrowsFullscreen } from 'react-icons/bs';
 
 interface ZoomControlsProps {

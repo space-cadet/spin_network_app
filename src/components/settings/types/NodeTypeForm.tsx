@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaInfoCircle } from 'react-icons/fa';
+import { FaChevronLeft } from 'react-icons/fa';
 import { NodeType } from '../../../models/typeModels';
 
 interface NodeTypeFormProps {

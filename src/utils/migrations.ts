@@ -32,4 +32,4 @@ export const migrations = {
 /**
  * Creates a migration function for redux-persist
  */
-export const migrationFunction = createMigrate(migrations, { debug: import.meta.env.DEV });
+export const migrationFunction = createMigrate(migrations, { debug: (import.meta as any).env?.DEV });

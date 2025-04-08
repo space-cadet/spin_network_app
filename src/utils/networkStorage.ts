@@ -101,7 +101,7 @@ export const NetworkStorage = {
     const networks: SpinNetwork[] = [];
     
     try {
-      await networkStorage.iterate<string, void>((value, key) => {
+      await networkStorage.iterate<string, void>((value) => {
         const network = JSON.parse(value) as SpinNetwork;
         networks.push(network);
       });

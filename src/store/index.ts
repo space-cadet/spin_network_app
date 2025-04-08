@@ -9,7 +9,7 @@ import {
   PURGE, 
   REGISTER 
 } from 'redux-persist';
-import { combineReducers } from 'redux';
+
 import localforage from 'localforage';
 
 import networkReducer from './slices/networkSlice';

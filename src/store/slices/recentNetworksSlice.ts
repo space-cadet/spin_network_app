@@ -29,7 +29,7 @@ const initialState: RecentNetworksState = {
  */
 const createEntryFromNetwork = (network: SpinNetwork): RecentNetworkEntry => {
   return {
-    id: network.metadata?.id || `network-${Date.now()}`,
+    id: (network.metadata as any)?.id || `network-${Date.now()}`,
     name: network.metadata?.name || 'Unnamed Network',
     timestamp: Date.now(),
     nodeCount: network.nodes.length,

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import './HeaderMenu.css';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
-  FaCog,
   FaEye,
   FaTh,
   FaPalette,

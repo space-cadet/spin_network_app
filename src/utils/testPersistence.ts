@@ -4,7 +4,7 @@
  */
 
 import { store, persistor } from '../store';
-import { createLattice, createCircular } from '../store/slices/networkSlice';
+import { createLattice } from '../store/slices/networkSlice';
 import { setViewSettings } from '../store/slices/uiSlice';
 
 /**

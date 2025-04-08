@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPlus, FaTable, FaCircle, FaRandom, FaTrash, FaSave, FaFileUpload } from 'react-icons/fa';
+import { FaPlus, FaTable, FaCircle, FaRandom, FaTrash } from 'react-icons/fa';
 import FileOperations from '../common/FileOperations';
 import ResetButton from '../common/ResetButton';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';

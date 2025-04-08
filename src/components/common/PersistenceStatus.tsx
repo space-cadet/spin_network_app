@@ -11,10 +11,11 @@ const PersistenceStatus: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'loading'>('idle');
   
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
     
     const unsubscribe = store.subscribe(() => {
-      const action = store.getState()._persist?.rehydrated 
+      const state = store.getState();
+      const action = (state as any)._persist?.rehydrated 
         ? { type: PERSIST } // If already rehydrated, this is a persist action
         : { type: REHYDRATE }; // Otherwise it's a rehydrate action
       

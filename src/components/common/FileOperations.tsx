@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SpinNetwork } from '../../models/types';
 import { setNetwork, setNetworkWithHistory } from '../../store/slices/networkSlice';
