@@ -23,7 +23,11 @@ const NodeTypeForm: React.FC<NodeTypeFormProps> = ({ nodeType, isEditing, onSubm
     borderStyle: 'solid',
     shape: 'ellipse',
     size: 80,
-    labelPosition: 'center'
+    labelPosition: 'center',
+    labelColor: '#ffffff',
+    labelSize: 14,
+    labelBold: false,
+    labelItalic: false
   });
 
   useEffect(() => {
@@ -186,6 +190,103 @@ const NodeTypeForm: React.FC<NodeTypeFormProps> = ({ nodeType, isEditing, onSubm
                 <option value="bottom">Bottom</option>
               </select>
             </div>
+            
+            {/* Label styling section */}
+            <div className="mt-6 border-t border-gray-200 pt-6">
+              <h3 className="text-md font-medium text-gray-900 dark:text-white mb-3">
+                Label Styling
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Label Color
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="color"
+                      value={type.labelColor || '#ffffff'}
+                      onChange={(e) => handleColorChange('labelColor', e.target.value)}
+                      className="w-10 h-10 p-0 border-0 rounded-md cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={type.labelColor || '#ffffff'}
+                      onChange={(e) => handleColorChange('labelColor', e.target.value)}
+                      className="flex-1 ml-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Label Size
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="range"
+                      name="labelSize"
+                      min="8"
+                      max="24"
+                      value={type.labelSize || 14}
+                      onChange={handleNumberChange}
+                      className="w-full mr-3"
+                    />
+                    <input
+                      type="number"
+                      name="labelSize"
+                      value={type.labelSize || 14}
+                      onChange={handleNumberChange}
+                      min="8"
+                      max="24"
+                      className="w-16 px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="labelBold"
+                      name="labelBold"
+                      checked={type.labelBold || false}
+                      onChange={(e) => {
+                        const updatedType = { ...type, labelBold: e.target.checked };
+                        setType(updatedType);
+                        if (isEditing) {
+                          dispatch(updateNodeType(updatedType));
+                        }
+                      }}
+                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <label htmlFor="labelBold" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      Bold
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="labelItalic"
+                      name="labelItalic"
+                      checked={type.labelItalic || false}
+                      onChange={(e) => {
+                        const updatedType = { ...type, labelItalic: e.target.checked };
+                        setType(updatedType);
+                        if (isEditing) {
+                          dispatch(updateNodeType(updatedType));
+                        }
+                      }}
+                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <label htmlFor="labelItalic" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      Italic
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Right column */}
@@ -294,9 +395,12 @@ const NodeTypeForm: React.FC<NodeTypeFormProps> = ({ nodeType, isEditing, onSubm
                 >
                   {type.labelPosition === 'center' && (
                     <span
-                      className="text-white text-sm font-medium"
                       style={{
-                        transform: type.shape === 'diamond' ? 'rotate(-45deg)' : 'none'
+                        transform: type.shape === 'diamond' ? 'rotate(-45deg)' : 'none',
+                        color: type.labelColor || '#ffffff',
+                        fontSize: `${type.labelSize || 14}px`,
+                        fontWeight: type.labelBold ? 'bold' : 'normal',
+                        fontStyle: type.labelItalic ? 'italic' : 'normal'
                       }}
                     >
                       Label
@@ -305,10 +409,30 @@ const NodeTypeForm: React.FC<NodeTypeFormProps> = ({ nodeType, isEditing, onSubm
                 </div>
               </div>
               {type.labelPosition === 'top' && (
-                <div className="text-center mt-2 text-sm font-medium">Label</div>
+                <div 
+                  className="text-center mt-2" 
+                  style={{
+                    color: type.labelColor || '#000000',
+                    fontSize: `${type.labelSize || 14}px`,
+                    fontWeight: type.labelBold ? 'bold' : 'normal',
+                    fontStyle: type.labelItalic ? 'italic' : 'normal'
+                  }}
+                >
+                  Label
+                </div>
               )}
               {type.labelPosition === 'bottom' && (
-                <div className="text-center mt-1 text-sm font-medium">Label</div>
+                <div 
+                  className="text-center mt-1"
+                  style={{
+                    color: type.labelColor || '#000000',
+                    fontSize: `${type.labelSize || 14}px`,
+                    fontWeight: type.labelBold ? 'bold' : 'normal',
+                    fontStyle: type.labelItalic ? 'italic' : 'normal'
+                  }}
+                >
+                  Label
+                </div>
               )}
             </div>
           </div>

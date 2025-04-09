@@ -16,6 +16,11 @@ export interface NodeType {
   shape: 'ellipse' | 'rectangle' | 'triangle' | 'diamond' | 'hexagon';
   size: number;
   labelPosition: 'center' | 'top' | 'bottom';
+  // Label style properties
+  labelColor?: string;
+  labelSize?: number;
+  labelBold?: boolean;
+  labelItalic?: boolean;
   isSystem?: boolean; // Indicates if this is a system type that cannot be deleted
 }
 
@@ -31,6 +36,13 @@ export interface EdgeType {
   lineStyle: 'solid' | 'dashed' | 'dotted';
   arrow: 'none' | 'triangle' | 'vee';
   arrowScale: number;
+  // Label style properties
+  labelColor?: string;
+  labelSize?: number;
+  labelBold?: boolean;
+  labelItalic?: boolean;
+  labelBackgroundColor?: string;
+  labelBackgroundOpacity?: number;
   isSystem?: boolean; // Indicates if this is a system type that cannot be deleted
 }
 
@@ -49,6 +61,10 @@ export const DEFAULT_NODE_TYPES: NodeType[] = [
     shape: 'ellipse',
     size: 80,
     labelPosition: 'center',
+    labelColor: '#ffffff',
+    labelSize: 14,
+    labelBold: false,
+    labelItalic: false,
     isSystem: true
   },
   {
@@ -62,6 +78,10 @@ export const DEFAULT_NODE_TYPES: NodeType[] = [
     shape: 'diamond',
     size: 32,
     labelPosition: 'center',
+    labelColor: '#ffffff',
+    labelSize: 12,
+    labelBold: false,
+    labelItalic: false,
     isSystem: true
   }
 ];
@@ -79,6 +99,12 @@ export const DEFAULT_EDGE_TYPES: EdgeType[] = [
     lineStyle: 'solid',
     arrow: 'none',
     arrowScale: 1,
+    labelColor: '#334155',
+    labelSize: 14,
+    labelBold: false,
+    labelItalic: false,
+    labelBackgroundColor: '#ffffff',
+    labelBackgroundOpacity: 1,
     isSystem: true
   },
   {
@@ -90,6 +116,12 @@ export const DEFAULT_EDGE_TYPES: EdgeType[] = [
     lineStyle: 'dashed',
     arrow: 'none',
     arrowScale: 1,
+    labelColor: '#334155',
+    labelSize: 14,
+    labelBold: false,
+    labelItalic: false,
+    labelBackgroundColor: '#ffffff',
+    labelBackgroundOpacity: 0.8,
     isSystem: true
   }
 ];

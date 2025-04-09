@@ -43,10 +43,12 @@ export const useTypeBasedStyles = () => {
         'shape': nodeType.shape,
         'text-valign': nodeType.labelPosition,
         'label': viewSettings?.showNodeLabels ? 'data(label)' : '',
-        'color': '#fff',
-        'text-outline-color': nodeType.borderColor,
+        'color': nodeType.labelColor || '#fff',
+        'text-outline-color': nodeType.borderColor, 
         'text-outline-width': 1.5,
-        'font-size': '14px'
+        'font-size': `${nodeType.labelSize || 14}px`,
+        'font-weight': nodeType.labelBold ? 'bold' : 'normal',
+        'font-style': nodeType.labelItalic ? 'italic' : 'normal'
       }
     }));
   };
@@ -65,9 +67,12 @@ export const useTypeBasedStyles = () => {
         'target-arrow-color': edgeType.color,
         'source-arrow-color': edgeType.color,
         'label': viewSettings?.showEdgeLabels ? 'data(label)' : '',
-        'color': '#334155',
-        'text-background-color': '#fff',
-        'text-background-opacity': 1,
+        'color': edgeType.labelColor || '#334155',
+        'font-size': `${edgeType.labelSize || 14}px`,
+        'font-weight': edgeType.labelBold ? 'bold' : 'normal',
+        'font-style': edgeType.labelItalic ? 'italic' : 'normal',
+        'text-background-color': edgeType.labelBackgroundColor || '#fff',
+        'text-background-opacity': edgeType.labelBackgroundOpacity || 1,
         'text-background-padding': '2px'
       }
     }));
@@ -87,7 +92,9 @@ export const useTypeBasedStyles = () => {
         'text-valign': 'center',
         'width': 80 * getNodeSizeMultiplier(),
         'height': 80 * getNodeSizeMultiplier(),
-        'font-size': '14px'
+        'font-size': '14px',
+        'font-weight': 'normal',
+        'font-style': 'normal'
       }
     },
     // Default selector for any edge without a recognized type
@@ -101,7 +108,10 @@ export const useTypeBasedStyles = () => {
         'color': '#334155',
         'text-background-color': '#fff',
         'text-background-opacity': 1,
-        'text-background-padding': '2px'
+        'text-background-padding': '2px',
+        'font-size': '14px',
+        'font-weight': 'normal',
+        'font-style': 'normal'
       }
     },
     // Dangling edges style

@@ -22,6 +22,12 @@ const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubm
     lineStyle: 'solid',
     arrow: 'none',
     arrowScale: 1,
+    labelColor: '#334155',
+    labelSize: 14,
+    labelBold: false,
+    labelItalic: false,
+    labelBackgroundColor: '#ffffff',
+    labelBackgroundOpacity: 1,
   });
 
   useEffect(() => {
@@ -59,8 +65,8 @@ const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubm
     }
   };
 
-  const handleColorChange = (value: string) => {
-    const updatedType = { ...type, color: value };
+  const handleColorChange = (colorName: string, value: string) => {
+    const updatedType = { ...type, [colorName]: value };
     setType(updatedType);
     
     // For real-time updates, dispatch to Redux if we're editing an existing type
@@ -149,13 +155,13 @@ const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubm
                 <input
                   type="color"
                   value={type.color}
-                  onChange={(e) => handleColorChange(e.target.value)}
+                  onChange={(e) => handleColorChange('color', e.target.value)}
                   className="w-10 h-10 p-0 border-0 rounded-md cursor-pointer"
                 />
                 <input
                   type="text"
                   value={type.color}
-                  onChange={(e) => handleColorChange(e.target.value)}
+                  onChange={(e) => handleColorChange('color', e.target.value)}
                   className="flex-1 ml-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
@@ -236,13 +242,158 @@ const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubm
               </div>
             </div>
 
+            {/* Label styling section */}
+            <div className="mt-6 border-t border-gray-200 pt-6">
+              <h3 className="text-md font-medium text-gray-900 dark:text-white mb-3">
+                Label Styling
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Label Color
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="color"
+                      value={type.labelColor || '#334155'}
+                      onChange={(e) => handleColorChange('labelColor', e.target.value)}
+                      className="w-10 h-10 p-0 border-0 rounded-md cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={type.labelColor || '#334155'}
+                      onChange={(e) => handleColorChange('labelColor', e.target.value)}
+                      className="flex-1 ml-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Label Size
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="range"
+                      name="labelSize"
+                      min="8"
+                      max="24"
+                      value={type.labelSize || 14}
+                      onChange={handleNumberChange}
+                      className="w-full mr-3"
+                    />
+                    <input
+                      type="number"
+                      name="labelSize"
+                      value={type.labelSize || 14}
+                      onChange={handleNumberChange}
+                      min="8"
+                      max="24"
+                      className="w-16 px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="labelBold"
+                      name="labelBold"
+                      checked={type.labelBold || false}
+                      onChange={(e) => {
+                        const updatedType = { ...type, labelBold: e.target.checked };
+                        setType(updatedType);
+                        if (isEditing) {
+                          dispatch(updateEdgeType(updatedType));
+                        }
+                      }}
+                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <label htmlFor="labelBold" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      Bold
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="labelItalic"
+                      name="labelItalic"
+                      checked={type.labelItalic || false}
+                      onChange={(e) => {
+                        const updatedType = { ...type, labelItalic: e.target.checked };
+                        setType(updatedType);
+                        if (isEditing) {
+                          dispatch(updateEdgeType(updatedType));
+                        }
+                      }}
+                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <label htmlFor="labelItalic" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      Italic
+                    </label>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Label Background Color
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="color"
+                      value={type.labelBackgroundColor || '#ffffff'}
+                      onChange={(e) => handleColorChange('labelBackgroundColor', e.target.value)}
+                      className="w-10 h-10 p-0 border-0 rounded-md cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={type.labelBackgroundColor || '#ffffff'}
+                      onChange={(e) => handleColorChange('labelBackgroundColor', e.target.value)}
+                      className="flex-1 ml-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Label Background Opacity
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="range"
+                      name="labelBackgroundOpacity"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={type.labelBackgroundOpacity || 1}
+                      onChange={handleNumberChange}
+                      className="w-full mr-3"
+                    />
+                    <input
+                      type="number"
+                      name="labelBackgroundOpacity"
+                      value={type.labelBackgroundOpacity || 1}
+                      onChange={handleNumberChange}
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      className="w-16 px-2 py-1 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             {/* Edge preview */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Preview
               </label>
-              <div className="border border-gray-200 dark:border-gray-700 rounded-md p-6 flex justify-center items-center bg-gray-50 dark:bg-gray-900">
-                <div className="w-full flex items-center">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-md p-6 flex flex-col justify-center items-center bg-gray-50 dark:bg-gray-900">
+                <div className="w-full flex items-center mb-2 relative">
                   <div className="w-4 h-4 rounded-full bg-gray-400"></div>
                   <div
                     className="w-full h-0 relative"
@@ -265,6 +416,26 @@ const EdgeTypeForm: React.FC<EdgeTypeFormProps> = ({ edgeType, isEditing, onSubm
                         }}
                       />
                     )}
+                    
+                    {/* Edge Label */}
+                    <div 
+                      className="absolute"
+                      style={{
+                        top: 10,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        padding: '2px 6px',
+                        backgroundColor: type.labelBackgroundColor || '#ffffff',
+                        opacity: type.labelBackgroundOpacity || 1,
+                        borderRadius: '3px',
+                        fontSize: `${type.labelSize || 14}px`,
+                        color: type.labelColor || '#334155',
+                        fontWeight: type.labelBold ? 'bold' : 'normal',
+                        fontStyle: type.labelItalic ? 'italic' : 'normal'
+                      }}
+                    >
+                      j=0.5
+                    </div>
                   </div>
                   <div className="w-4 h-4 rounded-full bg-gray-400"></div>
                 </div>
