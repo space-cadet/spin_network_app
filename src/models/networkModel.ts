@@ -353,11 +353,15 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
   
   // Convert nodes
   network.nodes.forEach(node => {
+    // For regular nodes, use the label or a default
+    // For placeholder nodes, ensure no label is shown
+    const label = node.type === 'placeholder' ? '' : (node.label || `Node ${node.id}`);
+    
     elements.push({
       group: 'nodes',
       data: {
         id: node.id,
-        label: node.label || `Node ${node.id}`,
+        label: label,
         intertwiner: node.intertwiner,
         position: node.position, // Store position in data for later access
         type: node.type || 'regular', // Use node type or default to regular
@@ -385,7 +389,7 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
           group: 'nodes',
           data: {
             id: placeholderId,
-            label: '',
+            label: '', // Empty label for placeholder
             type: 'placeholder',
             edgeId: edge.id,
             endpoint: 'source'
@@ -405,7 +409,7 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
           group: 'nodes',
           data: {
             id: placeholderId,
-            label: '',
+            label: '', // Empty label for placeholder
             type: 'placeholder',
             edgeId: edge.id,
             endpoint: 'target'

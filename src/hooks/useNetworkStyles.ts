@@ -41,7 +41,7 @@ export const useNetworkStyles = () => {
       }
     },
     {
-      selector: 'node[type="placeholder"]',
+      selector: 'node[type="placeholder"], .placeholder-node',
       style: {
         'background-color': '#f97316',
         'border-width': 2,
@@ -51,7 +51,8 @@ export const useNetworkStyles = () => {
         'height': getNodeSize() * 0.4,
         'shape': 'diamond',
         'opacity': 0.7,
-        'label': ''
+        'label': '',
+        'text-opacity': 0 // Make any text completely transparent
       }
     },
     {
