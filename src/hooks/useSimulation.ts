@@ -107,6 +107,10 @@ export const useSimulation = () => {
               positivity: conservation.positivity || false
             }
           });
+
+          // Force a UI refresh periodically to ensure components re-render with latest data
+          setCurrentTime(prev => prev + 0.0000001);
+          setTimeout(() => setCurrentTime(currentTime), 0);
         } catch (error) {
           simulationLogger.log('error', 'Error computing analysis results', { error }, currentTime);
         }
