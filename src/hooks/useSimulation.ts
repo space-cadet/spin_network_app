@@ -5,7 +5,7 @@ import {
   SimulationParameters,
   createSimulationEngine,
   createSimulationGraph,
-  SpinNetworkSimulationEngine,
+  SpinNetworkSimulationEngineImpl,
   DEFAULT_SIMULATION_PARAMETERS,
   SimulationGraph
 } from '../simulation';
@@ -32,45 +32,93 @@ export const useSimulation = () => {
   });
 
   // References to the simulation engine and graph
-  const engineRef = useRef<SpinNetworkSimulationEngine | null>(null);
+  const engineRef = useRef<SpinNetworkSimulationEngineImpl | null>(null);
   const graphRef = useRef<SimulationGraph | null>(null);
   
   // Animation frame ID for cleanup
   const animationFrameRef = useRef<number | null>(null);
   
-  // Initialize simulation with current network when it changes
-  useEffect(() => {
-    // Create simulation graph from network if it exists and has nodes
-    if (network && network.nodes && network.nodes.length > 0) {
-      graphRef.current = createSimulationGraph(network);
+  // Define all callback functions first to avoid reference errors
+  
+  // Update simulation parameters
+  const updateParameters = useCallback((newParams: Partial<SimulationParameters>) => {
+    setParameters(prev => {
+      const updated = { ...prev, ...newParams };
       
-      // Initialize engine if it exists
-      if (engineRef.current) {
-        engineRef.current.initialize(graphRef.current, parameters);
-        setCurrentTime(0);
-        setHasHistory(false);
+      // Log parameter change
+      simulationLogger.logParameterChange(prev, updated);
+      
+      // If engine already exists, update it
+      if (engineRef.current && graphRef.current) {
+        engineRef.current.initialize(graphRef.current, updated);
       }
       
-      // Update default node ID if it's not set or doesn't exist in network
-      const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
-      if (!nodeExists && network.nodes.length > 0) {
-        updateInitialStateParams({
-          ...parameters.initialStateParams,
-          nodeId: network.nodes[0].id
-        });
+      return updated;
+    });
+  }, []);
+  
+  // Update initial state parameters
+  const updateInitialStateParams = useCallback((newParams: Record<string, any>) => {
+    setParameters(prev => {
+      const updated = {
+        ...prev,
+        initialStateParams: {
+          ...prev.initialStateParams,
+          ...newParams
+        }
+      };
+      
+      // If engine already exists, update it
+      if (engineRef.current && graphRef.current) {
+        engineRef.current.initialize(graphRef.current, updated);
+      }
+      
+      return updated;
+    });
+  }, []);
+  
+  // Get current visualization state
+  const getVisualizationState = useCallback(() => {
+    if (engineRef.current && graphRef.current) {
+      return engineRef.current.getCurrentState().toVisualizationState();
+    }
+    // Return a default CytoscapeVisualizationState
+    if (graphRef.current) {
+      return new CytoscapeAdapter().createVisualization(graphRef.current);
+    }
+    return {
+      nodeValues: {},
+      minValue: 0,
+      maxValue: 1,
+      options: {
+        colorScale: ['#0000ff', '#ff0000'] as [string, string], // Blue to Red - explicit typing
+        sizeScale: [10, 50] as [number, number], // Explicit typing to fix error
+        useColor: true,
+        useSize: true,
+        showValues: false,
+        normalizeValues: true
+      }
+    };
+  }, []);
+  
+  // Get conservation laws
+  const getConservationLaws = useCallback(() => {
+    if (engineRef.current) {
+      try {
+        return engineRef.current.getConservationLaws();
+      } catch (error) {
+        console.error("Error getting conservation laws:", error);
+        return {
+          totalProbability: 0,
+          normVariation: 0,
+          positivity: false
+        };
       }
     }
-  }, [network]);
-  
-  // Create simulation engine on first render
-  useEffect(() => {
-    engineRef.current = createSimulationEngine();
-    
-    // Clean up on unmount
-    return () => {
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+    return {
+      totalProbability: 0,
+      normVariation: 0,
+      positivity: false
     };
   }, []);
   
@@ -126,51 +174,78 @@ export const useSimulation = () => {
     }
   }, [isRunning, parameters.timeStep]);
   
-  // Start animation loop when isRunning changes
-  useEffect(() => {
-    if (isRunning) {
-      console.log("Starting animation loop");
-      // Directly run a step immediately
-      if (engineRef.current && graphRef.current) {
-        console.log("Initial step when starting animation");
-        try {
-          engineRef.current.step();
-          setCurrentTime(engineRef.current.getCurrentTime());
-          setHasHistory(true);
-          console.log("Current time after initial step:", engineRef.current.getCurrentTime());
-        } catch (error) {
-          console.error("Error during initial step:", error);
-        }
+  // Reset simulation
+  const resetSimulation = useCallback(() => {
+    if (engineRef.current && graphRef.current) {
+      // Pause if running
+      if (isRunning) {
+        engineRef.current.pause();
+        setIsRunning(false);
       }
       
-      // Then start the animation loop
-      animationFrameRef.current = requestAnimationFrame(animationLoop);
-    } else if (animationFrameRef.current !== null) {
-      console.log("Stopping animation loop");
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
+      // Log simulation reset
+      simulationLogger.log('info', 'Simulation reset', {
+        parameters
+      });
+      
+      // End current simulation session
+      simulationLogger.endSession();
+      
+      // Reinitialize engine
+      engineRef.current.initialize(graphRef.current, parameters);
+      engineRef.current.reset();
+      
+      // Reset time and history
+      setCurrentTime(0);
+      setHasHistory(false);
     }
-  }, [isRunning, animationLoop]);
+  }, [isRunning, parameters]);
   
-  // Update initial state parameters
-  const updateInitialStateParams = useCallback((newParams: Record<string, any>) => {
-    setParameters(prev => {
-      const updated = {
-        ...prev,
-        initialStateParams: {
-          ...prev.initialStateParams,
-          ...newParams
-        }
-      };
+  // Jump to a specific time in the simulation history
+  const jumpToTime = useCallback((time: number) => {
+    if (engineRef.current && hasHistory) {
+      // Get state from history
+      const history = engineRef.current.getHistory();
+      const closestState = history.getClosestState(time);
       
-      // If engine already exists, update it
-      if (engineRef.current && graphRef.current) {
-        engineRef.current.initialize(graphRef.current, updated);
+      if (closestState) {
+        // Update current time
+        setCurrentTime(closestState.time);
+      }
+    }
+  }, [hasHistory]);
+  
+  // Pause simulation
+  const pauseSimulation = useCallback(() => {
+    if (engineRef.current) {
+      engineRef.current.pause();
+      setIsRunning(false);
+      
+      // Log simulation pause
+      simulationLogger.log('info', 'Simulation paused', {
+        time: engineRef.current.getCurrentTime()
+      }, engineRef.current.getCurrentTime());
+    }
+  }, []);
+  
+  // Step simulation (single step)
+  const stepSimulation = useCallback(() => {
+    if (engineRef.current && graphRef.current) {
+      // Initialize engine if not already done
+      if (currentTime === 0) {
+        engineRef.current.initialize(graphRef.current, parameters);
       }
       
-      return updated;
-    });
-  }, []);
+      // Step once
+      engineRef.current.step();
+      setCurrentTime(engineRef.current.getCurrentTime());
+      
+      // Check if history is available
+      if (engineRef.current.getHistory().getTimes().length > 0) {
+        setHasHistory(true);
+      }
+    }
+  }, [parameters, currentTime]);
   
   // Start simulation
   const startSimulation = useCallback(() => {
@@ -228,162 +303,67 @@ export const useSimulation = () => {
     }
   }, [parameters, network, updateInitialStateParams]);
   
-  // Pause simulation
-  const pauseSimulation = useCallback(() => {
-    if (engineRef.current) {
-      engineRef.current.pause();
-      setIsRunning(false);
+  // Initialize simulation with current network when it changes
+  useEffect(() => {
+    // Create simulation graph from network if it exists and has nodes
+    if (network && network.nodes && network.nodes.length > 0) {
+      graphRef.current = createSimulationGraph(network);
       
-      // Log simulation pause
-      simulationLogger.log('info', 'Simulation paused', {
-        time: engineRef.current.getCurrentTime()
-      }, engineRef.current.getCurrentTime());
-    }
-  }, []);
-  
-  // Step simulation (single step)
-  const stepSimulation = useCallback(() => {
-    if (engineRef.current && graphRef.current) {
-      // Initialize engine if not already done
-      if (currentTime === 0) {
+      // Initialize engine if it exists
+      if (engineRef.current) {
         engineRef.current.initialize(graphRef.current, parameters);
+        setCurrentTime(0);
+        setHasHistory(false);
       }
       
-      // Step once
-      engineRef.current.step();
-      setCurrentTime(engineRef.current.getCurrentTime());
-      
-      // Check if history is available
-      if (engineRef.current.getHistory().getTimes().length > 0) {
-        setHasHistory(true);
-      }
-    }
-  }, [parameters, currentTime]);
-  
-  // Reset simulation
-  const resetSimulation = useCallback(() => {
-    if (engineRef.current && graphRef.current) {
-      // Pause if running
-      if (isRunning) {
-        engineRef.current.pause();
-        setIsRunning(false);
-      }
-      
-      // Log simulation reset
-      simulationLogger.log('info', 'Simulation reset', {
-        parameters
-      });
-      
-      // End current simulation session
-      simulationLogger.endSession();
-      
-      // Reinitialize engine
-      engineRef.current.initialize(graphRef.current, parameters);
-      engineRef.current.reset();
-      
-      // Reset time and history
-      setCurrentTime(0);
-      setHasHistory(false);
-    }
-  }, [isRunning, parameters]);
-  
-  // Jump to a specific time in the simulation history
-  const jumpToTime = useCallback((time: number) => {
-    if (engineRef.current && hasHistory) {
-      // Get state from history
-      const history = engineRef.current.getHistory();
-      const closestState = history.getClosestState(time);
-      
-      if (closestState) {
-        // Update current time
-        setCurrentTime(closestState.time);
-        
-        // TODO: Update visualization with state
+      // Update default node ID if it's not set or doesn't exist in network
+      const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
+      if (!nodeExists && network.nodes.length > 0) {
+        updateInitialStateParams({
+          ...parameters.initialStateParams,
+          nodeId: network.nodes[0].id
+        });
       }
     }
-  }, [hasHistory]);
+  }, [network, updateInitialStateParams, parameters]);
   
-  // Update simulation parameters
-  const updateParameters = useCallback((newParams: Partial<SimulationParameters>) => {
-    setParameters(prev => {
-      const updated = { ...prev, ...newParams };
-      
-      // Log parameter change
-      simulationLogger.logParameterChange(prev, updated);
-      
-      // If engine already exists, update it
-      if (engineRef.current && graphRef.current) {
-        engineRef.current.initialize(graphRef.current, updated);
+  // Create simulation engine on first render
+  useEffect(() => {
+    engineRef.current = createSimulationEngine();
+    
+    // Clean up on unmount
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
-      
-      return updated;
-    });
+    };
   }, []);
   
-  // Update initial state parameters
-  const updateInitialStateParams = useCallback((newParams: Record<string, any>) => {
-    setParameters(prev => {
-      const updated = {
-        ...prev,
-        initialStateParams: {
-          ...prev.initialStateParams,
-          ...newParams
+  // Start animation loop when isRunning changes
+  useEffect(() => {
+    if (isRunning) {
+      console.log("Starting animation loop");
+      // Directly run a step immediately
+      if (engineRef.current && graphRef.current) {
+        console.log("Initial step when starting animation");
+        try {
+          engineRef.current.step();
+          setCurrentTime(engineRef.current.getCurrentTime());
+          setHasHistory(true);
+          console.log("Current time after initial step:", engineRef.current.getCurrentTime());
+        } catch (error) {
+          console.error("Error during initial step:", error);
         }
-      };
-      
-      // If engine already exists, update it
-      if (engineRef.current && graphRef.current) {
-        engineRef.current.initialize(graphRef.current, updated);
       }
       
-      return updated;
-    });
-  }, []);
-  
-  // Get current visualization state
-  const getVisualizationState = useCallback(() => {
-    if (engineRef.current && graphRef.current) {
-      return engineRef.current.getCurrentState().toVisualizationState();
+      // Then start the animation loop
+      animationFrameRef.current = requestAnimationFrame(animationLoop);
+    } else if (animationFrameRef.current !== null) {
+      console.log("Stopping animation loop");
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
-    // Return a default CytoscapeVisualizationState
-    if (graphRef.current) {
-      return new CytoscapeAdapter().createVisualization(graphRef.current);
-    }
-    return {
-      nodeValues: {},
-      minValue: 0,
-      maxValue: 1,
-      options: {
-        colorScale: ['#0000ff', '#ff0000'] as [string, string], // Blue to Red - explicit typing
-        sizeScale: [10, 50],
-        useColor: true,
-        useSize: true,
-        showValues: false,
-        normalizeValues: true
-      }
-    };
-  }, []);
-  
-  // Get conservation laws
-  const getConservationLaws = useCallback(() => {
-    if (engineRef.current) {
-      try {
-        return engineRef.current.getConservationLaws();
-      } catch (error) {
-        console.error("Error getting conservation laws:", error);
-        return {
-          totalProbability: 0,
-          normVariation: 0,
-          positivity: false
-        };
-      }
-    }
-    return {
-      totalProbability: 0,
-      normVariation: 0,
-      positivity: false
-    };
-  }, []);
+  }, [isRunning, animationLoop]);
 
   return {
     isRunning,

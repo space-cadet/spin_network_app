@@ -11,8 +11,7 @@ import {
   SimulationParameters,
   SimulationHistory,
   StateVector,
-  DiffusionModel,
-  NumericalSolver
+  DiffusionModel
 } from './types';
 import { DiffusionModelFactory } from '../models/diffusionModels';
 import { SolverFactory } from '../models/solvers';
@@ -146,9 +145,6 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     if (this.diffusionModel) {
       this.diffusionModel.initialize(graph, parameters);
     }
-    
-    // Create the solver
-    this.solver = SolverFactory.createSolver(parameters.numericalMethod);
     
     // Create the initial state
     this.createInitialState(parameters);
