@@ -2,6 +2,17 @@
 
 This file provides a textual summary of development milestones and key implementation details.
 
+## 2025-04-10: Simulation UI - Collapsible Panel and Improved Tabs
+- Made SimulationControlPanel component fully collapsible with toggle button
+- Implemented proper tab navigation for Parameters and Analysis sections
+- Added persistent status indicator in the panel header when collapsed
+- Created dedicated TabNav component with improved styling
+- Used border indicators and better visual styling for active/inactive tabs
+- Maintained all existing functionality within the collapsible structure
+- Added state management for panel expanded/collapsed status
+- Updated session_cache.md to document UI improvements
+- Added next steps for potential compact view mode
+
 ## 2025-04-10: Simulation UI Integration - Bug Fixes and Improvements
 - Fixed "Cannot read properties of undefined (reading 'nodes')" error in useSimulation.ts
 - Added optional chaining and null checks for safer network data access

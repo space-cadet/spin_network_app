@@ -2,6 +2,14 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-10: Simulation UI - Collapsible Panel and Improved Tabs
+
+Modified files:
+- `/src/components/panels/SimulationControlPanel.tsx` - Made panel collapsible, improved tab interface
+- `/memory-bank/session_cache.md` - Updated to reflect current status and changes
+- `/memory-bank/edit_history.md` - Added new entries for recent changes
+- `/memory-bank/dev_history.md` - Updated with implementation details
+
 ## 2025-04-10: Simulation UI Integration - Bug Fixes
 
 Modified files:

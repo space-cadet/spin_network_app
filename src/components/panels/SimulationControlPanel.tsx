@@ -8,7 +8,9 @@ import {
   FaChartLine,
   FaRuler,
   FaSlidersH,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaChevronDown,
+  FaChevronUp
 } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
@@ -250,6 +252,45 @@ const InitialStateSelector: React.FC<InitialStateSelectorProps> = ({
   );
 };
 
+// Tab interface component
+interface TabInterface {
+  activeTab: 'parameters' | 'analysis';
+  onTabChange: (tab: 'parameters' | 'analysis') => void;
+}
+
+const TabNav: React.FC<TabInterface> = ({ activeTab, onTabChange }) => {
+  return (
+    <div className="flex space-x-1 w-full mb-3">
+      <button
+        className={`flex-1 text-sm px-3 py-2 rounded-t-md border-b-2 ${
+          activeTab === 'parameters' 
+            ? 'bg-blue-50 border-blue-500 text-blue-700' 
+            : 'bg-gray-50 border-transparent text-gray-600 hover:text-gray-800'
+        }`}
+        onClick={() => onTabChange('parameters')}
+      >
+        <div className="flex items-center justify-center space-x-1">
+          <FaCog className="text-xs" />
+          <span>Parameters</span>
+        </div>
+      </button>
+      <button
+        className={`flex-1 text-sm px-3 py-2 rounded-t-md border-b-2 ${
+          activeTab === 'analysis' 
+            ? 'bg-blue-50 border-blue-500 text-blue-700' 
+            : 'bg-gray-50 border-transparent text-gray-600 hover:text-gray-800'
+        }`}
+        onClick={() => onTabChange('analysis')}
+      >
+        <div className="flex items-center justify-center space-x-1">
+          <FaChartLine className="text-xs" />
+          <span>Analysis</span>
+        </div>
+      </button>
+    </div>
+  );
+};
+
 const SimulationControlPanel: React.FC = () => {
   // Check if network exists first - access the current network correctly
   const network = useSelector((state: RootState) => state.network?.currentNetwork);
@@ -271,88 +312,89 @@ const SimulationControlPanel: React.FC = () => {
   } = useSimulation();
   
   const [activeTab, setActiveTab] = useState<'parameters' | 'analysis'>('parameters');
+  const [isPanelExpanded, setIsPanelExpanded] = useState<boolean>(true);
 
   return (
-    <div className="simulation-control-panel p-4 overflow-y-auto h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">Simulation Controls</h3>
-        <div className="flex space-x-2">
-          <button
-            className={`text-xs px-3 py-1 rounded ${
-              activeTab === 'parameters' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-800'
-            }`}
-            onClick={() => setActiveTab('parameters')}
-          >
-            Parameters
+    <div className="simulation-control-panel overflow-hidden border rounded-md shadow-sm">
+      {/* Collapsible header */}
+      <div 
+        className="bg-gray-50 p-3 border-b flex items-center justify-between cursor-pointer"
+        onClick={() => setIsPanelExpanded(!isPanelExpanded)}
+      >
+        <h3 className="text-lg font-medium flex items-center">
+          <span>Simulation Controls</span>
+          <button className="ml-2 text-gray-500 focus:outline-none">
+            {isPanelExpanded ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
           </button>
-          <button
-            className={`text-xs px-3 py-1 rounded ${
-              activeTab === 'analysis' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-800'
-            }`}
-            onClick={() => setActiveTab('analysis')}
-          >
-            Analysis
-          </button>
-        </div>
+        </h3>
+        
+        {/* Status indicator in header */}
+        {!isPanelExpanded && (
+          <span className={`text-sm ${isRunning ? "text-green-500" : "text-gray-500"}`}>
+            {isRunning ? "Running" : "Stopped"} (t={currentTime.toFixed(2)})
+          </span>
+        )}
       </div>
       
-      {/* Network warning banner */}
-      {!hasNetwork && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4 text-sm">
-          <div className="flex items-start">
-            <FaExclamationTriangle className="text-yellow-500 mt-0.5 mr-2 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-yellow-700">No network detected</p>
-              <p className="text-yellow-600 text-xs mt-1">
-                Create or load a network to run the simulation. Controls are available for configuration.
-              </p>
+      {/* Collapsible content */}
+      {isPanelExpanded && (
+        <div className="p-4 overflow-y-auto">
+          {/* Tab navigation */}
+          <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+      
+          {/* Network warning banner */}
+          {!hasNetwork && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4 text-sm">
+              <div className="flex items-start">
+                <FaExclamationTriangle className="text-yellow-500 mt-0.5 mr-2 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-yellow-700">No network detected</p>
+                  <p className="text-yellow-600 text-xs mt-1">
+                    Create or load a network to run the simulation. Controls are available for configuration.
+                  </p>
+                </div>
+              </div>
             </div>
+          )}
+          
+          {/* Play Controls */}
+          <div className="flex space-x-2 mb-4">
+            <button
+              className="btn flex-1 flex items-center justify-center space-x-2"
+              onClick={isRunning ? pauseSimulation : startSimulation}
+              disabled={!hasNetwork}
+            >
+              {isRunning ? <FaPause className="text-sm" /> : <FaPlay className="text-sm" />}
+              <span>{isRunning ? 'Pause' : 'Start'}</span>
+            </button>
+            
+            <button
+              className="btn flex items-center justify-center px-4"
+              onClick={stepSimulation}
+              disabled={isRunning || !hasNetwork}
+              title="Step forward"
+            >
+              <FaStepForward className="text-sm" />
+            </button>
+            
+            <button
+              className="btn flex items-center justify-center px-4"
+              onClick={resetSimulation}
+              disabled={!hasNetwork}
+              title="Reset simulation"
+            >
+              <FaUndo className="text-sm" />
+            </button>
           </div>
-        </div>
-      )}
-      
-      {/* Play Controls */}
-      <div className="flex space-x-2 mb-4">
-        <button
-          className="btn flex-1 flex items-center justify-center space-x-2"
-          onClick={isRunning ? pauseSimulation : startSimulation}
-          disabled={!hasNetwork}
-        >
-          {isRunning ? <FaPause className="text-sm" /> : <FaPlay className="text-sm" />}
-          <span>{isRunning ? 'Pause' : 'Start'}</span>
-        </button>
-        
-        <button
-          className="btn flex items-center justify-center px-4"
-          onClick={stepSimulation}
-          disabled={isRunning || !hasNetwork}
-          title="Step forward"
-        >
-          <FaStepForward className="text-sm" />
-        </button>
-        
-        <button
-          className="btn flex items-center justify-center px-4"
-          onClick={resetSimulation}
-          disabled={!hasNetwork}
-          title="Reset simulation"
-        >
-          <FaUndo className="text-sm" />
-        </button>
-      </div>
-      
-      {/* Time Slider */}
-      <TimeSlider
-        currentTime={currentTime}
-        totalTime={parameters.totalTime}
-        isRunning={isRunning}
-        hasHistory={hasHistory}
-        onTimeChange={jumpToTime}
-      />
+          
+          {/* Time Slider */}
+          <TimeSlider
+            currentTime={currentTime}
+            totalTime={parameters.totalTime}
+            isRunning={isRunning}
+            hasHistory={hasHistory}
+            onTimeChange={jumpToTime}
+          />
       
       {activeTab === 'parameters' ? (
         <div className="parameters-tab mt-4 space-y-4">
@@ -541,15 +583,17 @@ const SimulationControlPanel: React.FC = () => {
         </div>
       )}
       
-      {/* Simulation Status */}
-      <div className="mt-4 text-sm border-t border-gray-200 pt-3 flex justify-between items-center">
-        <span className="font-medium">
-          Status: <span className={isRunning ? "text-green-500" : "text-gray-500"}>
-            {isRunning ? "Running" : "Stopped"}
-          </span>
-        </span>
-        <span className="font-mono">t={currentTime.toFixed(2)}</span>
-      </div>
+          {/* Simulation Status */}
+          <div className="mt-4 text-sm border-t border-gray-200 pt-3 flex justify-between items-center">
+            <span className="font-medium">
+              Status: <span className={isRunning ? "text-green-500" : "text-gray-500"}>
+                {isRunning ? "Running" : "Stopped"}
+              </span>
+            </span>
+            <span className="font-mono">t={currentTime.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
