@@ -119,28 +119,19 @@ export class MathAdapter {
       ? eigs.values as number[] 
       : (eigs.values as math.Matrix).valueOf() as number[];
     
-    // Extract the eigenvectors - the API might return eigenvectors or vectors
-    let eigenvectors;
+    // Create a matrix for the eigenvectors
+    const size = matrix.size();
+    const eigenvectors = math.zeros(size[0], size[1]) as math.Matrix;
     
+    // Handle the case where eigenvectors are provided (old API)
     if (eigs.eigenvectors) {
-      // Create a matrix from the eigenvectors
-      const size = matrix.size();
-      const matrixData = math.zeros(size[0], size[1]) as math.Matrix;
-      
       // Manually build the matrix
       eigs.eigenvectors.forEach((item: any, index: number) => {
         const vector = item.vector;
         for (let i = 0; i < vector.length; i++) {
-          matrixData.set([i, index], vector[i]);
+          eigenvectors.set([i, index], vector[i]);
         }
       });
-      
-      eigenvectors = matrixData;
-    } else if (eigs.vectors) {
-      eigenvectors = eigs.vectors as math.Matrix;
-    } else {
-      // Fallback - create empty matrix
-      eigenvectors = math.zeros(matrix.size()[0], matrix.size()[1]) as math.Matrix;
     }
     
     return {

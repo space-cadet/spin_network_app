@@ -109,10 +109,20 @@ export class SimulationStateVector implements StateVector {
    * Create a state vector from math.js array
    */
   fromMathArray(array: math.MathArray, nodeIds: string[]): StateVector {
-    // Convert math.js array to regular array
-    const values: number[] = Array.isArray(array) 
-      ? array as number[]
-      : (math.flatten(array) as math.MathArray).valueOf() as number[];
+    // Try to convert math.js array to regular array
+    let values: number[] = [];
+    
+    if (math.isMatrix(array)) {
+      values = (math.flatten(array) as any).toArray() as number[];
+    } else if (Array.isArray(array)) {
+      values = [...array] as number[];
+    } else {
+      try {
+        values = Array.from(array as any);
+      } catch (e) {
+        throw new Error('Could not convert MathArray to regular array: ' + e);
+      }
+    }
     
     if (values.length !== nodeIds.length) {
       throw new Error(`Array length (${values.length}) doesn't match node count (${nodeIds.length})`);
@@ -125,18 +135,34 @@ export class SimulationStateVector implements StateVector {
    * Static factory method to create from math array
    */
   static fromMathArray(array: math.MathArray, nodeIds: string[]): StateVector {
-    // Convert math.js array or matrix to regular array
-    let values: number[];
+    // Try to convert math.js array to regular array
+    let values: number[] = [];
     
     if (math.isMatrix(array)) {
-      // Handle matrix case safely
-      values = math.flatten(array as math.Matrix).valueOf() as number[];
+      try {
+        values = (math.flatten(array) as any).toArray() as number[];
+      } catch (e) {
+        const matrixData = (array as math.Matrix).valueOf();
+        if (Array.isArray(matrixData)) {
+          if (Array.isArray(matrixData[0])) {
+            // Handle 2D array
+            values = matrixData.flat() as number[];
+          } else {
+            // Handle 1D array
+            values = matrixData as number[];
+          }
+        } else {
+          throw new Error('Could not convert matrix to array: ' + e);
+        }
+      }
     } else if (Array.isArray(array)) {
-      // Handle array case
-      values = array as number[];
+      values = [...array] as number[];
     } else {
-      // Handle other math collection types
-      values = math.flatten(array).valueOf() as number[];
+      try {
+        values = Array.from(array as any);
+      } catch (e) {
+        throw new Error('Could not convert MathArray to regular array: ' + e);
+      }
     }
     
     if (values.length !== nodeIds.length) {
