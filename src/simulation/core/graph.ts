@@ -1,55 +1,87 @@
 /**
- * Implementation of the Graph interface for spin network simulation
+ * Implementation of the SimulationGraph interface for the simulation component
+ * 
+ * This graph representation is designed to be compatible with both 2D and 3D
+ * visualizations and to work with math.js for matrix operations.
  */
 
-import { Graph, SimulationNode, SimulationEdge, Matrix, WeightFunction } from './types';
-import { DenseMatrix } from './matrix';
-import { SpinNetwork, NetworkNode, NetworkEdge } from '../../models/types';
+import * as math from 'mathjs';
+import { SpinNetwork } from '../../models/types';
+import { SimulationGraph, SimulationNode, SimulationEdge, NodePosition, WeightFunction } from './types';
+import { MathAdapter } from './mathAdapter';
 
 /**
- * Default implementation of the Graph interface
+ * Implementation of the SimulationGraph interface
  */
-export class SimulationGraph implements Graph {
-  private _nodes: Map<string, SimulationNode> = new Map();
-  private _edges: Map<string, SimulationEdge> = new Map();
-  private _adjacencyList: Map<string, Set<string>> = new Map();
-  private _nodeEdges: Map<string, Set<string>> = new Map();
+export class SpinNetworkGraph implements SimulationGraph {
+  private _nodes: Map<string, SimulationNode>;
+  private _edges: Map<string, SimulationEdge>;
+  private _adjacencyList: Map<string, Set<string>>;
+  private _nodeEdges: Map<string, Set<string>>;
 
   /**
    * Create a new SimulationGraph
    */
-  constructor() {}
+  constructor() {
+    this._nodes = new Map();
+    this._edges = new Map();
+    this._adjacencyList = new Map();
+    this._nodeEdges = new Map();
+  }
 
   /**
    * Create a simulation graph from the application SpinNetwork model
    */
   static fromSpinNetwork(network: SpinNetwork): SimulationGraph {
-    const graph = new SimulationGraph();
+    const graph = new SpinNetworkGraph();
     
-    // Add all nodes
+    // Add all nodes (skip placeholder nodes)
     for (const node of network.nodes) {
-      // Skip placeholder nodes
       if (node.type === 'placeholder') continue;
       
-      graph.addNode({
+      graph._nodes.set(node.id, {
         id: node.id,
         intertwiner: node.intertwiner,
+        position: {
+          x: node.position.x,
+          y: node.position.y,
+          z: 0 // Default to z=0 for 2D networks
+        },
         properties: node.properties || {}
       });
+      
+      // Initialize adjacency and edge lists
+      graph._adjacencyList.set(node.id, new Set());
+      graph._nodeEdges.set(node.id, new Set());
     }
     
-    // Add all edges
+    // Add all edges (skip dangling edges)
     for (const edge of network.edges) {
-      // Skip edges with dangling endpoints (null source or target)
       if (edge.source === null || edge.target === null) continue;
       
-      graph.addEdge({
-        id: edge.id,
-        sourceId: edge.source,
-        targetId: edge.target,
-        spin: edge.spin,
-        properties: edge.properties || {}
-      });
+      const sourceNode = graph._nodes.get(edge.source);
+      const targetNode = graph._nodes.get(edge.target);
+      
+      if (sourceNode && targetNode) {
+        // Create the edge
+        const simEdge: SimulationEdge = {
+          id: edge.id,
+          sourceId: edge.source,
+          targetId: edge.target,
+          spin: edge.spin,
+          properties: edge.properties || {}
+        };
+        
+        graph._edges.set(edge.id, simEdge);
+        
+        // Update adjacency list
+        graph._adjacencyList.get(edge.source)?.add(edge.target);
+        graph._adjacencyList.get(edge.target)?.add(edge.source);
+        
+        // Update node-edge mapping
+        graph._nodeEdges.get(edge.source)?.add(edge.id);
+        graph._nodeEdges.get(edge.target)?.add(edge.id);
+      }
     }
     
     return graph;
@@ -57,88 +89,72 @@ export class SimulationGraph implements Graph {
 
   /**
    * Convert the simulation graph back to a SpinNetwork
-   * Note: This preserves only the topological and quantum information,
-   * not the visual layout information
    */
-  toSpinNetwork(network?: SpinNetwork): SpinNetwork {
-    const result: SpinNetwork = network ? { ...network } : {
-      nodes: [],
-      edges: [],
-      metadata: {
-        name: 'Simulated Network',
-        created: Date.now(),
-        modified: Date.now(),
-        type: 'custom'
-      }
-    };
-    
-    // If there's an existing network, use it as a template
-    // but update the node and edge properties we care about
-    if (network) {
-      // Update existing nodes
-      result.nodes = network.nodes.map(node => {
+  toSpinNetwork(networkTemplate?: SpinNetwork): SpinNetwork {
+    // If we have a template, update it with our simulation values
+    if (networkTemplate) {
+      const result: SpinNetwork = {
+        ...networkTemplate,
+        nodes: [...networkTemplate.nodes],
+        edges: [...networkTemplate.edges],
+        metadata: {
+          ...networkTemplate.metadata,
+          modified: Date.now()
+        }
+      };
+      
+      // Update existing nodes with simulation values
+      for (let i = 0; i < result.nodes.length; i++) {
+        const node = result.nodes[i];
         const simNode = this._nodes.get(node.id);
+        
         if (simNode) {
-          // Copy over the simulation values while preserving layout
-          return {
+          result.nodes[i] = {
             ...node,
             intertwiner: simNode.intertwiner,
             properties: { ...node.properties, ...simNode.properties }
           };
         }
-        return node;
-      });
+      }
       
-      // Update existing edges
-      result.edges = network.edges.map(edge => {
+      // Update existing edges with simulation values
+      for (let i = 0; i < result.edges.length; i++) {
+        const edge = result.edges[i];
         const simEdge = this._edges.get(edge.id);
+        
         if (simEdge) {
-          // Copy over the simulation values while preserving layout
-          return {
+          result.edges[i] = {
             ...edge,
             spin: simEdge.spin,
             properties: { ...edge.properties, ...simEdge.properties }
           };
         }
-        return edge;
-      });
-      
-      // Update metadata
-      result.metadata = {
-        ...network.metadata,
-        modified: Date.now()
-      };
+      }
       
       return result;
     }
     
-    // Create a new network from scratch if no template was provided
-    // This is a minimal conversion - no layout information
+    // If no template, create a new SpinNetwork from scratch
+    // (this will not have proper layout information)
+    const nodes = [...this._nodes.values()].map(node => ({
+      id: node.id,
+      position: {
+        x: node.position.x,
+        y: node.position.y
+      },
+      intertwiner: node.intertwiner,
+      label: `Node ${node.id}`,
+      properties: { ...node.properties }
+    }));
     
-    // Create nodes
-    const nodes: NetworkNode[] = [];
-    for (const [_, node] of this._nodes.entries()) {
-      nodes.push({
-        id: node.id,
-        position: { x: 0, y: 0 }, // Default position
-        intertwiner: node.intertwiner,
-        label: `Node ${node.id}`,
-        properties: { ...node.properties }
-      });
-    }
-    
-    // Create edges
-    const edges: NetworkEdge[] = [];
-    for (const [_, edge] of this._edges.entries()) {
-      edges.push({
-        id: edge.id,
-        source: edge.sourceId,
-        target: edge.targetId,
-        spin: edge.spin,
-        label: `j=${edge.spin}`,
-        properties: { ...edge.properties }
-      });
-    }
+    const edges = [...this._edges.values()].map(edge => ({
+      id: edge.id,
+      source: edge.sourceId,
+      target: edge.targetId,
+      spin: edge.spin,
+      label: `j=${edge.spin}`,
+      properties: { ...edge.properties }
+    }));
     
     return {
       nodes,
@@ -152,313 +168,275 @@ export class SimulationGraph implements Graph {
     };
   }
 
-  //--------------------------------
-  // Graph interface implementation
-  //--------------------------------
-
+  /**
+   * Get all nodes in the graph
+   */
   get nodes(): SimulationNode[] {
     return Array.from(this._nodes.values());
   }
 
+  /**
+   * Get all edges in the graph
+   */
   get edges(): SimulationEdge[] {
     return Array.from(this._edges.values());
   }
 
+  /**
+   * Get a specific node by ID
+   */
   getNode(id: string): SimulationNode | undefined {
     return this._nodes.get(id);
   }
 
+  /**
+   * Get a specific edge by ID
+   */
   getEdge(id: string): SimulationEdge | undefined {
     return this._edges.get(id);
   }
 
+  /**
+   * Get all nodes adjacent to a specific node
+   */
   getAdjacentNodes(nodeId: string): SimulationNode[] {
     const adjacentIds = this._adjacencyList.get(nodeId) || new Set<string>();
-    return Array.from(adjacentIds).map(id => this._nodes.get(id)!).filter(node => !!node);
+    return Array.from(adjacentIds)
+      .map(id => this._nodes.get(id))
+      .filter(node => node !== undefined) as SimulationNode[];
   }
 
+  /**
+   * Get all edges connected to a specific node
+   */
   getConnectedEdges(nodeId: string): SimulationEdge[] {
     const edgeIds = this._nodeEdges.get(nodeId) || new Set<string>();
-    return Array.from(edgeIds).map(id => this._edges.get(id)!).filter(edge => !!edge);
+    return Array.from(edgeIds)
+      .map(id => this._edges.get(id))
+      .filter(edge => edge !== undefined) as SimulationEdge[];
   }
 
+  /**
+   * Get the number of nodes in the graph
+   */
   getNodeCount(): number {
     return this._nodes.size;
   }
 
+  /**
+   * Get the number of edges in the graph
+   */
   getEdgeCount(): number {
     return this._edges.size;
   }
 
-  addNode(node: SimulationNode): Graph {
-    // Create a new graph to maintain immutability
-    const newGraph = new SimulationGraph();
+  /**
+   * Add a node to the graph
+   */
+  addNode(node: SimulationNode): SimulationGraph {
+    // Create a new graph
+    const newGraph = new SpinNetworkGraph();
     
-    // Copy existing nodes and edges
-    for (const [id, existingNode] of this._nodes.entries()) {
-      newGraph._nodes.set(id, { ...existingNode });
-    }
-    for (const [id, existingEdge] of this._edges.entries()) {
-      newGraph._edges.set(id, { ...existingEdge });
-    }
+    // Copy all existing nodes and edges
+    this._nodes.forEach((n, id) => newGraph._nodes.set(id, n));
+    this._edges.forEach((e, id) => newGraph._edges.set(id, e));
     
-    // Copy adjacency list
-    for (const [id, adjacentIds] of this._adjacencyList.entries()) {
-      newGraph._adjacencyList.set(id, new Set(adjacentIds));
-    }
-    
-    // Copy node-edges mapping
-    for (const [id, edgeIds] of this._nodeEdges.entries()) {
-      newGraph._nodeEdges.set(id, new Set(edgeIds));
-    }
+    // Copy adjacency and edge lists
+    this._adjacencyList.forEach((adjacent, id) => {
+      newGraph._adjacencyList.set(id, new Set(adjacent));
+    });
+    this._nodeEdges.forEach((edges, id) => {
+      newGraph._nodeEdges.set(id, new Set(edges));
+    });
     
     // Add the new node
-    newGraph._nodes.set(node.id, { ...node });
-    newGraph._adjacencyList.set(node.id, new Set<string>());
-    newGraph._nodeEdges.set(node.id, new Set<string>());
+    newGraph._nodes.set(node.id, node);
+    newGraph._adjacencyList.set(node.id, new Set());
+    newGraph._nodeEdges.set(node.id, new Set());
     
     return newGraph;
   }
 
-  removeNode(nodeId: string): Graph {
-    // Create a new graph to maintain immutability
-    const newGraph = new SimulationGraph();
-    
-    // Skip if node doesn't exist
+  /**
+   * Remove a node from the graph
+   */
+  removeNode(nodeId: string): SimulationGraph {
     if (!this._nodes.has(nodeId)) {
-      return this;
+      return this; // Node doesn't exist, return unchanged
     }
     
-    // Copy nodes except the one being removed
-    for (const [id, existingNode] of this._nodes.entries()) {
+    // Create a new graph
+    const newGraph = new SpinNetworkGraph();
+    
+    // Copy nodes except the one to remove
+    this._nodes.forEach((node, id) => {
       if (id !== nodeId) {
-        newGraph._nodes.set(id, { ...existingNode });
+        newGraph._nodes.set(id, node);
       }
-    }
+    });
     
-    // Find edges that connect to this node
+    // Find edges connected to this node
     const connectedEdgeIds = this._nodeEdges.get(nodeId) || new Set<string>();
     
     // Copy edges except those connected to the removed node
-    for (const [id, existingEdge] of this._edges.entries()) {
+    this._edges.forEach((edge, id) => {
       if (!connectedEdgeIds.has(id)) {
-        newGraph._edges.set(id, { ...existingEdge });
+        newGraph._edges.set(id, edge);
       }
-    }
+    });
     
-    // Update adjacency list
-    for (const [id, adjacentIds] of this._adjacencyList.entries()) {
+    // Copy and update adjacency lists
+    this._adjacencyList.forEach((adjacent, id) => {
       if (id !== nodeId) {
-        // Create a new set without the removed node
-        const newAdjacentIds = new Set(adjacentIds);
-        newAdjacentIds.delete(nodeId);
-        newGraph._adjacencyList.set(id, newAdjacentIds);
+        const newAdjacent = new Set(adjacent);
+        newAdjacent.delete(nodeId); // Remove the deleted node from adjacency
+        newGraph._adjacencyList.set(id, newAdjacent);
       }
-    }
+    });
     
-    // Update node-edges mapping
-    for (const [id, edgeIds] of this._nodeEdges.entries()) {
+    // Copy and update node-edge mappings
+    this._nodeEdges.forEach((edges, id) => {
       if (id !== nodeId) {
-        // Create a new set without edges connected to the removed node
-        const newEdgeIds = new Set<string>();
-        for (const edgeId of edgeIds) {
+        const newEdges = new Set<string>();
+        
+        // Only include edges that aren't connected to the removed node
+        edges.forEach(edgeId => {
           if (!connectedEdgeIds.has(edgeId)) {
-            newEdgeIds.add(edgeId);
+            newEdges.add(edgeId);
           }
-        }
-        newGraph._nodeEdges.set(id, newEdgeIds);
+        });
+        
+        newGraph._nodeEdges.set(id, newEdges);
       }
-    }
+    });
     
     return newGraph;
   }
 
-  addEdge(edge: SimulationEdge): Graph {
-    // Create a new graph to maintain immutability
-    const newGraph = new SimulationGraph();
-    
-    // Copy existing nodes and edges
-    for (const [id, existingNode] of this._nodes.entries()) {
-      newGraph._nodes.set(id, { ...existingNode });
-    }
-    for (const [id, existingEdge] of this._edges.entries()) {
-      newGraph._edges.set(id, { ...existingEdge });
+  /**
+   * Add an edge to the graph
+   */
+  addEdge(edge: SimulationEdge): SimulationGraph {
+    // Check if both endpoint nodes exist
+    if (!this._nodes.has(edge.sourceId) || !this._nodes.has(edge.targetId)) {
+      return this; // Nodes don't exist, return unchanged
     }
     
-    // Copy adjacency list
-    for (const [id, adjacentIds] of this._adjacencyList.entries()) {
-      newGraph._adjacencyList.set(id, new Set(adjacentIds));
-    }
+    // Create a new graph
+    const newGraph = new SpinNetworkGraph();
     
-    // Copy node-edges mapping
-    for (const [id, edgeIds] of this._nodeEdges.entries()) {
-      newGraph._nodeEdges.set(id, new Set(edgeIds));
-    }
+    // Copy all existing nodes and edges
+    this._nodes.forEach((n, id) => newGraph._nodes.set(id, n));
+    this._edges.forEach((e, id) => newGraph._edges.set(id, e));
     
-    // Add the new edge if both nodes exist
-    if (newGraph._nodes.has(edge.sourceId) && newGraph._nodes.has(edge.targetId)) {
-      newGraph._edges.set(edge.id, { ...edge });
-      
-      // Update adjacency list
-      const sourceAdjacent = newGraph._adjacencyList.get(edge.sourceId) || new Set<string>();
-      sourceAdjacent.add(edge.targetId);
-      newGraph._adjacencyList.set(edge.sourceId, sourceAdjacent);
-      
-      const targetAdjacent = newGraph._adjacencyList.get(edge.targetId) || new Set<string>();
-      targetAdjacent.add(edge.sourceId);
-      newGraph._adjacencyList.set(edge.targetId, targetAdjacent);
-      
-      // Update node-edges mapping
-      const sourceEdges = newGraph._nodeEdges.get(edge.sourceId) || new Set<string>();
-      sourceEdges.add(edge.id);
-      newGraph._nodeEdges.set(edge.sourceId, sourceEdges);
-      
-      const targetEdges = newGraph._nodeEdges.get(edge.targetId) || new Set<string>();
-      targetEdges.add(edge.id);
-      newGraph._nodeEdges.set(edge.targetId, targetEdges);
-    }
+    // Copy adjacency and edge lists
+    this._adjacencyList.forEach((adjacent, id) => {
+      newGraph._adjacencyList.set(id, new Set(adjacent));
+    });
+    this._nodeEdges.forEach((edges, id) => {
+      newGraph._nodeEdges.set(id, new Set(edges));
+    });
+    
+    // Add the new edge
+    newGraph._edges.set(edge.id, edge);
+    
+    // Update adjacency lists
+    newGraph._adjacencyList.get(edge.sourceId)?.add(edge.targetId);
+    newGraph._adjacencyList.get(edge.targetId)?.add(edge.sourceId);
+    
+    // Update node-edge mappings
+    newGraph._nodeEdges.get(edge.sourceId)?.add(edge.id);
+    newGraph._nodeEdges.get(edge.targetId)?.add(edge.id);
     
     return newGraph;
   }
 
-  removeEdge(edgeId: string): Graph {
-    // Create a new graph to maintain immutability
-    const newGraph = new SimulationGraph();
-    
-    // Skip if edge doesn't exist
-    const edgeToRemove = this._edges.get(edgeId);
-    if (!edgeToRemove) {
-      return this;
+  /**
+   * Remove an edge from the graph
+   */
+  removeEdge(edgeId: string): SimulationGraph {
+    const edge = this._edges.get(edgeId);
+    if (!edge) {
+      return this; // Edge doesn't exist, return unchanged
     }
     
-    // Copy existing nodes
-    for (const [id, existingNode] of this._nodes.entries()) {
-      newGraph._nodes.set(id, { ...existingNode });
-    }
+    // Create a new graph
+    const newGraph = new SpinNetworkGraph();
     
-    // Copy edges except the one being removed
-    for (const [id, existingEdge] of this._edges.entries()) {
+    // Copy all nodes
+    this._nodes.forEach((n, id) => newGraph._nodes.set(id, n));
+    
+    // Copy edges except the one to remove
+    this._edges.forEach((e, id) => {
       if (id !== edgeId) {
-        newGraph._edges.set(id, { ...existingEdge });
+        newGraph._edges.set(id, e);
       }
-    }
+    });
     
-    // Update adjacency list (remove connections from source to target and vice versa)
-    for (const [id, adjacentIds] of this._adjacencyList.entries()) {
-      newGraph._adjacencyList.set(id, new Set(adjacentIds));
-    }
-    
-    // Only remove the adjacency entry if this is the only edge between the nodes
-    const sourceId = edgeToRemove.sourceId;
-    const targetId = edgeToRemove.targetId;
-    
-    // Check if there are other edges between these nodes
+    // Copy and update adjacency lists
+    // Only remove adjacency if this is the only edge between the nodes
+    const { sourceId, targetId } = edge;
     let otherEdgesExist = false;
-    for (const [id, edge] of this._edges.entries()) {
+    
+    for (const [id, e] of this._edges.entries()) {
       if (id !== edgeId && 
-          ((edge.sourceId === sourceId && edge.targetId === targetId) ||
-           (edge.sourceId === targetId && edge.targetId === sourceId))) {
+          ((e.sourceId === sourceId && e.targetId === targetId) ||
+           (e.sourceId === targetId && e.targetId === sourceId))) {
         otherEdgesExist = true;
         break;
       }
     }
     
-    // If no other edges exist, remove the adjacency entries
-    if (!otherEdgesExist) {
-      const sourceAdjacent = newGraph._adjacencyList.get(sourceId);
-      if (sourceAdjacent) {
-        sourceAdjacent.delete(targetId);
+    this._adjacencyList.forEach((adjacent, id) => {
+      const newAdjacent = new Set(adjacent);
+      
+      // Remove adjacency only if this was the only edge
+      if (!otherEdgesExist) {
+        if (id === sourceId) {
+          newAdjacent.delete(targetId);
+        } else if (id === targetId) {
+          newAdjacent.delete(sourceId);
+        }
       }
       
-      const targetAdjacent = newGraph._adjacencyList.get(targetId);
-      if (targetAdjacent) {
-        targetAdjacent.delete(sourceId);
-      }
-    }
+      newGraph._adjacencyList.set(id, newAdjacent);
+    });
     
-    // Update node-edges mapping
-    for (const [id, edgeIds] of this._nodeEdges.entries()) {
-      const newEdgeIds = new Set(edgeIds);
-      newEdgeIds.delete(edgeId);
-      newGraph._nodeEdges.set(id, newEdgeIds);
-    }
+    // Copy and update node-edge mappings
+    this._nodeEdges.forEach((edges, id) => {
+      const newEdges = new Set(edges);
+      newEdges.delete(edgeId); // Remove the edge from the mapping
+      newGraph._nodeEdges.set(id, newEdges);
+    });
     
     return newGraph;
   }
 
+  /**
+   * Get the degree of a node (number of connected nodes)
+   */
   getDegree(nodeId: string): number {
-    const adjacentNodes = this._adjacencyList.get(nodeId) || new Set<string>();
-    return adjacentNodes.size;
+    return this._adjacencyList.get(nodeId)?.size || 0;
   }
 
+  /**
+   * Get the IDs of all neighboring nodes
+   */
   getNeighbors(nodeId: string): string[] {
-    const adjacentNodes = this._adjacencyList.get(nodeId) || new Set<string>();
-    return Array.from(adjacentNodes);
+    return Array.from(this._adjacencyList.get(nodeId) || new Set<string>());
   }
 
-  toAdjacencyMatrix(): Matrix {
-    const nodeIds = Array.from(this._nodes.keys());
-    const n = nodeIds.length;
-    const nodeIdToIndex = new Map<string, number>();
-    
-    // Create a mapping from node ID to matrix index
-    for (let i = 0; i < n; i++) {
-      nodeIdToIndex.set(nodeIds[i], i);
-    }
-    
-    // Create a zero-filled matrix
-    const matrix = new DenseMatrix(n, n);
-    
-    // Fill the adjacency matrix
-    for (const edge of this._edges.values()) {
-      const sourceIndex = nodeIdToIndex.get(edge.sourceId);
-      const targetIndex = nodeIdToIndex.get(edge.targetId);
-      
-      if (sourceIndex !== undefined && targetIndex !== undefined) {
-        // Set 1 to indicate an edge exists
-        matrix.set(sourceIndex, targetIndex, 1);
-        matrix.set(targetIndex, sourceIndex, 1);
-      }
-    }
-    
-    return matrix;
+  /**
+   * Convert the graph to an adjacency matrix using math.js
+   */
+  toAdjacencyMatrix(): math.Matrix {
+    return MathAdapter.createAdjacencyMatrix(this);
   }
 
-  toLaplacianMatrix(weightFunction?: WeightFunction): Matrix {
-    const nodeIds = Array.from(this._nodes.keys());
-    const n = nodeIds.length;
-    const nodeIdToIndex = new Map<string, number>();
-    
-    // Create a mapping from node ID to matrix index
-    for (let i = 0; i < n; i++) {
-      nodeIdToIndex.set(nodeIds[i], i);
-    }
-    
-    // Create a zero-filled matrix
-    const matrix = new DenseMatrix(n, n);
-    
-    // Default weight function: w(e) = e.spin (use spin value directly)
-    const weightFn = weightFunction || ((edge: SimulationEdge) => edge.spin);
-    
-    // Fill the Laplacian matrix
-    for (const edge of this._edges.values()) {
-      const sourceIndex = nodeIdToIndex.get(edge.sourceId);
-      const targetIndex = nodeIdToIndex.get(edge.targetId);
-      
-      if (sourceIndex !== undefined && targetIndex !== undefined) {
-        // Calculate weight for this edge
-        const weight = weightFn(edge);
-        
-        // Update off-diagonal elements (negative weights)
-        matrix.set(sourceIndex, targetIndex, matrix.get(sourceIndex, targetIndex) - weight);
-        matrix.set(targetIndex, sourceIndex, matrix.get(targetIndex, sourceIndex) - weight);
-        
-        // Update diagonal elements (sum of weights of connected edges)
-        matrix.set(sourceIndex, sourceIndex, matrix.get(sourceIndex, sourceIndex) + weight);
-        matrix.set(targetIndex, targetIndex, matrix.get(targetIndex, targetIndex) + weight);
-      }
-    }
-    
-    return matrix;
+  /**
+   * Convert the graph to a Laplacian matrix using math.js
+   */
+  toLaplacianMatrix(weightFunction?: WeightFunction): math.Matrix {
+    return MathAdapter.createLaplacianMatrix(this, weightFunction);
   }
 }
