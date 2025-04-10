@@ -133,9 +133,9 @@ export class OrdinaryDiffusionModel extends BaseDiffusionModel {
     const deltaState = this.mathAdapter.multiply(alphaDiffusion, dt);
     const newStateArray = this.mathAdapter.add(stateArray, deltaState);
     
-    // Convert back to state vector
+    // Convert back to state vector - ensure it's a MathArray by casting
     const newState = this.state.fromMathArray(
-      newStateArray, 
+      newStateArray as any, 
       this.state.nodeIds
     );
     
@@ -220,9 +220,9 @@ export class TelegraphDiffusionModel extends BaseDiffusionModel {
     const stateMinusPrev = this.mathAdapter.subtract(twoState, prevStateArray);
     const newStateArray = this.mathAdapter.add(stateMinusPrev, wavetermScaled);
     
-    // Convert back to state vector
+    // Convert back to state vector - ensure it's a MathArray by casting
     const newState = this.state.fromMathArray(
-      newStateArray, 
+      newStateArray as any, 
       this.state.nodeIds
     );
     

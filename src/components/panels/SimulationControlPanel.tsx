@@ -6,8 +6,6 @@ import {
   FaUndo, 
   FaCog,
   FaChartLine,
-  FaRuler,
-  FaSlidersH,
   FaExclamationTriangle,
   FaChevronDown,
   FaChevronUp

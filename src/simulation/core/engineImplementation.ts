@@ -121,7 +121,6 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
   private graph: SimulationGraph | null = null;
   private parameters: SimulationParameters | null = null;
   private diffusionModel: DiffusionModel | null = null;
-  private solver: NumericalSolver | null = null;
   private state: StateVector | null = null;
   private initialState: StateVector | null = null;
   private currentTime: number = 0;

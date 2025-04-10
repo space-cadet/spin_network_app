@@ -104,8 +104,6 @@ export const useSimulation = () => {
         if (Math.floor(currentTime / 1.0) > Math.floor((currentTime - timeStep) / 1.0)) {
           // Get analysis results
           try {
-            const state = engineRef.current.getCurrentState();
-            
             // Log simulation step with conservation data
             simulationLogger.logResults(currentTime, {
               conservation: {
@@ -153,6 +151,26 @@ export const useSimulation = () => {
       animationFrameRef.current = null;
     }
   }, [isRunning, animationLoop]);
+  
+  // Update initial state parameters
+  const updateInitialStateParams = useCallback((newParams: Record<string, any>) => {
+    setParameters(prev => {
+      const updated = {
+        ...prev,
+        initialStateParams: {
+          ...prev.initialStateParams,
+          ...newParams
+        }
+      };
+      
+      // If engine already exists, update it
+      if (engineRef.current && graphRef.current) {
+        engineRef.current.initialize(graphRef.current, updated);
+      }
+      
+      return updated;
+    });
+  }, []);
   
   // Start simulation
   const startSimulation = useCallback(() => {
@@ -336,7 +354,7 @@ export const useSimulation = () => {
       minValue: 0,
       maxValue: 1,
       options: {
-        colorScale: ['#0000ff', '#ff0000'], // Blue to Red
+        colorScale: ['#0000ff', '#ff0000'] as [string, string], // Blue to Red - explicit typing
         sizeScale: [10, 50],
         useColor: true,
         useSize: true,

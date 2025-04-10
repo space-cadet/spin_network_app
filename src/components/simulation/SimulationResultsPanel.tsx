@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaChartBar, FaChartPie, FaChartLine, FaRuler } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
