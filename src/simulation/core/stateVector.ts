@@ -125,10 +125,19 @@ export class SimulationStateVector implements StateVector {
    * Static factory method to create from math array
    */
   static fromMathArray(array: math.MathArray, nodeIds: string[]): StateVector {
-    // Convert math.js array to regular array
-    const values: number[] = Array.isArray(array) 
-      ? array as number[]
-      : (math.flatten(array) as math.MathArray).valueOf() as number[];
+    // Convert math.js array or matrix to regular array
+    let values: number[];
+    
+    if (math.isMatrix(array)) {
+      // Handle matrix case safely
+      values = math.flatten(array as math.Matrix).valueOf() as number[];
+    } else if (Array.isArray(array)) {
+      // Handle array case
+      values = array as number[];
+    } else {
+      // Handle other math collection types
+      values = math.flatten(array).valueOf() as number[];
+    }
     
     if (values.length !== nodeIds.length) {
       throw new Error(`Array length (${values.length}) doesn't match node count (${nodeIds.length})`);
@@ -229,7 +238,8 @@ export class SimulationStateVector implements StateVector {
   }
   
   toMathArray(): math.MathArray {
-    return math.matrix(this._values) as math.MathArray;
+    // Create a simple array that mathjs can work with
+    return this._values as unknown as math.MathArray;
   }
   
   normalize(): StateVector {
