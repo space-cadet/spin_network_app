@@ -251,8 +251,8 @@ const InitialStateSelector: React.FC<InitialStateSelectorProps> = ({
 };
 
 const SimulationControlPanel: React.FC = () => {
-  // Check if network exists first
-  const network = useSelector((state: RootState) => state.network?.present);
+  // Check if network exists first - access the current network correctly
+  const network = useSelector((state: RootState) => state.network?.currentNetwork);
   const hasNetwork = !!(network && network.nodes && network.nodes.length > 0);
   
   // Safe access to useSimulation

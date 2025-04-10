@@ -12,7 +12,7 @@ import { RootState } from '../store';
 
 export const useSimulation = () => {
   // Get network from Redux - handle the case where it might be undefined
-  const network = useSelector((state: RootState) => state.network?.present);
+  const network = useSelector((state: RootState) => state.network?.currentNetwork);
   
   // Simulation state
   const [isRunning, setIsRunning] = useState(false);

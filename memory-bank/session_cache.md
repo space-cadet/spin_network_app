@@ -9,7 +9,7 @@ CONTINUING
 UI integration of the simulation component - Bug fixes and refinements
 
 ## Current Step
-Improved error handling in useSimulation and enhanced UI feedback when no network is available.
+Fixed incorrect network state references and UI issues
 
 ## Critical Files
 - `/src/components/panels/SimulationControlPanel.tsx`
@@ -26,6 +26,9 @@ Improved error handling in useSimulation and enhanced UI feedback when no networ
 - Enhanced SimulationResultsPanel to handle undefined values
 - Added defensive coding to prevent runtime errors when Redux state is not fully loaded
 - Added optional chaining operators for safer access to potentially undefined properties
+- Fixed network state reference in SimulationControlPanel (was using 'present', now using 'currentNetwork')
+- Fixed network state reference in useSimulation hook (was using 'present', now using 'currentNetwork')
+- Updated copyright message in MainLayout.tsx from "© 2023" to "© Deepak Vaid, 2025"
 
 ## Implementation Progress
 1. ✅ Created directory structure for simulation component
@@ -62,6 +65,10 @@ Improved error handling in useSimulation and enhanced UI feedback when no networ
 3. Enhanced SimulationResultsPanel to safely handle undefined values
    - Added default values for all parameters
    - Used optional chaining for accessing nested properties
+4. Fixed "No network detected" warning appearing even when network is present
+   - Updated the Redux selector to correctly check state.network.currentNetwork instead of state.network.present
+5. Updated copyright in footer
+   - Changed from "© 2023" to "© Deepak Vaid, 2025"
 
 ## Design Decisions
 - Kept all simulation controls visible even when no network is available
@@ -72,13 +79,14 @@ Improved error handling in useSimulation and enhanced UI feedback when no networ
 - Made components resilient to undefined or null Redux state
 
 ## Next Steps
-1. Implement visualization adapter to connect simulation state to Cytoscape
-2. Create actual data visualization components for simulation results
-3. Add analysis features to the results panel (conservation laws, geometric properties)
-4. Add more error handling and validation for user inputs
-5. Implement presets for common simulation scenarios
-6. Add import/export functionality for simulation configuration
-7. Create comprehensive tests for the simulation UI
+1. Test the fixes we made for network detection and copyright message
+2. Implement visualization adapter to connect simulation state to Cytoscape
+3. Create actual data visualization components for simulation results
+4. Add analysis features to the results panel (conservation laws, geometric properties)
+5. Add more error handling and validation for user inputs
+6. Implement presets for common simulation scenarios
+7. Add import/export functionality for simulation configuration
+8. Create comprehensive tests for the simulation UI
 
 ## Notes
 - The improved design allows users to configure simulation parameters even before having a network

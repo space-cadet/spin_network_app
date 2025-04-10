@@ -57,7 +57,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="px-4 h-full flex items-center">
           <div className="container mx-auto text-sm text-gray-500 flex justify-between">
             <div>Spin Network Visualization App v0.1.0</div>
-            <div>© 2023</div>
+            <div>© Deepak Vaid, 2025</div>
           </div>
         </div>
       </ResizablePanel>
