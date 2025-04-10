@@ -3,12 +3,13 @@ import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
 import NetworkTools from './components/tools/NetworkTools'
 import { PropertiesPanel, TypeManagementPanel, SimulationControlPanel } from './components/panels'
-import { SimulationResultsPanel } from './components/simulation'
+import { SimulationResultsPanel, SimulationLogsPanel } from './components/simulation'
 import EnergyPlot from './components/visualization/EnergyPlot'
 import PersistentResizablePanel from './components/common/PersistentResizablePanel'
 import PersistenceStatus from './components/common/PersistenceStatus'
 import SidebarToggle from './components/common/SidebarToggle'
 import ThemeProvider from './components/settings/ThemeProvider'
+import { useState } from 'react'
 import { 
   selectLeftSidebarVisible, 
   selectRightSidebarVisible, 
@@ -20,6 +21,9 @@ function App() {
   const leftSidebarVisible = useSelector(selectLeftSidebarVisible);
   const rightSidebarVisible = useSelector(selectRightSidebarVisible);
   const bottomSidebarVisible = useSelector(selectBottomSidebarVisible);
+  
+  // State for bottom panel tabs
+  const [bottomPanelTab, setBottomPanelTab] = useState<'results' | 'logs'>('results');
   
   return (
     <ThemeProvider>
@@ -78,7 +82,38 @@ function App() {
                   handlePosition="start"
                 >
                   <div className="h-full overflow-y-auto">
-                    <SimulationResultsPanel />
+                    {/* Tabs for Results and Logs */}
+                    <div className="border-b border-gray-200">
+                      <div className="flex">
+                        <button
+                          className={`px-4 py-2 text-sm font-medium ${
+                            bottomPanelTab === 'results' 
+                              ? 'border-b-2 border-blue-500 text-blue-600' 
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                          onClick={() => setBottomPanelTab('results')}
+                        >
+                          Simulation Results
+                        </button>
+                        <button
+                          className={`px-4 py-2 text-sm font-medium ${
+                            bottomPanelTab === 'logs' 
+                              ? 'border-b-2 border-blue-500 text-blue-600' 
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                          onClick={() => setBottomPanelTab('logs')}
+                        >
+                          Simulation Logs
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Tab content */}
+                    {bottomPanelTab === 'results' ? (
+                      <SimulationResultsPanel />
+                    ) : (
+                      <SimulationLogsPanel />
+                    )}
                   </div>
                 </PersistentResizablePanel>
                 <SidebarToggle side="bottom" isVisible={bottomSidebarVisible} />
