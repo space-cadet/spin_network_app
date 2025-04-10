@@ -32,3 +32,4 @@ dist-ssr
 .env.production.local
 
 storage/*
+build_errors*.md
