@@ -7,7 +7,7 @@
 
 import * as math from 'mathjs';
 import { SpinNetwork } from '../../models/types';
-import { SimulationGraph, SimulationNode, SimulationEdge, NodePosition, WeightFunction } from './types';
+import { SimulationGraph, SimulationNode, SimulationEdge, WeightFunction } from './types';
 import { MathAdapter } from './mathAdapter';
 
 /**
@@ -32,7 +32,7 @@ export class SpinNetworkGraph implements SimulationGraph {
   /**
    * Create a simulation graph from the application SpinNetwork model
    */
-  static fromSpinNetwork(network: SpinNetwork): SimulationGraph {
+  fromSpinNetwork(network: SpinNetwork): SimulationGraph {
     const graph = new SpinNetworkGraph();
     
     // Add all nodes (skip placeholder nodes)
@@ -85,6 +85,14 @@ export class SpinNetworkGraph implements SimulationGraph {
     }
     
     return graph;
+  }
+
+  /**
+   * Static factory method to create a graph from a SpinNetwork
+   */
+  static fromSpinNetwork(network: SpinNetwork): SimulationGraph {
+    const instance = new SpinNetworkGraph();
+    return instance.fromSpinNetwork(network);
   }
 
   /**

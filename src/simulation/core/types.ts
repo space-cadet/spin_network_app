@@ -38,7 +38,7 @@ export interface SimulationGraph {
   getNeighbors(nodeId: string): string[];
   
   // Conversion to/from application model
-  static fromSpinNetwork(network: SpinNetwork): SimulationGraph;
+  fromSpinNetwork(network: SpinNetwork): SimulationGraph;
   toSpinNetwork(networkTemplate?: SpinNetwork): SpinNetwork;
   
   // Conversion to matrix representation
@@ -97,7 +97,7 @@ export interface StateVector {
   
   // Math.js integration
   toMathArray(): MathArray;
-  static fromMathArray(array: MathArray, nodeIds: string[]): StateVector;
+  fromMathArray(array: MathArray, nodeIds: string[]): StateVector;
   
   // Utility methods
   normalize(): StateVector;
