@@ -11,8 +11,8 @@ import {
 import { RootState } from '../store';
 
 export const useSimulation = () => {
-  // Get network from Redux
-  const network = useSelector((state: RootState) => state.network.present);
+  // Get network from Redux - handle the case where it might be undefined
+  const network = useSelector((state: RootState) => state.network?.present);
   
   // Simulation state
   const [isRunning, setIsRunning] = useState(false);
@@ -24,8 +24,8 @@ export const useSimulation = () => {
     ...DEFAULT_SIMULATION_PARAMETERS,
     initialStateParams: {
       ...DEFAULT_SIMULATION_PARAMETERS.initialStateParams,
-      // Set the first node as default delta source if available
-      nodeId: network.nodes[0]?.id || ''
+      // Safely set the first node as default delta source if available
+      nodeId: network?.nodes?.[0]?.id || ''
     }
   });
 
@@ -38,8 +38,8 @@ export const useSimulation = () => {
   
   // Initialize simulation with current network when it changes
   useEffect(() => {
-    // Create simulation graph from network
-    if (network && network.nodes.length > 0) {
+    // Create simulation graph from network if it exists and has nodes
+    if (network && network.nodes && network.nodes.length > 0) {
       graphRef.current = createSimulationGraph(network);
       
       // Initialize engine if it exists
@@ -51,10 +51,10 @@ export const useSimulation = () => {
       
       // Update default node ID if it's not set or doesn't exist in network
       const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
-      if (!nodeExists) {
+      if (!nodeExists && network.nodes.length > 0) {
         updateInitialStateParams({
           ...parameters.initialStateParams,
-          nodeId: network.nodes[0]?.id || ''
+          nodeId: network.nodes[0].id
         });
       }
     }

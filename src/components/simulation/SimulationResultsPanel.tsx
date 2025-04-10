@@ -4,7 +4,11 @@ import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
 
 const SimulationResultsPanel: React.FC = () => {
-  const { currentTime, hasHistory } = useSimulation();
+  // Handle undefined values from useSimulation gracefully
+  const simulation = useSimulation();
+  const currentTime = simulation?.currentTime || 0;
+  const hasHistory = simulation?.hasHistory || false;
+  
   const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
   
   // Placeholder data for demonstration
