@@ -110,16 +110,42 @@ export class MathAdapter {
    */
   static eigenDecomposition(matrix: math.Matrix): {
     values: number[];
-    vectors: math.Matrix; // This property name matches the return value from eigendecomposition
+    vectors: math.Matrix;
   } {
     const eigs = math.eigs(matrix);
     
-    // Construct eigenvector matrix manually since the API changed
-    const eigenvectors = eigs.eigenvectors || eigs.vectors;
+    // Extract the eigenvalues
+    const values = Array.isArray(eigs.values) 
+      ? eigs.values as number[] 
+      : (eigs.values as math.Matrix).valueOf() as number[];
+    
+    // Extract the eigenvectors - the API might return eigenvectors or vectors
+    let eigenvectors;
+    
+    if (eigs.eigenvectors) {
+      // Create a matrix from the eigenvectors
+      const size = matrix.size();
+      const matrixData = math.zeros(size[0], size[1]) as math.Matrix;
+      
+      // Manually build the matrix
+      eigs.eigenvectors.forEach((item: any, index: number) => {
+        const vector = item.vector;
+        for (let i = 0; i < vector.length; i++) {
+          matrixData.set([i, index], vector[i]);
+        }
+      });
+      
+      eigenvectors = matrixData;
+    } else if (eigs.vectors) {
+      eigenvectors = eigs.vectors as math.Matrix;
+    } else {
+      // Fallback - create empty matrix
+      eigenvectors = math.zeros(matrix.size()[0], matrix.size()[1]) as math.Matrix;
+    }
     
     return {
-      values: eigs.values as number[],
-      vectors: eigenvectors as math.Matrix
+      values,
+      vectors: eigenvectors
     };
   }
   
@@ -131,7 +157,7 @@ export class MathAdapter {
     nodeIds: string[]
   ): StateVector {
     // Convert matrix to array safely
-    const matrixArray = math.flatten(math.clone(matrix)) as unknown as number[];
+    const matrixArray = math.flatten(math.clone(matrix)).valueOf() as number[];
     
     // Use the StateVector implementation
     return SimulationStateVector.fromMathArray(matrixArray as unknown as math.MathArray, nodeIds);
@@ -201,16 +227,17 @@ export class MathAdapter {
     // Get size of state vector
     const size = math.size(initialStateMatrix).valueOf() as number[];
     
-    // Create combined state matrix
-    const y0 = math.matrix([
-      math.flatten(initialStateMatrix).valueOf(),
-      math.flatten(initialVelocityMatrix).valueOf()
-    ]);
+    // Create dense matrices for the state
+    const stateData = math.flatten(initialStateMatrix).valueOf() as number[];
+    const velocityData = math.flatten(initialVelocityMatrix).valueOf() as number[];
+    
+    // Create combined state
+    const y0 = math.matrix([stateData, velocityData]);
     
     // Function to compute derivative
     const dydt = (t: number, y: math.Matrix): math.Matrix => {
-      const phi = y.subset(math.index(0, math.range(0, size[0]))) as math.Matrix;
-      const dphidt = y.subset(math.index(1, math.range(0, size[0]))) as math.Matrix;
+      const phi = math.subset(y, math.index(0, math.range(0, size[0]))) as math.Matrix;
+      const dphidt = math.subset(y, math.index(1, math.range(0, size[0]))) as math.Matrix;
       
       // Calculate c²⋅L⋅ϕ
       const laplacianTerm = math.multiply(laplacian, phi) as math.Matrix;
@@ -223,10 +250,9 @@ export class MathAdapter {
       const acceleration = math.add(cSquaredLaplacianTerm, dampingTerm) as math.Matrix;
       
       // Return [dϕ/dt, c²⋅L⋅ϕ - β⋅dϕ/dt]
-      return math.matrix([
-        math.flatten(dphidt).valueOf(),
-        math.flatten(acceleration).valueOf()
-      ]);
+      const dphiValues = math.flatten(dphidt).valueOf() as number[];
+      const accelValues = math.flatten(acceleration).valueOf() as number[];
+      return math.matrix([dphiValues, accelValues]);
     };
     
     // Use 4th order Runge-Kutta method to solve numerically
@@ -245,7 +271,7 @@ export class MathAdapter {
     }
     
     // Extract the solution (just the position component)
-    return currentY.subset(math.index(0, math.range(0, size[0]))) as unknown as math.MathArray;
+    return math.subset(currentY, math.index(0, math.range(0, size[0]))) as unknown as math.MathArray;
   }
   
   /**
