@@ -5,7 +5,7 @@
  * during the simulation to ensure physical validity.
  */
 
-import { SimulationGraph, StateVector } from '../core/types';
+import { StateVector } from '../core/types';
 
 /**
  * Interface for conservation law checker
