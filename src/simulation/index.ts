@@ -12,7 +12,8 @@ export { SimulationStateVector } from './core/stateVector';
 export { MathAdapter } from './core/mathAdapter';
 
 // Import missing classes from time evolution (we'll need to define these)
-import { SimulationEngine } from './core/types';
+import { SimulationEngine, SimulationGraph } from './core/types';
+import { SpinNetworkGraph } from './core/graph';
 
 // Simulation engine class (placeholder until implementation is ready)
 export class SpinNetworkSimulationEngine implements SimulationEngine {
@@ -91,7 +92,7 @@ export function createSimulationEngine(): SpinNetworkSimulationEngine {
 /**
  * Create a simulation graph from an existing spin network
  */
-export function createSimulationGraph(network: any): SpinNetworkGraph {
+export function createSimulationGraph(network: any): SimulationGraph {
   return SpinNetworkGraph.fromSpinNetwork(network);
 }
 
