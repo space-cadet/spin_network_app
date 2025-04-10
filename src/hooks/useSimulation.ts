@@ -77,42 +77,50 @@ export const useSimulation = () => {
   // Animation loop for updating simulation
   const animationLoop = useCallback(() => {
     if (isRunning && engineRef.current) {
+      console.log("Animation loop iteration, stepping simulation");
+      
       // Step the simulation
-      engineRef.current.step();
-      
-      const currentTime = engineRef.current.getCurrentTime();
-      
-      // Update current time
-      setCurrentTime(currentTime);
-      
-      // Check if history is available
-      if (engineRef.current.getHistory().getTimes().length > 0) {
-        setHasHistory(true);
-      }
-      
-      // Log occasionally (every second of simulation time)
-      // This reduces log clutter while still providing useful data
-      const timeStep = parameters.timeStep || 0.01;
-      if (Math.floor(currentTime / 1.0) > Math.floor((currentTime - timeStep) / 1.0)) {
-        // Get analysis results
-        try {
-          const state = engineRef.current.getCurrentState();
-          const conservation = engineRef.current.getConservationLaws();
-          
-          // Log simulation step with conservation data
-          simulationLogger.logResults(currentTime, {
-            conservation: {
-              totalProbability: conservation.totalProbability || 0,
-              normVariation: conservation.normVariation || 0,
-              positivity: conservation.positivity || false
-            }
-          });
-
-          // Update current time to trigger re-renders (simpler approach)
-          setCurrentTime(currentTime);
-        } catch (error) {
-          simulationLogger.log('error', 'Error computing analysis results', { error }, currentTime);
+      try {
+        engineRef.current.step();
+        
+        const currentTime = engineRef.current.getCurrentTime();
+        console.log("Current simulation time:", currentTime);
+        
+        // Update current time
+        setCurrentTime(currentTime);
+        
+        // Check if history is available
+        if (engineRef.current.getHistory().getTimes().length > 0) {
+          setHasHistory(true);
         }
+        
+        // Get and log conservation laws for every step
+        const conservation = engineRef.current.getConservationLaws();
+        console.log("Conservation laws:", conservation);
+        
+        // Log occasionally (every second of simulation time)
+        // This reduces log clutter while still providing useful data
+        const timeStep = parameters.timeStep || 0.01;
+        if (Math.floor(currentTime / 1.0) > Math.floor((currentTime - timeStep) / 1.0)) {
+          // Get analysis results
+          try {
+            const state = engineRef.current.getCurrentState();
+            
+            // Log simulation step with conservation data
+            simulationLogger.logResults(currentTime, {
+              conservation: {
+                totalProbability: conservation.totalProbability || 0,
+                normVariation: conservation.normVariation || 0,
+                positivity: conservation.positivity || false
+              }
+            });
+          } catch (error) {
+            simulationLogger.log('error', 'Error computing analysis results', { error }, currentTime);
+          }
+        }
+      } catch (error) {
+        console.error("Error in simulation step:", error);
+        simulationLogger.log('error', 'Error in simulation step', { error });
       }
       
       // Request next frame
@@ -123,8 +131,24 @@ export const useSimulation = () => {
   // Start animation loop when isRunning changes
   useEffect(() => {
     if (isRunning) {
+      console.log("Starting animation loop");
+      // Directly run a step immediately
+      if (engineRef.current && graphRef.current) {
+        console.log("Initial step when starting animation");
+        try {
+          engineRef.current.step();
+          setCurrentTime(engineRef.current.getCurrentTime());
+          setHasHistory(true);
+          console.log("Current time after initial step:", engineRef.current.getCurrentTime());
+        } catch (error) {
+          console.error("Error during initial step:", error);
+        }
+      }
+      
+      // Then start the animation loop
       animationFrameRef.current = requestAnimationFrame(animationLoop);
     } else if (animationFrameRef.current !== null) {
+      console.log("Stopping animation loop");
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
@@ -133,6 +157,8 @@ export const useSimulation = () => {
   // Start simulation
   const startSimulation = useCallback(() => {
     if (engineRef.current && graphRef.current) {
+      console.log("Starting simulation, graph:", graphRef.current.nodes.length, "nodes");
+      
       // Initialize engine if not already done
       engineRef.current.initialize(graphRef.current, parameters);
       
@@ -151,19 +177,38 @@ export const useSimulation = () => {
         });
       }
       
-      // Ensure we have an initial state
-      console.log("Starting simulation with engine:", engineRef.current);
+      // Create delta function on the first node if network exists
+      if (network?.nodes?.length > 0) {
+        // Make sure initial state has a node selected
+        if (!parameters.initialStateParams.nodeId && network.nodes.length > 0) {
+          updateInitialStateParams({
+            ...parameters.initialStateParams,
+            nodeId: network.nodes[0].id
+          });
+        }
+        console.log("Using initial node:", parameters.initialStateParams.nodeId);
+      }
       
       // Start simulation
       engineRef.current.resume();
       setIsRunning(true);
       
       // Take an immediate first step to show something happening
-      engineRef.current.step();
-      setCurrentTime(engineRef.current.getCurrentTime());
-      setHasHistory(true);
+      try {
+        engineRef.current.step();
+        const newTime = engineRef.current.getCurrentTime();
+        console.log("First step completed, new time:", newTime);
+        setCurrentTime(newTime);
+        setHasHistory(true);
+      } catch (error) {
+        console.error("Error during first step:", error);
+      }
+    } else {
+      console.error("Cannot start simulation: engine or graph is null");
+      if (!graphRef.current) console.error("Graph ref is null");
+      if (!engineRef.current) console.error("Engine ref is null");
     }
-  }, [parameters, network]);
+  }, [parameters, network, updateInitialStateParams]);
   
   // Pause simulation
   const pauseSimulation = useCallback(() => {

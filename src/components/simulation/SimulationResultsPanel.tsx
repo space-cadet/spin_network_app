@@ -34,7 +34,13 @@ const SimulationResultsPanel: React.FC = () => {
     kurtosis: 2.9
   };
 
-  if (!hasHistory) {
+  // Always get the latest conservation data, even if no formal "history" yet
+  let displayConservationData = conservationData;
+  if (simulation.isRunning && simulation.getConservationLaws) {
+    displayConservationData = simulation.getConservationLaws();
+  }
+
+  if (!hasHistory && !simulation.isRunning) {
     return (
       <div className="simulation-results-panel p-4 text-center text-gray-500">
         <FaChartLine className="mx-auto mb-3 text-3xl" />
@@ -94,31 +100,31 @@ const SimulationResultsPanel: React.FC = () => {
               <div className="flex justify-between mb-1">
                 <span className="text-sm">Current Value:</span>
                 <span className={`font-mono text-sm ${
-                  Math.abs(conservationData.totalProbability - 1) < 0.01 
+                  Math.abs(displayConservationData.totalProbability - 1) < 0.01 
                     ? 'text-green-600' 
                     : 'text-yellow-600'
                 }`}>
-                  {Number(conservationData.totalProbability).toFixed(6)}
+                  {Number(displayConservationData.totalProbability).toFixed(6)}
                 </span>
               </div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm">Variation:</span>
                 <span className={`font-mono text-sm ${
-                  conservationData.normVariation < 0.01 
+                  displayConservationData.normVariation < 0.01 
                     ? 'text-green-600' 
                     : 'text-yellow-600'
                 }`}>
-                  {Number(conservationData.normVariation).toFixed(6)}
+                  {Number(displayConservationData.normVariation).toFixed(6)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm">Positivity:</span>
                 <span className={`font-mono text-sm ${
-                  conservationData.positivity 
+                  displayConservationData.positivity 
                     ? 'text-green-600' 
                     : 'text-red-600'
                 }`}>
-                  {conservationData.positivity ? 'Preserved' : 'Violated'}
+                  {displayConservationData.positivity ? 'Preserved' : 'Violated'}
                 </span>
               </div>
             </div>
