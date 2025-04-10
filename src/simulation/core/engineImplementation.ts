@@ -149,8 +149,7 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     }
     
     // Create the solver
-    const solverFactory = new SolverFactory();
-    this.solver = solverFactory.createSolver(parameters.numericalMethod);
+    this.solver = SolverFactory.createSolver(parameters.numericalMethod);
     
     // Create the initial state
     this.createInitialState(parameters);
@@ -420,11 +419,12 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     const conservationChecker = new ProbabilityConservation();
     
     // Get the initial probability if available
-    const initialProbability = this.initialState ? 
-      conservationChecker.getValue(this.initialState) : 1.0;
-    
+    const initialProbability = this.initialState ?
+      conservationChecker.getDeviation(this.initialState, this.initialState) : 0.0;
+
     // Calculate current probability
-    const currentProbability = conservationChecker.getValue(this.state);
+    const currentProbability = this.state && this.initialState ?
+      conservationChecker.getDeviation(this.initialState, this.state) : 0.0;
     
     // Calculate the variation
     const normVariation = Math.abs(currentProbability - initialProbability);

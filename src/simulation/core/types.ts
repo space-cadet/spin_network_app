@@ -105,7 +105,7 @@ export interface StateVector {
   equals(other: StateVector): boolean;
   
   // Conversion to/from application model
-  toVisualizationState(): Record<string, number>;
+  toVisualizationState(): import('../visualization/cytoscapeAdapter').CytoscapeVisualizationState;
 }
 
 /**

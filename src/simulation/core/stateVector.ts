@@ -7,6 +7,7 @@
 
 import * as math from 'mathjs';
 import { StateVector } from './types';
+import { CytoscapeVisualizationState } from '../visualization/cytoscapeAdapter';
 
 /**
  * Implementation of the StateVector interface
@@ -308,13 +309,42 @@ export class SimulationStateVector implements StateVector {
     return true;
   }
   
-  toVisualizationState(): Record<string, number> {
-    const result: Record<string, number> = {};
+  toVisualizationState(): CytoscapeVisualizationState {
+    const nodeValues: Record<string, number> = {};
+    let minValue = Number.POSITIVE_INFINITY;
+    let maxValue = Number.NEGATIVE_INFINITY;
     
     this._nodeIds.forEach((id, index) => {
-      result[id] = this._values[index];
+      const value = this._values[index];
+      nodeValues[id] = value;
+      
+      if (value < minValue) minValue = value;
+      if (value > maxValue) maxValue = value;
     });
     
-    return result;
+    // Handle case where all values are equal
+    if (minValue === maxValue) {
+      if (minValue === 0) {
+        maxValue = 1; // Avoid division by zero
+      } else {
+        const range = Math.abs(minValue) * 0.01;
+        minValue -= range;
+        maxValue += range;
+      }
+    }
+    
+    return {
+      nodeValues,
+      minValue,
+      maxValue,
+      options: {
+        colorScale: ['#0000ff', '#ff0000'], // Blue to Red
+        sizeScale: [10, 50],
+        useColor: true,
+        useSize: true,
+        showValues: false,
+        normalizeValues: true
+      }
+    };
   }
 }

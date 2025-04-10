@@ -7,7 +7,7 @@ import {
   FaCog,
   FaChartLine,
   FaRuler,
-  FaSliders,
+  FaSlidersH,
   FaExclamationTriangle
 } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';

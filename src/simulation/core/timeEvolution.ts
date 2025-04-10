@@ -120,8 +120,9 @@ export class SpinNetworkSimulationEngine implements SimulationEngine {
     this.parameters = parameters;
     
     // Create the appropriate diffusion model
-    this.diffusionModel = DiffusionModelFactory.createModel(parameters.diffusionType);
-    this.diffusionModel.initialize(graph, parameters);
+    const diffusionModelFactory = new DiffusionModelFactory();
+    this.diffusionModel = diffusionModelFactory.createDiffusionModel(parameters.diffusionType);
+    this.diffusionModel && this.diffusionModel.initialize(graph, parameters);
     
     // Clear history
     this.history.clear();

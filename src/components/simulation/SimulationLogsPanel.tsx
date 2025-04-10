@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaList, FaClock, FaDownload, FaTrash, FaSearch } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
-import { simulationLogger, SimulationSessionLog, LogEntry } from '../../simulation/core/simulationLogger';
+import { simulationLogger, SimulationSessionLog, LogEntry, LogLevel } from '../../simulation/core/simulationLogger';
 import { useSimulation } from '../../hooks/useSimulation';
 
 interface LogEntryItemProps {

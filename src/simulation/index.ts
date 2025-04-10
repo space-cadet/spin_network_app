@@ -76,7 +76,7 @@ export {
  * Create a new simulation engine with default configuration
  */
 export function createSimulationEngine(): SpinNetworkSimulationEngine {
-  return new SpinNetworkSimulationEngine();
+  return new SpinNetworkSimulationEngineImpl();
 }
 
 // Export the simulation logger

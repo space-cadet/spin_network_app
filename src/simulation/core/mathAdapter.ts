@@ -139,6 +139,38 @@ export class MathAdapter {
       vectors: eigenvectors
     };
   }
+
+ /**
+  * Multiply two matrices or a matrix and a scalar
+  */
+ multiply(x: math.Matrix | math.MathArray, y: math.Matrix | math.MathArray | number): math.MathArray {
+   const result = math.multiply(x, y);
+   if (typeof result === 'number') {
+     return [result] as unknown as math.MathArray;
+   }
+   return (result as math.Matrix).toArray() as unknown as math.MathArray;
+ }
+
+ /**
+  * Add two matrices
+  */
+ add(x: math.Matrix | math.MathArray, y: math.Matrix | math.MathArray): math.Matrix | math.MathArray {
+   return math.add(x, y) as math.Matrix | math.MathArray;
+ }
+
+ /**
+  * Subtract two matrices
+  */
+ subtract(x: math.Matrix | math.MathArray, y: math.Matrix | math.MathArray): math.Matrix | math.MathArray {
+   return math.subtract(x, y) as math.Matrix | math.MathArray;
+ }
+
+ /**
+  * Divide a matrix by a scalar
+  */
+ divide(x: math.Matrix | math.MathArray, y: number): math.Matrix | math.MathArray {
+   return math.divide(x, y) as math.Matrix | math.MathArray;
+ }
   
   /**
    * Convert a math.js matrix to a state vector

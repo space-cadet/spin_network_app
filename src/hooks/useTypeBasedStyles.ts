@@ -77,7 +77,7 @@ export const useTypeBasedStyles = () => {
   const baseStyles = [
     // Default selector for any node without a recognized type
     {
-      selector: 'node[type="undefined"], node:not([type])',
+      selector: 'node[type]', // Apply to all nodes with a type attribute
       style: {
         'background-color': '#4f46e5',
         'label': viewSettings?.showNodeLabels ? 'data(label)' : '',
@@ -90,9 +90,9 @@ export const useTypeBasedStyles = () => {
         'font-size': '14px'
       }
     },
-    // Default selector for any edge without a recognized type
+    // Default selector for all edges with a type attribute
     {
-      selector: 'edge[type="undefined"], edge:not([type])',
+      selector: 'edge[type]',
       style: {
         'width': 3 * getEdgeThicknessMultiplier(),
         'line-color': '#3b82f6',

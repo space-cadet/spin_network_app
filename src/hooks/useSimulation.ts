@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { CytoscapeAdapter } from '../simulation/visualization/cytoscapeAdapter';
 import { useSelector } from 'react-redux';
 import { 
   SimulationParameters,
@@ -267,10 +268,26 @@ export const useSimulation = () => {
   
   // Get current visualization state
   const getVisualizationState = useCallback(() => {
-    if (engineRef.current) {
+    if (engineRef.current && graphRef.current) {
       return engineRef.current.getCurrentState().toVisualizationState();
     }
-    return {};
+    // Return a default CytoscapeVisualizationState
+    if (graphRef.current) {
+      return new CytoscapeAdapter().createVisualization(graphRef.current);
+    }
+    return {
+      nodeValues: {},
+      minValue: 0,
+      maxValue: 1,
+      options: {
+        colorScale: ['#0000ff', '#ff0000'], // Blue to Red
+        sizeScale: [10, 50],
+        useColor: true,
+        useSize: true,
+        showValues: false,
+        normalizeValues: true
+      }
+    };
   }, []);
   
   // Get conservation laws
