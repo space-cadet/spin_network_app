@@ -11,11 +11,9 @@ import {
   SimulationGraph, 
   StateVector, 
   SimulationParameters,
-  StandardWeightFunction,
   WeightFunction 
 } from '../core/types';
 import { SimulationStateVector } from '../core/stateVector';
-import { MathAdapter } from '../core/mathAdapter';
 import { SpinWeightFunctionFactory } from './weightFunctions';
 
 /**
@@ -229,7 +227,7 @@ export class TelegraphDiffusionModel extends BaseDiffusionModel {
     const velocityArray = this.currentVelocity.toMathArray();
     
     // Calculate c² ⋅ L ⋅ ϕ
-    const laplacianTerm = math.multiply(this.laplacianMatrix, stateArray) as math.MathArray;
+    const laplacianTerm = math.multiply(this.laplacianMatrix, stateArray) as unknown as math.MathArray;
     const cSquaredLaplacianTerm = math.multiply(laplacianTerm, cSquared) as math.MathArray;
     
     // Calculate -β ⋅ v
@@ -251,6 +249,7 @@ export class TelegraphDiffusionModel extends BaseDiffusionModel {
       newStateArray,
       this.currentState.nodeIds
     );
+    
     this.currentVelocity = SimulationStateVector.fromMathArray(
       newVelocityArray,
       this.currentState.nodeIds
