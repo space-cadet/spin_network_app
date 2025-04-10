@@ -1,5 +1,109 @@
 # Error Log
 
+## 2025-04-10 19:30 IST - Build and Runtime Errors in Simulation Component
+
+**File:** Multiple files in the simulation component
+
+**Error Message:**
+Build errors:
+```
+src/App.tsx(7,1): error TS6133: 'EnergyPlot' is declared but its value is never read.
+src/components/panels/SimulationControlPanel.tsx(9,3): error TS6133: 'FaRuler' is declared but its value is never read.
+src/components/panels/SimulationControlPanel.tsx(10,3): error TS6133: 'FaSlidersH' is declared but its value is never read.
+src/components/simulation/SimulationResultsPanel.tsx(1,27): error TS6133: 'useEffect' is declared but its value is never read.
+src/components/workspace/Workspace.tsx(187,58): error TS2345: Argument of type '...' is not assignable to parameter of type 'CytoscapeVisualizationState'.
+src/hooks/useSimulation.ts(107,19): error TS6133: 'state' is declared but its value is never read.
+src/hooks/useSimulation.ts(211,28): error TS2448: Block-scoped variable 'updateInitialStateParams' used before its declaration.
+src/hooks/useSimulation.ts(211,28): error TS2454: Variable 'updateInitialStateParams' is used before being assigned.
+src/simulation/core/engineImplementation.ts(124,11): error TS6133: 'solver' is declared but its value is never read.
+src/simulation/index.ts(78,43): error TS2552: Cannot find name 'SpinNetworkSimulationEngine'. Did you mean 'SpinNetworkSimulationEngineImpl'?
+src/simulation/models/diffusionModels.ts(138,7): error TS2345: Argument of type 'Matrix | MathArray' is not assignable to parameter of type 'MathArray'.
+src/simulation/models/diffusionModels.ts(225,7): error TS2345: Argument of type 'Matrix | MathArray' is not assignable to parameter of type 'MathArray'.
+```
+
+Runtime error:
+```
+useSimulation.ts:211 Uncaught ReferenceError: Cannot access 'updateInitialStateParams' before initialization at useSimulation (useSimulation.ts:211:28) at SimulationControlPanel (SimulationControlPanel.tsx:312:7)
+```
+
+**Cause:**
+1. The simulation component had various TypeScript errors preventing the app from loading:
+   - Multiple unused imports and variables across several files
+   - Type issues with colorScale and sizeScale arrays in visualization components
+   - A critical error with function declaration order in useSimulation.ts
+   - Matrix type conversion issues in diffusion models
+   - Incorrect class name references in simulation/index.ts
+
+2. The primary runtime error was related to the `updateInitialStateParams` function being used before it was defined in the code, due to the order of declarations in useSimulation.ts.
+
+**Fix:**
+1. **Restructured useSimulation.ts**:
+   - Completely reorganized the hook to define all functions before they're used
+   - Moved all callback function declarations to the top of the component
+   - Fixed function dependencies in the dependency arrays
+   - Added proper error handling in animation loops
+
+2. **Fixed Type Errors**:
+   - Added explicit type assertions for arrays: `as [string, string]` for colorScale and `as [number, number]` for sizeScale
+   - Added proper type casting for matrix/array conversions: `as any` for Matrix to MathArray conversions
+   - Removed unused imports and variables across multiple files
+   - Updated SpinNetworkSimulationEngine references to SpinNetworkSimulationEngineImpl
+
+3. **Enhanced Error Handling**:
+   - Added comprehensive error handling in the simulation animation loop
+   - Improved visualization state handling with proper fallbacks
+   - Added better console logging for debugging simulation steps
+
+**Key Code Changes:**
+
+```typescript
+// Fixed type casting in useSimulation.ts
+return {
+  nodeValues: {},
+  minValue: 0,
+  maxValue: 1,
+  options: {
+    colorScale: ['#0000ff', '#ff0000'] as [string, string], // Explicit typing
+    sizeScale: [10, 50] as [number, number], // Explicit typing
+    useColor: true,
+    useSize: true,
+    showValues: false,
+    normalizeValues: true
+  }
+};
+
+// Fixed function order in useSimulation.ts by defining all callbacks at the top
+// Define all callback functions first to avoid reference errors
+const updateParameters = useCallback((newParams: Partial<SimulationParameters>) => {
+  // Function implementation
+}, []);
+
+const updateInitialStateParams = useCallback((newParams: Record<string, any>) => {
+  // Function implementation
+}, []);
+
+// Then use them later in the component
+const startSimulation = useCallback(() => {
+  // Now can safely use updateInitialStateParams
+}, [parameters, network, updateInitialStateParams]);
+
+// Fixed matrix type conversion in diffusionModels.ts
+const newState = this.state.fromMathArray(
+  newStateArray as any, // Explicit type casting to fix conversion error
+  this.state.nodeIds
+);
+```
+
+**Affected Files:**
+- src/hooks/useSimulation.ts
+- src/components/simulation/SimulationResultsPanel.tsx
+- src/simulation/core/engineImplementation.ts
+- src/simulation/models/diffusionModels.ts
+- src/simulation/index.ts
+- src/components/workspace/Workspace.tsx
+- src/components/panels/SimulationControlPanel.tsx
+- src/App.tsx
+
 ## 2025-04-10 10:15 IST - TypeScript Build Errors in Simulation Component
 
 **File:** Multiple files in the simulation component (see list below)

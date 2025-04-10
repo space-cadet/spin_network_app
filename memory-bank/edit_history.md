@@ -2,6 +2,21 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-10: Fixed Build and Runtime Errors in Simulation Component
+
+Modified files:
+- `/src/hooks/useSimulation.ts` - Completely restructured hook to fix variable declaration order
+- `/src/components/simulation/SimulationResultsPanel.tsx` - Updated to use real conservation data
+- `/src/simulation/core/engineImplementation.ts` - Removed unused imports and solver references
+- `/src/simulation/models/diffusionModels.ts` - Fixed matrix type conversion issues
+- `/src/simulation/index.ts` - Fixed incorrect class name references
+- `/src/components/workspace/Workspace.tsx` - Added proper type assertions for visualization state
+- `/src/components/panels/SimulationControlPanel.tsx` - Removed unused imports
+- `/src/App.tsx` - Removed unused imports
+- `/memory-bank/session_cache.md` - Updated to reflect build fix progress
+- `/memory-bank/errorLog.md` - Added detailed documentation of fixed errors
+- `/memory-bank/edit_history.md` - Updated with recent changes
+
 ## 2025-04-10: Simulation UI - Collapsible Panel and Improved Tabs
 
 Modified files:
