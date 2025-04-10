@@ -140,24 +140,24 @@ export class OrdinaryDiffusionModel extends BaseDiffusionModel {
     const stateArray = this.currentState.toMathArray();
     
     // Calculate L * ϕ
-    const laplacianTerm = math.multiply(this.laplacianMatrix, stateArray) as math.MathArray;
+    // We need to wrap stateArray in a matrix first to avoid type errors
+    const stateMatrix = math.matrix(stateArray);
+    const laplacianTerm = math.multiply(this.laplacianMatrix, stateMatrix) as math.Matrix;
     
     // Calculate α * L * ϕ
-    const diffusionTerm = math.multiply(laplacianTerm, alpha) as math.MathArray;
+    const diffusionTerm = math.multiply(laplacianTerm, alpha) as math.Matrix;
     
     // Calculate dt * α * L * ϕ
-    const deltaTerm = math.multiply(diffusionTerm, dt) as math.MathArray;
+    const deltaTerm = math.multiply(diffusionTerm, dt) as math.Matrix;
     
     // Calculate ϕ(t) + dt * α * L * ϕ(t)
-    const newStateArray = math.add(stateArray, deltaTerm) as math.MathArray;
+    const newStateMatrix = math.add(stateMatrix, deltaTerm) as math.Matrix;
     
     // Convert back to a StateVector
-    const newState = SimulationStateVector.fromMathArray(
-      newStateArray,
+    return SimulationStateVector.fromMathArray(
+      newStateMatrix as unknown as math.MathArray,
       this.currentState.nodeIds
     );
-    
-    return newState;
   }
 }
 
@@ -223,35 +223,35 @@ export class TelegraphDiffusionModel extends BaseDiffusionModel {
     // dv/dt = c² ⋅ L ⋅ ϕ - β ⋅ v
     
     // Get current state and velocity as math.js arrays
-    const stateArray = this.currentState.toMathArray();
-    const velocityArray = this.currentVelocity.toMathArray();
+    const stateMatrix = math.matrix(this.currentState.toMathArray());
+    const velocityMatrix = math.matrix(this.currentVelocity.toMathArray());
     
     // Calculate c² ⋅ L ⋅ ϕ
-    const laplacianTerm = math.multiply(this.laplacianMatrix, stateArray) as unknown as math.MathArray;
-    const cSquaredLaplacianTerm = math.multiply(laplacianTerm, cSquared) as math.MathArray;
+    const laplacianTerm = math.multiply(this.laplacianMatrix, stateMatrix);
+    const cSquaredLaplacianTerm = math.multiply(laplacianTerm, cSquared);
     
     // Calculate -β ⋅ v
-    const dampingTerm = math.multiply(velocityArray, -beta) as math.MathArray;
+    const dampingTerm = math.multiply(velocityMatrix, -beta);
     
     // Calculate acceleration: c² ⋅ L ⋅ ϕ - β ⋅ v
-    const accelerationTerm = math.add(cSquaredLaplacianTerm, dampingTerm) as math.MathArray;
+    const accelerationTerm = math.add(cSquaredLaplacianTerm, dampingTerm);
     
     // Update velocity: v(t+dt) = v(t) + dt * acceleration
-    const deltaVelocity = math.multiply(accelerationTerm, dt) as math.MathArray;
-    const newVelocityArray = math.add(velocityArray, deltaVelocity) as math.MathArray;
+    const deltaVelocity = math.multiply(accelerationTerm, dt);
+    const newVelocityMatrix = math.add(velocityMatrix, deltaVelocity);
     
     // Update position: ϕ(t+dt) = ϕ(t) + dt * v(t+dt)
-    const deltaPosition = math.multiply(newVelocityArray, dt) as math.MathArray;
-    const newStateArray = math.add(stateArray, deltaPosition) as math.MathArray;
+    const deltaPosition = math.multiply(newVelocityMatrix, dt);
+    const newStateMatrix = math.add(stateMatrix, deltaPosition);
     
     // Convert back to StateVectors
     const newState = SimulationStateVector.fromMathArray(
-      newStateArray,
+      newStateMatrix as unknown as math.MathArray,
       this.currentState.nodeIds
     );
     
     this.currentVelocity = SimulationStateVector.fromMathArray(
-      newVelocityArray,
+      newVelocityMatrix as unknown as math.MathArray,
       this.currentState.nodeIds
     );
     
