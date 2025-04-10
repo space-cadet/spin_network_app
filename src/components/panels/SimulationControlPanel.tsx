@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSimulation } from '../../hooks/useSimulation';
+import { SimulationParameters } from '../../simulation/core/types';
 
 export const SimulationControlPanel: React.FC = () => {
   const {
@@ -19,7 +20,9 @@ export const SimulationControlPanel: React.FC = () => {
           Diffusion Type:
           <select 
             value={parameters.diffusionType}
-            onChange={e => updateParameters({ diffusionType: e.target.value })}
+            onChange={e => updateParameters({ 
+              diffusionType: e.target.value as SimulationParameters['diffusionType'] 
+            })}
           >
             <option value="ordinary">Ordinary Diffusion</option>
             <option value="telegraph">Telegraph Diffusion</option>

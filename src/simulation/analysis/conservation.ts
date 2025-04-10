@@ -14,13 +14,11 @@ export interface ConservationChecker {
   /**
    * Check if a conservation law is satisfied
    * 
-   * @param graph The simulation graph
    * @param initialState The initial state
    * @param currentState The current state
    * @returns True if the conservation law is satisfied within tolerance
    */
   checkConservation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): boolean;
@@ -28,13 +26,11 @@ export interface ConservationChecker {
   /**
    * Get the deviation from the conservation law
    * 
-   * @param graph The simulation graph
    * @param initialState The initial state
    * @param currentState The current state
    * @returns The deviation from the conservation law
    */
   getDeviation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): number;
@@ -78,7 +74,6 @@ export class ProbabilityConservation implements ConservationChecker {
    * Check if probability is conserved (L2 norm remains constant)
    */
   checkConservation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): boolean {
@@ -100,7 +95,6 @@ export class ProbabilityConservation implements ConservationChecker {
    * Get the deviation from probability conservation
    */
   getDeviation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): number {
@@ -159,7 +153,6 @@ export class TotalOccupancyConservation implements ConservationChecker {
    * Check if total occupancy is conserved
    */
   checkConservation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): boolean {
@@ -181,7 +174,6 @@ export class TotalOccupancyConservation implements ConservationChecker {
    * Get the deviation from total occupancy conservation
    */
   getDeviation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): number {
@@ -256,7 +248,6 @@ export class PositivityConservation implements ConservationChecker {
    * Check if positivity is conserved
    */
   checkConservation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): boolean {
@@ -275,7 +266,6 @@ export class PositivityConservation implements ConservationChecker {
    * Get the deviation from positivity conservation
    */
   getDeviation(
-    graph: SimulationGraph,
     initialState: StateVector,
     currentState: StateVector
   ): number {

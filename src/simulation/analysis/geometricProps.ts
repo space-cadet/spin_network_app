@@ -5,7 +5,6 @@
  * of the network based on quantum geometry principles.
  */
 
-import * as math from 'mathjs';
 import { GeometricCalculator, SimulationGraph, StateVector } from '../core/types';
 import { MathAdapter } from '../core/mathAdapter';
 
@@ -25,7 +24,6 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
     
     // Sum up the volumes associated with each node
     for (let i = 0; i < state.size; i++) {
-      const nodeId = state.nodeIds[i];
       const stateValue = state.getValueAtIndex(i);
       
       // The volume contribution of a node is proportional to |ψ|^2
@@ -160,9 +158,8 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
    * Calculate the diffusion rate based on the current state
    */
   calculateDiffusionRate(
-    graph: SimulationGraph,
-    state: StateVector,
     prevState: StateVector,
+    state: StateVector,
     dt: number
   ): number {
     // If dt is 0, return 0 to avoid division by zero

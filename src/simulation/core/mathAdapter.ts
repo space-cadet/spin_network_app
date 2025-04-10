@@ -7,6 +7,7 @@
 
 import * as math from 'mathjs';
 import { SimulationGraph, SimulationEdge, StateVector, WeightFunction } from './types';
+import { SimulationStateVector } from './stateVector';
 
 /**
  * Math.js adapter for simulation operations
@@ -109,13 +110,16 @@ export class MathAdapter {
    */
   static eigenDecomposition(matrix: math.Matrix): {
     values: number[];
-    vectors: math.Matrix;
+    vectors: math.Matrix; // This property name matches the return value from eigendecomposition
   } {
     const eigs = math.eigs(matrix);
     
+    // Construct eigenvector matrix manually since the API changed
+    const eigenvectors = eigs.eigenvectors || eigs.vectors;
+    
     return {
       values: eigs.values as number[],
-      vectors: eigs.vectors as math.Matrix
+      vectors: eigenvectors as math.Matrix
     };
   }
   
@@ -126,24 +130,11 @@ export class MathAdapter {
     matrix: math.Matrix, 
     nodeIds: string[]
   ): StateVector {
-    // This is a placeholder - the actual StateVector implementation
-    // will be created in stateVector.ts
-    return {
-      size: nodeIds.length,
-      nodeIds,
-      getValue: () => 0,
-      setValue: () => ({} as StateVector),
-      getValueAtIndex: () => 0,
-      setValueAtIndex: () => ({} as StateVector),
-      add: () => ({} as StateVector),
-      subtract: () => ({} as StateVector),
-      multiply: () => ({} as StateVector),
-      toMathArray: () => [] as math.MathArray,
-      normalize: () => ({} as StateVector),
-      clone: () => ({} as StateVector),
-      equals: () => false,
-      toVisualizationState: () => ({})
-    };
+    // Convert matrix to array safely
+    const matrixArray = math.flatten(math.clone(matrix)) as unknown as number[];
+    
+    // Use the StateVector implementation
+    return SimulationStateVector.fromMathArray(matrixArray as unknown as math.MathArray, nodeIds);
   }
   
   /**
@@ -157,7 +148,7 @@ export class MathAdapter {
    */
   static solveOrdinaryDiffusion(
     laplacian: math.Matrix,
-    initialState: math.MathArray,
+    initialState: math.MathArray | math.Matrix,
     alpha: number,
     t: number
   ): math.MathArray {
@@ -170,8 +161,13 @@ export class MathAdapter {
     // Calculate e^(α⋅L⋅t)
     const expMatrix = this.matrixExponential(scaledLaplacian, t);
     
+    // Convert initialState to matrix if it's not already
+    const initialStateMatrix = math.isMatrix(initialState) ? 
+      initialState as math.Matrix : 
+      math.matrix(initialState);
+    
     // Apply to initial state: e^(α⋅L⋅t) ⋅ ϕ(0)
-    return math.multiply(expMatrix, initialState) as math.MathArray;
+    return math.multiply(expMatrix, initialStateMatrix) as unknown as math.MathArray;
   }
   
   /**
@@ -182,27 +178,39 @@ export class MathAdapter {
    */
   static solveTelegraphDiffusion(
     laplacian: math.Matrix,
-    initialState: math.MathArray,
-    initialVelocity: math.MathArray,
+    initialState: math.MathArray | math.Matrix,
+    initialVelocity: math.MathArray | math.Matrix,
     beta: number,
     cSquared: number,
     t: number,
     dt: number
   ): math.MathArray {
+    // Convert inputs to matrices if they're not already
+    const initialStateMatrix = math.isMatrix(initialState) ? 
+      initialState as math.Matrix : 
+      math.matrix(initialState);
+    
+    const initialVelocityMatrix = math.isMatrix(initialVelocity) ? 
+      initialVelocity as math.Matrix : 
+      math.matrix(initialVelocity);
+    
     // Convert to a system of first-order ODEs:
     // Let y = [ϕ, dϕ/dt]
     // Then dy/dt = [dϕ/dt, c²⋅L⋅ϕ - β⋅dϕ/dt]
     
-    // Initial state as a column vector
+    // Get size of state vector
+    const size = math.size(initialStateMatrix).valueOf() as number[];
+    
+    // Create combined state matrix
     const y0 = math.matrix([
-      initialState,
-      initialVelocity
+      math.flatten(initialStateMatrix).valueOf(),
+      math.flatten(initialVelocityMatrix).valueOf()
     ]);
     
     // Function to compute derivative
     const dydt = (t: number, y: math.Matrix): math.Matrix => {
-      const phi = y.subset(math.index(0, math.range(0, initialState.length))) as math.Matrix;
-      const dphidt = y.subset(math.index(1, math.range(0, initialState.length))) as math.Matrix;
+      const phi = y.subset(math.index(0, math.range(0, size[0]))) as math.Matrix;
+      const dphidt = y.subset(math.index(1, math.range(0, size[0]))) as math.Matrix;
       
       // Calculate c²⋅L⋅ϕ
       const laplacianTerm = math.multiply(laplacian, phi) as math.Matrix;
@@ -216,8 +224,8 @@ export class MathAdapter {
       
       // Return [dϕ/dt, c²⋅L⋅ϕ - β⋅dϕ/dt]
       return math.matrix([
-        dphidt,
-        acceleration
+        math.flatten(dphidt).valueOf(),
+        math.flatten(acceleration).valueOf()
       ]);
     };
     
@@ -237,7 +245,7 @@ export class MathAdapter {
     }
     
     // Extract the solution (just the position component)
-    return currentY.subset(math.index(0, math.range(0, initialState.length))) as math.MathArray;
+    return currentY.subset(math.index(0, math.range(0, size[0]))) as unknown as math.MathArray;
   }
   
   /**

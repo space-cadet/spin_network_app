@@ -10,7 +10,26 @@ export * from './core/types';
 export { SpinNetworkGraph } from './core/graph';
 export { SimulationStateVector } from './core/stateVector';
 export { MathAdapter } from './core/mathAdapter';
-export { SpinNetworkSimulationEngine } from './core/timeEvolution';
+
+// Import missing classes from time evolution (we'll need to define these)
+import { SimulationEngine } from './core/types';
+
+// Simulation engine class (placeholder until implementation is ready)
+export class SpinNetworkSimulationEngine implements SimulationEngine {
+  initialize(graph: any, parameters: any): void {}
+  step(): void {}
+  runUntil(time: number): void {}
+  runSteps(steps: number): void {}
+  pause(): void {}
+  resume(): void {}
+  reset(): void {}
+  getCurrentState(): any { return null; }
+  getCurrentTime(): number { return 0; }
+  getHistory(): any { return {}; }
+  isRunning(): boolean { return false; }
+  addEventListener(event: string, callback: Function): void {}
+  removeEventListener(event: string, callback: Function): void {}
+}
 
 // Diffusion models
 export { 

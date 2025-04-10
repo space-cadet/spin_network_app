@@ -1,15 +1,22 @@
 import { useState, useCallback } from 'react';
-import { MathAdapter } from '../simulation/core/mathAdapter';
 import { SimulationParameters } from '../simulation/core/types';
 
 export const useSimulation = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [parameters, setParameters] = useState<SimulationParameters>({
+    timeStep: 0.01,
+    totalTime: 10.0,
     diffusionType: 'ordinary',
     alpha: 0.5,
     beta: 0.1,
-    cSquared: 1.0,
-    dt: 0.01
+    c: 1.0,
+    numericalMethod: 'euler',
+    weightFunction: 'spin',
+    initialStateType: 'delta',
+    initialStateParams: {},
+    recordHistory: true,
+    historyInterval: 10,
+    parameters: {}
   });
 
   const startSimulation = useCallback(() => {
