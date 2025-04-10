@@ -11,6 +11,8 @@ An interactive web application for constructing, visualizing, and simulating dif
 - Visualize diffusion processes and energy conservation through interactive UI
 - Customizable workspace with resizable panels
 - Interactive network manipulation with intuitive controls
+- Comprehensive type management for visual customization
+- Simulation support for both ordinary and telegraph diffusion models
 
 ## Getting Started
 
@@ -43,7 +45,7 @@ The application features a flexible, customizable interface:
 - **Left Panel**: Network creation tools, templates, and file operations with collapsible sections
 - **Main Area**: Interactive network visualization with dedicated zoom controls and mode selection
 - **Right Panel**: Properties editor, type management, and simulation controls with collapsible sections
-- **Bottom Panel**: Energy plots and simulation metrics
+- **Bottom Panel**: Simulation results, analysis, and visualization metrics
 
 Key features:
 - All panels are resizable to accommodate different workflows and preferences
@@ -57,6 +59,35 @@ Key features:
 - Recent networks quick access menu
 - Real-time type management updates with immediate visualization feedback
 - Dark/light theme support with system detection
+- Comprehensive simulation controls with adjustable parameters
+- Analysis tools for conservation laws and geometric properties
+
+## Simulation Features
+
+The application includes a powerful simulation engine for modeling diffusion processes on spin networks:
+
+- **Multiple Diffusion Models**:
+  - Ordinary diffusion (heat equation model) for traditional diffusion processes
+  - Telegraph diffusion (wave-like model) for finite velocity propagation
+
+- **Configurable Parameters**:
+  - Diffusion rate (alpha) controls the speed of ordinary diffusion
+  - Damping (beta) and wave speed (c) for telegraph diffusion
+  - Choice of numerical methods (Euler, RK4, Adaptive)
+  - Weight function selection based on spin values
+  - Time step and total simulation time customization
+
+- **Initial State Configuration**:
+  - Delta function (single node) initialization
+  - Uniform distribution across nodes
+  - Gaussian distribution with configurable parameters
+  - Support for custom initial states
+
+- **Analysis Tools**:
+  - Conservation law verification
+  - Geometric property calculations
+  - Statistical analysis of simulation results
+  - Time evolution visualization
 
 ## Development
 
@@ -80,7 +111,16 @@ spin_network_app/
 │   │   ├── tools/        # Tool components
 │   │   ├── visualization/# Visualization components
 │   │   └── workspace/    # Workspace components
+│   ├── hooks/            # Custom React hooks
+│   ├── models/           # Data models and types
+│   ├── simulation/       # Simulation engine
+│   │   ├── analysis/     # Analysis tools
+│   │   ├── core/         # Core simulation classes
+│   │   ├── models/       # Diffusion models
+│   │   └── visualization/# Visualization adapters
+│   ├── store/            # Redux store and slices
 │   ├── styles/           # CSS styles
+│   ├── utils/            # Utility functions
 │   ├── App.tsx           # Main application component
 │   └── main.tsx          # Application entry point
 ├── index.html            # HTML entry point
@@ -113,6 +153,7 @@ For more detailed technical information, see the files in the `resources/` direc
 - **React 18** - UI library
 - **TypeScript** - Type-safe JavaScript
 - **Cytoscape.js** - Network visualization
+- **math.js** - Mathematical operations for simulation
 - **D3.js** - Data visualization for metrics and plots
 - **Redux Toolkit** - State management
 - **Redux Persist** - State persistence with IndexedDB
@@ -137,6 +178,9 @@ The project is in active development. The current version features:
 - Type management with real-time updates and immediate visualization feedback
 - Collapsible panels and sections for better organization and reduced scrolling
 - Dark/light theme support with system detection
+- Simulation engine with support for ordinary and telegraph diffusion
+- Comprehensive simulation controls with customizable parameters
+- Analysis tools for conservation laws and geometric properties
 
 See the [CHANGELOG.md](CHANGELOG.md) for recent updates and the current development status.
 
