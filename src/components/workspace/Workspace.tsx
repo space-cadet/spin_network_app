@@ -22,6 +22,8 @@ import {
   updateNetworkEdge
 } from '../../store/slices/networkSlice';
 import { NetworkNode, NetworkEdge } from '../../models/types';
+import { useSimulation } from '../../hooks/useSimulation';
+import { CytoscapeAdapter } from '../../simulation/visualization/cytoscapeAdapter';
 
 const Workspace: React.FC = () => {
   const cyContainerRef = useRef<HTMLDivElement>(null);
@@ -30,6 +32,24 @@ const Workspace: React.FC = () => {
   const mode = useAppSelector(selectInteractionMode);
   const viewSettings = useAppSelector(selectViewSettings);
   const dispatch = useAppDispatch();
+  
+  // Get simulation state
+  const simulation = useSimulation();
+  const isSimulationRunning = simulation.isRunning;
+  const currentTime = simulation.currentTime;
+  
+  // Cytoscape visualization adapter
+  const [cytoscapeAdapter] = useState(() => new CytoscapeAdapter({
+    colorScale: ['#dbeafe', '#3b82f6'],  // Light blue to primary blue
+    sizeScale: [25, 50],
+    useColor: true,
+    useSize: true,
+    showValues: true,
+    normalizeValues: true
+  }));
+  
+  // Reference to hold the last simulation state for visualization
+  const lastSimulationStateRef = useRef<any>(null);
   
   // State for edge creation - just store the source node ID
   const [edgeSourceId, setEdgeSourceId] = useState<string | null>(null);
@@ -149,6 +169,27 @@ const Workspace: React.FC = () => {
     // Apply the new styles
     cy.style(networkStyles as any);
   }, [cy, viewSettings, networkStyles]);
+  
+  // Update visualization when simulation state changes
+  useEffect(() => {
+    if (!cy || !isSimulationRunning) return;
+    
+    // Get the visualization state from the simulation
+    const visualizationState = simulation.getVisualizationState();
+    
+    // Only update if we have meaningful visualization data
+    if (visualizationState && Object.keys(visualizationState).length > 0) {
+      // Store the last simulation state
+      lastSimulationStateRef.current = visualizationState;
+      
+      // Apply the visualization to the cytoscape instance
+      try {
+        cytoscapeAdapter.applyCytoscapeVisualization(cy, visualizationState);
+      } catch (error) {
+        console.error("Error applying simulation visualization:", error);
+      }
+    }
+  }, [cy, isSimulationRunning, currentTime, simulation, cytoscapeAdapter]);
 
   // Update cytoscape when network changes
   useEffect(() => {
