@@ -25,6 +25,15 @@ export {
   createIntertwinerWeightFunction 
 } from './models/weightFunctions';
 
+// Numerical solvers
+export {
+  EulerSolver,
+  MidpointSolver,
+  RungeKutta4Solver,
+  AdaptiveRKF45Solver,
+  SolverFactory
+} from './models/solvers';
+
 // Visualization adapters
 export { 
   CytoscapeAdapter,
@@ -36,6 +45,22 @@ export {
   type ColorGradientOptions,
   type SizeMappingOptions
 } from './visualization/visualizationTypes';
+
+// Analysis tools
+export {
+  SpinNetworkGeometryCalculator
+} from './analysis/geometricProps';
+export {
+  ProbabilityConservation,
+  TotalOccupancyConservation,
+  PositivityConservation,
+  ConservationCheckerFactory,
+  type ConservationChecker
+} from './analysis/conservation';
+export {
+  SimulationAnalyzer,
+  type SimulationStatistics
+} from './analysis/statistics';
 
 /**
  * Create a new simulation engine with default configuration
