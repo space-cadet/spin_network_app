@@ -7,10 +7,13 @@ import {
   FaCog,
   FaChartLine,
   FaRuler,
-  FaSliders
+  FaSliders,
+  FaExclamationTriangle
 } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 import { 
   SimulationParameters, 
   StandardWeightFunction 
@@ -248,6 +251,11 @@ const InitialStateSelector: React.FC<InitialStateSelectorProps> = ({
 };
 
 const SimulationControlPanel: React.FC = () => {
+  // Check if network exists first
+  const network = useSelector((state: RootState) => state.network?.present);
+  const hasNetwork = !!(network && network.nodes && network.nodes.length > 0);
+  
+  // Safe access to useSimulation
   const {
     isRunning,
     parameters,
@@ -292,11 +300,27 @@ const SimulationControlPanel: React.FC = () => {
         </div>
       </div>
       
+      {/* Network warning banner */}
+      {!hasNetwork && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4 text-sm">
+          <div className="flex items-start">
+            <FaExclamationTriangle className="text-yellow-500 mt-0.5 mr-2 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-yellow-700">No network detected</p>
+              <p className="text-yellow-600 text-xs mt-1">
+                Create or load a network to run the simulation. Controls are available for configuration.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Play Controls */}
       <div className="flex space-x-2 mb-4">
         <button
           className="btn flex-1 flex items-center justify-center space-x-2"
           onClick={isRunning ? pauseSimulation : startSimulation}
+          disabled={!hasNetwork}
         >
           {isRunning ? <FaPause className="text-sm" /> : <FaPlay className="text-sm" />}
           <span>{isRunning ? 'Pause' : 'Start'}</span>
@@ -305,7 +329,7 @@ const SimulationControlPanel: React.FC = () => {
         <button
           className="btn flex items-center justify-center px-4"
           onClick={stepSimulation}
-          disabled={isRunning}
+          disabled={isRunning || !hasNetwork}
           title="Step forward"
         >
           <FaStepForward className="text-sm" />
@@ -314,6 +338,7 @@ const SimulationControlPanel: React.FC = () => {
         <button
           className="btn flex items-center justify-center px-4"
           onClick={resetSimulation}
+          disabled={!hasNetwork}
           title="Reset simulation"
         >
           <FaUndo className="text-sm" />
