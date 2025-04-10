@@ -2,8 +2,8 @@ import { useSelector } from 'react-redux'
 import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
 import NetworkTools from './components/tools/NetworkTools'
-import { PropertiesPanel, TypeManagementPanel } from './components/panels'
-import SimulationControls from './components/simulation/SimulationControls'
+import { PropertiesPanel, TypeManagementPanel, SimulationControlPanel } from './components/panels'
+import { SimulationResultsPanel } from './components/simulation'
 import EnergyPlot from './components/visualization/EnergyPlot'
 import PersistentResizablePanel from './components/common/PersistentResizablePanel'
 import PersistenceStatus from './components/common/PersistenceStatus'
@@ -16,11 +16,6 @@ import {
 } from './store/selectors'
 
 function App() {
-  const handleStartSimulation = (params: any) => {
-    console.log('Starting simulation with params:', params);
-    // This would eventually start a simulation
-  };
-  
   // Get sidebar visibility state from Redux
   const leftSidebarVisible = useSelector(selectLeftSidebarVisible);
   const rightSidebarVisible = useSelector(selectRightSidebarVisible);
@@ -71,19 +66,19 @@ function App() {
               </div>
             )}
             
-            {/* Energy Visualization - Resizable & Hideable */}
+            {/* Simulation Results Panel - Resizable & Hideable */}
             {bottomSidebarVisible && (
               <div className="relative">
                 <PersistentResizablePanel
                   direction="vertical"
                   sidebarKey="bottom"
-                  minSize={100}
+                  minSize={150}
                   maxSize={400}
                   className="border-t border-gray-200 bg-white overflow-y-auto h-full"
                   handlePosition="start"
                 >
-                  <div className="p-4 h-full overflow-y-auto">
-                    <EnergyPlot />
+                  <div className="h-full overflow-y-auto">
+                    <SimulationResultsPanel />
                   </div>
                 </PersistentResizablePanel>
                 <SidebarToggle side="bottom" isVisible={bottomSidebarVisible} />
@@ -112,7 +107,7 @@ function App() {
                 <div className="h-full overflow-y-auto">
                   <PropertiesPanel />
                   <TypeManagementPanel />
-                  <SimulationControls onStartSimulation={handleStartSimulation} />
+                  <SimulationControlPanel />
                 </div>
               </PersistentResizablePanel>
               <SidebarToggle side="right" isVisible={rightSidebarVisible} />
