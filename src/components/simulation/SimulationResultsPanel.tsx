@@ -11,20 +11,14 @@ const SimulationResultsPanel: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
   
-  // Create state for conservation data
-  const [conservationData, setConservationData] = useState({
-    totalProbability: 0,
-    positivity: false,
-    normVariation: 0,
-  });
-  
-  // Update conservation data when simulation state changes
-  useEffect(() => {
-    if (simulation.getConservationLaws) {
-      const data = simulation.getConservationLaws();
-      setConservationData(data);
-    }
-  }, [simulation, currentTime]);
+  // Use a simple approach that doesn't rely on useEffect for updating
+  const conservationData = hasHistory && simulation.getConservationLaws 
+    ? simulation.getConservationLaws() 
+    : {
+        totalProbability: 0,
+        positivity: false,
+        normVariation: 0,
+      };
   
   const geometricData = {
     totalVolume: 12.5,

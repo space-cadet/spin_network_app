@@ -108,9 +108,8 @@ export const useSimulation = () => {
             }
           });
 
-          // Force a UI refresh periodically to ensure components re-render with latest data
-          setCurrentTime(prev => prev + 0.0000001);
-          setTimeout(() => setCurrentTime(currentTime), 0);
+          // Update current time to trigger re-renders (simpler approach)
+          setCurrentTime(currentTime);
         } catch (error) {
           simulationLogger.log('error', 'Error computing analysis results', { error }, currentTime);
         }
@@ -152,9 +151,17 @@ export const useSimulation = () => {
         });
       }
       
+      // Ensure we have an initial state
+      console.log("Starting simulation with engine:", engineRef.current);
+      
       // Start simulation
       engineRef.current.resume();
       setIsRunning(true);
+      
+      // Take an immediate first step to show something happening
+      engineRef.current.step();
+      setCurrentTime(engineRef.current.getCurrentTime());
+      setHasHistory(true);
     }
   }, [parameters, network]);
   
