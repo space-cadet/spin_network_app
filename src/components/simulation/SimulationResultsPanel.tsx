@@ -104,7 +104,7 @@ const SimulationResultsPanel: React.FC = () => {
                     ? 'text-green-600' 
                     : 'text-yellow-600'
                 }`}>
-                  {conservationData.totalProbability.toFixed(6)}
+                  {Number(conservationData.totalProbability).toFixed(6)}
                 </span>
               </div>
               <div className="flex justify-between mb-1">
@@ -114,7 +114,7 @@ const SimulationResultsPanel: React.FC = () => {
                     ? 'text-green-600' 
                     : 'text-yellow-600'
                 }`}>
-                  {conservationData.normVariation.toFixed(6)}
+                  {Number(conservationData.normVariation).toFixed(6)}
                 </span>
               </div>
               <div className="flex justify-between">
