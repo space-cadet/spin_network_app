@@ -6,7 +6,6 @@
  */
 
 import { VisualizationAdapter } from '../core/types';
-import { CytoscapeVisualizationState } from './cytoscapeAdapter';
 
 /**
  * Common base type for visualization options
