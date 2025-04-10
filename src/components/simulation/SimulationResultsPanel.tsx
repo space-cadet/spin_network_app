@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaChartPie, FaChartLine, FaRuler } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
@@ -11,12 +11,20 @@ const SimulationResultsPanel: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
   
-  // Placeholder data for demonstration
-  const conservationData = {
-    totalProbability: 0.99,
-    positivity: true,
-    normVariation: 0.01,
-  };
+  // Create state for conservation data
+  const [conservationData, setConservationData] = useState({
+    totalProbability: 0,
+    positivity: false,
+    normVariation: 0,
+  });
+  
+  // Update conservation data when simulation state changes
+  useEffect(() => {
+    if (simulation.getConservationLaws) {
+      const data = simulation.getConservationLaws();
+      setConservationData(data);
+    }
+  }, [simulation, currentTime]);
   
   const geometricData = {
     totalVolume: 12.5,
