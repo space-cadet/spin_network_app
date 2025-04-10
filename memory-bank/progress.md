@@ -1,6 +1,6 @@
 # Spin Network Visualization and Diffusion App - Progress
 
-*Last Updated: April 10, 2025*
+*Last Updated: April 10, 2025 (15:30)*
 
 ## Development Status
 
@@ -119,6 +119,7 @@
    - Implemented initial state configuration UI
    - Created time configuration controls
    - Added play, pause, step, and reset controls
+   - Fixed "No network detected" issue by correcting Redux state reference
 
 2. **Simulation Results Panel Creation**:
    - Created panel for displaying analysis results
@@ -132,3 +133,9 @@
    - Created state management for simulation parameters
    - Added support for visualization state mapping
    - Implemented time management functions
+   - Fixed incorrect Redux state reference causing network detection issues
+
+4. **UI Issues Fixed**:
+   - Updated copyright message in the footer from "© 2023" to "© Deepak Vaid, 2025"
+   - Fixed network detection logic in simulation panels
+   - Corrected Redux selectors to use proper state structure
