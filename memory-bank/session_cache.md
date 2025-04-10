@@ -35,3 +35,5 @@ Defining core modules and architecture for the simulation component
 - Design for extensibility to support different mathematical models
 - Create clean separation between simulation engine and visualization
 - Consider performance optimization for matrix operations
+- Ensure the simulation component is compatible with future three.js 3D visualization
+- Design with abstraction layer to support both 2D and 3D network representations
