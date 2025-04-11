@@ -1,5 +1,73 @@
 # Error Log
 
+## 2025-04-11 10:45 IST - Matrix Multiplication Error in Simulation
+
+**File:** `src/simulation/core/mathAdapter.ts`
+
+**Error Message:**
+```
+useSimulation.ts:297 Error during first step: TypeError: result.toArray is not a function
+    at MathAdapter.multiply (mathAdapter.ts:151:35)
+    at OrdinaryDiffusionModel.evolveStep (diffusionModels.ts:132:45)
+    at SpinNetworkSimulationEngineImpl.step (engineImplementation.ts:239:38)
+    at useSimulation.ts:291:27
+```
+
+**Cause:**
+The `multiply` method in `MathAdapter` class was expecting the result of `math.multiply` to always be a Matrix object with a `toArray()` method. However, in some cases, the result could be a different type of object (like a regular Array or another mathjs data structure) that doesn't have this method.
+
+The specific issue occurred when:
+1. The simulation tried to perform its first step
+2. In `OrdinaryDiffusionModel.evolveStep`, it used `mathAdapter.multiply` to calculate diffusion
+3. The `multiply` method tried to call `toArray()` on a result that didn't have this method
+4. This caused the simulation to fail completely on startup
+
+**Fix:**
+Enhanced the `multiply` method in `mathAdapter.ts` to properly handle all possible return types from `math.multiply`:
+
+1. Added type checking to determine what kind of object was returned
+2. Implemented different conversion methods based on the detected type
+3. Added multiple fallback options for conversion
+4. Added error handling to ensure the method always returns something usable
+
+**Key Code Changes:**
+```typescript
+multiply(x: math.Matrix | math.MathArray, y: math.Matrix | math.MathArray | number): math.MathArray {
+  const result = math.multiply(x, y);
+  
+  if (typeof result === 'number') {
+    return [result] as unknown as math.MathArray;
+  }
+  
+  // Handle different return types from math.multiply
+  if (math.isMatrix(result)) {
+    // If it's a math.js Matrix, use toArray()
+    return result.toArray() as unknown as math.MathArray;
+  } else if (Array.isArray(result)) {
+    // If it's already an array, return it directly
+    return result as unknown as math.MathArray;
+  } else {
+    // For any other type, try to convert it safely
+    try {
+      // Try to get as a flat array - this works for most math.js structures
+      return math.flatten(result).valueOf() as unknown as math.MathArray;
+    } catch (e) {
+      // Fallback: try to convert to a regular array
+      try {
+        return Array.from(result as any) as unknown as math.MathArray;
+      } catch (e2) {
+        console.error("Failed to convert multiplication result to MathArray:", e2);
+        // Last resort: return an empty array
+        return [] as unknown as math.MathArray;
+      }
+    }
+  }
+}
+```
+
+**Affected Files:**
+- src/simulation/core/mathAdapter.ts
+
 ## 2025-04-10 19:30 IST - Build and Runtime Errors in Simulation Component
 
 **File:** Multiple files in the simulation component

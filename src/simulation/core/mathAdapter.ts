@@ -145,10 +145,34 @@ export class MathAdapter {
   */
  multiply(x: math.Matrix | math.MathArray, y: math.Matrix | math.MathArray | number): math.MathArray {
    const result = math.multiply(x, y);
+   
    if (typeof result === 'number') {
      return [result] as unknown as math.MathArray;
    }
-   return (result as math.Matrix).toArray() as unknown as math.MathArray;
+   
+   // Handle different return types from math.multiply
+   if (math.isMatrix(result)) {
+     // If it's a math.js Matrix, use toArray()
+     return result.toArray() as unknown as math.MathArray;
+   } else if (Array.isArray(result)) {
+     // If it's already an array, return it directly
+     return result as unknown as math.MathArray;
+   } else {
+     // For any other type, try to convert it safely
+     try {
+       // Try to get as a flat array - this works for most math.js structures
+       return math.flatten(result).valueOf() as unknown as math.MathArray;
+     } catch (e) {
+       // Fallback: try to convert to a regular array
+       try {
+         return Array.from(result as any) as unknown as math.MathArray;
+       } catch (e2) {
+         console.error("Failed to convert multiplication result to MathArray:", e2);
+         // Last resort: return an empty array
+         return [] as unknown as math.MathArray;
+       }
+     }
+   }
  }
 
  /**

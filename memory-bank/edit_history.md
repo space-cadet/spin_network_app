@@ -2,6 +2,13 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-11: Fixed Matrix Multiplication Error in Simulation
+
+Modified files:
+- `/src/simulation/core/mathAdapter.ts` - Fixed multiply method to handle all return types from math.js
+- `/memory-bank/errorLog.md` - Added documentation of the matrix multiplication error and fix
+- `/memory-bank/edit_history.md` - Updated with recent changes
+
 ## 2025-04-10: Fixed Build and Runtime Errors in Simulation Component
 
 Modified files:
