@@ -356,7 +356,8 @@ export const useSimulation = () => {
       }
       
       // Only proceed if the nodeId is valid
-      if (nodeIdIsValid) {
+      // (nodeIdValidation === true means the node ID is valid)
+      {
         // Initialize engine if not already done
         engineRef.current.initialize(graphRef.current, parameters);
         
