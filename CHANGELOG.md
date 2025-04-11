@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dedicated zoom controls with percentage indicator
 - Collapsible sections in panels to reduce scrolling and improve organization
 - Persistent sidebar width/height between sessions
+- Simulation test infrastructure with browser-based validation
+- Documentation for Cytoscape event handling patterns in TypeScript
+
+### Fixed
+- Build errors related to Cytoscape event handling in TypeScript
+- Event handler type mismatches in NetworkInteractionManager
+- Event binding patterns for proper TypeScript compatibility
+- Network interaction manager cleanup and lifecycle management
 
 ### Changed
 - Improved Type Management workflow with real-time updates instead of requiring "Update" button clicks
