@@ -383,6 +383,25 @@ const SimulationControlPanel: React.FC = () => {
             >
               <FaUndo className="text-sm" />
             </button>
+            
+            <button
+              className="btn btn-sm px-3 text-xs"
+              onClick={() => {
+                // Set stable simulation parameters
+                updateParameters({
+                  alpha: 0.01,
+                  timeStep: 0.005,
+                  beta: 0.8,
+                  c: 1.0
+                });
+                // Reset simulation with new parameters
+                setTimeout(resetSimulation, 100);
+              }}
+              disabled={!hasNetwork}
+              title="Reset with stable parameters"
+            >
+              Stable Reset
+            </button>
           </div>
           
           {/* Time Slider */}
@@ -409,17 +428,28 @@ const SimulationControlPanel: React.FC = () => {
                   <label className="block text-sm font-medium">
                     Diffusion Rate (α)
                   </label>
-                  <span className="text-sm font-mono">{parameters.alpha.toFixed(2)}</span>
+                  <span className="text-sm font-mono">{parameters.alpha.toFixed(3)}</span>
                 </div>
                 <input
                   type="range"
-                  min="0"
-                  max="2"
-                  step="0.01"
+                  min="0.001"
+                  max="0.5"
+                  step="0.001"
                   value={parameters.alpha}
-                  onChange={(e) => updateParameters({ alpha: parseFloat(e.target.value) })}
+                  onChange={(e) => {
+                    const newAlpha = parseFloat(e.target.value);
+                    updateParameters({ 
+                      alpha: newAlpha,
+                      // Reset simulation when alpha changes significantly
+                      ...(Math.abs(newAlpha - parameters.alpha) > 0.05 ? { timeStep: 0.005 } : {})
+                    });
+                    console.log("Updated alpha to:", newAlpha);
+                  }}
                   className="w-full"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Lower values (0.001-0.1) provide more stable diffusion behavior
+                </p>
               </div>
               
               {/* Beta parameter (for telegraph diffusion) */}
@@ -488,7 +518,7 @@ const SimulationControlPanel: React.FC = () => {
                   <input
                     type="number"
                     min="0.001"
-                    max="0.1"
+                    max="0.05"
                     step="0.001"
                     value={parameters.timeStep}
                     onChange={(e) => updateParameters({ timeStep: parseFloat(e.target.value) })}
@@ -497,8 +527,13 @@ const SimulationControlPanel: React.FC = () => {
                   <span className="text-sm font-mono">s</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Smaller values increase accuracy but decrease performance
+                  Recommended: 0.005 for ordinary diffusion, 0.001 for telegraph
                 </p>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded p-2 mt-2 text-xs text-blue-700">
+                <strong>Stability tip:</strong> For best results, keep α×timeStep ≤ 0.001 to ensure numerical stability.
+                Current value: {(parameters.alpha * parameters.timeStep).toFixed(5)}
               </div>
               
               <div className="form-group">

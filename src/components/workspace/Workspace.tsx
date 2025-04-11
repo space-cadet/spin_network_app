@@ -172,7 +172,7 @@ const Workspace: React.FC = () => {
   
   // Update visualization when simulation state changes
   useEffect(() => {
-    if (!cy || !isSimulationRunning) return;
+    if (!cy) return;
     
     // Get the visualization state from the simulation
     const visualizationState = simulation.getVisualizationState();
@@ -182,14 +182,32 @@ const Workspace: React.FC = () => {
       // Store the last simulation state
       lastSimulationStateRef.current = visualizationState;
       
+      console.log("Applying visualization state:", 
+        Object.keys(visualizationState.nodeValues).length, 
+        "nodes, min:", visualizationState.minValue.toFixed(4), 
+        "max:", visualizationState.maxValue.toFixed(4));
+      
       // Apply the visualization to the cytoscape instance
       try {
-        cytoscapeAdapter.applyCytoscapeVisualization(cy, visualizationState);
+        // First ensure nodes exist before applying visualization
+        const nodeCount = cy.nodes().length;
+        if (nodeCount > 0) {
+          cytoscapeAdapter.applyCytoscapeVisualization(cy, visualizationState);
+          
+          // Check if visualization was applied by checking a random node
+          const sampleNode = cy.nodes().first();
+          if (sampleNode && !sampleNode.empty()) {
+            console.log("Applied visualization to cytoscape nodes, color of first node:", 
+              sampleNode.style('background-color'));
+          }
+        } else {
+          console.warn("Cannot apply visualization: no nodes in cytoscape");
+        }
       } catch (error) {
         console.error("Error applying simulation visualization:", error);
       }
     }
-  }, [cy, isSimulationRunning, currentTime, simulation, cytoscapeAdapter]);
+  }, [cy, currentTime, simulation, cytoscapeAdapter]);
 
   // Update cytoscape when network changes
   useEffect(() => {
