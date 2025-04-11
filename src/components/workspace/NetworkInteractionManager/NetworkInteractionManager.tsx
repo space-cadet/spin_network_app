@@ -155,11 +155,16 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
       }
     };
     
+    // Define a named function for the event handler
+    function onTap(event: cytoscape.EventObject) {
+      handleNodeTapForEdge(event);
+    }
+    
     // Add handlers for both regular and placeholder nodes
-    cy.nodes().on('tap', handleNodeTapForEdge);
+    cy.nodes().on('tap', onTap);
     
     return () => {
-      cy.nodes().off('tap', handleNodeTapForEdge);
+      cy.nodes().off('tap', onTap);
     };
   }, [cy, mode, edgeSourceId, handleCreateEdge]);
   
@@ -195,11 +200,16 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
       }
     };
     
+    // Define a named function for the event handler
+    function onPlaceholderTap(event: cytoscape.EventObject) {
+      handlePlaceholderTap(event);
+    }
+    
     // Add handler only for placeholder nodes
-    cy.nodes().filter('[type = "placeholder"]').on('tap', handlePlaceholderTap);
+    cy.nodes().filter('[type = "placeholder"]').on('tap', onPlaceholderTap);
     
     return () => {
-      cy.nodes().filter('[type = "placeholder"]').off('tap', handlePlaceholderTap);
+      cy.nodes().filter('[type = "placeholder"]').off('tap', onPlaceholderTap);
     };
   }, [cy, mode, onConvertPlaceholder, onAddNode, defaultNodeIntertwiner, network.nodes.length]);
   
@@ -207,11 +217,12 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
   useEffect(() => {
     if (!cy) return;
     
-    // Add canvas tap handler
-    cy.on('tap', handleCanvasTap);
+    // Add canvas tap handler - use function reference directly
+    cy.on('tap', (event) => handleCanvasTap(event));
     
     return () => {
-      cy.removeListener('tap', handleCanvasTap);
+      // Use same pattern for removal
+      cy.removeListener('tap');
     };
   }, [cy, handleCanvasTap]);
   

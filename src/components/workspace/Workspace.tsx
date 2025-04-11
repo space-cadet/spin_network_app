@@ -46,8 +46,8 @@ const Workspace: React.FC = () => {
   // Get simulation state
   const simulation = useSimulation();
   
-  // Network styles
-  const networkStyles = useTypeBasedStyles();
+  // Network styles - use type assertion to handle the complex type
+  const networkStyles = useTypeBasedStyles() as unknown as cytoscape.StylesheetCSS[];
   
   // Default values for new elements
   const defaultNodeIntertwiner = 1;
@@ -71,11 +71,16 @@ const Workspace: React.FC = () => {
   };
   
   // Handler for element selection
-  const handleSelect = useCallback((elementId: string, elementType: 'node' | 'edge') => {
+  const handleSelect = useCallback((elementId: string, elementType: string) => {
+    // Validate element type to make sure it's 'node' or 'edge'
+    const validType = (elementType === 'node' || elementType === 'edge') ? elementType : 'node';
     if (mode === 'select') {
+      // Validate element type to make sure it's 'node' or 'edge'
+      const validType = (elementType === 'node' || elementType === 'edge') ? elementType : 'node';
+      
       dispatch(setSelectedElement({
         id: elementId,
-        type: elementType
+        type: validType
       }));
     }
   }, [dispatch, mode]);
