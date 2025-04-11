@@ -12,6 +12,15 @@ const SimulationResultsPanel: React.FC = () => {
   const hasHistory = simulation?.hasHistory || false;
   const isRunning = simulation?.isRunning || false;
   
+  // Log simulation object when component renders to check available methods
+  console.log("useSimulation hook returned:", {
+    currentTime,
+    hasHistory,
+    isRunning,
+    hasGetGraph: typeof simulation.getGraph === 'function',
+    hasGetCurrentState: typeof simulation.getCurrentState === 'function'
+  });
+  
   const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
   const [refreshCounter, setRefreshCounter] = useState(0); // Used to force re-renders
   const [geometricData, setGeometricData] = useState({
@@ -28,6 +37,44 @@ const SimulationResultsPanel: React.FC = () => {
     kurtosis: 0
   });
   
+  // Run initial calculation once when component mounts
+  useEffect(() => {
+    console.log("SimulationResultsPanel mounted - will perform initial data calculation");
+    // Delay the initial calculation to ensure all hooks are properly initialized
+    setTimeout(() => {
+      if (simulation && (simulation.isRunning || simulation.hasHistory)) {
+        console.log("Running initial analysis calculation");
+        // Get initial data
+        try {
+          const currentState = simulation.getCurrentState ? simulation.getCurrentState() : null;
+          const graph = simulation.getGraph ? simulation.getGraph() : null;
+          if (currentState && graph) {
+            console.log("Initial data available - calculating");
+            // Intentionally call function logic directly rather than through updateAnalysisData
+            // to avoid any issues with function references or closures
+            const geometryCalculator = new SpinNetworkGeometryCalculator();
+            setGeometricData({
+              totalVolume: geometryCalculator.calculateTotalVolume(currentState),
+              volumeEntropy: geometryCalculator.calculateVolumeEntropy(currentState),
+              totalArea: geometryCalculator.calculateTotalArea(graph),
+              effectiveDimension: geometryCalculator.calculateEffectiveDimension(graph, currentState)
+            });
+            
+            const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
+            setStatisticsData({
+              mean: stats.mean,
+              variance: stats.variance,
+              skewness: 0,
+              kurtosis: 0
+            });
+          }
+        } catch (error) {
+          console.error("Error in initial analysis calculation:", error);
+        }
+      }
+    }, 100);
+  }, []);
+  
   // Get conservation data from simulation
   const conservationData = simulation.getConservationLaws 
     ? simulation.getConservationLaws() 
@@ -37,56 +84,64 @@ const SimulationResultsPanel: React.FC = () => {
         normVariation: 0,
       };
   
+  // Helper function to safely update analysis data
+  const updateAnalysisData = () => {
+    if (!simulation) return;
+    
+    try {
+      // Try to get the current state and graph
+      const currentState = simulation.getCurrentState ? simulation.getCurrentState() : null;
+      const graph = simulation.getGraph ? simulation.getGraph() : null;
+      
+      console.log("Analysis data check - currentState:", !!currentState, "graph:", !!graph);
+      
+      if (!currentState || !graph) {
+        console.warn("Missing state or graph for analysis calculations");
+        return;
+      }
+      
+      // Calculate geometric properties
+      const geometryCalculator = new SpinNetworkGeometryCalculator();
+      const totalVolume = geometryCalculator.calculateTotalVolume(currentState);
+      const volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
+      const totalArea = geometryCalculator.calculateTotalArea(graph);
+      const effectiveDimension = geometryCalculator.calculateEffectiveDimension(graph, currentState);
+      
+      console.log("Calculated geometric data:", {
+        totalVolume,
+        volumeEntropy,
+        totalArea,
+        effectiveDimension
+      });
+      
+      setGeometricData({
+        totalVolume,
+        totalArea,
+        effectiveDimension,
+        volumeEntropy
+      });
+      
+      // Calculate statistics
+      const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
+      console.log("Calculated statistics:", stats);
+      
+      setStatisticsData({
+        mean: stats.mean,
+        variance: stats.variance,
+        skewness: 0,  // Placeholder - could be calculated 
+        kurtosis: 0   // Placeholder - could be calculated
+      });
+    } catch (error) {
+      console.error("Error calculating analysis data:", error);
+    }
+  };
+  
   // Calculate geometric and statistical data
   useEffect(() => {
     // Only calculate if simulation has data
     if (simulation && (simulation.isRunning || simulation.hasHistory)) {
-      try {
-        console.log("Calculating analysis data, isRunning:", simulation.isRunning);
-        
-        const currentState = simulation.getCurrentState?.();
-        const graph = simulation.getGraph?.();
-        
-        console.log("Got current state:", !!currentState, "and graph:", !!graph);
-        
-        if (currentState && graph) {
-          // Calculate geometric properties
-          const geometryCalculator = new SpinNetworkGeometryCalculator();
-          const totalVolume = geometryCalculator.calculateTotalVolume(currentState);
-          const volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
-          const totalArea = geometryCalculator.calculateTotalArea(graph);
-          const effectiveDimension = geometryCalculator.calculateEffectiveDimension(graph, currentState);
-          
-          console.log("Calculated geometric data:", {
-            totalVolume,
-            volumeEntropy,
-            totalArea,
-            effectiveDimension
-          });
-          
-          setGeometricData({
-            totalVolume,
-            totalArea,
-            effectiveDimension,
-            volumeEntropy
-          });
-          
-          // Calculate statistics
-          const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
-          console.log("Calculated statistics:", stats);
-          
-          setStatisticsData({
-            mean: stats.mean,
-            variance: stats.variance,
-            skewness: 0,  // Placeholder - could be calculated 
-            kurtosis: 0   // Placeholder - could be calculated
-          });
-        } else {
-          console.warn("Missing state or graph for analysis calculations");
-        }
-      } catch (error) {
-        console.error("Error calculating analysis data:", error);
-      }
+      console.log("Triggering analysis data calculation");
+      updateAnalysisData();
     } else {
       console.log("Simulation not running or no history, skipping analysis calculations");
     }
@@ -98,10 +153,19 @@ const SimulationResultsPanel: React.FC = () => {
     let timer: number | null = null;
     
     if (isRunning) {
+      // Initial calculation
+      updateAnalysisData();
+      
+      // Set up timer for regular updates
       timer = window.setInterval(() => {
         setRefreshCounter(prev => prev + 1);
         console.log("Force refreshing simulation results panel");
+        // Force update analysis data
+        updateAnalysisData();
       }, 500); // Refresh more frequently (twice per second)
+    } else if (hasHistory) {
+      // If not running but has history, calculate once
+      updateAnalysisData();
     }
     
     return () => {
@@ -109,17 +173,20 @@ const SimulationResultsPanel: React.FC = () => {
         window.clearInterval(timer);
       }
     };
-  }, [isRunning]);
+  }, [isRunning, hasHistory]);
 
   // Check if we have any meaningful data to display
   const hasAnyData = isRunning || hasHistory || 
-                    (conservationData && conservationData.totalProbability > 0);
+                    (conservationData && conservationData.totalProbability > 0) ||
+                    geometricData.totalVolume > 0;
   
   console.log("SimulationResultsPanel render:", { 
     hasAnyData, 
     isRunning, 
     hasHistory, 
-    conservationData 
+    conservationData,
+    geometricData,
+    statisticsData
   });
 
   if (!hasAnyData) {
