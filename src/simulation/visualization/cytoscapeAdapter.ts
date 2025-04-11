@@ -246,56 +246,85 @@ export class CytoscapeAdapter implements VisualizationAdapter<CytoscapeVisualiza
     const { nodeValues, minValue, maxValue, options } = visualization;
     const { colorScale, sizeScale, useColor, useSize, normalizeValues } = options;
     
-    // Function to normalize a value between min and max
+    // Function to normalize a value between min and max with safeguards
     const normalize = (value: number): number => {
+      // Default to middle value if no range
+      if (maxValue === minValue) return 0.5;
+      
       if (normalizeValues) {
-        if (maxValue === minValue) return 0.5;
-        return (value - minValue) / (maxValue - minValue);
+        // Clamp between 0 and 1
+        const norm = (value - minValue) / (maxValue - minValue);
+        return Math.max(0, Math.min(1, norm));
       }
       return value;
     };
     
-    // Update each node in the cytoscape instance
-    Object.entries(nodeValues).forEach(([nodeId, value]) => {
-      const node = cy.getElementById(nodeId);
-      if (!node.empty()) {
-        const normalizedValue = normalize(value);
-        
-        // Apply color mapping if enabled
-        if (useColor) {
-          // Interpolate between min and max colors
-          const r1 = parseInt(colorScale[0].substring(1, 3), 16);
-          const g1 = parseInt(colorScale[0].substring(3, 5), 16);
-          const b1 = parseInt(colorScale[0].substring(5, 7), 16);
+    // Calculate the actual range to detect if we have meaningful variation
+    const range = maxValue - minValue;
+    const hasSignificantRange = range > 0.0001;
+    console.log(`Visualization range: ${range.toFixed(6)}, significant: ${hasSignificantRange}`);
+    
+    // Batch updates for better performance
+    cy.batch(() => {
+      // Update each node in the cytoscape instance
+      Object.entries(nodeValues).forEach(([nodeId, value]) => {
+        const node = cy.getElementById(nodeId);
+        if (!node.empty()) {
+          const normalizedValue = normalize(value);
           
-          const r2 = parseInt(colorScale[1].substring(1, 3), 16);
-          const g2 = parseInt(colorScale[1].substring(3, 5), 16);
-          const b2 = parseInt(colorScale[1].substring(5, 7), 16);
+          // Apply color mapping if enabled
+          if (useColor) {
+            // Interpolate between min and max colors
+            const r1 = parseInt(colorScale[0].substring(1, 3), 16);
+            const g1 = parseInt(colorScale[0].substring(3, 5), 16);
+            const b1 = parseInt(colorScale[0].substring(5, 7), 16);
+            
+            const r2 = parseInt(colorScale[1].substring(1, 3), 16);
+            const g2 = parseInt(colorScale[1].substring(3, 5), 16);
+            const b2 = parseInt(colorScale[1].substring(5, 7), 16);
+            
+            const r = Math.round(r1 + normalizedValue * (r2 - r1));
+            const g = Math.round(g1 + normalizedValue * (g2 - g1));
+            const b = Math.round(b1 + normalizedValue * (b2 - b1));
+            
+            const color = `rgb(${r}, ${g}, ${b})`;
+            node.style('background-color', color);
+            
+            // If non-significant range, make sure we see something
+            if (!hasSignificantRange) {
+              // Make values more visible by exaggerating differences
+              node.style('border-width', 2);
+              node.style('border-color', '#000000');
+            }
+          }
           
-          const r = Math.round(r1 + normalizedValue * (r2 - r1));
-          const g = Math.round(g1 + normalizedValue * (g2 - g1));
-          const b = Math.round(b1 + normalizedValue * (b2 - b1));
+          // Apply size mapping if enabled
+          if (useSize) {
+            const minSize = sizeScale[0];
+            const maxSize = sizeScale[1];
+            const size = minSize + normalizedValue * (maxSize - minSize);
+            
+            node.style('width', size);
+            node.style('height', size);
+          }
           
-          node.style('background-color', `rgb(${r}, ${g}, ${b})`);
+          // Apply label if showing values
+          if (options.showValues) {
+            // For zero/tiny values, just show 0.000
+            if (Math.abs(value) < 0.0001) {
+              node.style('label', '0.000');
+            } else {
+              node.style('label', value.toFixed(3));
+            }
+          } else {
+            // Always show labels when running simulation
+            node.style('label', value.toFixed(3));
+          }
         }
-        
-        // Apply size mapping if enabled
-        if (useSize) {
-          const minSize = sizeScale[0];
-          const maxSize = sizeScale[1];
-          const size = minSize + normalizedValue * (maxSize - minSize);
-          
-          node.style('width', size);
-          node.style('height', size);
-        }
-        
-        // Apply label if showing values
-        if (options.showValues) {
-          node.style('label', value.toFixed(3));
-        } else {
-          node.style('label', '');
-        }
-      }
+      });
     });
+    
+    // Update stylesheet to ensure changes are applied
+    cy.style().update();
   }
 }
