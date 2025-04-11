@@ -176,7 +176,12 @@ export const useSimulation = () => {
   
   // Reset simulation
   const resetSimulation = useCallback(() => {
-    if (engineRef.current && graphRef.current) {
+    if (!engineRef.current || !graphRef.current) {
+      console.warn("Cannot reset simulation: engine or graph is null");
+      return;
+    }
+    
+    try {
       // Pause if running
       if (isRunning) {
         engineRef.current.pause();
@@ -191,15 +196,47 @@ export const useSimulation = () => {
       // End current simulation session
       simulationLogger.endSession();
       
-      // Reinitialize engine
+      // First check if nodeId exists in the network
+      if (network && network.nodes && network.nodes.length > 0) {
+        const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
+        if (!nodeExists) {
+          // Update parameters with a valid nodeId
+          const firstNodeId = network.nodes[0].id;
+          console.log("Updating node ID during reset to", firstNodeId);
+          
+          // Update parameters
+          setParameters(prev => ({
+            ...prev,
+            initialStateParams: {
+              ...prev.initialStateParams,
+              nodeId: firstNodeId
+            }
+          }));
+          
+          // Delay reinitialization to ensure parameters are updated
+          setTimeout(() => {
+            if (engineRef.current && graphRef.current) {
+              engineRef.current.initialize(graphRef.current, parameters);
+              engineRef.current.reset();
+              setCurrentTime(0);
+              setHasHistory(false);
+            }
+          }, 50);
+          return;
+        }
+      }
+      
+      // If nodeId is valid, reinitialize immediately
       engineRef.current.initialize(graphRef.current, parameters);
       engineRef.current.reset();
       
       // Reset time and history
       setCurrentTime(0);
       setHasHistory(false);
+    } catch (error) {
+      console.error("Error resetting simulation:", error);
     }
-  }, [isRunning, parameters]);
+  }, [isRunning, parameters, network]);
   
   // Jump to a specific time in the simulation history
   const jumpToTime = useCallback((time: number) => {
@@ -249,83 +286,131 @@ export const useSimulation = () => {
   
   // Start simulation
   const startSimulation = useCallback(() => {
-    if (engineRef.current && graphRef.current) {
-      console.log("Starting simulation, graph:", graphRef.current.nodes.length, "nodes");
-      
-      // Initialize engine if not already done
-      engineRef.current.initialize(graphRef.current, parameters);
-      
-      // Log simulation start
-      if (network) {
-        simulationLogger.startSession({
-          nodeCount: network.nodes?.length || 0,
-          edgeCount: network.edges?.length || 0,
-          name: network.metadata?.name,
-          type: network.metadata?.type
-        }, parameters);
-        
-        simulationLogger.log('info', 'Simulation started', {
-          networkSize: network.nodes?.length || 0,
-          parameters
-        });
-      }
-      
-      // Create delta function on the first node if network exists
-      if (network?.nodes?.length > 0) {
-        // Make sure initial state has a node selected
-        if (!parameters.initialStateParams.nodeId && network.nodes.length > 0) {
-          updateInitialStateParams({
-            ...parameters.initialStateParams,
-            nodeId: network.nodes[0].id
-          });
-        }
-        console.log("Using initial node:", parameters.initialStateParams.nodeId);
-      }
-      
-      // Start simulation
-      engineRef.current.resume();
-      setIsRunning(true);
-      
-      // Take an immediate first step to show something happening
-      try {
-        engineRef.current.step();
-        const newTime = engineRef.current.getCurrentTime();
-        console.log("First step completed, new time:", newTime);
-        setCurrentTime(newTime);
-        setHasHistory(true);
-      } catch (error) {
-        console.error("Error during first step:", error);
-      }
-    } else {
+    if (!engineRef.current || !graphRef.current) {
       console.error("Cannot start simulation: engine or graph is null");
       if (!graphRef.current) console.error("Graph ref is null");
       if (!engineRef.current) console.error("Engine ref is null");
+      return;
     }
-  }, [parameters, network, updateInitialStateParams]);
+    
+    try {
+      console.log("Starting simulation, graph:", graphRef.current.nodes.length, "nodes");
+      
+      // Validate that the nodeId exists in the network
+      let nodeIdIsValid = true;
+      if (network?.nodes?.length > 0) {
+        const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
+        if (!nodeExists) {
+          nodeIdIsValid = false;
+          
+          // Update with first node ID
+          const firstNodeId = network.nodes[0].id;
+          console.log("Invalid node ID, updating to first node:", firstNodeId);
+          
+          // Update parameters
+          setParameters(prev => ({
+            ...prev,
+            initialStateParams: {
+              ...prev.initialStateParams,
+              nodeId: firstNodeId
+            }
+          }));
+          
+          // Don't proceed with simulation start until parameters are updated
+          console.log("Deferring simulation start until node ID is updated");
+          setTimeout(() => {
+            startSimulation();
+          }, 50);
+          return;
+        }
+      }
+      
+      // Only proceed if the nodeId is valid
+      if (nodeIdIsValid) {
+        // Initialize engine if not already done
+        engineRef.current.initialize(graphRef.current, parameters);
+        
+        // Log simulation start
+        if (network) {
+          simulationLogger.startSession({
+            nodeCount: network.nodes?.length || 0,
+            edgeCount: network.edges?.length || 0,
+            name: network.metadata?.name,
+            type: network.metadata?.type
+          }, parameters);
+          
+          simulationLogger.log('info', 'Simulation started', {
+            networkSize: network.nodes?.length || 0,
+            parameters
+          });
+        }
+        
+        console.log("Using initial node:", parameters.initialStateParams.nodeId);
+        
+        // Start simulation
+        engineRef.current.resume();
+        setIsRunning(true);
+        
+        // Take an immediate first step to show something happening
+        try {
+          engineRef.current.step();
+          const newTime = engineRef.current.getCurrentTime();
+          console.log("First step completed, new time:", newTime);
+          setCurrentTime(newTime);
+          setHasHistory(true);
+        } catch (error) {
+          console.error("Error during first step:", error);
+        }
+      }
+    } catch (error) {
+      console.error("Error starting simulation:", error);
+    }
+  }, [parameters, network]);
   
   // Initialize simulation with current network when it changes
   useEffect(() => {
-    // Create simulation graph from network if it exists and has nodes
-    if (network && network.nodes && network.nodes.length > 0) {
+    // Only proceed if network exists and has nodes
+    if (!network || !network.nodes || network.nodes.length === 0) {
+      return;
+    }
+    
+    try {
+      console.log("Network changed, creating simulation graph with", network.nodes.length, "nodes");
+      
+      // Create simulation graph from network
       graphRef.current = createSimulationGraph(network);
       
-      // Initialize engine if it exists
-      if (engineRef.current) {
-        engineRef.current.initialize(graphRef.current, parameters);
-        setCurrentTime(0);
-        setHasHistory(false);
-      }
-      
+      // Always update the parameters first to ensure we have a valid nodeId
       // Update default node ID if it's not set or doesn't exist in network
       const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
       if (!nodeExists && network.nodes.length > 0) {
-        updateInitialStateParams({
-          ...parameters.initialStateParams,
-          nodeId: network.nodes[0].id
-        });
+        const firstNodeId = network.nodes[0].id;
+        console.log("Updating initial state node ID to", firstNodeId);
+        
+        // Update parameters directly to avoid any race conditions
+        setParameters(prev => ({
+          ...prev,
+          initialStateParams: {
+            ...prev.initialStateParams,
+            nodeId: firstNodeId
+          }
+        }));
       }
+      
+      // Initialize engine with updated parameters after a short delay
+      // This ensures the parameters are fully updated before initialization
+      setTimeout(() => {
+        if (engineRef.current && graphRef.current) {
+          console.log("Initializing simulation engine with updated parameters");
+          engineRef.current.initialize(graphRef.current, parameters);
+          setCurrentTime(0);
+          setHasHistory(false);
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error initializing simulation with new network:", error);
     }
-  }, [network, updateInitialStateParams, parameters]);
+  }, [network]);
   
   // Create simulation engine on first render
   useEffect(() => {
