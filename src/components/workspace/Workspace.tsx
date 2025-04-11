@@ -267,6 +267,7 @@ const Workspace: React.FC = () => {
           onSelect={handleSelect}
           onUnselect={handleUnselect}
           onZoomChange={handleZoomChange}
+          onCytoscapeReady={setCy}
         />
         
         {/* Network interaction manager - non-visual component */}
@@ -281,6 +282,7 @@ const Workspace: React.FC = () => {
             onDeleteEdge={handleDeleteEdge}
             onClearSelection={() => dispatch(clearSelection())}
             onConvertPlaceholder={handleConvertPlaceholder}
+            onEdgeSourceChange={setEdgeSourceId}
             defaultNodeIntertwiner={defaultNodeIntertwiner}
             defaultEdgeSpin={defaultEdgeSpin}
           />

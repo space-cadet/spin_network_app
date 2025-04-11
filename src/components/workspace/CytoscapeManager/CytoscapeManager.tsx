@@ -19,6 +19,7 @@ export interface CytoscapeManagerProps {
   onViewportChange?: (viewport: Viewport) => void;
   onZoomChange?: (zoom: number) => void;
   onTap?: (event: cytoscape.EventObject) => void;
+  onCytoscapeReady?: (cy: cytoscape.Core) => void;
   className?: string;
 }
 
@@ -31,6 +32,7 @@ const CytoscapeManager: React.FC<CytoscapeManagerProps> = ({
   onViewportChange,
   onZoomChange,
   onTap,
+  onCytoscapeReady,
   className = ''
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,6 +70,13 @@ const CytoscapeManager: React.FC<CytoscapeManagerProps> = ({
     // Set mode-specific interactions
     setModeInteractions(cy, mode);
   }, [cy, mode]);
+  
+  // Notify parent when Cytoscape instance is ready
+  useEffect(() => {
+    if (cy && onCytoscapeReady) {
+      onCytoscapeReady(cy);
+    }
+  }, [cy, onCytoscapeReady]);
   
   // Update graph when network changes
   useEffect(() => {

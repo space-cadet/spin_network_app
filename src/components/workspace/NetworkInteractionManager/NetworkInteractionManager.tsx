@@ -20,6 +20,7 @@ export interface NetworkInteractionManagerProps {
   onDeleteEdge?: (edgeId: string) => void;
   onClearSelection?: () => void;
   onConvertPlaceholder?: (placeholderId: string, newNodeId: string, edgeId?: string, endpoint?: 'source' | 'target') => void;
+  onEdgeSourceChange?: (sourceId: string | null) => void;
   defaultNodeIntertwiner?: number;
   defaultEdgeSpin?: number;
 }
@@ -34,6 +35,7 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
   onDeleteEdge,
   onClearSelection,
   onConvertPlaceholder,
+  onEdgeSourceChange,
   defaultNodeIntertwiner = 1,
   defaultEdgeSpin = 0.5
 }) => {
@@ -43,6 +45,13 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
     onDeleteNode,
     onDeleteEdge
   });
+  
+  // Notify parent component about edge source changes
+  useEffect(() => {
+    if (onEdgeSourceChange) {
+      onEdgeSourceChange(edgeSourceId);
+    }
+  }, [edgeSourceId, onEdgeSourceChange]);
   
   // Handler for adding a new node
   const handleAddNode = useCallback((position: { x: number; y: number }) => {
