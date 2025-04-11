@@ -3,7 +3,7 @@
  * Handles network interactions like selection, creation, and deletion
  */
 import React, { useCallback, useEffect } from 'react';
-import cytoscape from 'cytoscape';
+import * as cytoscape from 'cytoscape';
 import { useNetworkInteractions } from './hooks/useNetworkInteractions';
 import { createNode, createPlaceholderNode, getPlaceholderConversionInfo } from './handlers/nodeHandlers';
 import { createEdge, createDanglingEdge, createDanglingEdgeWithPlaceholder } from './handlers/edgeHandlers';
@@ -156,9 +156,9 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
     };
     
     // Define a named function for the event handler
-    function onTap(event: cytoscape.EventObject) {
+    const onTap = function(event: cytoscape.EventObject) {
       handleNodeTapForEdge(event);
-    }
+    };
     
     // Add handlers for both regular and placeholder nodes
     cy.nodes().on('tap', onTap);
@@ -201,9 +201,9 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
     };
     
     // Define a named function for the event handler
-    function onPlaceholderTap(event: cytoscape.EventObject) {
+    const onPlaceholderTap = function(event: cytoscape.EventObject) {
       handlePlaceholderTap(event);
-    }
+    };
     
     // Add handler only for placeholder nodes
     cy.nodes().filter('[type = "placeholder"]').on('tap', onPlaceholderTap);
@@ -217,12 +217,17 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
   useEffect(() => {
     if (!cy) return;
     
-    // Add canvas tap handler - use function reference directly
-    cy.on('tap', (event) => handleCanvasTap(event));
+    // Define a named function for the event handler
+    const onCanvasTap = function(event: cytoscape.EventObject) {
+      handleCanvasTap(event);
+    };
+    
+    // Add canvas tap handler with the correct event string
+    cy.on('tap', onCanvasTap);
     
     return () => {
-      // Use same pattern for removal
-      cy.removeListener('tap');
+      // Clean up by removing the listener
+      cy.off('tap', onCanvasTap);
     };
   }, [cy, handleCanvasTap]);
   
