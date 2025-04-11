@@ -1,5 +1,185 @@
 # Error Log
 
+## 2025-04-11 17:20 IST - Node ID Synchronization Error in Simulation Engine
+
+**File:** `src/hooks/useSimulation.ts`, `src/simulation/core/stateVector.ts`
+
+**Error Message:**
+```
+Uncaught Error: Node ID node-1744345960060-402 not found in the state vector
+    at SimulationStateVector.setValue (stateVector.ts:197:13)
+    at SpinNetworkSimulationEngineImpl.createInitialState (engineImplementation.ts:181:31)
+    at SpinNetworkSimulationEngineImpl.initialize (engineImplementation.ts:150:10)
+    at useSimulation.ts:314:27
+```
+
+**Cause:**
+When creating a new network from a template (like a lattice or circular network), there was a synchronization issue between the network model and the simulation state vector. The node IDs in the simulation parameters were not being properly updated to match the new network nodes. Specifically:
+
+1. The network was updated with new nodes having new IDs
+2. The simulation parameters still referenced old node IDs (e.g., for the initial state node)
+3. When the simulation engine tried to initialize, it attempted to set values for nodes that didn't exist in the new network
+4. This resulted in the "Node ID not found" error in the `setValue` method of `SimulationStateVector`
+
+**Fix:**
+Implemented a comprehensive solution with multiple layers of protection:
+
+1. **Improved Network Change Handling**:
+   - Enhanced the effect in `useSimulation.ts` that responds to network changes
+   - Added validation to check if node IDs in parameters actually exist in the network
+   - Added fallback to the first node when specified node ID is invalid
+   - Added timeouts to ensure state updates are fully propagated before critical operations
+
+2. **Enhanced Simulation Start Logic**:
+   - Added validation before starting simulation
+   - Deferred simulation start if parameters need updating
+   - Added comprehensive error handling
+
+3. **Improved Reset Functionality**:
+   - Added validation during simulation reset
+   - Improved parameter updates during reset
+   - Added timeouts to ensure proper state propagation
+
+**Key Code Changes:**
+```typescript
+// Network change handler in useSimulation.ts
+useEffect(() => {
+  // Only proceed if network exists and has nodes
+  if (!network || !network.nodes || network.nodes.length === 0) {
+    return;
+  }
+  
+  try {
+    console.log("Network changed, creating simulation graph with", network.nodes.length, "nodes");
+    
+    // Create simulation graph from network
+    graphRef.current = createSimulationGraph(network);
+    
+    // Always update the parameters first to ensure we have a valid nodeId
+    // Update default node ID if it's not set or doesn't exist in network
+    const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
+    if (!nodeExists && network.nodes.length > 0) {
+      const firstNodeId = network.nodes[0].id;
+      console.log("Updating initial state node ID to", firstNodeId);
+      
+      // Update parameters directly to avoid any race conditions
+      setParameters(prev => ({
+        ...prev,
+        initialStateParams: {
+          ...prev.initialStateParams,
+          nodeId: firstNodeId
+        }
+      }));
+      
+      // Delay initialization to ensure parameters are updated
+      setTimeout(() => {
+        if (engineRef.current && graphRef.current) {
+          console.log("Initializing simulation engine with updated parameters");
+          engineRef.current.initialize(graphRef.current, parameters);
+        }
+      }, 100);
+    }
+  } catch (error) {
+    console.error("Error initializing simulation with new network:", error);
+  }
+}, [network]);
+```
+
+**Affected Files:**
+- src/hooks/useSimulation.ts
+- src/simulation/core/stateVector.ts
+- src/simulation/core/engineImplementation.ts
+
+## 2025-04-11 16:45 IST - Adapter.configure is not a function Error
+
+**File:** `src/components/workspace/SimulationVisualizationManager/hooks/useSimulationVisualization.ts`
+
+**Error Message:**
+```
+Uncaught TypeError: adapter.configure is not a function at useSimulationVisualization.ts:62:15
+```
+
+**Cause:**
+In the `useSimulationVisualization` hook, there was a call to `adapter.configure()`, but the CytoscapeAdapter class doesn't have a `configure` method. It has a `setOptions` method instead. This mismatch between the expected API and the actual implementation caused the error.
+
+**Fix:**
+Updated the hook to use the correct method name:
+
+```typescript
+// Update adapter settings when options change
+useEffect(() => {
+  if (adapter && adapter.setOptions) {
+    // Updated from adapter.configure to adapter.setOptions
+    adapter.setOptions({
+      colorScale: options.colorScale || ['#dbeafe', '#3b82f6'],
+      sizeScale: options.sizeScale || [25, 50],
+      useColor: options.useColor !== undefined ? options.useColor : true,
+      useSize: options.useSize !== undefined ? options.useSize : true,
+      showValues: options.showValues !== undefined ? options.showValues : true,
+      normalizeValues: options.normalizeValues !== undefined ? options.normalizeValues : true
+    });
+  }
+}, [
+  adapter,
+  options.colorScale,
+  options.sizeScale,
+  options.useColor,
+  options.useSize,
+  options.showValues,
+  options.normalizeValues
+]);
+```
+
+**Affected Files:**
+- src/components/workspace/SimulationVisualizationManager/hooks/useSimulationVisualization.ts
+
+## 2025-04-11 16:15 IST - Cytoscape Instance Not Available Error
+
+**File:** `src/components/workspace/Workspace.tsx`, `src/components/workspace/CytoscapeManager/CytoscapeManager.tsx`
+
+**Error Message:**
+No explicit error in console, but the NetworkInteractionManager and SimulationVisualizationManager components were not functioning properly because the Cytoscape instance was not available to them.
+
+**Cause:**
+The CytoscapeManager component created and managed the Cytoscape instance, but didn't provide a way for the parent component (Workspace) to access it. Since the Cytoscape instance was critical for other components to function, this created a dependency issue.
+
+**Fix:**
+1. Added an `onCytoscapeReady` callback prop to CytoscapeManager
+2. Modified the component to call this callback when the Cytoscape instance is initialized
+3. Updated Workspace to use this callback to store the Cytoscape instance in its state
+
+**Key Code Changes:**
+```typescript
+// In CytoscapeManager.tsx - added the callback prop
+export interface CytoscapeManagerProps {
+  // ... existing props
+  onCytoscapeReady?: (cy: cytoscape.Core) => void;
+  // ... other props
+}
+
+// In CytoscapeManager.tsx - use the callback
+useEffect(() => {
+  if (cy && onCytoscapeReady) {
+    onCytoscapeReady(cy);
+  }
+}, [cy, onCytoscapeReady]);
+
+// In Workspace.tsx - use the callback to set the state
+<CytoscapeManager
+  network={network}
+  styles={networkStyles}
+  mode={mode}
+  onSelect={handleSelect}
+  onUnselect={handleUnselect}
+  onZoomChange={handleZoomChange}
+  onCytoscapeReady={setCy}
+/>
+```
+
+**Affected Files:**
+- src/components/workspace/Workspace.tsx
+- src/components/workspace/CytoscapeManager/CytoscapeManager.tsx
+
 ## 2025-04-11 10:45 IST - Matrix Multiplication Error in Simulation
 
 **File:** `src/simulation/core/mathAdapter.ts`
