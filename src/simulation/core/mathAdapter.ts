@@ -144,7 +144,8 @@ export class MathAdapter {
   * Multiply two matrices or a matrix and a scalar
   */
  multiply(x: math.Matrix | math.MathArray, y: math.Matrix | math.MathArray | number): math.MathArray {
-   const result = math.multiply(x, y);
+   // Cast inputs to any to bypass type restriction for BigNumber, Fraction, Complex, etc.
+   const result = math.multiply(x as any, y as any);
    
    if (typeof result === 'number') {
      return [result] as unknown as math.MathArray;

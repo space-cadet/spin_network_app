@@ -186,7 +186,10 @@ export class SimulationStateVector implements StateVector {
   getValue(nodeId: string): number {
     const index = this._nodeIdToIndex.get(nodeId);
     if (index === undefined) {
-      throw new Error(`Node ID ${nodeId} not found in the state vector`);
+      // Add more context about available node IDs to help with debugging
+      const availableIds = this._nodeIds.slice(0, 5).join(', ') + 
+        (this._nodeIds.length > 5 ? `... (and ${this._nodeIds.length - 5} more)` : '');
+      throw new Error(`Node ID ${nodeId} not found in the state vector. Available nodes: ${availableIds}`);
     }
     return this._values[index];
   }
@@ -194,7 +197,10 @@ export class SimulationStateVector implements StateVector {
   setValue(nodeId: string, value: number): StateVector {
     const index = this._nodeIdToIndex.get(nodeId);
     if (index === undefined) {
-      throw new Error(`Node ID ${nodeId} not found in the state vector`);
+      // Add more context about available node IDs to help with debugging
+      const availableIds = this._nodeIds.slice(0, 5).join(', ') + 
+        (this._nodeIds.length > 5 ? `... (and ${this._nodeIds.length - 5} more)` : '');
+      throw new Error(`Node ID ${nodeId} not found in the state vector. Available nodes: ${availableIds}`);
     }
     
     // Create a new state vector with the updated value

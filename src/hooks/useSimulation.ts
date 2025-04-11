@@ -5,10 +5,11 @@ import {
   SimulationParameters,
   createSimulationEngine,
   createSimulationGraph,
-  SpinNetworkSimulationEngineImpl,
   DEFAULT_SIMULATION_PARAMETERS,
   SimulationGraph
 } from '../simulation';
+// Import the engine implementation directly
+import { SpinNetworkSimulationEngineImpl } from '../simulation/core/engineImplementation';
 import { RootState } from '../store';
 import { simulationLogger } from '../simulation/core/simulationLogger';
 
@@ -196,20 +197,20 @@ export const useSimulation = () => {
       // End current simulation session
       simulationLogger.endSession();
       
-      // First check if nodeId exists in the network
-      if (network && network.nodes && network.nodes.length > 0) {
-        const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
-        if (!nodeExists) {
-          // Update parameters with a valid nodeId
-          const firstNodeId = network.nodes[0].id;
-          console.log("Updating node ID during reset to", firstNodeId);
+      // Validate node ID
+      const nodeIdValidation = validateNodeId(network, parameters);
+      
+      if (nodeIdValidation !== true) {
+        if (nodeIdValidation) {
+          // Update with valid node ID
+          console.log("Updating node ID during reset to", nodeIdValidation);
           
           // Update parameters
           setParameters(prev => ({
             ...prev,
             initialStateParams: {
               ...prev.initialStateParams,
-              nodeId: firstNodeId
+              nodeId: nodeIdValidation
             }
           }));
           
@@ -222,6 +223,9 @@ export const useSimulation = () => {
               setHasHistory(false);
             }
           }, 50);
+          return;
+        } else {
+          console.error("Failed to validate node ID during reset");
           return;
         }
       }
@@ -284,6 +288,32 @@ export const useSimulation = () => {
     }
   }, [parameters, currentTime]);
   
+  // Helper function to validate node ID and return a valid ID or true if current is valid
+  const validateNodeId = useCallback((network: any, params: SimulationParameters) => {
+    if (!network?.nodes || network.nodes.length === 0) {
+      console.warn("Cannot validate node ID: network is undefined or has no nodes");
+      return false;
+    }
+    
+    const nodeId = params.initialStateParams.nodeId;
+    console.log(`Validating node ID: ${nodeId}`);
+    
+    if (!nodeId) {
+      const firstNodeId = network.nodes[0].id;
+      console.log(`Node ID is empty, using first node: ${firstNodeId}`);
+      return firstNodeId;
+    }
+    
+    const nodeExists = network.nodes.some((node: any) => node.id === nodeId);
+    if (!nodeExists) {
+      const firstNodeId = network.nodes[0].id;
+      console.log(`Node ID ${nodeId} not found in network, using first node: ${firstNodeId}`);
+      return firstNodeId;
+    }
+    
+    return true; // Current node ID is valid
+  }, []);
+
   // Start simulation
   const startSimulation = useCallback(() => {
     if (!engineRef.current || !graphRef.current) {
@@ -297,22 +327,19 @@ export const useSimulation = () => {
       console.log("Starting simulation, graph:", graphRef.current.nodes.length, "nodes");
       
       // Validate that the nodeId exists in the network
-      let nodeIdIsValid = true;
-      if (network?.nodes?.length > 0) {
-        const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
-        if (!nodeExists) {
-          nodeIdIsValid = false;
-          
-          // Update with first node ID
-          const firstNodeId = network.nodes[0].id;
-          console.log("Invalid node ID, updating to first node:", firstNodeId);
+      const nodeIdValidation = validateNodeId(network, parameters);
+      
+      if (nodeIdValidation !== true) {
+        if (nodeIdValidation) {
+          // Update with valid node ID
+          console.log("Invalid node ID, updating to:", nodeIdValidation);
           
           // Update parameters
           setParameters(prev => ({
             ...prev,
             initialStateParams: {
               ...prev.initialStateParams,
-              nodeId: firstNodeId
+              nodeId: nodeIdValidation
             }
           }));
           
@@ -321,6 +348,9 @@ export const useSimulation = () => {
           setTimeout(() => {
             startSimulation();
           }, 50);
+          return;
+        } else {
+          console.error("Failed to validate node ID and couldn't find a valid substitute");
           return;
         }
       }

@@ -12,9 +12,9 @@ import { Viewport } from './utils/viewportUtils';
 
 export interface CytoscapeManagerProps {
   network: SpinNetwork;
-  styles: cytoscape.Stylesheet[];
+  styles: cytoscape.StylesheetCSS[];
   mode: 'select' | 'pan' | 'addNode' | 'addEdge' | 'delete';
-  onSelect?: (elementId: string, elementType: 'node' | 'edge') => void;
+  onSelect?: (elementId: string, elementType: string) => void;
   onUnselect?: () => void;
   onViewportChange?: (viewport: Viewport) => void;
   onZoomChange?: (zoom: number) => void;

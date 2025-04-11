@@ -11,7 +11,7 @@ import cytoscape from 'cytoscape';
  */
 export const initializeCytoscape = (
   container: HTMLElement,
-  styles: cytoscape.Stylesheet[]
+  styles: cytoscape.StylesheetCSS[]
 ): cytoscape.Core => {
   return cytoscape({
     container,

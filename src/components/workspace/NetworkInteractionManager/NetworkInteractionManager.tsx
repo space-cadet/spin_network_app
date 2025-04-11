@@ -143,7 +143,7 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
     if (!cy || mode !== 'addEdge') return;
     
     // Function to handle node tap during edge creation
-    const handleNodeTapForEdge = (event: cytoscape.EventObjectData) => {
+    const handleNodeTapForEdge = (event: cytoscape.EventObject) => {
       const nodeId = event.target.id();
       
       // If we have a source but it's the same as this node, ignore
@@ -156,10 +156,10 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
     };
     
     // Add handlers for both regular and placeholder nodes
-    cy.nodes().bind('tap', handleNodeTapForEdge);
+    cy.nodes().on('tap', handleNodeTapForEdge);
     
     return () => {
-      cy.nodes().unbind('tap', handleNodeTapForEdge);
+      cy.nodes().off('tap', handleNodeTapForEdge);
     };
   }, [cy, mode, edgeSourceId, handleCreateEdge]);
   
@@ -168,7 +168,7 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
     if (!cy || mode !== 'select' || !onConvertPlaceholder) return;
     
     // Function to handle placeholder tap in select mode
-    const handlePlaceholderTap = (event: cytoscape.EventObjectData) => {
+    const handlePlaceholderTap = (event: cytoscape.EventObject) => {
       const placeholderId = event.target.id();
       
       // Ask if the user wants to convert the placeholder to a real node
@@ -196,10 +196,10 @@ const NetworkInteractionManager: React.FC<NetworkInteractionManagerProps> = ({
     };
     
     // Add handler only for placeholder nodes
-    cy.nodes().filter('[type = "placeholder"]').bind('tap', handlePlaceholderTap);
+    cy.nodes().filter('[type = "placeholder"]').on('tap', handlePlaceholderTap);
     
     return () => {
-      cy.nodes().filter('[type = "placeholder"]').unbind('tap', handlePlaceholderTap);
+      cy.nodes().filter('[type = "placeholder"]').off('tap', handlePlaceholderTap);
     };
   }, [cy, mode, onConvertPlaceholder, onAddNode, defaultNodeIntertwiner, network.nodes.length]);
   

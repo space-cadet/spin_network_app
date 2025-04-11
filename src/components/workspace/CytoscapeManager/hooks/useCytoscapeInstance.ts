@@ -19,7 +19,7 @@ export interface CytoscapeHookOptions {
  */
 export const useCytoscapeInstance = (
   containerRef: React.RefObject<HTMLElement>,
-  styles: cytoscape.Stylesheet[],
+  styles: cytoscape.StylesheetCSS[],
   options?: CytoscapeHookOptions
 ) => {
   const [cy, setCy] = useState<cytoscape.Core | null>(null);

@@ -168,6 +168,11 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     if (!this.graph) return;
     
     const nodeIds = this.graph.nodes.map(node => node.id);
+    if (nodeIds.length === 0) {
+      console.error("Cannot create initial state: graph has no nodes");
+      return;
+    }
+    
     this.state = new SimulationStateVector(nodeIds);
     this.initialState = this.state.clone();
     
@@ -175,47 +180,97 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     const { initialStateType, initialStateParams } = parameters;
     
     if (initialStateType === 'delta') {
-      // Set a single node to 1.0 (or specified value)
-      const nodeId = initialStateParams.nodeId || nodeIds[0];
-      const value = initialStateParams.value || 1.0;
-      this.state = this.state.setValue(nodeId, value);
+      try {
+        // Validate that the node ID exists in the network
+        let nodeId = initialStateParams.nodeId;
+        
+        // If node ID is missing or not in the graph, use the first node
+        if (!nodeId || !this.graph.getNode(nodeId)) {
+          nodeId = nodeIds[0];
+          console.warn(`Initial state node ID ${initialStateParams.nodeId} is invalid, using ${nodeId} instead`);
+        }
+        
+        const value = initialStateParams.value || 1.0;
+        this.state = this.state.setValue(nodeId, value);
+      } catch (error) {
+        console.error("Error setting delta state:", error);
+        
+        // Fallback: Set first node to 1.0 if available
+        if (nodeIds.length > 0) {
+          const nodeId = nodeIds[0];
+          console.warn(`Falling back to first node ${nodeId} for initial state`);
+          try {
+            this.state = this.state.setValue(nodeId, 1.0);
+          } catch (fallbackError) {
+            console.error("Critical error: Failed to set fallback initial state:", fallbackError);
+          }
+        }
+      }
     }
     else if (initialStateType === 'uniform') {
-      // Set all nodes to the same value
-      const value = initialStateParams.value || 0.1;
-      for (const nodeId of nodeIds) {
-        this.state = this.state.setValue(nodeId, value);
+      try {
+        // Set all nodes to the same value
+        const value = initialStateParams.value || 0.1;
+        for (const nodeId of nodeIds) {
+          this.state = this.state.setValue(nodeId, value);
+        }
+      } catch (error) {
+        console.error("Error setting uniform state:", error);
       }
     }
     else if (initialStateType === 'gaussian') {
-      // Create a Gaussian distribution centered on a node
-      const centerNodeId = initialStateParams.nodeId || nodeIds[0];
-      const centerValue = initialStateParams.centerValue || 1.0;
-      const sigma = initialStateParams.sigma || 1.0;
-      
-      // Set center node
-      this.state = this.state.setValue(centerNodeId, centerValue);
-      
-      // Get center node position
-      const centerNode = this.graph.getNode(centerNodeId);
-      if (!centerNode) return;
-      
-      // Set other nodes based on distance
-      for (const nodeId of nodeIds) {
-        if (nodeId === centerNodeId) continue;
+      try {
+        // Create a Gaussian distribution centered on a node
+        let centerNodeId = initialStateParams.nodeId;
         
-        const node = this.graph.getNode(nodeId);
-        if (!node) continue;
+        // Validate that the center node ID exists
+        if (!centerNodeId || !this.graph.getNode(centerNodeId)) {
+          centerNodeId = nodeIds[0];
+          console.warn(`Center node ID ${initialStateParams.nodeId} is invalid, using ${centerNodeId} instead`);
+        }
         
-        // Calculate Euclidean distance
-        const dx = node.position.x - centerNode.position.x;
-        const dy = node.position.y - centerNode.position.y;
-        const dz = (node.position.z || 0) - (centerNode.position.z || 0);
-        const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        const centerValue = initialStateParams.centerValue || 1.0;
+        const sigma = initialStateParams.sigma || 1.0;
         
-        // Calculate Gaussian value
-        const value = centerValue * Math.exp(-(distance*distance) / (2*sigma*sigma));
-        this.state = this.state.setValue(nodeId, value);
+        // Set center node
+        this.state = this.state.setValue(centerNodeId, centerValue);
+        
+        // Get center node position
+        const centerNode = this.graph.getNode(centerNodeId);
+        if (!centerNode) {
+          console.error("Center node not found even after validation");
+          return;
+        }
+        
+        // Set other nodes based on distance
+        for (const nodeId of nodeIds) {
+          if (nodeId === centerNodeId) continue;
+          
+          const node = this.graph.getNode(nodeId);
+          if (!node) continue;
+          
+          // Calculate Euclidean distance
+          const dx = node.position.x - centerNode.position.x;
+          const dy = node.position.y - centerNode.position.y;
+          const dz = (node.position.z || 0) - (centerNode.position.z || 0);
+          const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+          
+          // Calculate Gaussian value
+          const value = centerValue * Math.exp(-(distance*distance) / (2*sigma*sigma));
+          this.state = this.state.setValue(nodeId, value);
+        }
+      } catch (error) {
+        console.error("Error setting Gaussian state:", error);
+        
+        // Fallback to a simple delta state on the first node
+        if (nodeIds.length > 0) {
+          try {
+            console.warn("Falling back to delta state on first node");
+            this.state = this.state.setValue(nodeIds[0], 1.0);
+          } catch (fallbackError) {
+            console.error("Critical error: Failed to set fallback state:", fallbackError);
+          }
+        }
       }
     }
     
