@@ -1,5 +1,63 @@
 # Error Log
 
+## 2025-04-11 18:20 IST - TypeScript Build Errors in Cytoscape Types
+
+**File:** Multiple files with Cytoscape type references
+
+**Error Message:**
+```
+src/components/workspace/CytoscapeManager/CytoscapeManager.tsx(15,21): error TS2724: 'cytoscape' has no exported member named 'Stylesheet'. Did you mean 'StylesheetCSS'?
+src/components/workspace/CytoscapeManager/hooks/useCytoscapeInstance.ts(22,21): error TS2724: 'cytoscape' has no exported member named 'Stylesheet'. Did you mean 'StylesheetCSS'?
+src/components/workspace/CytoscapeManager/utils/cytoscapeSetup.ts(14,21): error TS2724: 'cytoscape' has no exported member named 'Stylesheet'. Did you mean 'StylesheetCSS'?
+src/components/workspace/NetworkInteractionManager/NetworkInteractionManager.tsx(162,32): error TS2345: Argument of type '(event: cytoscape.EventObjectData) => void' is not assignable to parameter of type 'string'.
+src/components/workspace/Workspace.tsx(265,11): error TS2322: Type '[...] is not assignable to type 'StylesheetCSS[]'.
+src/components/workspace/Workspace.tsx(267,11): error TS2322: Type '(elementId: string, elementType: "node" | "edge") => void' is not assignable to type '(elementId: string, elementType: string) => void'.
+```
+
+**Cause:**
+Several types of errors occurred in Cytoscape-related components:
+
+1. The type reference `cytoscape.Stylesheet` is outdated and should be `cytoscape.StylesheetCSS` in the latest typings
+2. Event handlers were being passed directly to Cytoscape methods, but the types expected string event names
+3. The style object structure was incompatible with the expected `StylesheetCSS` interface
+4. Element type parameter was more specific in the handler (`"node" | "edge"`) than in the interface (`string`)
+
+**Fix:**
+1. Updated all references from `Stylesheet` to `StylesheetCSS`
+2. Changed event binding approach in NetworkInteractionManager
+3. Used type assertion to handle the style conversion in Workspace.tsx
+4. Broadened the element type in handler to accept a string and validate it internally
+
+**Key Code Changes:**
+```typescript
+// Updated type references
+styles: cytoscape.StylesheetCSS[];
+
+// Fixed event binding
+cy.on('tap', (event) => handleCanvasTap(event));
+
+// Fixed style conversion in Workspace.tsx
+const networkStyles = useTypeBasedStyles() as unknown as cytoscape.StylesheetCSS[];
+
+// Added type validation for element type
+const handleSelect = useCallback((elementId: string, elementType: string) => {
+  // Validate element type to make sure it's 'node' or 'edge'
+  const validType = (elementType === 'node' || elementType === 'edge') ? elementType : 'node';
+  
+  dispatch(setSelectedElement({
+    id: elementId,
+    type: validType
+  }));
+}, [dispatch, mode]);
+```
+
+**Affected Files:**
+- src/components/workspace/CytoscapeManager/CytoscapeManager.tsx
+- src/components/workspace/CytoscapeManager/hooks/useCytoscapeInstance.ts
+- src/components/workspace/CytoscapeManager/utils/cytoscapeSetup.ts
+- src/components/workspace/NetworkInteractionManager/NetworkInteractionManager.tsx
+- src/components/workspace/Workspace.tsx
+
 ## 2025-04-11 17:20 IST - Node ID Synchronization Error in Simulation Engine
 
 **File:** `src/hooks/useSimulation.ts`, `src/simulation/core/stateVector.ts`
