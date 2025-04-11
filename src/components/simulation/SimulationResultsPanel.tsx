@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaChartPie, FaChartLine, FaRuler } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
@@ -8,11 +8,13 @@ const SimulationResultsPanel: React.FC = () => {
   const simulation = useSimulation();
   const currentTime = simulation?.currentTime || 0;
   const hasHistory = simulation?.hasHistory || false;
+  const isRunning = simulation?.isRunning || false;
   
   const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
+  const [, setRefreshCounter] = useState(0); // Used to force re-renders
   
   // Use a simple approach that doesn't rely on useEffect for updating
-  const conservationData = hasHistory && simulation.getConservationLaws 
+  const conservationData = simulation.getConservationLaws 
     ? simulation.getConservationLaws() 
     : {
         totalProbability: 0,
@@ -34,13 +36,37 @@ const SimulationResultsPanel: React.FC = () => {
     kurtosis: 2.9
   };
 
-  // Always get the latest conservation data, even if no formal "history" yet
-  let displayConservationData = conservationData;
-  if (simulation.isRunning && simulation.getConservationLaws) {
-    displayConservationData = simulation.getConservationLaws();
-  }
+  // Auto-refresh component when simulation is running
+  useEffect(() => {
+    console.log("Setting up refresh timer, isRunning:", isRunning);
+    let timer: number | null = null;
+    
+    if (isRunning) {
+      timer = window.setInterval(() => {
+        setRefreshCounter(prev => prev + 1);
+        console.log("Force refreshing simulation results panel");
+      }, 1000);
+    }
+    
+    return () => {
+      if (timer !== null) {
+        window.clearInterval(timer);
+      }
+    };
+  }, [isRunning]);
 
-  if (!hasHistory && !simulation.isRunning) {
+  // Check if we have any meaningful data to display
+  const hasAnyData = isRunning || hasHistory || 
+                    (conservationData && conservationData.totalProbability > 0);
+  
+  console.log("SimulationResultsPanel render:", { 
+    hasAnyData, 
+    isRunning, 
+    hasHistory, 
+    conservationData 
+  });
+
+  if (!hasAnyData) {
     return (
       <div className="simulation-results-panel p-4 text-center text-gray-500">
         <FaChartLine className="mx-auto mb-3 text-3xl" />
@@ -100,31 +126,31 @@ const SimulationResultsPanel: React.FC = () => {
               <div className="flex justify-between mb-1">
                 <span className="text-sm">Current Value:</span>
                 <span className={`font-mono text-sm ${
-                  Math.abs(displayConservationData.totalProbability - 1) < 0.01 
+                  Math.abs(conservationData.totalProbability - 1) < 0.01 
                     ? 'text-green-600' 
                     : 'text-yellow-600'
                 }`}>
-                  {Number(displayConservationData.totalProbability).toFixed(6)}
+                  {Number(conservationData.totalProbability).toFixed(6)}
                 </span>
               </div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm">Variation:</span>
                 <span className={`font-mono text-sm ${
-                  displayConservationData.normVariation < 0.01 
+                  conservationData.normVariation < 0.01 
                     ? 'text-green-600' 
                     : 'text-yellow-600'
                 }`}>
-                  {Number(displayConservationData.normVariation).toFixed(6)}
+                  {Number(conservationData.normVariation).toFixed(6)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm">Positivity:</span>
                 <span className={`font-mono text-sm ${
-                  displayConservationData.positivity 
+                  conservationData.positivity 
                     ? 'text-green-600' 
                     : 'text-red-600'
                 }`}>
-                  {displayConservationData.positivity ? 'Preserved' : 'Violated'}
+                  {conservationData.positivity ? 'Preserved' : 'Violated'}
                 </span>
               </div>
             </div>
