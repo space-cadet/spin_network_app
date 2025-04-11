@@ -2,6 +2,19 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-11: Fixed Simulation Visualization and Results Display
+
+Modified files:
+- `/src/components/simulation/SimulationResultsPanel.tsx` - Added auto-refresh functionality and improved display logic
+- `/src/simulation/visualization/cytoscapeAdapter.ts` - Enhanced visualization adapter with better normalization and feedback
+- `/src/components/panels/SimulationControlPanel.tsx` - Improved simulation parameters for stability and added helpful UI feedback
+
+Issues addressed:
+- Added value normalization and styling improvements for better node visualization
+- Fixed results panel not showing data despite simulation being active
+- Added better feedback on simulation stability through UI elements
+- Improved simulation parameters to ensure more stable behavior
+
 ## 2025-04-11: Fixed Matrix Multiplication Error in Simulation
 
 Modified files:
