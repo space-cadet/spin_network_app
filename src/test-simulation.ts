@@ -28,7 +28,9 @@ const testNetwork: SpinNetwork = {
   metadata: {
     name: 'Test Network',
     description: 'A simple test network for simulation testing',
-    type: 'test'
+    type: 'custom',
+    created: new Date().toISOString(),
+    modified: new Date().toISOString()
   }
 };
 
@@ -46,14 +48,7 @@ export const runSimulationTest = (): boolean => {
     console.log('Created simulation engine');
     
     // Create a Cytoscape adapter for visualization
-    const adapter = new CytoscapeAdapter({
-      colorScale: ['#0000ff', '#ff0000'],
-      sizeScale: [10, 50],
-      useColor: true,
-      useSize: true,
-      showValues: true,
-      normalizeValues: true
-    });
+    const adapter = new CytoscapeAdapter();
     console.log('Created Cytoscape adapter');
     
     // Set up initial state parameters
@@ -71,7 +66,10 @@ export const runSimulationTest = (): boolean => {
     
     // Get the initial state
     const initialState = engine.getCurrentState();
-    console.log('Initial state:', initialState.toJSON());
+    console.log('Initial state values:', initialState.nodeIds.map(id => ({ 
+      id, 
+      value: initialState.getValue(id) 
+    })));
     
     // Step the simulation a few times
     for (let i = 0; i < 5; i++) {
@@ -80,14 +78,17 @@ export const runSimulationTest = (): boolean => {
       
       // Get the current state
       const state = engine.getCurrentState();
-      console.log(`  Node values: ${JSON.stringify(state.getValues())}`);
+      const nodeValues = Object.fromEntries(
+        state.nodeIds.map(id => [id, state.getValue(id)])
+      );
+      console.log(`  Node values: ${JSON.stringify(nodeValues)}`);
       
       // Get conservation laws
       const conservation = engine.getConservationLaws();
       console.log(`  Conservation: total=${conservation.totalProbability.toFixed(4)}, norm_var=${conservation.normVariation.toFixed(4)}, pos=${conservation.positivity}`);
       
       // Create visualization state
-      const visualizationState = adapter.stateToVisualization(state, graph);
+      const visualizationState = adapter.createVisualization(graph);
       console.log(`  Visualization: min=${visualizationState.minValue.toFixed(4)}, max=${visualizationState.maxValue.toFixed(4)}`);
     }
     

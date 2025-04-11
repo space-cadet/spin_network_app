@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaChartPie, FaChartLine, FaRuler } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
+import { SpinNetworkGeometryCalculator } from '../../simulation/analysis/geometricProps';
+import { SimulationAnalyzer } from '../../simulation/analysis/statistics';
 
 const SimulationResultsPanel: React.FC = () => {
   // Handle undefined values from useSimulation gracefully
@@ -11,9 +13,22 @@ const SimulationResultsPanel: React.FC = () => {
   const isRunning = simulation?.isRunning || false;
   
   const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
-  const [, setRefreshCounter] = useState(0); // Used to force re-renders
+  const [refreshCounter, setRefreshCounter] = useState(0); // Used to force re-renders
+  const [geometricData, setGeometricData] = useState({
+    totalVolume: 0,
+    totalArea: 0,
+    effectiveDimension: 0,
+    volumeEntropy: 0
+  });
   
-  // Use a simple approach that doesn't rely on useEffect for updating
+  const [statisticsData, setStatisticsData] = useState({
+    mean: 0,
+    variance: 0,
+    skewness: 0,
+    kurtosis: 0
+  });
+  
+  // Get conservation data from simulation
   const conservationData = simulation.getConservationLaws 
     ? simulation.getConservationLaws() 
     : {
@@ -22,19 +37,60 @@ const SimulationResultsPanel: React.FC = () => {
         normVariation: 0,
       };
   
-  const geometricData = {
-    totalVolume: 12.5,
-    totalArea: 28.7,
-    effectiveDimension: 1.8,
-    volumeEntropy: 0.65
-  };
-  
-  const statisticsData = {
-    mean: 0.12,
-    variance: 0.34,
-    skewness: 0.02,
-    kurtosis: 2.9
-  };
+  // Calculate geometric and statistical data
+  useEffect(() => {
+    // Only calculate if simulation has data
+    if (simulation && (simulation.isRunning || simulation.hasHistory)) {
+      try {
+        console.log("Calculating analysis data, isRunning:", simulation.isRunning);
+        
+        const currentState = simulation.getCurrentState?.();
+        const graph = simulation.getGraph?.();
+        
+        console.log("Got current state:", !!currentState, "and graph:", !!graph);
+        
+        if (currentState && graph) {
+          // Calculate geometric properties
+          const geometryCalculator = new SpinNetworkGeometryCalculator();
+          const totalVolume = geometryCalculator.calculateTotalVolume(currentState);
+          const volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
+          const totalArea = geometryCalculator.calculateTotalArea(graph);
+          const effectiveDimension = geometryCalculator.calculateEffectiveDimension(graph, currentState);
+          
+          console.log("Calculated geometric data:", {
+            totalVolume,
+            volumeEntropy,
+            totalArea,
+            effectiveDimension
+          });
+          
+          setGeometricData({
+            totalVolume,
+            totalArea,
+            effectiveDimension,
+            volumeEntropy
+          });
+          
+          // Calculate statistics
+          const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
+          console.log("Calculated statistics:", stats);
+          
+          setStatisticsData({
+            mean: stats.mean,
+            variance: stats.variance,
+            skewness: 0,  // Placeholder - could be calculated 
+            kurtosis: 0   // Placeholder - could be calculated
+          });
+        } else {
+          console.warn("Missing state or graph for analysis calculations");
+        }
+      } catch (error) {
+        console.error("Error calculating analysis data:", error);
+      }
+    } else {
+      console.log("Simulation not running or no history, skipping analysis calculations");
+    }
+  }, [simulation, refreshCounter, simulation.currentTime, simulation.isRunning]);
 
   // Auto-refresh component when simulation is running
   useEffect(() => {
@@ -45,7 +101,7 @@ const SimulationResultsPanel: React.FC = () => {
       timer = window.setInterval(() => {
         setRefreshCounter(prev => prev + 1);
         console.log("Force refreshing simulation results panel");
-      }, 1000);
+      }, 500); // Refresh more frequently (twice per second)
     }
     
     return () => {
@@ -180,28 +236,28 @@ const SimulationResultsPanel: React.FC = () => {
               <div className="bg-gray-50 p-3 rounded">
                 <h4 className="text-sm font-medium mb-2">Total Volume</h4>
                 <div className="text-lg font-mono text-center">
-                  {geometricData.totalVolume.toFixed(2)}
+                  {geometricData.totalVolume.toFixed(4)}
                 </div>
               </div>
               
               <div className="bg-gray-50 p-3 rounded">
                 <h4 className="text-sm font-medium mb-2">Total Area</h4>
                 <div className="text-lg font-mono text-center">
-                  {geometricData.totalArea.toFixed(2)}
+                  {geometricData.totalArea.toFixed(4)}
                 </div>
               </div>
               
               <div className="bg-gray-50 p-3 rounded">
                 <h4 className="text-sm font-medium mb-2">Effective Dimension</h4>
                 <div className="text-lg font-mono text-center">
-                  {geometricData.effectiveDimension.toFixed(2)}
+                  {geometricData.effectiveDimension.toFixed(4)}
                 </div>
               </div>
               
               <div className="bg-gray-50 p-3 rounded">
                 <h4 className="text-sm font-medium mb-2">Volume Entropy</h4>
                 <div className="text-lg font-mono text-center">
-                  {geometricData.volumeEntropy.toFixed(2)}
+                  {geometricData.volumeEntropy.toFixed(4)}
                 </div>
               </div>
             </div>

@@ -481,6 +481,19 @@ export const useSimulation = () => {
     }
   }, [isRunning, animationLoop]);
 
+  // Get the current simulation graph
+  const getGraph = useCallback(() => {
+    return graphRef.current;
+  }, []);
+
+  // Get the current state directly
+  const getCurrentState = useCallback(() => {
+    if (engineRef.current) {
+      return engineRef.current.getCurrentState();
+    }
+    return null;
+  }, []);
+
   return {
     isRunning,
     parameters,
@@ -494,6 +507,8 @@ export const useSimulation = () => {
     updateParameters,
     updateInitialStateParams,
     getVisualizationState,
-    getConservationLaws
+    getConservationLaws,
+    getGraph,
+    getCurrentState
   };
 };
