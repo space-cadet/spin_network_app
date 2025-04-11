@@ -57,9 +57,9 @@ export const useSimulationVisualization = (
   
   // Update adapter settings when options change
   useEffect(() => {
-    if (adapter) {
+    if (adapter && adapter.setOptions) {
       // Update adapter configuration
-      adapter.configure({
+      adapter.setOptions({
         colorScale: options.colorScale || ['#dbeafe', '#3b82f6'],
         sizeScale: options.sizeScale || [25, 50],
         useColor: options.useColor !== undefined ? options.useColor : true,
