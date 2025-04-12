@@ -83,8 +83,29 @@
   </div>
   
   <script type="module">
-    import { runSimulationTest } from '../src/test-simulation.js';
-    import { SpinNetworkGeometryCalculator, SimulationAnalyzer } from '../src/simulation/index.js';
+    console.log('Starting script execution');
+    
+    // Try importing with error handling
+    let runSimulationTest, SpinNetworkGeometryCalculator, SimulationAnalyzer;
+    
+    try {
+      const testSimulation = await import('../src/test-simulation.js');
+      runSimulationTest = testSimulation.runSimulationTest;
+      console.log('Successfully imported runSimulationTest');
+    } catch (error) {
+      console.error('Error importing test-simulation.js:', error);
+    }
+    
+    try {
+      const simulation = await import('../src/simulation/index.js');
+      SpinNetworkGeometryCalculator = simulation.SpinNetworkGeometryCalculator;
+      SimulationAnalyzer = simulation.SimulationAnalyzer;
+      console.log('Successfully imported simulation components');
+      console.log('SpinNetworkGeometryCalculator available:', typeof SpinNetworkGeometryCalculator !== 'undefined');
+      console.log('SimulationAnalyzer available:', typeof SimulationAnalyzer !== 'undefined');
+    } catch (error) {
+      console.error('Error importing simulation/index.js:', error);
+    }
     
     // DOM elements
     const consoleOutput = document.getElementById('console-output');
@@ -108,22 +129,83 @@
     
     // Function to update the results panel with current data
     function updateResultsPanel() {
+      console.log("updateResultsPanel called");
+      
       if (!window.currentEngine || !window.currentGraph) {
         console.warn("Cannot update results: engine or graph is null");
-        return;
+        // Show more detailed diagnostic info
+        console.warn("currentEngine:", window.currentEngine);
+        console.warn("currentGraph:", window.currentGraph);
+        return null;
       }
       
       try {
+        console.log("Getting current state from engine");
         const state = window.currentEngine.getCurrentState();
+        console.log("Current state obtained:", state ? "Available" : "Not available");
+        
+        if (!state) {
+          console.error("State is null or undefined");
+          return null;
+        }
+        
+        console.log("Creating geometry calculator");
         const geometryCalculator = new SpinNetworkGeometryCalculator();
         
-        // Calculate geometric properties
-        const totalVolume = geometryCalculator.calculateTotalVolume(state);
-        const totalArea = geometryCalculator.calculateTotalArea(window.currentGraph);
-        const effectiveDimension = geometryCalculator.calculateEffectiveDimension(
-          window.currentGraph, state
-        );
-        const volumeEntropy = geometryCalculator.calculateVolumeEntropy(state);
+        // First log the state and graph to help with debugging
+        console.log("State properties:", {
+          size: state.size,
+          nodeIds: state.nodeIds ? state.nodeIds.length : "undefined",
+          hasGetValue: typeof state.getValue === 'function'
+        });
+        
+        console.log("Graph properties:", {
+          nodes: window.currentGraph.nodes.length,
+          edges: window.currentGraph.edges.length
+        });
+        
+        // Calculate geometric properties with more detailed error handling
+        console.log("Calculating total volume...");
+        let totalVolume = 0;
+        try {
+          totalVolume = geometryCalculator.calculateTotalVolume(state);
+          console.log("Total volume calculated:", totalVolume);
+        } catch (volumeError) {
+          console.error("Error calculating total volume:", volumeError);
+          totalVolume = 0;
+        }
+        
+        console.log("Calculating total area...");
+        let totalArea = 0;
+        try {
+          totalArea = geometryCalculator.calculateTotalArea(window.currentGraph);
+          console.log("Total area calculated:", totalArea);
+        } catch (areaError) {
+          console.error("Error calculating total area:", areaError);
+          totalArea = 0;
+        }
+        
+        console.log("Calculating effective dimension...");
+        let effectiveDimension = 0;
+        try {
+          effectiveDimension = geometryCalculator.calculateEffectiveDimension(
+            window.currentGraph, state
+          );
+          console.log("Effective dimension calculated:", effectiveDimension);
+        } catch (dimensionError) {
+          console.error("Error calculating effective dimension:", dimensionError);
+          effectiveDimension = 0;
+        }
+        
+        console.log("Calculating volume entropy...");
+        let volumeEntropy = 0;
+        try {
+          volumeEntropy = geometryCalculator.calculateVolumeEntropy(state);
+          console.log("Volume entropy calculated:", volumeEntropy);
+        } catch (entropyError) {
+          console.error("Error calculating volume entropy:", entropyError);
+          volumeEntropy = 0;
+        }
         
         // Update geometric property elements
         totalVolumeElem.textContent = totalVolume.toFixed(4);
@@ -131,10 +213,17 @@
         effectiveDimensionElem.textContent = effectiveDimension.toFixed(4);
         volumeEntropyElem.textContent = volumeEntropy.toFixed(4);
         
-        // Calculate statistics
-        const stats = SimulationAnalyzer.calculateStatistics(
-          state, window.currentEngine.getCurrentTime()
-        );
+        // Calculate statistics with more detailed error handling
+        console.log("Calculating simulation statistics...");
+        let stats = { mean: 0, variance: 0, standardDeviation: 0, min: 0, max: 0 };
+        try {
+          stats = SimulationAnalyzer.calculateStatistics(
+            state, window.currentEngine.getCurrentTime()
+          );
+          console.log("Statistics calculated:", stats);
+        } catch (statsError) {
+          console.error("Error calculating statistics:", statsError);
+        }
         
         // Update statistics elements
         meanElem.textContent = stats.mean.toFixed(4);
@@ -144,6 +233,7 @@
         
         // Show the results panel
         resultsPanel.style.display = 'block';
+        console.log("Results panel made visible");
         
         return {
           geometric: { totalVolume, totalArea, effectiveDimension, volumeEntropy },
@@ -151,6 +241,8 @@
         };
       } catch (error) {
         console.error("Error updating results panel:", error);
+        console.error("Error details:", error.message);
+        console.error("Stack trace:", error.stack);
         return null;
       }
     }
@@ -198,23 +290,47 @@
     const originalRunTest = runSimulationTest;
     window.runSimulationTest = async function() {
       try {
+        console.log("Starting enhanced runSimulationTest...");
+        
         // Run the original test
+        console.log("Calling original runSimulationTest function...");
         const result = await originalRunTest();
+        console.log("Original runSimulationTest completed with result:", result);
+        
+        // Debug log for engine and graph references
+        console.log("Checking references - engine:", window.currentEngine ? "Available" : "Not available");
+        console.log("Checking references - graph:", window.currentGraph ? "Available" : "Not available");
+        
+        if (window.currentEngine) {
+          console.log("Engine state check:", window.currentEngine.getCurrentState() ? "State present" : "No state");
+        }
         
         // Attempt to update the results panel after a short delay
+        console.log("Setting timeout to update results panel...");
         setTimeout(() => {
           // If we have engine and graph references, update the panel
           if (window.currentEngine && window.currentGraph) {
             console.log("Updating results panel with simulation data...");
-            updateResultsPanel();
+            try {
+              const updateResult = updateResultsPanel();
+              console.log("Results panel update completed:", updateResult);
+            } catch (updateError) {
+              console.error("Error during updateResultsPanel:", updateError);
+              console.error("Error details:", updateError.message);
+              console.error("Stack trace:", updateError.stack);
+            }
           } else {
             console.warn("Engine or graph reference not available for results panel update");
+            if (!window.currentEngine) console.warn("Missing engine reference");
+            if (!window.currentGraph) console.warn("Missing graph reference");
           }
-        }, 500);
+        }, 1000); // Increased timeout to give more time for references to be set
         
         return result;
       } catch (error) {
         console.error("Error in enhanced runSimulationTest:", error);
+        console.error("Error details:", error.message);
+        console.error("Stack trace:", error.stack);
         return false;
       }
     };

@@ -48,6 +48,7 @@ const runSimulationTest = () => {
     // Store graph reference for external access
     if (typeof window !== 'undefined') {
       window.currentGraph = graph;
+      console.log('Stored graph reference in window.currentGraph');
     }
     
     // Create a simulation engine
@@ -57,6 +58,14 @@ const runSimulationTest = () => {
     // Store engine reference for external access
     if (typeof window !== 'undefined') {
       window.currentEngine = engine;
+      console.log('Stored engine reference in window.currentEngine');
+      
+      // Debug verification
+      if (window.currentEngine === engine) {
+        console.log('Engine reference correctly assigned');
+      } else {
+        console.error('Engine reference assignment failed');
+      }
     }
     
     // Create a Cytoscape adapter for visualization
@@ -87,7 +96,7 @@ const runSimulationTest = () => {
     const geometryCalculator = new SpinNetworkGeometryCalculator();
     
     // Calculate and report initial geometric properties
-    const initialState = engine.getCurrentState();
+    // No need to get the state again, we already have it
     console.log("Calculating initial geometric properties...");
     
     // Calculate geometric properties
