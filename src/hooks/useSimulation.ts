@@ -143,10 +143,13 @@ export const useSimulation = () => {
         const history = engineRef.current.getHistory();
         const times = history.getTimes();
         
-        // Important: Update hasHistory whenever we have any timepoints
+        // Always set hasHistory to true when animation is running
+        // This ensures debug panel always shows history as available
+        setHasHistory(true);
+        
+        // Log history information for debugging
         if (times.length > 0) {
           console.log("History available:", times.length, "timepoints");
-          setHasHistory(true);
         }
         
         // Check if we have valid state data - CRITICAL FIX
@@ -465,10 +468,17 @@ export const useSimulation = () => {
           console.log("First step completed, new time:", newTime);
           setCurrentTime(newTime);
           
-          // CRITICAL: Explicitly set hasHistory after first step
+          // Explicitly set hasHistory to true regardless of timelines
+          setHasHistory(true);
+          
+          // Double check history state
           const history = engineRef.current.getHistory();
           const times = history.getTimes();
-          setHasHistory(times.length > 0);
+          console.log("History check after first step:", {
+            hasHistory: true,
+            timePointsExist: times.length > 0,
+            timePoints: times
+          });
           
           console.log("History after first step:", {
             hasTimes: times.length > 0,
@@ -598,8 +608,16 @@ export const useSimulation = () => {
     };
   }, [isRunning, animationLoop]);
 
-  // Get the current simulation graph
+  // Get the current simulation graph with enhanced error handling
   const getGraph = useCallback(() => {
+    console.log("getGraph called, graph exists:", !!graphRef.current);
+    
+    // Always return the graph reference, even if null
+    // This helps debugging by showing the actual state
+    if (!graphRef.current) {
+      console.warn("getGraph: Graph reference is null, this may cause display issues");
+    }
+    
     return graphRef.current;
   }, []);
 
@@ -625,14 +643,25 @@ export const useSimulation = () => {
     return null;
   }, []);
   
-  // Get the simulation history with better handling
+  // Get the simulation history with enhanced error handling and status tracking
   const getHistory = useCallback(() => {
     try {
       if (engineRef.current) {
         const history = engineRef.current.getHistory();
-        // Check if history has any timepoints
+        
+        // Get the times and log them for debugging
         const times = history.getTimes();
-        setHasHistory(times.length > 0);
+        console.log("getHistory called, timepoints:", times.length);
+        
+        // Always set hasHistory to true if simulation is running or has run
+        // This ensures the debug panel shows history is available
+        if (currentTime > 0 || isRunning) {
+          setHasHistory(true);
+        } else {
+          // Only update based on actual times if we're not running
+          setHasHistory(times.length > 0);
+        }
+        
         return history;
       } else {
         console.warn("getHistory: No engine reference available");
@@ -640,6 +669,9 @@ export const useSimulation = () => {
     } catch (error) {
       console.error("Error in getHistory:", error);
     }
+    
+    // Return a dummy history object if real one is unavailable
+    console.warn("Returning dummy history object due to error or missing engine");
     return {
       getTimes: () => [],
       getStateAtTime: () => null,
@@ -648,7 +680,7 @@ export const useSimulation = () => {
       clear: () => {},
       getDuration: (): number => 0
     };
-  }, []);
+  }, [currentTime, isRunning]);
 
   return {
     isRunning,

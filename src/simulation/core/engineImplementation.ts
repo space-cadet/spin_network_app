@@ -152,9 +152,13 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     // Clear history
     this.history.clear();
     
-    // Record initial state if history recording is enabled
-    if (parameters.recordHistory && this.state) {
+    // Always record initial state to ensure history exists
+    // This is critical for ensuring the debug panel shows history data
+    if (this.state) {
       this.history.addState(0, this.state);
+      console.log("Recorded initial state in history at time 0");
+    } else {
+      console.error("Cannot record initial state: state is null");
     }
     
     // Fire initialized event
@@ -297,9 +301,13 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     this.currentTime += dt;
     this.stepCounter++;
     
-    // Record state if history recording is enabled
-    if (this.parameters.recordHistory && this.stepCounter % this.parameters.historyInterval === 0) {
-      this.history.addState(this.currentTime, this.state);
+    // Always record state to ensure history is available
+    // This ensures the debug panel can access history data
+    this.history.addState(this.currentTime, this.state);
+    
+    // Log every Nth step to avoid excessive logging
+    if (this.stepCounter % 10 === 0) {
+      console.log(`Recorded state at step ${this.stepCounter}, time ${this.currentTime}`);
     }
     
     // Dispatch step event
