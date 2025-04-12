@@ -80,25 +80,28 @@ const SimulationDebugPanel: React.FC = () => {
   if (simulation?.getCurrentState) {
     try {
       const state = simulation.getCurrentState();
-      stateData = {
-        exists: !!state,
-        size: state?.size || 0,
-        nodeIds: state?.nodeIds?.slice(0, 3) || [], // Just get first 3 to avoid clutter
-        hasValues: state && state.size > 0
-      };
+      
+      // Create sample values object first
+      let sampleValues: Record<string, number> = {};
       
       // Sample a few values if available
       if (state && state.size > 0) {
-        const sampleValues: Record<string, number> = {};
         const sampleCount = Math.min(3, state.nodeIds.length);
         
         for (let i = 0; i < sampleCount; i++) {
           const nodeId = state.nodeIds[i];
           sampleValues[nodeId] = state.getValue(nodeId);
         }
-        
-        stateData.sampleValues = sampleValues;
       }
+      
+      // Then create the state data object with all properties
+      stateData = {
+        exists: !!state,
+        size: state?.size || 0,
+        nodeIds: state?.nodeIds?.slice(0, 3) || [], // Just get first 3 to avoid clutter
+        hasValues: state && state.size > 0,
+        sampleValues: sampleValues
+      };
     } catch (error) {
       stateData = { error: "Error fetching state data" };
     }

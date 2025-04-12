@@ -125,7 +125,8 @@ export const useSimulation = () => {
   
   // Animation loop for updating simulation
   const animationLoop = useCallback(() => {
-    if (isRunning && engineRef.current) {
+    // Check both internal (engine) and external (React state) running flags
+    if (engineRef.current && engineRef.current.isRunning() && isRunning) {
       console.log("Animation loop iteration, stepping simulation");
       
       // Step the simulation
@@ -165,13 +166,27 @@ export const useSimulation = () => {
             simulationLogger.log('error', 'Error computing analysis results', { error }, currentTime);
           }
         }
+        
+        // Only schedule next frame if still running
+        if (engineRef.current.isRunning() && isRunning) {
+          // Request next frame
+          animationFrameRef.current = requestAnimationFrame(animationLoop);
+        } else {
+          console.log("Animation stopped due to running state change");
+          animationFrameRef.current = null;
+        }
       } catch (error) {
         console.error("Error in simulation step:", error);
         simulationLogger.log('error', 'Error in simulation step', { error });
+        
+        // Still schedule next frame to ensure animation doesn't stop on error
+        if (engineRef.current.isRunning() && isRunning) {
+          animationFrameRef.current = requestAnimationFrame(animationLoop);
+        }
       }
-      
-      // Request next frame
-      animationFrameRef.current = requestAnimationFrame(animationLoop);
+    } else {
+      console.log("Animation loop called but simulation is not running");
+      console.log("Engine running:", engineRef.current?.isRunning(), "React state:", isRunning);
     }
   }, [isRunning, parameters.timeStep]);
   
@@ -259,13 +274,26 @@ export const useSimulation = () => {
   // Pause simulation
   const pauseSimulation = useCallback(() => {
     if (engineRef.current) {
+      console.log("Pausing simulation - canceling animation frame");
+      
+      // Cancel any pending animation frame first
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      
+      // Update engine state
       engineRef.current.pause();
+      
+      // Update React state
       setIsRunning(false);
       
       // Log simulation pause
       simulationLogger.log('info', 'Simulation paused', {
         time: engineRef.current.getCurrentTime()
       }, engineRef.current.getCurrentTime());
+      
+      console.log("Simulation paused at time:", engineRef.current.getCurrentTime());
     }
   }, []);
   
@@ -457,8 +485,22 @@ export const useSimulation = () => {
   
   // Start animation loop when isRunning changes
   useEffect(() => {
+    // Make sure we clean up any existing animation frame before changing state
+    if (animationFrameRef.current !== null) {
+      console.log("Cleaning up existing animation frame before state change");
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
     if (isRunning) {
-      console.log("Starting animation loop");
+      console.log("Starting animation loop, engine state:", engineRef.current?.isRunning());
+      
+      // Make sure engine and React states are in sync
+      if (engineRef.current && !engineRef.current.isRunning()) {
+        console.log("Engine was not running, resuming it");
+        engineRef.current.resume();
+      }
+      
       // Directly run a step immediately
       if (engineRef.current && graphRef.current) {
         console.log("Initial step when starting animation");
@@ -473,12 +515,26 @@ export const useSimulation = () => {
       }
       
       // Then start the animation loop
+      console.log("Requesting initial animation frame");
       animationFrameRef.current = requestAnimationFrame(animationLoop);
-    } else if (animationFrameRef.current !== null) {
-      console.log("Stopping animation loop");
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
+    } else {
+      console.log("Not starting animation loop because isRunning is false");
+      
+      // Make sure engine state matches React state
+      if (engineRef.current && engineRef.current.isRunning()) {
+        console.log("Engine was running but React state is not, pausing engine");
+        engineRef.current.pause();
+      }
     }
+    
+    // Cleanup function
+    return () => {
+      if (animationFrameRef.current !== null) {
+        console.log("Cleaning up animation frame in effect cleanup");
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
   }, [isRunning, animationLoop]);
 
   // Get the current simulation graph
