@@ -216,52 +216,113 @@ const SimulationResultsPanel: React.FC = () => {
     } else {
       console.log("Simulation not running or no history, skipping analysis calculations");
     }
-  }, [simulation, refreshCounter, simulation.currentTime, simulation.isRunning]);
+    
+    // Add a console log showing the specific changes that triggered this effect
+    console.log("Analysis calculation effect triggered by:", {
+      refreshCounter,
+      currentTime: simulation?.currentTime,
+      isRunning: simulation?.isRunning,
+      simulationChanged: true,
+      hasHistory: simulation?.hasHistory
+    });
+  }, [simulation, refreshCounter, simulation?.currentTime, simulation?.isRunning, simulation?.hasHistory]);
 
-  // Auto-refresh component when simulation is running
+  // Enhanced auto-refresh for simulation results
   useEffect(() => {
-    console.log("Setting up refresh timer:", {
+    console.log("Setting up enhanced refresh mechanism:", {
       isRunning,
       hasHistory,
       currentTime,
       simulationExists: !!simulation
     });
     
+    // Create both interval-based and animation frame-based refresh
     let timer: number | null = null;
+    let animationFrame: number | null = null;
+    
+    const refreshFunction = () => {
+      // Only update if simulation still exists
+      if (simulation) {
+        // Check if simulation data has actually changed
+        const newTime = simulation.currentTime;
+        const newRunning = simulation.isRunning;
+        
+        console.log("Checking for simulation state changes:", {
+          newTime,
+          currentTimeInState: currentTime,
+          newRunning,
+          isRunningInState: isRunning
+        });
+        
+        // Force update counter on any change to trigger recalculation
+        if (newTime !== currentTime || newRunning !== isRunning) {
+          console.log("Simulation state changed - forcing refresh");
+          setRefreshCounter(prev => prev + 1);
+          updateAnalysisData();
+        }
+        
+        // Schedule next animation frame if still running
+        if (newRunning) {
+          animationFrame = requestAnimationFrame(refreshFunction);
+        }
+      }
+    };
     
     if (isRunning) {
       // Initial calculation
       console.log("Simulation is running - performing initial calculation");
       updateAnalysisData();
       
-      // Set up timer for regular updates
-      timer = window.setInterval(() => {
-        setRefreshCounter(prev => prev + 1);
-        console.log("Refresh timer triggered - updating analysis data", {
-          currentTime: simulation?.currentTime,
-          isStillRunning: simulation?.isRunning
-        });
-        
-        // Force update analysis data
-        updateAnalysisData();
-      }, 500); // Refresh more frequently (twice per second)
+      // Use both interval for guaranteed updates and animation frame for smooth updates
       
-      console.log("Refresh timer set up with interval of 500ms");
+      // Interval-based polling as a fallback (at a lower frequency)
+      timer = window.setInterval(() => {
+        console.log("Interval timer triggered - checking state");
+        setRefreshCounter(prev => prev + 1);
+        updateAnalysisData();
+      }, 1000); // Every second as a fallback
+      
+      // Animation frame for smooth, continuous updates
+      animationFrame = requestAnimationFrame(refreshFunction);
+      
+      console.log("Enhanced refresh mechanism set up with both interval and animation frame");
     } else if (hasHistory) {
       // If not running but has history, calculate once
       console.log("Simulation not running but has history - performing one-time calculation");
       updateAnalysisData();
+      
+      // Even for non-running simulations, set up a slow polling interval
+      // to catch any external state changes (e.g., from debug panel)
+      timer = window.setInterval(() => {
+        updateAnalysisData();
+      }, 2000); // Every 2 seconds for history mode
     } else {
-      console.log("Neither running nor has history - no calculations performed");
+      console.log("Neither running nor has history - setting up minimal polling");
+      
+      // Even when no data exists, set up a very infrequent check
+      // to detect when simulation becomes available
+      timer = window.setInterval(() => {
+        if (simulation?.isRunning || simulation?.hasHistory) {
+          console.log("Simulation became available during polling");
+          setRefreshCounter(prev => prev + 1);
+          updateAnalysisData();
+        }
+      }, 3000); // Every 3 seconds when idle
     }
     
     return () => {
+      // Clean up both timers
       if (timer !== null) {
-        console.log("Cleaning up refresh timer");
+        console.log("Cleaning up interval timer");
         window.clearInterval(timer);
       }
+      
+      if (animationFrame !== null) {
+        console.log("Cleaning up animation frame");
+        cancelAnimationFrame(animationFrame);
+      }
     };
-  }, [isRunning, hasHistory, simulation?.currentTime]);
+  }, [isRunning, hasHistory, simulation]);
 
   // Check if we have any meaningful data to display
   const hasAnyData = isRunning || hasHistory || 
@@ -392,18 +453,52 @@ const SimulationResultsPanel: React.FC = () => {
               <h4 className="text-sm font-medium">Conservation Over Time</h4>
             </div>
             <div className="h-40 flex items-center justify-center bg-gray-100">
-              <div className="text-center">
-                <span className="text-sm text-gray-500 block">Chart will appear here</span>
-                <button
-                  className="mt-2 text-xs text-blue-600 underline"
-                  onClick={() => {
-                    console.log("Forcing visualization update for conservation chart");
-                    setRefreshCounter(prev => prev + 1);
-                  }}
-                >
-                  Force Update
-                </button>
-              </div>
+              {/* Chart validation - only try to render if we have valid data */}
+              {simulation && hasHistory ? (
+                <div className="w-full h-full p-2">
+                  {/* Chart would be rendered here */}
+                  {/* Using a text display as a fallback for now */}
+                  <div className="text-xs bg-white p-2 rounded shadow border border-gray-200 h-full overflow-y-auto">
+                    <div className="font-medium mb-1">Conservation Data:</div>
+                    <div className="flex justify-between">
+                      <span>Total Probability:</span>
+                      <span className="font-mono">{conservationData.totalProbability.toFixed(6)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Variation:</span>
+                      <span className="font-mono">{conservationData.normVariation.toFixed(6)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span className={conservationData.positivity ? "text-green-500" : "text-red-500"}>
+                        {conservationData.positivity ? "Valid" : "Violated"}
+                      </span>
+                    </div>
+                    <div className="text-center mt-2">
+                      <span className="text-xs text-gray-500 italic">
+                        Using fallback display - chart visualization in progress
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-500 block">
+                    {!simulation ? "Simulation not available" : 
+                     !hasHistory ? "No historical data available yet" : 
+                     "Chart will appear here"}
+                  </span>
+                  <button
+                    className="mt-2 text-xs text-blue-600 underline"
+                    onClick={() => {
+                      console.log("Forcing visualization update for conservation chart");
+                      setRefreshCounter(prev => prev + 1);
+                    }}
+                  >
+                    Force Update
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -467,18 +562,54 @@ const SimulationResultsPanel: React.FC = () => {
               <h4 className="text-sm font-medium">Dimension Analysis</h4>
             </div>
             <div className="h-40 flex items-center justify-center bg-gray-100">
-              <div className="text-center">
-                <span className="text-sm text-gray-500 block">Chart will appear here</span>
-                <button
-                  className="mt-2 text-xs text-blue-600 underline"
-                  onClick={() => {
-                    console.log("Forcing visualization update for dimension analysis");
-                    setRefreshCounter(prev => prev + 1);
-                  }}
-                >
-                  Force Update
-                </button>
-              </div>
+              {/* Chart validation - only try to render if we have valid data */}
+              {simulation && geometricData.totalVolume > 0 ? (
+                <div className="w-full h-full p-2">
+                  {/* Chart would be rendered here */}
+                  {/* Using a text display as a fallback for now */}
+                  <div className="text-xs bg-white p-2 rounded shadow border border-gray-200 h-full overflow-y-auto">
+                    <div className="font-medium mb-1">Dimension Analysis:</div>
+                    <div className="flex justify-between">
+                      <span>Total Volume:</span>
+                      <span className="font-mono">{geometricData.totalVolume.toFixed(6)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Volume Entropy:</span>
+                      <span className="font-mono">{geometricData.volumeEntropy.toFixed(6)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total Area:</span>
+                      <span className="font-mono">{geometricData.totalArea.toFixed(6)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Effective Dimension:</span>
+                      <span className="font-mono">{geometricData.effectiveDimension.toFixed(6)}</span>
+                    </div>
+                    <div className="text-center mt-2">
+                      <span className="text-xs text-gray-500 italic">
+                        Using fallback display - chart visualization in progress
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-500 block">
+                    {!simulation ? "Simulation not available" : 
+                     geometricData.totalVolume <= 0 ? "No geometric data available yet" : 
+                     "Chart will appear here"}
+                  </span>
+                  <button
+                    className="mt-2 text-xs text-blue-600 underline"
+                    onClick={() => {
+                      console.log("Forcing visualization update for dimension analysis");
+                      setRefreshCounter(prev => prev + 1);
+                    }}
+                  >
+                    Force Update
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -530,18 +661,83 @@ const SimulationResultsPanel: React.FC = () => {
               <h4 className="text-sm font-medium">State Distribution</h4>
             </div>
             <div className="h-40 flex items-center justify-center bg-gray-100">
-              <div className="text-center">
-                <span className="text-sm text-gray-500 block">Histogram will appear here</span>
-                <button
-                  className="mt-2 text-xs text-blue-600 underline"
-                  onClick={() => {
-                    console.log("Forcing visualization update for state distribution");
-                    setRefreshCounter(prev => prev + 1);
-                  }}
-                >
-                  Force Update
-                </button>
-              </div>
+              {/* Chart validation - only try to render if we have valid data */}
+              {simulation && statisticsData.mean !== 0 ? (
+                <div className="w-full h-full p-2">
+                  {/* Histogram would be rendered here */}
+                  {/* Using a text display as a fallback for now */}
+                  <div className="text-xs bg-white p-2 rounded shadow border border-gray-200 h-full overflow-y-auto">
+                    <div className="font-medium mb-1">State Distribution:</div>
+                    <div className="flex justify-between">
+                      <span>Mean:</span>
+                      <span className="font-mono">{statisticsData.mean.toFixed(6)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Variance:</span>
+                      <span className="font-mono">{statisticsData.variance.toFixed(6)}</span>
+                    </div>
+                    {simulation?.getCurrentState && (
+                      <div className="mt-2">
+                        <div className="font-medium mb-1">Node Value Distribution:</div>
+                        <div className="bg-gray-100 p-1 rounded">
+                          {(() => {
+                            try {
+                              const state = simulation.getCurrentState();
+                              if (state && state.nodeIds && state.nodeIds.length > 0) {
+                                // Sample a few values for display
+                                const sampleSize = Math.min(5, state.nodeIds.length);
+                                const samples = state.nodeIds.slice(0, sampleSize);
+                                
+                                return (
+                                  <div>
+                                    {samples.map(nodeId => (
+                                      <div key={nodeId} className="flex justify-between">
+                                        <span>{nodeId}:</span>
+                                        <span>{state.getValue(nodeId).toFixed(4)}</span>
+                                      </div>
+                                    ))}
+                                    {state.nodeIds.length > sampleSize && (
+                                      <div className="text-gray-500 text-center mt-1">
+                                        +{state.nodeIds.length - sampleSize} more nodes
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              }
+                              return <div className="text-gray-500">No node values available</div>;
+                            } catch (error) {
+                              console.error("Error retrieving node values:", error);
+                              return <div className="text-red-500">Error retrieving node values</div>;
+                            }
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                    <div className="text-center mt-2">
+                      <span className="text-xs text-gray-500 italic">
+                        Using fallback display - histogram visualization in progress
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-500 block">
+                    {!simulation ? "Simulation not available" : 
+                     statisticsData.mean === 0 ? "No statistical data available yet" : 
+                     "Histogram will appear here"}
+                  </span>
+                  <button
+                    className="mt-2 text-xs text-blue-600 underline"
+                    onClick={() => {
+                      console.log("Forcing visualization update for state distribution");
+                      setRefreshCounter(prev => prev + 1);
+                    }}
+                  >
+                    Force Update
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           
@@ -550,18 +746,86 @@ const SimulationResultsPanel: React.FC = () => {
               <h4 className="text-sm font-medium">Time Evolution</h4>
             </div>
             <div className="h-40 flex items-center justify-center bg-gray-100">
-              <div className="text-center">
-                <span className="text-sm text-gray-500 block">Line chart will appear here</span>
-                <button
-                  className="mt-2 text-xs text-blue-600 underline"
-                  onClick={() => {
-                    console.log("Forcing visualization update for time evolution");
-                    setRefreshCounter(prev => prev + 1);
-                  }}
-                >
-                  Force Update
-                </button>
-              </div>
+              {/* Chart validation - only try to render if we have valid data */}
+              {simulation && hasHistory ? (
+                <div className="w-full h-full p-2">
+                  {/* Time evolution chart would be rendered here */}
+                  {/* Using a text display as a fallback for now */}
+                  <div className="text-xs bg-white p-2 rounded shadow border border-gray-200 h-full overflow-y-auto">
+                    <div className="font-medium mb-1">Time Evolution:</div>
+                    <div className="flex justify-between">
+                      <span>Current Time:</span>
+                      <span className="font-mono">{currentTime.toFixed(4)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Current Mean:</span>
+                      <span className="font-mono">{statisticsData.mean.toFixed(4)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Current Variance:</span>
+                      <span className="font-mono">{statisticsData.variance.toFixed(4)}</span>
+                    </div>
+                    <div className="mt-2 font-medium">Time Points:</div>
+                    {(() => {
+                      try {
+                        if (simulation.getHistory && typeof simulation.getHistory === 'function') {
+                          const history = simulation.getHistory();
+                          const times = history.getTimes();
+                          
+                          if (times && times.length > 0) {
+                            // Just show a few time points
+                            const sampleSize = Math.min(5, times.length);
+                            const samples = times.slice(-sampleSize); // Show most recent
+                            
+                            return (
+                              <div className="bg-gray-100 p-1 rounded">
+                                {samples.map((t, index) => (
+                                  <div key={index} className="flex justify-between">
+                                    <span>t{index}:</span>
+                                    <span>{t.toFixed(4)}</span>
+                                  </div>
+                                ))}
+                                {times.length > sampleSize && (
+                                  <div className="text-gray-500 text-center mt-1">
+                                    +{times.length - sampleSize} more time points
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+                          return <div className="text-gray-500">No time points available</div>;
+                        }
+                        return <div className="text-gray-500">History function not available</div>;
+                      } catch (error) {
+                        console.error("Error retrieving time points:", error);
+                        return <div className="text-red-500">Error retrieving time points</div>;
+                      }
+                    })()}
+                    <div className="text-center mt-2">
+                      <span className="text-xs text-gray-500 italic">
+                        Using fallback display - time evolution visualization in progress
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-500 block">
+                    {!simulation ? "Simulation not available" : 
+                     !hasHistory ? "No historical data available yet" : 
+                     "Line chart will appear here"}
+                  </span>
+                  <button
+                    className="mt-2 text-xs text-blue-600 underline"
+                    onClick={() => {
+                      console.log("Forcing visualization update for time evolution");
+                      setRefreshCounter(prev => prev + 1);
+                    }}
+                  >
+                    Force Update
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
