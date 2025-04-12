@@ -1,5 +1,16 @@
 # Edit History
 
+## April 12, 2025 - Build Optimizations and Fixes
+- Fixed TypeScript errors in test-simulation.ts:
+  - Changed timestamp format in network metadata from string (ISO format) to number (Unix timestamp)
+  - Updated metadata.created and metadata.modified to use Date.now() instead of new Date().toISOString()
+- Implemented Vite chunk optimization:
+  - Added chunk splitting configuration to vite.config.ts
+  - Separated vendor libraries into dedicated chunks (react, cytoscape, etc.)
+  - Set appropriate chunk size warning limits
+  - Enabled cssCodeSplit and modern browser targeting
+  - Reduced bundle size from ~1MB to multiple smaller chunks
+
 ## April 11, 2025 - Workspace Component Refactoring
 - Refactored Workspace.tsx into multiple specialized components:
   - CytoscapeManager - For graph visualization and cytoscape lifecycle

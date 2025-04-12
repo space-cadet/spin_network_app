@@ -1,5 +1,117 @@
 # Error Log
 
+## 2025-04-12 14:30 IST - TypeScript Build Errors in test-simulation.ts
+
+**File:** `src/test-simulation.ts`
+
+**Error Message:**
+```
+src/test-simulation.ts:32:5 - error TS2322: Type 'string' is not assignable to type 'number'.
+32     created: new Date().toISOString(),
+       ~~~~~~~
+  src/models/types.ts:51:3
+    51   created: number; // Creation timestamp
+         ~~~~~~~
+    The expected type comes from property 'created' which is declared here on type 'NetworkMetadata'
+src/test-simulation.ts:33:5 - error TS2322: Type 'string' is not assignable to type 'number'.
+33     modified: new Date().toISOString()
+       ~~~~~~~~
+  src/models/types.ts:52:3
+    52   modified: number; // Last modification timestamp
+         ~~~~~~~~
+    The expected type comes from property 'modified' which is declared here on type 'NetworkMetadata'
+```
+
+**Cause:**
+In the `test-simulation.ts` file, the metadata creation and modification timestamps were set using `new Date().toISOString()`, which returns a string. However, the `NetworkMetadata` interface in `types.ts` defines these properties as number types, expecting a numeric timestamp (milliseconds since epoch).
+
+**Fix:**
+Updated the test-simulation.ts file to use `Date.now()` instead of `new Date().toISOString()` for the timestamp values:
+
+```typescript
+// In test-simulation.ts
+metadata: {
+  name: 'Test Network',
+  description: 'A simple test network for simulation testing',
+  type: 'custom',
+  created: Date.now(),
+  modified: Date.now()
+}
+```
+
+**Affected Files:**
+- src/test-simulation.ts
+
+## 2025-04-12 15:15 IST - Large JavaScript Bundle Size
+
+**File:** `vite.config.ts`
+
+**Error Message:**
+Not an error per se, but a build output showing a large bundle size:
+```
+dist/assets/index-DZtH3AUD.js   1,062.35 kB │ gzip: 320.84 kB
+```
+
+**Cause:**
+The Vite build was producing a single large JavaScript bundle that included all application code and third-party dependencies. This was due to:
+1. No chunk splitting configuration in vite.config.ts
+2. All dependencies being bundled together with application code
+3. Default Vite settings prioritizing simplicity over optimization
+
+**Fix:**
+Enhanced the Vite configuration to implement chunk splitting and optimize the build:
+
+1. **Added chunk splitting for node_modules**:
+   - Implemented a manualChunks function to separate vendor code
+   - Created dedicated chunks for major libraries (React, Cytoscape)
+   - Used a general vendor chunk for other dependencies
+
+2. **Added build optimization settings**:
+   - Enabled cssCodeSplit for CSS code splitting
+   - Set target to 'esnext' for better modern browser support
+   - Increased the chunkSizeWarningLimit for clarity
+
+```typescript
+// Updated vite.config.ts
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
+  },
+  build: {
+    cssCodeSplit: true,
+    target: 'esnext',
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('three')) return 'vendor-three';
+            if (id.includes('cytoscape')) return 'vendor-cytoscape';
+            if (id.includes('react')) return 'vendor-react';
+            return 'vendor';
+          }
+        }
+      }
+    }
+  }
+});
+```
+
+**Results:**
+The build output was optimized from a single large bundle to multiple smaller chunks:
+```
+dist/assets/index-CLPTADY8.js             182.60 kB │ gzip:  41.21 kB
+dist/assets/vendor-react-CBoPg66P.js      195.20 kB │ gzip:  63.09 kB
+dist/assets/vendor-DtKNf6-K.js            255.76 kB │ gzip:  80.12 kB
+dist/assets/vendor-cytoscape-BPoQaFli.js  425.57 kB │ gzip: 135.68 kB
+```
+
+**Affected Files:**
+- vite.config.ts
+
 ## 2025-04-11 20:15 IST - Simulation Results Panel Not Showing Data
 
 **File:** `src/components/simulation/SimulationResultsPanel.tsx`
