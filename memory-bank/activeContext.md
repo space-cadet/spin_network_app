@@ -1,10 +1,10 @@
 # Spin Network Visualization and Diffusion App - Active Context
 
-*Last Updated: April 11, 2025 (20:45)*
+*Last Updated: April 12, 2025 (20:30)*
 
 ## Current Development Focus
 
-We have successfully implemented the simulation component core infrastructure, fixed the build errors, and improved the UI integration for the simulation capabilities:
+We have successfully implemented the simulation component core infrastructure, fixed the build errors, and enhanced the simulation capabilities with better debugging and visualization:
 
 1. ✅ **Redux State Management**: Implemented Redux for global state management
 2. ✅ **Network Operations**: Implemented UI-based node/edge creation and deletion
@@ -19,28 +19,37 @@ We have successfully implemented the simulation component core infrastructure, f
 11. ✅ **Simulation Logging System**: Implemented comprehensive logging with UI
 12. ✅ **UI Improvements**: Implemented collapsible simulation panel with improved tab interface
 13. ✅ **Simulation Test Infrastructure**: Implemented standalone test page and fixed simulation test
-14. 🔄 **Simulation Results and Visualization**: Enhanced simulation results panel with real data display
-14. ⬜ **Advanced Simulation Analysis**: Adding more in-depth analysis and visualization of simulation results
+14. ✅ **Simulation Results and Visualization**: Enhanced simulation results panel with real data display
+15. ✅ **Debug Tools**: Created dedicated debug panel with auto-refresh capability
+16. 🔄 **Advanced Simulation Analysis**: Adding more in-depth analysis and visualization of simulation results
 
 ## Recent Changes
 
-### Simulation Results Panel Enhancement
-We've successfully enhanced the simulation results panel to display real data:
-- Connected the panel to actual analysis modules rather than using mock data
-- Added imports for SpinNetworkGeometryCalculator and SimulationAnalyzer
-- Implemented state for geometric and statistical data
-- Enhanced the useSimulation hook with new methods:
-  - Added getGraph() to expose the simulation graph
-  - Added getCurrentState() to expose the current state vector
-- Added real-time calculation of key metrics:
-  - Geometric properties (volume, area, dimension, entropy)
-  - Statistical properties (mean, variance, etc.)
-  - Conservation laws (probability, positivity)
-- Enhanced refresh mechanism for more responsive updates
-- Added extensive debugging to trace data flow issues
-- Improved display formatting with proper precision
-- Added robustness with comprehensive error handling
-- Implemented multiple data sources to determine if data is available
+### Simulation Debug Tools Enhancement
+We've successfully added dedicated debugging tools and enhanced the simulation state management:
+- Created a separate SimulationDebugPanel component as a third tab in the bottom panel
+- Implemented auto-refresh capability with manual and interval-based options
+- Added detailed raw data display for simulation state, graph, and conservation laws
+- Enhanced error handling and fallback displays when visualizations fail
+- Converted hasHistory to useState in SimulationResultsPanel for better state management
+- Improved null-safe evaluations in simulation logs data checks
+- Added explicit return type to getDuration in useSimulation fallback
+- Implemented dual refresh mechanism combining animation frames and intervals
+- Fixed animation loop to check both React state and engine internal state
+- Added proper cancelAnimationFrame calls in pause handler for immediate animation stop
+- Improved synchronization between React state and engine running state
+- Enhanced cleanup to avoid memory leaks during component unmount
+
+### Simulation Results Stability Improvements
+We've enhanced the reliability and robustness of the simulation results display:
+- Added comprehensive data validation before attempting to render charts
+- Created text-based fallback displays when visualizations cannot render
+- Improved dependency tracking in simulation hooks to prevent unnecessary rerenders
+- Added specialized RawDataDisplay component for consistent data presentation
+- Enhanced error logging and debugging throughout the visualization pipeline
+- Implemented better detection of simulation availability and state changes
+- Added fallback mechanisms to retrieve data from simulation logs when direct access fails
+- Implemented force update buttons for manual refresh when needed
 
 ### Simulation Test Infrastructure Enhancement
 We fixed the simulation test framework and resolved execution errors:
@@ -168,20 +177,27 @@ We're addressing event binding issues with Cytoscape in TypeScript:
    - Updated tests to use current API and proper types
    - Successfully ran tests with proper execution
 
-3. **Complete Simulation Results Panel** 🔄:
+3. **Complete Simulation Results Panel** ✅:
    - Fixed results panel to display actual data from analysis modules
    - Added getGraph and getCurrentState methods to useSimulation hook
    - Enhanced refresh mechanism for real-time updates
    - Added robust error handling and debugging
    - Improved display of numerical values
 
-4. **Simulation Results Analysis** 🔄:
+4. **Add Debug Tools** ✅:
+   - Created dedicated SimulationDebugPanel component
+   - Implemented auto-refresh capability with toggle controls
+   - Added raw data display for simulation state inspection
+   - Enhanced error logging and debugging
+   - Improved user experience with better diagnostic tools
+
+5. **Simulation Results Analysis** 🔄:
    - Create charts and graphs for simulation data visualization
    - Implement time-series plots of key simulation metrics
    - Add visual indicators for conservation law violations
    - Create histograms for state distribution analysis
 
-5. **Complete Simulation Feature** ⬜:
+6. **Complete Simulation Feature** 🔄:
    - Add simulation presets for common scenarios
    - Implement parameter saving/loading
    - Create comprehensive help documentation
