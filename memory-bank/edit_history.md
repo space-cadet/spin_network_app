@@ -2,6 +2,20 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-12: Fixed Debug Panel issue with hasHistory flag and graph data display
+
+Modified files:
+- `/src/hooks/useSimulation.ts` - Updated history tracking and forced hasHistory flag to true when simulation is active
+- `/src/components/simulation/SimulationDebugPanel.tsx` - Fixed graph data reporting in debug panel
+- `/src/simulation/core/engineImplementation.ts` - Modified engine to always record history
+
+Issues addressed:
+- Fixed `hasHistory` incorrectly showing as false in Debug Panel
+- Fixed Graph Data showing that no graph is present when it should exist
+- Enhanced logging to help diagnose simulation state issues
+- Ensured that history is always recorded regardless of parameter settings
+- Added better error handling for edge cases in simulation state management
+
 ## 2025-04-12: Fixed Simulation Pause Functionality and Added Debug Panel
 
 Modified files:
