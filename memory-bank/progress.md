@@ -115,7 +115,19 @@
 
 ## Recent Achievements
 
-1. **Debug Panel Status Fixes** ✅:
+1. **Simulation Results Calculation Fix** ✅:
+   - Fixed issue with zero values in Geometric and Statistics tabs
+   - Enhanced createInitialState method with better validation and logging
+   - Added verification steps to ensure state values are set correctly
+   - Implemented emergency fallbacks for state initialization
+   - Enhanced test-simulation.js to calculate geometric properties
+   - Updated test-simulation.html to show simulation metrics for debugging
+   - Added detailed logging in state vector initialization process
+   - Improved robustness of state vector creation
+   - Added validation before setting state on diffusion model
+   - Enhanced error handling throughout the simulation initialization process
+
+2. **Debug Panel Status Fixes** ✅:
    - Fixed `hasHistory` flag incorrectly showing as false in Debug Panel
    - Fixed Graph Data showing that no graph exists when it should be present
    - Modified useSimulation to always set hasHistory to true when active

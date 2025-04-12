@@ -2,6 +2,23 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-12: Fixed Zero Values in Simulation Results Panels
+
+Modified files:
+- `/src/simulation/core/engineImplementation.ts` - Enhanced createInitialState method with better validation and logging
+- `/src/test-simulation.js` - Added geometric properties calculation and updated to expose key references
+- `/public/test-simulation.html` - Enhanced with results panel to show geometric and statistical metrics
+
+Issues addressed:
+- Fixed issue with Geometric and Statistics tabs showing zero values
+- Added verification steps to ensure state values are set correctly
+- Implemented emergency fallbacks for state initialization
+- Added detailed logging in state vector initialization process
+- Added validation before setting state on diffusion model
+- Enhanced error handling throughout the simulation process
+- Updated test framework to display and verify geometric and statistical metrics
+- Modified test-simulation.html to provide better debugging capabilities
+
 ## 2025-04-12: Fixed Debug Panel issue with hasHistory flag and graph data display
 
 Modified files:

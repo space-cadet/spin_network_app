@@ -25,6 +25,18 @@ We have successfully implemented the simulation component core infrastructure, f
 
 ## Recent Changes
 
+### Simulation Results Calculation Fix
+We've fixed the issue with zero values in Geometric and Statistics tabs:
+- Enhanced createInitialState method with better validation and logging
+- Added verification steps to ensure state values are set correctly
+- Implemented emergency fallbacks for state initialization
+- Enhanced test-simulation.js to calculate and display geometric properties
+- Updated test-simulation.html to show simulation metrics for debugging
+- Added detailed logging in state vector initialization process 
+- Improved robustness of state vector creation
+- Added validation before setting state on diffusion model
+- Enhanced error handling throughout the simulation initialization process
+
 ### Debug Panel Status Display Fixes
 We've successfully resolved issues with the Debug Panel status display:
 - Fixed `hasHistory` flag always showing as false in the Debug Panel
