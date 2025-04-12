@@ -1,5 +1,95 @@
 # Error Log
 
+## 2025-04-12 16:45 IST - Simulation Pause Functionality Not Working
+
+**File:** `src/hooks/useSimulation.ts`, `src/components/panels/SimulationControlPanel.tsx`
+
+**Error Message:**
+No explicit error message was logged, but the pause button did not stop the simulation from running. Clicking pause would update the UI state but the simulation would continue to advance.
+
+**Cause:**
+Multiple issues in the animation loop and pause handling:
+1. The animation loop was only checking the React state (`isRunning`) and not the engine's internal state
+2. The pauseSimulation function didn't properly cancel the animation frame
+3. There was a race condition where the engine state and React state could get out of sync
+4. The animation loop was scheduling the next frame regardless of state changes during execution
+
+**Fix:**
+Implemented a comprehensive solution:
+
+1. **Enhanced Animation Loop**:
+   - Modified the animation loop to check both React state and engine internal state
+   - Added extra checks before scheduling the next animation frame
+   - Added more robust error handling inside the animation loop
+   - Improved logging to track animation frame scheduling and cancellation
+
+2. **Fixed Pause Function**:
+   - Updated pauseSimulation to explicitly cancel any pending animation frames
+   - Added proper synchronization between engine state and React state
+   - Enhanced logging to verify pause operation
+   - Added state checks to ensure consistent behavior
+
+3. **Improved State Management**:
+   - Added proper cleanup for animation frames in useEffect cleanup functions
+   - Ensured proper synchronization between the engine's internal running state and React's isRunning state
+   - Fixed state initialization and cleanup to prevent memory leaks
+
+**Key Code Changes:**
+```typescript
+// Animation loop with improved state checking
+const animationLoop = useCallback(() => {
+  // Check both internal (engine) and external (React state) running flags
+  if (engineRef.current && engineRef.current.isRunning() && isRunning) {
+    // Step the simulation
+    try {
+      engineRef.current.step();
+      // Processing logic...
+      
+      // Only schedule next frame if still running
+      if (engineRef.current.isRunning() && isRunning) {
+        animationFrameRef.current = requestAnimationFrame(animationLoop);
+      } else {
+        console.log("Animation stopped due to running state change");
+        animationFrameRef.current = null;
+      }
+    } catch (error) {
+      console.error("Error in simulation step:", error);
+      // Still schedule next frame to ensure animation doesn't stop on error
+      if (engineRef.current.isRunning() && isRunning) {
+        animationFrameRef.current = requestAnimationFrame(animationLoop);
+      }
+    }
+  }
+}, [isRunning, parameters.timeStep]);
+
+// Fixed pause function
+const pauseSimulation = useCallback(() => {
+  if (engineRef.current) {
+    console.log("Pausing simulation - canceling animation frame");
+    
+    // Cancel any pending animation frame first
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    // Update engine state
+    engineRef.current.pause();
+    
+    // Update React state
+    setIsRunning(false);
+    
+    // Log simulation pause
+    simulationLogger.log('info', 'Simulation paused', {
+      time: engineRef.current.getCurrentTime()
+    }, engineRef.current.getCurrentTime());
+  }
+}, []);
+```
+
+**Affected Files:**
+- src/hooks/useSimulation.ts
+
 ## 2025-04-12 14:30 IST - TypeScript Build Errors in test-simulation.ts
 
 **File:** `src/test-simulation.ts`

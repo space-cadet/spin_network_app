@@ -2,6 +2,26 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-12: Fixed Simulation Pause Functionality and Added Debug Panel
+
+Modified files:
+- `/src/hooks/useSimulation.ts` - Fixed pause functionality and animation loop issues
+- `/src/components/simulation/SimulationDebugPanel.tsx` - Added new debug panel component
+- `/src/components/simulation/SimulationResultsPanel.tsx` - Removed embedded debug view
+- `/src/components/simulation/RawDataDisplay.tsx` - Added component for displaying raw data when visualizations fail
+- `/src/components/simulation/index.ts` - Added export for new debug components
+- `/src/App.tsx` - Added debug panel as a separate tab option
+
+Issues addressed:
+- Fixed simulation pause button not actually stopping the simulation
+- Fixed animation loop continuing to run after pause was clicked
+- Added dedicated debug panel for better separation of concerns
+- Improved error handling in the animation loop
+- Added better synchronization between React state and engine state
+- Enhanced logging for simulation state transitions
+- Added raw data display components for fallback when visualizations fail
+- Improved user experience by separating diagnostic tools from regular results view
+
 ## 2025-04-11: Fixed Simulation Test and Simulation Results Panel
 
 Modified files:
