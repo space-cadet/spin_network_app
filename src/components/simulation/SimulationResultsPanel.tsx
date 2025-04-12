@@ -4,6 +4,7 @@ import CollapsibleSection from '../common/CollapsibleSection';
 import { useSimulation } from '../../hooks/useSimulation';
 import { SpinNetworkGeometryCalculator } from '../../simulation/analysis/geometricProps';
 import { SimulationAnalyzer } from '../../simulation/analysis/statistics';
+import { simulationLogger } from '../../simulation/core/simulationLogger';
 import RawDataDisplay from './RawDataDisplay';
 
 const SimulationResultsPanel: React.FC = () => {
@@ -97,16 +98,52 @@ const SimulationResultsPanel: React.FC = () => {
     }, 100);
   }, []);
   
-  // Get conservation data from simulation
-  const conservationData = simulation.getConservationLaws 
-    ? simulation.getConservationLaws() 
-    : {
+  // Get conservation data from simulation with better fallback handling
+  const conservationData = (() => {
+    try {
+      // First try to get data directly from simulation engine
+      if (simulation && simulation.getConservationLaws) {
+        const data = simulation.getConservationLaws();
+        
+        // Check if we actually got valid data
+        if (data && typeof data.totalProbability === 'number' && data.totalProbability > 0) {
+          console.log("Got valid conservation data from simulation:", data);
+          return data;
+        } else {
+          console.warn("Conservation data from simulation was invalid:", data);
+        }
+      }
+      
+      // Try to get data from simulation logs as a fallback
+      // This is especially useful after a simulation has finished running
+      const simulationLogs = simulationLogger.getCurrentSession();
+      if (simulationLogs && simulationLogs.results.length > 0) {
+        // Get the most recent result
+        const latestResult = simulationLogs.results[simulationLogs.results.length - 1];
+        
+        if (latestResult && latestResult.conservation) {
+          console.log("Using conservation data from logs:", latestResult.conservation);
+          return latestResult.conservation;
+        }
+      }
+      
+      console.warn("Could not get valid conservation data from any source");
+      return {
         totalProbability: 0,
         positivity: false,
         normVariation: 0,
       };
+    } catch (error) {
+      console.error("Error getting conservation data:", error);
+      return {
+        totalProbability: 0,
+        positivity: false,
+        normVariation: 0,
+      };
+    }
+  })();
   
-  // Helper function to safely update analysis data
+  // Enhanced helper function to safely update analysis data with fallbacks
   const updateAnalysisData = () => {
     if (!simulation) {
       console.warn("updateAnalysisData called with no simulation object");
@@ -128,19 +165,57 @@ const SimulationResultsPanel: React.FC = () => {
         simulationTime: simulation.currentTime
       });
       
-      // Validate data is usable
-      if (!currentState || !graph) {
-        console.warn("Missing state or graph for analysis calculations");
-        return;
-      }
-      
-      if (currentState.size === 0) {
-        console.warn("Current state has zero size, skipping analysis");
-        return;
-      }
-      
-      if (graph.nodes.length === 0) {
-        console.warn("Graph has zero nodes, skipping analysis");
+      // CRITICAL FIX: Check logs for data when simulation state is missing
+      if (!currentState || !graph || currentState.size === 0 || graph.nodes.length === 0) {
+        console.warn("Missing or invalid simulation data, checking logs as fallback");
+        
+        // Try to get data from logs
+        const logsSession = simulationLogger.getCurrentSession();
+        if (logsSession && logsSession.results.length > 0) {
+          // Get the most recent result
+          const latestResult = logsSession.results[logsSession.results.length - 1];
+          
+          // Update conservation data from logs
+          if (latestResult.conservation) {
+            console.log("Using log data for analysis:", latestResult);
+            
+            // Directly update geometric data from logs if available
+            if (latestResult.geometric) {
+              setGeometricData({
+                totalVolume: latestResult.geometric.totalVolume || 0,
+                volumeEntropy: latestResult.geometric.volumeEntropy || 0,
+                totalArea: latestResult.geometric.totalArea || 0,
+                effectiveDimension: latestResult.geometric.effectiveDimension || 0
+              });
+              console.log("Updated geometric data from logs");
+            }
+            
+            // Update statistics from logs if available
+            if (latestResult.statistics) {
+              setStatisticsData({
+                mean: latestResult.statistics.mean || 0,
+                variance: latestResult.statistics.variance || 0,
+                skewness: latestResult.statistics.skewness || 0,
+                kurtosis: latestResult.statistics.kurtosis || 0
+              });
+              console.log("Updated statistics data from logs");
+            }
+            
+            // Force hasHistory to true since we have log data
+            if (simulation && typeof simulation.getHistory === 'function') {
+              const history = simulation.getHistory();
+              if (history && typeof history.getTimes === 'function') {
+                const times = history.getTimes();
+                setHasHistory(times.length > 0);
+              }
+            }
+            
+            return; // Exit early, we've updated from logs
+          }
+        }
+        
+        // If we get here, we couldn't get data from logs either
+        console.warn("No valid data available from simulation or logs");
         return;
       }
       
@@ -324,10 +399,35 @@ const SimulationResultsPanel: React.FC = () => {
     };
   }, [isRunning, hasHistory, simulation]);
 
-  // Check if we have any meaningful data to display
-  const hasAnyData = isRunning || hasHistory || 
-                    (conservationData && conservationData.totalProbability > 0) ||
-                    geometricData.totalVolume > 0;
+  // Enhanced data availability detection
+  const hasAnyData = (() => {
+    // Check multiple sources of data
+    const fromRunningState = isRunning;
+    const fromHistoryFlag = hasHistory;
+    const fromConservationData = conservationData && conservationData.totalProbability > 0;
+    const fromGeometricData = geometricData.totalVolume > 0;
+    const fromStatisticsData = statisticsData.mean !== 0 || statisticsData.variance !== 0;
+    
+    // Check logs as a fallback
+    const logsSession = simulationLogger.getCurrentSession();
+    const fromLogs = logsSession && logsSession.results.length > 0;
+    
+    // Detailed logging of data sources
+    console.log("Data source check:", {
+      fromRunningState,
+      fromHistoryFlag,
+      fromConservationData,
+      fromGeometricData,
+      fromStatisticsData,
+      fromLogs,
+      conservationData,
+      hasHistory,
+      isRunning
+    });
+    
+    return fromRunningState || fromHistoryFlag || fromConservationData || 
+           fromGeometricData || fromStatisticsData || fromLogs;
+  })();
   
   console.log("SimulationResultsPanel render:", { 
     hasAnyData, 
@@ -335,7 +435,8 @@ const SimulationResultsPanel: React.FC = () => {
     hasHistory, 
     conservationData,
     geometricData,
-    statisticsData
+    statisticsData,
+    hasLogsData: simulationLogger.getCurrentSession()?.results.length > 0
   });
 
   // No longer need to import debug view here since we have a dedicated panel

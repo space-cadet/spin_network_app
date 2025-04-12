@@ -123,7 +123,7 @@ export const useSimulation = () => {
     };
   }, []);
   
-  // Animation loop for updating simulation
+  // Enhanced animation loop for updating simulation
   const animationLoop = useCallback(() => {
     // Check both internal (engine) and external (React state) running flags
     if (engineRef.current && engineRef.current.isRunning() && isRunning) {
@@ -139,9 +139,28 @@ export const useSimulation = () => {
         // Update current time
         setCurrentTime(currentTime);
         
-        // Check if history is available
-        if (engineRef.current.getHistory().getTimes().length > 0) {
+        // Check if history is available - CRITICAL FIX
+        const history = engineRef.current.getHistory();
+        const times = history.getTimes();
+        
+        // Important: Update hasHistory whenever we have any timepoints
+        if (times.length > 0) {
+          console.log("History available:", times.length, "timepoints");
           setHasHistory(true);
+        }
+        
+        // Check if we have valid state data - CRITICAL FIX
+        const state = engineRef.current.getCurrentState();
+        if (!state || state.size === 0) {
+          console.warn("Animation loop: Current state is empty or invalid");
+        } else {
+          // Log state size and sample value
+          if (state.size > 0) {
+            console.log("State data:", {
+              size: state.size,
+              firstNodeValue: state.getValueAtIndex(0)
+            });
+          }
         }
         
         // Get and log conservation laws for every step
@@ -342,7 +361,7 @@ export const useSimulation = () => {
     return true; // Current node ID is valid
   }, []);
 
-  // Start simulation
+  // Enhanced start simulation with better error handling and state validation
   const startSimulation = useCallback(() => {
     if (!engineRef.current || !graphRef.current) {
       console.error("Cannot start simulation: engine or graph is null");
@@ -352,7 +371,14 @@ export const useSimulation = () => {
     }
     
     try {
-      console.log("Starting simulation, graph:", graphRef.current.nodes.length, "nodes");
+      // Important debug information
+      const graphNodeCount = graphRef.current.nodes.length;
+      console.log("Starting simulation, graph:", graphNodeCount, "nodes");
+      
+      if (graphNodeCount === 0) {
+        console.error("Cannot start simulation with empty graph (0 nodes)");
+        return;
+      }
       
       // Validate that the nodeId exists in the network
       const nodeIdValidation = validateNodeId(network, parameters);
@@ -383,11 +409,33 @@ export const useSimulation = () => {
         }
       }
       
+      // Force history recording - CRITICAL FIX
+      const enhancedParameters = {
+        ...parameters,
+        recordHistory: true,
+        historyInterval: 1 // Record every step for better analysis
+      };
+      
       // Only proceed if the nodeId is valid
       // (nodeIdValidation === true means the node ID is valid)
       {
+        console.log("Initializing engine with parameters:", enhancedParameters);
+        
         // Initialize engine if not already done
-        engineRef.current.initialize(graphRef.current, parameters);
+        engineRef.current.initialize(graphRef.current, enhancedParameters);
+        
+        // Force a check of initial state
+        const initialState = engineRef.current.getCurrentState();
+        console.log("Initial state after initialization:", {
+          exists: !!initialState,
+          size: initialState ? initialState.size : 0,
+          nodeIds: initialState ? initialState.nodeIds.slice(0, 3) : []
+        });
+        
+        if (!initialState || initialState.size === 0) {
+          console.error("Failed to create valid initial state");
+          return;
+        }
         
         // Log simulation start
         if (network) {
@@ -396,15 +444,15 @@ export const useSimulation = () => {
             edgeCount: network.edges?.length || 0,
             name: network.metadata?.name,
             type: network.metadata?.type
-          }, parameters);
+          }, enhancedParameters);
           
           simulationLogger.log('info', 'Simulation started', {
             networkSize: network.nodes?.length || 0,
-            parameters
+            parameters: enhancedParameters
           });
         }
         
-        console.log("Using initial node:", parameters.initialStateParams.nodeId);
+        console.log("Using initial node:", enhancedParameters.initialStateParams.nodeId);
         
         // Start simulation
         engineRef.current.resume();
@@ -416,7 +464,20 @@ export const useSimulation = () => {
           const newTime = engineRef.current.getCurrentTime();
           console.log("First step completed, new time:", newTime);
           setCurrentTime(newTime);
-          setHasHistory(true);
+          
+          // CRITICAL: Explicitly set hasHistory after first step
+          const history = engineRef.current.getHistory();
+          const times = history.getTimes();
+          setHasHistory(times.length > 0);
+          
+          console.log("History after first step:", {
+            hasTimes: times.length > 0,
+            timePoints: times
+          });
+          
+          // Also check conservation laws to see if they've been computed
+          const conservation = engineRef.current.getConservationLaws();
+          console.log("Conservation laws after first step:", conservation);
         } catch (error) {
           console.error("Error during first step:", error);
         }
@@ -542,12 +603,51 @@ export const useSimulation = () => {
     return graphRef.current;
   }, []);
 
-  // Get the current state directly
+  // Get the current state directly with improved error handling
   const getCurrentState = useCallback(() => {
-    if (engineRef.current) {
-      return engineRef.current.getCurrentState();
+    try {
+      if (engineRef.current) {
+        // Always get a fresh state to ensure we have the latest
+        const state = engineRef.current.getCurrentState();
+        
+        // Validate state has data
+        if (state && state.size > 0) {
+          return state;
+        } else {
+          console.warn("getCurrentState: State exists but has no data");
+        }
+      } else {
+        console.warn("getCurrentState: No engine reference available");
+      }
+    } catch (error) {
+      console.error("Error in getCurrentState:", error);
     }
     return null;
+  }, []);
+  
+  // Get the simulation history with better handling
+  const getHistory = useCallback(() => {
+    try {
+      if (engineRef.current) {
+        const history = engineRef.current.getHistory();
+        // Check if history has any timepoints
+        const times = history.getTimes();
+        setHasHistory(times.length > 0);
+        return history;
+      } else {
+        console.warn("getHistory: No engine reference available");
+      }
+    } catch (error) {
+      console.error("Error in getHistory:", error);
+    }
+    return {
+      getTimes: () => [],
+      getStateAtTime: () => null,
+      getClosestState: () => null,
+      addState: () => {},
+      clear: () => {},
+      getDuration: () => 0
+    };
   }, []);
 
   return {
@@ -565,6 +665,7 @@ export const useSimulation = () => {
     getVisualizationState,
     getConservationLaws,
     getGraph,
-    getCurrentState
+    getCurrentState,
+    getHistory  // Add history getter
   };
 };
