@@ -646,7 +646,7 @@ export const useSimulation = () => {
       getClosestState: () => null,
       addState: () => {},
       clear: () => {},
-      getDuration: () => 0
+      getDuration: (): number => 0
     };
   }, []);
 

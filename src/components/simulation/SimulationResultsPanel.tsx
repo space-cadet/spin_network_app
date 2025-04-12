@@ -11,7 +11,7 @@ const SimulationResultsPanel: React.FC = () => {
   // Handle undefined values from useSimulation gracefully
   const simulation = useSimulation();
   const currentTime = simulation?.currentTime || 0;
-  const hasHistory = simulation?.hasHistory || false;
+  const [hasHistory, setHasHistory] = useState(simulation?.hasHistory || false);
   const isRunning = simulation?.isRunning || false;
   
   // Enhanced logging to debug simulation data flow
@@ -429,14 +429,18 @@ const SimulationResultsPanel: React.FC = () => {
            fromGeometricData || fromStatisticsData || fromLogs;
   })();
   
-  console.log("SimulationResultsPanel render:", { 
-    hasAnyData, 
-    isRunning, 
-    hasHistory, 
+  console.log("SimulationResultsPanel render:", {
+    hasAnyData,
+    isRunning,
+    hasHistory,
     conservationData,
     geometricData,
     statisticsData,
-    hasLogsData: simulationLogger.getCurrentSession()?.results.length > 0
+    hasLogsData: (() => {
+      const session = simulationLogger.getCurrentSession();
+      const results = session?.results;
+      return results && results.length > 0;
+    })()
   });
 
   // No longer need to import debug view here since we have a dedicated panel
