@@ -3,7 +3,7 @@ import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
 import NetworkTools from './components/tools/NetworkTools'
 import { PropertiesPanel, TypeManagementPanel, SimulationControlPanel } from './components/panels'
-import { SimulationResultsPanel, SimulationLogsPanel } from './components/simulation'
+import { SimulationResultsPanel, SimulationLogsPanel, SimulationDebugPanel } from './components/simulation'
 import PersistentResizablePanel from './components/common/PersistentResizablePanel'
 import PersistenceStatus from './components/common/PersistenceStatus'
 import SidebarToggle from './components/common/SidebarToggle'
@@ -22,7 +22,7 @@ function App() {
   const bottomSidebarVisible = useSelector(selectBottomSidebarVisible);
   
   // State for bottom panel tabs
-  const [bottomPanelTab, setBottomPanelTab] = useState<'results' | 'logs'>('results');
+  const [bottomPanelTab, setBottomPanelTab] = useState<'results' | 'logs' | 'debug'>('results');
   
   return (
     <ThemeProvider>
@@ -81,7 +81,7 @@ function App() {
                   handlePosition="start"
                 >
                   <div className="h-full overflow-y-auto">
-                    {/* Tabs for Results and Logs */}
+                    {/* Tabs for Results, Logs, and Debug */}
                     <div className="border-b border-gray-200">
                       <div className="flex">
                         <button
@@ -104,14 +104,26 @@ function App() {
                         >
                           Simulation Logs
                         </button>
+                        <button
+                          className={`px-4 py-2 text-sm font-medium ${
+                            bottomPanelTab === 'debug' 
+                              ? 'border-b-2 border-blue-500 text-blue-600' 
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                          onClick={() => setBottomPanelTab('debug')}
+                        >
+                          Debug Panel
+                        </button>
                       </div>
                     </div>
                     
                     {/* Tab content */}
                     {bottomPanelTab === 'results' ? (
                       <SimulationResultsPanel />
-                    ) : (
+                    ) : bottomPanelTab === 'logs' ? (
                       <SimulationLogsPanel />
+                    ) : (
+                      <SimulationDebugPanel />
                     )}
                   </div>
                 </PersistentResizablePanel>

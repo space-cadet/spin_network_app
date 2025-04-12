@@ -277,11 +277,7 @@ const SimulationResultsPanel: React.FC = () => {
     statisticsData
   });
 
-  // Import the debug view
-  const SimulationDebugView = React.lazy(() => import('./SimulationDebugView'));
-  
-  // State to control showing debug view
-  const [showDebugView, setShowDebugView] = useState(false);
+  // No longer need to import debug view here since we have a dedicated panel
   
   if (!hasAnyData) {
     return (
@@ -289,23 +285,7 @@ const SimulationResultsPanel: React.FC = () => {
         <FaChartLine className="mx-auto mb-3 text-3xl" />
         <p>Run simulation to see results</p>
         <p className="text-sm">Analysis will appear here after simulation starts</p>
-        
-        {/* Developer debug button */}
-        <button 
-          className="mt-4 px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-          onClick={() => setShowDebugView(!showDebugView)}
-        >
-          {showDebugView ? "Hide Debug Data" : "Show Debug Data"}
-        </button>
-        
-        {/* Show debug view if enabled */}
-        {showDebugView && (
-          <React.Suspense fallback={<div>Loading debug view...</div>}>
-            <div className="mt-4">
-              <SimulationDebugView />
-            </div>
-          </React.Suspense>
-        )}
+        <p className="text-xs mt-4">For detailed diagnostic information, check the Debug Panel tab</p>
       </div>
     );
   }
@@ -314,25 +294,8 @@ const SimulationResultsPanel: React.FC = () => {
     <div className="simulation-results-panel p-4 overflow-y-auto h-full">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium">Simulation Results</h3>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm font-mono">t={currentTime.toFixed(2)}</span>
-          
-          {/* Developer debug toggle button */}
-          <button 
-            className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-            onClick={() => setShowDebugView(!showDebugView)}
-          >
-            {showDebugView ? "Hide Debug" : "Debug"}
-          </button>
-        </div>
+        <span className="text-sm font-mono">t={currentTime.toFixed(2)}</span>
       </div>
-      
-      {/* Show debug view if enabled */}
-      {showDebugView && (
-        <React.Suspense fallback={<div>Loading debug view...</div>}>
-          <SimulationDebugView />
-        </React.Suspense>
-      )}
       
       <div className="flex space-x-2 mb-4">
         <button
