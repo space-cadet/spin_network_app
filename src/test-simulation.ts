@@ -29,8 +29,8 @@ const testNetwork: SpinNetwork = {
     name: 'Test Network',
     description: 'A simple test network for simulation testing',
     type: 'custom',
-    created: new Date().toISOString(),
-    modified: new Date().toISOString()
+    created: Date.now(),
+    modified: Date.now()
   }
 };
 
