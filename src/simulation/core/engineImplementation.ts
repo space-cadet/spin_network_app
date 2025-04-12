@@ -457,7 +457,10 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
    * Get conservation laws for the current state
    */
   getConservationLaws() {
+    console.log("Getting conservation laws...");
+    
     if (!this.state) {
+      console.warn("Cannot get conservation laws: state is null");
       return {
         totalProbability: 0,
         normVariation: 0,
@@ -465,33 +468,70 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       };
     }
 
-    // Use the ProbabilityConservation checker
-    const conservationChecker = new ProbabilityConservation();
-    
-    // Get the initial probability if available
-    const initialProbability = this.initialState ?
-      conservationChecker.getDeviation(this.initialState, this.initialState) : 0.0;
-
-    // Calculate current probability
-    const currentProbability = this.state && this.initialState ?
-      conservationChecker.getDeviation(this.initialState, this.state) : 0.0;
-    
-    // Calculate the variation
-    const normVariation = Math.abs(currentProbability - initialProbability);
-    
-    // Check positivity
-    let positivity = true;
-    for (const nodeId of this.state.nodeIds) {
-      if (this.state.getValue(nodeId) < 0) {
-        positivity = false;
-        break;
-      }
+    if (!this.initialState) {
+      console.warn("Cannot get conservation laws: initialState is null");
+      return {
+        totalProbability: 0,
+        normVariation: 0,
+        positivity: false,
+      };
     }
-    
-    return {
-      totalProbability: currentProbability,
-      normVariation,
-      positivity,
-    };
+
+    try {
+      // Calculate L2 norm (sqrt of sum of squares) instead of deviation
+      let initialNorm = 0;
+      let currentNorm = 0;
+      
+      // Calculate norms directly
+      for (let i = 0; i < this.state.size; i++) {
+        const initialValue = this.initialState.getValueAtIndex(i);
+        const currentValue = this.state.getValueAtIndex(i);
+        
+        initialNorm += initialValue * initialValue;
+        currentNorm += currentValue * currentValue;
+      }
+      
+      // Take square root to get actual norms
+      initialNorm = Math.sqrt(initialNorm);
+      currentNorm = Math.sqrt(currentNorm);
+      
+      console.log("Conservation calculation:", {
+        initialNorm,
+        currentNorm,
+        stateSize: this.state.size
+      });
+      
+      // Calculate the variation
+      const normVariation = Math.abs(currentNorm - initialNorm) / 
+                           (initialNorm > 1e-10 ? initialNorm : 1.0);
+      
+      // Check positivity
+      let positivity = true;
+      for (let i = 0; i < this.state.size; i++) {
+        if (this.state.getValueAtIndex(i) < -1e-10) {
+          positivity = false;
+          break;
+        }
+      }
+      
+      console.log("Conservation laws calculated:", {
+        totalProbability: currentNorm,
+        normVariation,
+        positivity
+      });
+      
+      return {
+        totalProbability: currentNorm,
+        normVariation,
+        positivity,
+      };
+    } catch (error) {
+      console.error("Error calculating conservation laws:", error);
+      return {
+        totalProbability: 0,
+        normVariation: 0,
+        positivity: false,
+      };
+    }
   }
 }
