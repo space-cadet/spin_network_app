@@ -6,11 +6,17 @@
  * are working correctly.
  */
 
-import { createSimulationEngine, createSimulationGraph, DEFAULT_SIMULATION_PARAMETERS } from './simulation';
+import { 
+  createSimulationEngine, 
+  createSimulationGraph, 
+  DEFAULT_SIMULATION_PARAMETERS,
+  SpinNetworkGeometryCalculator,
+  SimulationAnalyzer
+} from './simulation';
 import { CytoscapeAdapter } from './simulation/visualization/cytoscapeAdapter';
 
-// Create a test network
-const testNetwork = {
+// Create a test network - exported for test-simulation.html
+export const testNetwork = {
   nodes: [
     { id: 'node1', position: { x: 100, y: 100 }, intertwiner: 1, type: 'default' },
     { id: 'node2', position: { x: 200, y: 100 }, intertwiner: 1, type: 'default' },
@@ -39,9 +45,19 @@ const runSimulationTest = () => {
     const graph = createSimulationGraph(testNetwork);
     console.log(`Created simulation graph with ${graph.nodes.length} nodes and ${graph.edges.length} edges`);
     
+    // Store graph reference for external access
+    if (typeof window !== 'undefined') {
+      window.currentGraph = graph;
+    }
+    
     // Create a simulation engine
     const engine = createSimulationEngine();
     console.log('Created simulation engine');
+    
+    // Store engine reference for external access
+    if (typeof window !== 'undefined') {
+      window.currentEngine = engine;
+    }
     
     // Create a Cytoscape adapter for visualization
     const adapter = new CytoscapeAdapter();
@@ -67,6 +83,38 @@ const runSimulationTest = () => {
       value: initialState.getValue(id) 
     })));
     
+    // Create geometry calculator and statistics analyzer
+    const geometryCalculator = new SpinNetworkGeometryCalculator();
+    
+    // Calculate and report initial geometric properties
+    const initialState = engine.getCurrentState();
+    console.log("Calculating initial geometric properties...");
+    
+    // Calculate geometric properties
+    const initialGeometric = {
+      totalVolume: geometryCalculator.calculateTotalVolume(initialState),
+      totalArea: geometryCalculator.calculateTotalArea(graph),
+      effectiveDimension: geometryCalculator.calculateEffectiveDimension(graph, initialState),
+      volumeEntropy: geometryCalculator.calculateVolumeEntropy(initialState)
+    };
+    
+    console.log("Initial geometric properties:", {
+      totalVolume: initialGeometric.totalVolume.toFixed(6),
+      totalArea: initialGeometric.totalArea.toFixed(6),
+      effectiveDimension: initialGeometric.effectiveDimension.toFixed(6),
+      volumeEntropy: initialGeometric.volumeEntropy.toFixed(6)
+    });
+    
+    // Calculate initial statistics
+    const initialStats = SimulationAnalyzer.calculateStatistics(initialState, 0);
+    console.log("Initial statistics:", {
+      mean: initialStats.mean.toFixed(6),
+      variance: initialStats.variance.toFixed(6),
+      standardDeviation: initialStats.standardDeviation.toFixed(6),
+      min: initialStats.min.toFixed(6),
+      max: initialStats.max.toFixed(6)
+    });
+    
     // Step the simulation a few times
     for (let i = 0; i < 5; i++) {
       engine.step();
@@ -82,6 +130,20 @@ const runSimulationTest = () => {
       // Get conservation laws
       const conservation = engine.getConservationLaws();
       console.log(`  Conservation: total=${conservation.totalProbability.toFixed(4)}, norm_var=${conservation.normVariation.toFixed(4)}, pos=${conservation.positivity}`);
+      
+      // Calculate geometric properties
+      const geometric = {
+        totalVolume: geometryCalculator.calculateTotalVolume(state),
+        totalArea: geometryCalculator.calculateTotalArea(graph),
+        effectiveDimension: geometryCalculator.calculateEffectiveDimension(graph, state),
+        volumeEntropy: geometryCalculator.calculateVolumeEntropy(state)
+      };
+      
+      console.log(`  Geometric: volume=${geometric.totalVolume.toFixed(4)}, area=${geometric.totalArea.toFixed(4)}, dimension=${geometric.effectiveDimension.toFixed(4)}, entropy=${geometric.volumeEntropy.toFixed(4)}`);
+      
+      // Calculate statistics
+      const stats = SimulationAnalyzer.calculateStatistics(state, engine.getCurrentTime());
+      console.log(`  Statistics: mean=${stats.mean.toFixed(4)}, variance=${stats.variance.toFixed(4)}, min=${stats.min.toFixed(4)}, max=${stats.max.toFixed(4)}`);
       
       // Create visualization state
       const visualizationState = adapter.createVisualization(graph);

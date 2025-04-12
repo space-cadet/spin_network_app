@@ -51,6 +51,32 @@
   
   <button id="run-test">Run Simulation Test</button>
   
+  <div class="results-panel" style="margin-top: 20px; display: none;">
+    <h2>Simulation Results:</h2>
+    
+    <div style="display: flex; gap: 20px; margin-top: 10px;">
+      <div style="flex: 1; padding: 15px; background-color: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0;">
+        <h3 style="margin-top: 0; color: #1e40af;">Geometric Properties</h3>
+        <div id="geometric-results">
+          <div>Total Volume: <span id="total-volume">0.0000</span></div>
+          <div>Total Area: <span id="total-area">0.0000</span></div>
+          <div>Effective Dimension: <span id="effective-dimension">0.0000</span></div>
+          <div>Volume Entropy: <span id="volume-entropy">0.0000</span></div>
+        </div>
+      </div>
+      
+      <div style="flex: 1; padding: 15px; background-color: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0;">
+        <h3 style="margin-top: 0; color: #1e40af;">Distribution Statistics</h3>
+        <div id="statistics-results">
+          <div>Mean: <span id="mean">0.0000</span></div>
+          <div>Variance: <span id="variance">0.0000</span></div>
+          <div>Skewness: <span id="skewness">0.0000</span></div>
+          <div>Kurtosis: <span id="kurtosis">0.0000</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <div class="output">
     <h2>Console Output:</h2>
     <pre id="console-output"></pre>
@@ -58,11 +84,83 @@
   
   <script type="module">
     import { runSimulationTest } from '../src/test-simulation.js';
+    import { SpinNetworkGeometryCalculator, SimulationAnalyzer } from '../src/simulation/index.js';
+    
+    // DOM elements
+    const consoleOutput = document.getElementById('console-output');
+    const resultsPanel = document.querySelector('.results-panel');
+    
+    // Geometric property elements
+    const totalVolumeElem = document.getElementById('total-volume');
+    const totalAreaElem = document.getElementById('total-area');
+    const effectiveDimensionElem = document.getElementById('effective-dimension');
+    const volumeEntropyElem = document.getElementById('volume-entropy');
+    
+    // Statistics elements
+    const meanElem = document.getElementById('mean');
+    const varianceElem = document.getElementById('variance');
+    const skewnessElem = document.getElementById('skewness');
+    const kurtosisElem = document.getElementById('kurtosis');
+    
+    // Store current engine and graph for accessing from console
+    window.currentEngine = null;
+    window.currentGraph = null;
+    
+    // Function to update the results panel with current data
+    function updateResultsPanel() {
+      if (!window.currentEngine || !window.currentGraph) {
+        console.warn("Cannot update results: engine or graph is null");
+        return;
+      }
+      
+      try {
+        const state = window.currentEngine.getCurrentState();
+        const geometryCalculator = new SpinNetworkGeometryCalculator();
+        
+        // Calculate geometric properties
+        const totalVolume = geometryCalculator.calculateTotalVolume(state);
+        const totalArea = geometryCalculator.calculateTotalArea(window.currentGraph);
+        const effectiveDimension = geometryCalculator.calculateEffectiveDimension(
+          window.currentGraph, state
+        );
+        const volumeEntropy = geometryCalculator.calculateVolumeEntropy(state);
+        
+        // Update geometric property elements
+        totalVolumeElem.textContent = totalVolume.toFixed(4);
+        totalAreaElem.textContent = totalArea.toFixed(4);
+        effectiveDimensionElem.textContent = effectiveDimension.toFixed(4);
+        volumeEntropyElem.textContent = volumeEntropy.toFixed(4);
+        
+        // Calculate statistics
+        const stats = SimulationAnalyzer.calculateStatistics(
+          state, window.currentEngine.getCurrentTime()
+        );
+        
+        // Update statistics elements
+        meanElem.textContent = stats.mean.toFixed(4);
+        varianceElem.textContent = stats.variance.toFixed(4);
+        skewnessElem.textContent = "0.0000"; // Placeholder for now
+        kurtosisElem.textContent = "0.0000"; // Placeholder for now
+        
+        // Show the results panel
+        resultsPanel.style.display = 'block';
+        
+        return {
+          geometric: { totalVolume, totalArea, effectiveDimension, volumeEntropy },
+          statistics: { ...stats }
+        };
+      } catch (error) {
+        console.error("Error updating results panel:", error);
+        return null;
+      }
+    }
+    
+    // Make the function globally available
+    window.updateResultsPanel = updateResultsPanel;
     
     // Capture console.log output
     const originalLog = console.log;
     const originalError = console.error;
-    const consoleOutput = document.getElementById('console-output');
     
     console.log = function() {
       // Call original console.log
@@ -96,13 +194,39 @@
       consoleOutput.textContent += '❌ ERROR: ' + line + '\n';
     };
     
+    // Modify runSimulationTest to update our UI and capture references
+    const originalRunTest = runSimulationTest;
+    window.runSimulationTest = async function() {
+      try {
+        // Run the original test
+        const result = await originalRunTest();
+        
+        // Attempt to update the results panel after a short delay
+        setTimeout(() => {
+          // If we have engine and graph references, update the panel
+          if (window.currentEngine && window.currentGraph) {
+            console.log("Updating results panel with simulation data...");
+            updateResultsPanel();
+          } else {
+            console.warn("Engine or graph reference not available for results panel update");
+          }
+        }, 500);
+        
+        return result;
+      } catch (error) {
+        console.error("Error in enhanced runSimulationTest:", error);
+        return false;
+      }
+    };
+    
     // Set up the test button
     document.getElementById('run-test').addEventListener('click', () => {
       consoleOutput.textContent = ''; // Clear previous output
       console.log('Starting simulation test...');
       
       try {
-        runSimulationTest();
+        // Run the test
+        window.runSimulationTest();
       } catch (error) {
         console.error('Test failed with error:', error);
       }

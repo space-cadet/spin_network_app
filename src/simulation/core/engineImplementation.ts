@@ -169,13 +169,18 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
    * Create the initial state based on parameters
    */
   private createInitialState(parameters: SimulationParameters): void {
-    if (!this.graph) return;
+    if (!this.graph) {
+      console.error("Cannot create initial state: graph is null");
+      return;
+    }
     
     const nodeIds = this.graph.nodes.map(node => node.id);
     if (nodeIds.length === 0) {
       console.error("Cannot create initial state: graph has no nodes");
       return;
     }
+    
+    console.log("Creating initial state with", nodeIds.length, "nodes");
     
     this.state = new SimulationStateVector(nodeIds);
     this.initialState = this.state.clone();
@@ -191,11 +196,23 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
         // If node ID is missing or not in the graph, use the first node
         if (!nodeId || !this.graph.getNode(nodeId)) {
           nodeId = nodeIds[0];
-          console.warn(`Initial state node ID ${initialStateParams.nodeId} is invalid, using ${nodeId} instead`);
+          console.warn(`Initial state node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${nodeId} instead`);
         }
         
         const value = initialStateParams.value || 1.0;
+        console.log(`Setting delta state on node ${nodeId} with value ${value}`);
         this.state = this.state.setValue(nodeId, value);
+        
+        // Verify the state was set correctly
+        const newValue = this.state.getValue(nodeId);
+        console.log(`Verified state value for node ${nodeId}: ${newValue}`);
+        
+        // Log all node values to verify state is correct
+        const allValues = nodeIds.map(id => ({
+          id,
+          value: this.state.getValue(id)
+        }));
+        console.log("All node values:", allValues);
       } catch (error) {
         console.error("Error setting delta state:", error);
         
@@ -205,6 +222,10 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
           console.warn(`Falling back to first node ${nodeId} for initial state`);
           try {
             this.state = this.state.setValue(nodeId, 1.0);
+            
+            // Verify the state was set correctly
+            const newValue = this.state.getValue(nodeId);
+            console.log(`Verified fallback state value for node ${nodeId}: ${newValue}`);
           } catch (fallbackError) {
             console.error("Critical error: Failed to set fallback initial state:", fallbackError);
           }
@@ -215,9 +236,19 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       try {
         // Set all nodes to the same value
         const value = initialStateParams.value || 0.1;
+        console.log(`Setting uniform state with value ${value} for all nodes`);
+        
         for (const nodeId of nodeIds) {
           this.state = this.state.setValue(nodeId, value);
         }
+        
+        // Verify the state was set correctly
+        const firstNodeValue = this.state.getValue(nodeIds[0]);
+        console.log(`Verified uniform state value: ${firstNodeValue}`);
+        
+        // Check that all values are as expected
+        const allSame = nodeIds.every(id => Math.abs(this.state.getValue(id) - value) < 1e-10);
+        console.log(`All nodes have the same value: ${allSame}`);
       } catch (error) {
         console.error("Error setting uniform state:", error);
       }
@@ -230,11 +261,13 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
         // Validate that the center node ID exists
         if (!centerNodeId || !this.graph.getNode(centerNodeId)) {
           centerNodeId = nodeIds[0];
-          console.warn(`Center node ID ${initialStateParams.nodeId} is invalid, using ${centerNodeId} instead`);
+          console.warn(`Center node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${centerNodeId} instead`);
         }
         
         const centerValue = initialStateParams.centerValue || 1.0;
         const sigma = initialStateParams.sigma || 1.0;
+        
+        console.log(`Setting Gaussian state centered at node ${centerNodeId} with value ${centerValue} and sigma ${sigma}`);
         
         // Set center node
         this.state = this.state.setValue(centerNodeId, centerValue);
@@ -263,6 +296,22 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
           const value = centerValue * Math.exp(-(distance*distance) / (2*sigma*sigma));
           this.state = this.state.setValue(nodeId, value);
         }
+        
+        // Verify the state was set correctly
+        const centerNodeValue = this.state.getValue(centerNodeId);
+        console.log(`Verified center node value: ${centerNodeValue}`);
+        
+        // Log some sample values
+        const sampleNodes = nodeIds.slice(0, Math.min(3, nodeIds.length));
+        for (const id of sampleNodes) {
+          if (id !== centerNodeId) {
+            console.log(`Node ${id} value: ${this.state.getValue(id)}`);
+          }
+        }
+        
+        // Check that at least one node has a value > 0
+        const anyPositive = nodeIds.some(id => this.state.getValue(id) > 0);
+        console.log(`At least one node has positive value: ${anyPositive}`);
       } catch (error) {
         console.error("Error setting Gaussian state:", error);
         
@@ -271,6 +320,10 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
           try {
             console.warn("Falling back to delta state on first node");
             this.state = this.state.setValue(nodeIds[0], 1.0);
+            
+            // Verify the fallback state
+            const fallbackValue = this.state.getValue(nodeIds[0]);
+            console.log(`Verified fallback value for node ${nodeIds[0]}: ${fallbackValue}`);
           } catch (fallbackError) {
             console.error("Critical error: Failed to set fallback state:", fallbackError);
           }
@@ -281,9 +334,53 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
     // Save a copy of the initial state
     this.initialState = this.state.clone();
     
+    // Validate the state before setting on the diffusion model
+    try {
+      // Find maximum value in state for validation
+      let maxValue = 0;
+      let nonZeroCount = 0;
+      
+      for (let i = 0; i < this.state.size; i++) {
+        const value = Math.abs(this.state.getValueAtIndex(i));
+        if (value > maxValue) {
+          maxValue = value;
+        }
+        if (value > 1e-10) {
+          nonZeroCount++;
+        }
+      }
+      
+      console.log(`State validation: max value=${maxValue.toFixed(6)}, non-zero nodes=${nonZeroCount}/${this.state.size}`);
+      
+      if (maxValue < 1e-10) {
+        console.error("State validation failed: all values are zero or near zero");
+        
+        // Emergency fallback - set first node to 1.0
+        if (nodeIds.length > 0) {
+          console.warn("Emergency fallback: setting first node to 1.0");
+          this.state = this.state.setValue(nodeIds[0], 1.0);
+          this.initialState = this.state.clone();
+          
+          // Verify the emergency fix
+          const fixedValue = this.state.getValue(nodeIds[0]);
+          console.log(`Emergency fix verified: node ${nodeIds[0]} value = ${fixedValue}`);
+        }
+      }
+    } catch (error) {
+      console.error("Error validating initial state:", error);
+    }
+    
     // Set the initial state on the diffusion model
     if (this.diffusionModel && this.state) {
+      console.log("Setting initial state on diffusion model");
       this.diffusionModel.setInitialState(this.state);
+    } else {
+      if (!this.diffusionModel) {
+        console.error("Cannot set initial state: diffusion model is null");
+      }
+      if (!this.state) {
+        console.error("Cannot set initial state: state is null");
+      }
     }
   }
 
