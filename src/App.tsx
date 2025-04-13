@@ -134,13 +134,50 @@ function App() {
                     ) : bottomPanelTab === 'logs' ? (
                       <SimulationLogsPanel />
                     ) : bottomPanelTab === 'application' ? (
-                      <LogViewerAdapter 
-                        defaultLogType={['error', 'edit']}
-                        defaultLimit={50}
-                        showFilters={true}
-                        allowExport={true}
-                        height="calc(100vh - 300px)"
-                      />
+                      <div>
+                        <div className="flex items-center justify-between p-2 bg-gray-100 mb-3">
+                          <h2 className="text-lg">Application Logs</h2>
+                          <button 
+                            className="px-3 py-1 bg-blue-500 text-white rounded" 
+                            onClick={async () => {
+                              const { migrateMarkdownLogs } = await import('./utils/logMigrationUtil');
+                              if (window.confirm('Run log migration from Markdown files to database?')) {
+                                try {
+                                  console.log('Starting migration process...');
+                                  const result = await migrateMarkdownLogs();
+                                  
+                                  if (result.success) {
+                                    const message = `Migration completed: 
+${result.totalLogsMigrated} logs migrated 
+(${result.errorLogsMigrated} errors, ${result.editLogsMigrated} edits)
+${result.skippedDuplicates || 0} duplicate entries skipped`;
+                                    alert(message);
+                                    
+                                    if (result.totalLogsMigrated > 0) {
+                                      window.location.reload();
+                                    }
+                                  } else {
+                                    alert(`Migration failed: ${result.error || 'Unknown error'}`);
+                                    console.error('Migration failed with error:', result.error);
+                                  }
+                                } catch (err) {
+                                  alert(`Migration failed with exception: ${err.message}`);
+                                  console.error('Migration exception:', err);
+                                }
+                              }
+                            }}
+                          >
+                            Migrate Logs from Markdown
+                          </button>
+                        </div>
+                        <LogViewerAdapter 
+                          defaultLogType={['error', 'edit']}
+                          defaultLimit={50}
+                          showFilters={true}
+                          allowExport={true}
+                          height="calc(100vh - 340px)"
+                        />
+                      </div>
                     ) : (
                       <SimulationDebugPanel />
                     )}
