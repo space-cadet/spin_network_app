@@ -1,5 +1,81 @@
 # Error Log
 
+## 2025-04-12 22:30 IST - Test Simulation HTML Not Displaying Data
+
+**File:** `public/test-simulation.html`, `src/test-simulation.js`, `src/simulation/index.js`
+
+**Error Message:**
+```
+test-simulation.js:90 Uncaught SyntaxError: Identifier 'initialState' has already been declared (at test-simulation.js:90:11)
+```
+
+**Cause:**
+Multiple issues were causing the test-simulation.html page to fail:
+1. In the test-simulation.js file, there was a duplicate declaration of the `initialState` variable
+2. The test-simulation.html file was trying to import from `../src/simulation/index.js` which didn't exist
+3. There was no JavaScript bridge between the TypeScript implementation and the JavaScript imports in the HTML
+
+**Fix:**
+Implemented a comprehensive solution:
+
+1. **Fixed duplicate variable declaration:**
+   - Removed the second declaration of `initialState` in test-simulation.js
+   - Added clarifying comment to prevent future duplication
+
+2. **Created JavaScript bridge file:**
+   - Added new file at `src/simulation/index.js`
+   - Implemented re-export of all components from TypeScript implementation
+   - Added explicit exports for specific components used in HTML file
+   - Added debug logging to verify component availability
+
+3. **Enhanced error handling in HTML file:**
+   - Added extensive error trapping around dynamic imports
+   - Enhanced the updateResultsPanel function with verbose logging
+   - Added step-by-step validation of simulation calculations
+   - Added detailed diagnostics for references and state
+   - Increased timeout for panel updates to prevent race conditions
+   - Implemented fallbacks for calculation errors
+
+**Key Code Changes:**
+```javascript
+// Fixed duplicate initialState in test-simulation.js
+// Before:
+const initialState = engine.getCurrentState();
+console.log('Initial state values:', initialState.nodeIds.map(id => ({ 
+  id, value: initialState.getValue(id) 
+})));
+    
+// Create geometry calculator and statistics analyzer
+const geometryCalculator = new SpinNetworkGeometryCalculator();
+    
+// Calculate and report initial geometric properties
+const initialState = engine.getCurrentState(); // <-- This was the duplicate
+
+// After:
+const initialState = engine.getCurrentState();
+console.log('Initial state values:', initialState.nodeIds.map(id => ({ 
+  id, value: initialState.getValue(id) 
+})));
+    
+// Create geometry calculator and statistics analyzer
+const geometryCalculator = new SpinNetworkGeometryCalculator();
+    
+// Calculate and report initial geometric properties
+// No need to get the state again, we already have it
+```
+
+```javascript
+// Created JavaScript bridge in src/simulation/index.js
+export * from './index.ts';
+export { SpinNetworkGeometryCalculator } from './analysis/geometricProps';
+export { SimulationAnalyzer } from './analysis/statistics';
+```
+
+**Affected Files:**
+- src/test-simulation.js
+- src/simulation/index.js (new file)
+- public/test-simulation.html
+
 ## 2025-04-12 16:45 IST - Simulation Pause Functionality Not Working
 
 **File:** `src/hooks/useSimulation.ts`, `src/components/panels/SimulationControlPanel.tsx`
