@@ -33,85 +33,7 @@ export const useReduxSimulation = () => {
   const needsSyncRef = useRef<boolean>(true);
   const refreshTimerRef = useRef<number | null>(null);
   
-  // Start simulation with Redux integration
-  const startSimulation = useCallback(() => {
-    // Call the original startSimulation
-    simulation.startSimulation();
-    
-    // Update Redux state
-    dispatch(setSimulationRunning(true));
-    
-    // Enable synchronization to ensure we capture the latest data
-    needsSyncRef.current = true;
-  }, [simulation, dispatch]);
-  
-  // Pause simulation with Redux integration
-  const pauseSimulation = useCallback(() => {
-    // Call the original pauseSimulation
-    simulation.pauseSimulation();
-    
-    // Update Redux state
-    dispatch(setSimulationRunning(false));
-    
-    // Force one final sync to ensure we have the latest data
-    syncSimulationDataToRedux();
-  }, [simulation, dispatch]);
-  
-  // Reset simulation with Redux integration
-  const resetSimulation = useCallback(() => {
-    // Call the original resetSimulation
-    simulation.resetSimulation();
-    
-    // Reset Redux state
-    dispatch(resetSimulationState());
-    
-    // Re-enable synchronization
-    needsSyncRef.current = true;
-  }, [simulation, dispatch]);
-  
-  // Step simulation with Redux integration
-  const stepSimulation = useCallback(() => {
-    // Call the original stepSimulation
-    simulation.stepSimulation();
-    
-    // Update Redux with new time
-    dispatch(setCurrentTime(simulation.currentTime));
-    
-    // Ensure we update Redux with the latest data
-    syncSimulationDataToRedux();
-  }, [simulation, dispatch]);
-  
-  // Jump to a specific time with Redux integration
-  const jumpToTime = useCallback((time: number) => {
-    // Call the original jumpToTime
-    simulation.jumpToTime(time);
-    
-    // Update Redux with new time
-    dispatch(setCurrentTime(time));
-    
-    // Ensure we update Redux with the latest data
-    syncSimulationDataToRedux();
-  }, [simulation, dispatch]);
-  
-  // Update parameters with Redux integration
-  const updateParametersWithRedux = useCallback((params: any) => {
-    // Call the original updateParameters
-    simulation.updateParameters(params);
-    
-    // Update Redux state
-    dispatch(updateParameters(params));
-  }, [simulation, dispatch]);
-  
-  // Update initial state params with Redux integration
-  const updateInitialStateParamsWithRedux = useCallback((params: any) => {
-    // Call the original updateInitialStateParams
-    simulation.updateInitialStateParams(params);
-    
-    // Update Redux state
-    dispatch(updateInitialStateParams(params));
-  }, [simulation, dispatch]);
-  
-  // Function to sync simulation data to Redux
+  // Function to sync simulation data to Redux - MUST DEFINE THIS FIRST
   const syncSimulationDataToRedux = useCallback(() => {
     // Only proceed if sync is needed
     if (!needsSyncRef.current) return;
@@ -209,31 +131,125 @@ export const useReduxSimulation = () => {
       console.error('Error synchronizing simulation data to Redux:', error);
     }
   }, [simulation, dispatch]);
+
+  // Start simulation with Redux integration
+  const startSimulation = useCallback(() => {
+    // Call the original startSimulation
+    simulation.startSimulation();
+    
+    // Update Redux state
+    dispatch(setSimulationRunning(true));
+    
+    // Enable synchronization to ensure we capture the latest data
+    needsSyncRef.current = true;
+    
+    // Initial sync to ensure data is available immediately
+    syncSimulationDataToRedux();
+  }, [simulation, dispatch, syncSimulationDataToRedux]);
+  
+  // Pause simulation with Redux integration
+  const pauseSimulation = useCallback(() => {
+    // Set a flag to force data sync after pause
+    needsSyncRef.current = true;
+    
+    // Call the original pauseSimulation
+    simulation.pauseSimulation();
+    
+    // Update Redux state
+    dispatch(setSimulationRunning(false));
+    
+    // Force one final sync immediately to ensure we have the latest data
+    syncSimulationDataToRedux();
+    
+    // And schedule one more sync after a short delay to catch any final updates
+    setTimeout(() => {
+      syncSimulationDataToRedux();
+      needsSyncRef.current = false;
+    }, 100);
+  }, [simulation, dispatch, syncSimulationDataToRedux]);
+  
+  // Reset simulation with Redux integration
+  const resetSimulation = useCallback(() => {
+    // Call the original resetSimulation
+    simulation.resetSimulation();
+    
+    // Reset Redux state
+    dispatch(resetSimulationState());
+    
+    // Re-enable synchronization
+    needsSyncRef.current = true;
+    
+    // Make sure to sync the reset state to Redux
+    syncSimulationDataToRedux();
+  }, [simulation, dispatch, syncSimulationDataToRedux]);
+  
+  // Step simulation with Redux integration
+  const stepSimulation = useCallback(() => {
+    // Call the original stepSimulation
+    simulation.stepSimulation();
+    
+    // Update Redux with new time
+    dispatch(setCurrentTime(simulation.currentTime));
+    
+    // Ensure we update Redux with the latest data
+    syncSimulationDataToRedux();
+  }, [simulation, dispatch, syncSimulationDataToRedux]);
+  
+  // Jump to a specific time with Redux integration
+  const jumpToTime = useCallback((time: number) => {
+    // Call the original jumpToTime
+    simulation.jumpToTime(time);
+    
+    // Update Redux with new time
+    dispatch(setCurrentTime(time));
+    
+    // Ensure we update Redux with the latest data
+    syncSimulationDataToRedux();
+  }, [simulation, dispatch, syncSimulationDataToRedux]);
+  
+  // Update parameters with Redux integration
+  const updateParametersWithRedux = useCallback((params: any) => {
+    // Call the original updateParameters
+    simulation.updateParameters(params);
+    
+    // Update Redux state
+    dispatch(updateParameters(params));
+  }, [simulation, dispatch]);
+  
+  // Update initial state params with Redux integration
+  const updateInitialStateParamsWithRedux = useCallback((params: any) => {
+    // Call the original updateInitialStateParams
+    simulation.updateInitialStateParams(params);
+    
+    // Update Redux state
+    dispatch(updateInitialStateParams(params));
+  }, [simulation, dispatch]);
   
   // Setup regular sync of data from simulation engine to Redux
   useEffect(() => {
-    // If simulation is running, sync more frequently
+    // Always clear previous timer when dependencies change
+    if (refreshTimerRef.current !== null) {
+      window.clearInterval(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+    
+    // If simulation is running, set up regular sync interval
     if (simulation.isRunning) {
-      // Set up interval for regular updates
-      if (refreshTimerRef.current === null) {
-        refreshTimerRef.current = window.setInterval(syncSimulationDataToRedux, 250);
-      }
-    } else {
-      // If not running but we have history, sync once
-      if (simulation.hasHistory && needsSyncRef.current) {
-        syncSimulationDataToRedux();
-        needsSyncRef.current = false;
-      }
+      // Sync immediately first
+      syncSimulationDataToRedux();
       
-      // Clear interval if it exists
-      if (refreshTimerRef.current !== null) {
-        window.clearInterval(refreshTimerRef.current);
-        refreshTimerRef.current = null;
-      }
+      // Then set up interval (less frequent to reduce overhead)
+      refreshTimerRef.current = window.setInterval(syncSimulationDataToRedux, 500);
+    } 
+    // If not running but we have history, do a one-time sync
+    else if (simulation.hasHistory && needsSyncRef.current) {
+      syncSimulationDataToRedux();
+      // After initial sync, we only need to sync on state changes
+      needsSyncRef.current = false;
     }
     
     return () => {
-      // Clean up interval on unmount
+      // Clean up interval on unmount or dependency change
       if (refreshTimerRef.current !== null) {
         window.clearInterval(refreshTimerRef.current);
         refreshTimerRef.current = null;

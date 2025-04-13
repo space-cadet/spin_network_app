@@ -1,5 +1,281 @@
 # Error Log
 
+## 2025-04-13 - useState Not Defined in LogViewerAdapter Component
+
+**File:** `src/components/logs/LogViewerAdapter.tsx`
+
+**Error Message:**
+```
+LogViewerAdapter.tsx:56 Uncaught ReferenceError: useState is not defined
+    at LogViewerAdapter (LogViewerAdapter.tsx:56:41)
+    at renderWithHooks (chunk-BQR6MQF4.js?v=7ffe35ed:11548:26)
+    at mountIndeterminateComponent (chunk-BQR6MQF4.js?v=7ffe35ed:14926:21)
+    at beginWork (chunk-BQR6MQF4.js?v=7ffe35ed:15914:22)
+```
+
+**Cause:**
+The `LogViewerAdapter` component was using the React `useState` hook without importing it from React. While the component did import `useEffect` and `useRef`, it was missing the `useState` import.
+
+**Fix:**
+Updated the import statement to include `useState`:
+
+```typescript
+// Before
+import React, { useEffect, useRef } from 'react';
+
+// After
+import React, { useEffect, useRef, useState } from 'react';
+```
+
+**Affected Files:**
+- src/components/logs/LogViewerAdapter.tsx
+
+## 2025-04-13 - Controlled/Uncontrolled Input Warning in LogViewerAdapter
+
+**File:** `src/components/logs/LogViewerAdapter.tsx`
+
+**Error Message:**
+```
+Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component.
+```
+
+**Cause:**
+The `MultiSelect` component in `LogViewerAdapter` was receiving inconsistent value types. The component was initially rendering with an undefined or non-array value, and then receiving an array value, causing React to warn about switching between controlled and uncontrolled inputs.
+
+**Fix:**
+Enhanced the component to always provide consistent value types to the MultiSelect component:
+
+1. Modified the value prop to ensure it's always an array:
+```typescript
+<MultiSelect
+  value={Array.isArray(queryOptions.type) ? queryOptions.type : (queryOptions.type ? [queryOptions.type] : [])}
+  options={logTypeOptions}
+  onChange={(e) => handleFilterChange({ type: e.value })}
+  placeholder="Filter by type"
+  className="w-full md:w-15rem"
+/>
+```
+
+2. Fixed the initialization of query options to ensure consistent array value:
+```typescript
+useEffect(() => {
+  // Ensure type is always an array
+  const initialType = Array.isArray(defaultLogType) ? defaultLogType : [defaultLogType];
+  
+  dispatch(setQueryOptions({
+    type: initialType,
+    limit: defaultLimit,
+    offset: 0,
+    sort: 'desc'
+  }));
+}, [dispatch, defaultLogType, defaultLimit]);
+```
+
+3. Improved the filter change handler to normalize type values:
+```typescript
+const handleFilterChange = (changes: Partial<LogQueryOptions>) => {
+  // Ensure type is always an array or undefined
+  const updatedChanges = {...changes};
+  
+  if (updatedChanges.type !== undefined) {
+    // If empty array, set to undefined to clear filter
+    if (Array.isArray(updatedChanges.type) && updatedChanges.type.length === 0) {
+      updatedChanges.type = undefined;
+    }
+    // If single string, convert to array
+    else if (!Array.isArray(updatedChanges.type) && updatedChanges.type) {
+      updatedChanges.type = [updatedChanges.type];
+    }
+  }
+  
+  dispatch(setQueryOptions({
+    ...queryOptions,
+    ...updatedChanges,
+    offset: 0 // Reset pagination when changing filters
+  }));
+};
+```
+
+**Affected Files:**
+- src/components/logs/LogViewerAdapter.tsx
+
+## 2025-04-13 - Circular Dependency in useReduxSimulation.ts
+
+**File:** `src/hooks/useReduxSimulation.ts`
+
+**Error Message:**
+```
+useReduxSimulation.ts:67 Uncaught ReferenceError: Cannot access 'syncSimulationDataToRedux' before initialization
+    at useReduxSimulation (useReduxSimulation.ts:67:29)
+    at SimulationResultsPanel (SimulationResultsPanel.tsx:78:22)
+```
+
+**Cause:**
+In the `useReduxSimulation.ts` file, there was a circular dependency caused by the function order. The `pauseSimulation`, `jumpToTime`, and `stepSimulation` functions were referencing the `syncSimulationDataToRedux` function before it was defined in the file.
+
+**Fix:**
+1. Reordered the function declarations, moving `syncSimulationDataToRedux` to be defined before any functions that use it
+2. Added proper dependency arrays to all callback functions
+3. Enhanced synchronization between Redux state and simulation engine state
+
+```typescript
+// Function to sync simulation data to Redux - MUST DEFINE THIS FIRST
+const syncSimulationDataToRedux = useCallback(() => {
+  // Function implementation here...
+}, [simulation, dispatch]);
+
+// Pause simulation with Redux integration (USING the function defined above)
+const pauseSimulation = useCallback(() => {
+  // Function implementation that uses syncSimulationDataToRedux
+}, [simulation, dispatch, syncSimulationDataToRedux]);
+```
+
+**Affected Files:**
+- src/hooks/useReduxSimulation.ts
+
+## 2025-04-13 - Simulation Play/Pause Functionality Not Working
+
+**File:** `src/hooks/useSimulation.ts`
+
+**Error Message:**
+No explicit error in console, but the play/pause functionality was not working correctly:
+- Pressing play would start the simulation, but the time slider would not advance
+- Pressing stop would not stop the simulation
+- Console logs would flood with simulation step messages until the app was terminated
+
+**Cause:**
+Multiple issues in the animation loop and state management:
+1. The animation loop wasn't properly checking both React state and engine state
+2. Animation frames weren't being properly canceled on pause
+3. The loop was continuously scheduling the next frame regardless of pause state
+4. Excessive console logging was causing performance issues
+
+**Fix:**
+1. Completely refactored the animation loop to be more robust:
+```typescript
+const animationLoop = useCallback(() => {
+  // IMPORTANT: Don't proceed if we're not supposed to be running
+  if (!isRunning || !engineRef.current) {
+    // Reset animation frame ref to ensure we don't have lingering references
+    animationFrameRef.current = null;
+    return;
+  }
+  
+  // Make sure engine is in running state too
+  if (!engineRef.current.isRunning()) {
+    engineRef.current.resume();
+  }
+  
+  // Step the simulation
+  try {
+    engineRef.current.step();
+    
+    const currentTime = engineRef.current.getCurrentTime();
+    
+    // Update current time (only if different to avoid unnecessary renders)
+    if (Math.abs(currentTime - currentTime) > 1e-10) {
+      setCurrentTime(currentTime);
+    }
+    
+    // Update history status
+    if (!hasHistory) {
+      setHasHistory(true);
+    }
+    
+    // Only log occasionally to reduce console flood
+    const timeStep = parameters.timeStep || 0.01;
+    if (Math.floor(currentTime / 1.0) > Math.floor((currentTime - timeStep) / 1.0)) {
+      // Get conservation laws for logging
+      const conservation = engineRef.current.getConservationLaws();
+      
+      // Log simulation step with conservation data (only at interval points)
+      simulationLogger.logResults(currentTime, {
+        conservation: {
+          totalProbability: conservation.totalProbability || 0,
+          normVariation: conservation.normVariation || 0,
+          positivity: conservation.positivity || false
+        }
+      });
+    }
+    
+    // Only schedule next frame if still supposed to be running
+    if (isRunning) {
+      animationFrameRef.current = requestAnimationFrame(animationLoop);
+    } else {
+      animationFrameRef.current = null;
+    }
+  } catch (error) {
+    console.error("Error in simulation step:", error);
+    
+    // Stop animation on error to prevent infinite error loops
+    animationFrameRef.current = null;
+    setIsRunning(false);
+    if (engineRef.current) {
+      engineRef.current.pause();
+    }
+  }
+}, [isRunning, parameters.timeStep, hasHistory]);
+```
+
+2. Fixed the pause function to properly stop the animation:
+```typescript
+const pauseSimulation = useCallback(() => {
+  // Update React state first
+  setIsRunning(false);
+  
+  // Cancel animation frame (important to do this immediately)
+  if (animationFrameRef.current !== null) {
+    cancelAnimationFrame(animationFrameRef.current);
+    animationFrameRef.current = null;
+  }
+  
+  // Pause the engine
+  if (engineRef.current) {
+    engineRef.current.pause();
+  }
+}, []);
+```
+
+3. Improved the animation frame management in useEffect:
+```typescript
+useEffect(() => {
+  // Always clean up any existing animation frame first
+  if (animationFrameRef.current !== null) {
+    cancelAnimationFrame(animationFrameRef.current);
+    animationFrameRef.current = null;
+  }
+  
+  // Only start animation if we're supposed to be running
+  if (isRunning && engineRef.current && graphRef.current) {
+    // Make sure engine state matches React state
+    if (!engineRef.current.isRunning()) {
+      engineRef.current.resume();
+    }
+    
+    // Start the animation loop
+    animationFrameRef.current = requestAnimationFrame(animationLoop);
+  } 
+  else if (!isRunning && engineRef.current) {
+    // Make sure engine is paused when React state is not running
+    if (engineRef.current.isRunning()) {
+      engineRef.current.pause();
+    }
+  }
+  
+  // Cleanup function
+  return () => {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  };
+}, [isRunning, animationLoop]);
+```
+
+**Affected Files:**
+- src/hooks/useSimulation.ts
+- src/hooks/useReduxSimulation.ts
+
 ## 2025-04-13 23:45 IST - Syntax Error in Template Literals
 
 **File:** `src/utils/logMigrationUtil.ts`

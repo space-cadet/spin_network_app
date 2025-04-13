@@ -152,92 +152,69 @@ export const useSimulation = () => {
   
   // Enhanced animation loop for updating simulation
   const animationLoop = useCallback(() => {
-    // Check both internal (engine) and external (React state) running flags
-    if (engineRef.current && engineRef.current.isRunning() && isRunning) {
-      console.log("Animation loop iteration, stepping simulation");
-      
-      // Step the simulation
-      try {
-        engineRef.current.step();
-        
-        const currentTime = engineRef.current.getCurrentTime();
-        console.log("Current simulation time:", currentTime);
-        
-        // Update current time
-        setCurrentTime(currentTime);
-        
-        // Check if history is available - CRITICAL FIX
-        const history = engineRef.current.getHistory();
-        const times = history.getTimes();
-        
-        // Always set hasHistory to true when animation is running
-        // This ensures debug panel always shows history as available
-        setHasHistory(true);
-        
-        // Log history information for debugging
-        if (times.length > 0) {
-          console.log("History available:", times.length, "timepoints");
-        }
-        
-        // Check if we have valid state data - CRITICAL FIX
-        const state = engineRef.current.getCurrentState();
-        if (!state || state.size === 0) {
-          console.warn("Animation loop: Current state is empty or invalid");
-        } else {
-          // Log state size and sample value
-          if (state.size > 0) {
-            console.log("State data:", {
-              size: state.size,
-              firstNodeValue: state.getValueAtIndex(0)
-            });
-          }
-        }
-        
-        // Get and log conservation laws for every step
-        const conservation = engineRef.current.getConservationLaws();
-        console.log("Conservation laws:", conservation);
-        
-        // Log occasionally (every second of simulation time)
-        // This reduces log clutter while still providing useful data
-        const timeStep = parameters.timeStep || 0.01;
-        if (Math.floor(currentTime / 1.0) > Math.floor((currentTime - timeStep) / 1.0)) {
-          // Get analysis results
-          try {
-            // Log simulation step with conservation data
-            simulationLogger.logResults(currentTime, {
-              conservation: {
-                totalProbability: conservation.totalProbability || 0,
-                normVariation: conservation.normVariation || 0,
-                positivity: conservation.positivity || false
-              }
-            });
-          } catch (error) {
-            simulationLogger.log('error', 'Error computing analysis results', { error }, currentTime);
-          }
-        }
-        
-        // Only schedule next frame if still running
-        if (engineRef.current.isRunning() && isRunning) {
-          // Request next frame
-          animationFrameRef.current = requestAnimationFrame(animationLoop);
-        } else {
-          console.log("Animation stopped due to running state change");
-          animationFrameRef.current = null;
-        }
-      } catch (error) {
-        console.error("Error in simulation step:", error);
-        simulationLogger.log('error', 'Error in simulation step', { error });
-        
-        // Still schedule next frame to ensure animation doesn't stop on error
-        if (engineRef.current.isRunning() && isRunning) {
-          animationFrameRef.current = requestAnimationFrame(animationLoop);
-        }
-      }
-    } else {
-      console.log("Animation loop called but simulation is not running");
-      console.log("Engine running:", engineRef.current?.isRunning(), "React state:", isRunning);
+    // IMPORTANT: Don't proceed if we're not supposed to be running
+    if (!isRunning || !engineRef.current) {
+      // Reset animation frame ref to ensure we don't have lingering references
+      animationFrameRef.current = null;
+      return;
     }
-  }, [isRunning, parameters.timeStep]);
+    
+    // Make sure engine is in running state too
+    if (!engineRef.current.isRunning()) {
+      engineRef.current.resume();
+    }
+    
+    // Step the simulation
+    try {
+      engineRef.current.step();
+      
+      const currentTime = engineRef.current.getCurrentTime();
+      
+      // Update current time (only if different to avoid unnecessary renders)
+      if (Math.abs(currentTime - currentTime) > 1e-10) {
+        setCurrentTime(currentTime);
+      }
+      
+      // Update history status
+      if (!hasHistory) {
+        setHasHistory(true);
+      }
+      
+      // Log occasionally (every second of simulation time)
+      // This reduces log clutter while still providing useful data
+      const timeStep = parameters.timeStep || 0.01;
+      if (Math.floor(currentTime / 1.0) > Math.floor((currentTime - timeStep) / 1.0)) {
+        // Get conservation laws for logging
+        const conservation = engineRef.current.getConservationLaws();
+        
+        // Log simulation step with conservation data (only at interval points)
+        simulationLogger.logResults(currentTime, {
+          conservation: {
+            totalProbability: conservation.totalProbability || 0,
+            normVariation: conservation.normVariation || 0,
+            positivity: conservation.positivity || false
+          }
+        });
+      }
+      
+      // Only schedule next frame if still supposed to be running
+      if (isRunning) {
+        animationFrameRef.current = requestAnimationFrame(animationLoop);
+      } else {
+        animationFrameRef.current = null;
+      }
+    } catch (error) {
+      console.error("Error in simulation step:", error);
+      simulationLogger.log('error', 'Error in simulation step', { error });
+      
+      // Stop animation on error to prevent infinite error loops
+      animationFrameRef.current = null;
+      setIsRunning(false);
+      if (engineRef.current) {
+        engineRef.current.pause();
+      }
+    }
+  }, [isRunning, parameters.timeStep, hasHistory]);
   
   // Reset simulation
   const resetSimulation = useCallback(() => {
@@ -322,27 +299,23 @@ export const useSimulation = () => {
   
   // Pause simulation
   const pauseSimulation = useCallback(() => {
+    // Update React state first
+    setIsRunning(false);
+    
+    // Cancel animation frame (important to do this immediately)
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    // Pause the engine
     if (engineRef.current) {
-      console.log("Pausing simulation - canceling animation frame");
-      
-      // Cancel any pending animation frame first
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      
-      // Update engine state
       engineRef.current.pause();
-      
-      // Update React state
-      setIsRunning(false);
       
       // Log simulation pause
       simulationLogger.log('info', 'Simulation paused', {
         time: engineRef.current.getCurrentTime()
       }, engineRef.current.getCurrentTime());
-      
-      console.log("Simulation paused at time:", engineRef.current.getCurrentTime());
     }
   }, []);
   
@@ -395,30 +368,23 @@ export const useSimulation = () => {
   const startSimulation = useCallback(() => {
     if (!engineRef.current || !graphRef.current) {
       console.error("Cannot start simulation: engine or graph is null");
-      if (!graphRef.current) console.error("Graph ref is null");
-      if (!engineRef.current) console.error("Engine ref is null");
       return;
     }
     
     try {
-      // Important debug information
+      // Check for empty graph
       const graphNodeCount = graphRef.current.nodes.length;
-      console.log("Starting simulation, graph:", graphNodeCount, "nodes");
-      
       if (graphNodeCount === 0) {
         console.error("Cannot start simulation with empty graph (0 nodes)");
         return;
       }
       
-      // Validate that the nodeId exists in the network
+      // Validate nodeId
       const nodeIdValidation = validateNodeId(network, parameters);
       
       if (nodeIdValidation !== true) {
         if (nodeIdValidation) {
-          // Update with valid node ID
-          console.log("Invalid node ID, updating to:", nodeIdValidation);
-          
-          // Update parameters
+          // Update parameters with valid node ID and try again
           setParameters(prev => ({
             ...prev,
             initialStateParams: {
@@ -427,8 +393,7 @@ export const useSimulation = () => {
             }
           }));
           
-          // Don't proceed with simulation start until parameters are updated
-          console.log("Deferring simulation start until node ID is updated");
+          // Defer simulation start to avoid race conditions
           setTimeout(() => {
             startSimulation();
           }, 50);
@@ -439,90 +404,49 @@ export const useSimulation = () => {
         }
       }
       
-      // Force history recording - CRITICAL FIX
+      // Force history recording
       const enhancedParameters = {
         ...parameters,
         recordHistory: true,
-        historyInterval: 1 // Record every step for better analysis
+        historyInterval: 1
       };
       
-      // Only proceed if the nodeId is valid
-      // (nodeIdValidation === true means the node ID is valid)
-      {
-        console.log("Initializing engine with parameters:", enhancedParameters);
-        
-        // Initialize engine if not already done
-        engineRef.current.initialize(graphRef.current, enhancedParameters);
-        
-        // Force a check of initial state
-        const initialState = engineRef.current.getCurrentState();
-        console.log("Initial state after initialization:", {
-          exists: !!initialState,
-          size: initialState ? initialState.size : 0,
-          nodeIds: initialState ? initialState.nodeIds.slice(0, 3) : []
-        });
-        
-        if (!initialState || initialState.size === 0) {
-          console.error("Failed to create valid initial state");
-          return;
-        }
-        
-        // Log simulation start
-        if (network) {
-          simulationLogger.startSession({
-            nodeCount: network.nodes?.length || 0,
-            edgeCount: network.edges?.length || 0,
-            name: network.metadata?.name,
-            type: network.metadata?.type
-          }, enhancedParameters);
-          
-          simulationLogger.log('info', 'Simulation started', {
-            networkSize: network.nodes?.length || 0,
-            parameters: enhancedParameters
-          });
-        }
-        
-        console.log("Using initial node:", enhancedParameters.initialStateParams.nodeId);
-        
-        // Start simulation
-        engineRef.current.resume();
-        setIsRunning(true);
-        
-        // Take an immediate first step to show something happening
-        try {
-          engineRef.current.step();
-          const newTime = engineRef.current.getCurrentTime();
-          console.log("First step completed, new time:", newTime);
-          setCurrentTime(newTime);
-          
-          // Explicitly set hasHistory to true regardless of timelines
-          setHasHistory(true);
-          
-          // Double check history state
-          const history = engineRef.current.getHistory();
-          const times = history.getTimes();
-          console.log("History check after first step:", {
-            hasHistory: true,
-            timePointsExist: times.length > 0,
-            timePoints: times
-          });
-          
-          console.log("History after first step:", {
-            hasTimes: times.length > 0,
-            timePoints: times
-          });
-          
-          // Also check conservation laws to see if they've been computed
-          const conservation = engineRef.current.getConservationLaws();
-          console.log("Conservation laws after first step:", conservation);
-        } catch (error) {
-          console.error("Error during first step:", error);
-        }
+      // Initialize engine with enhanced parameters
+      engineRef.current.initialize(graphRef.current, enhancedParameters);
+      
+      // Verify initial state
+      const initialState = engineRef.current.getCurrentState();
+      if (!initialState || initialState.size === 0) {
+        console.error("Failed to create valid initial state");
+        return;
       }
+      
+      // Log simulation start (reduced logging)
+      simulationLogger.startSession({
+        nodeCount: network?.nodes?.length || 0,
+        edgeCount: network?.edges?.length || 0,
+        name: network?.metadata?.name,
+        type: network?.metadata?.type
+      }, enhancedParameters);
+      
+      // Start the engine
+      engineRef.current.resume();
+      
+      // Update React state
+      setIsRunning(true);
+      setHasHistory(true);
+      
+      // Take first step immediately
+      engineRef.current.step();
+      setCurrentTime(engineRef.current.getCurrentTime());
+      
+      // Start animation loop (will be triggered by isRunning effect)
     } catch (error) {
       console.error("Error starting simulation:", error);
+      // Make sure we reset running state on error
+      setIsRunning(false);
     }
-  }, [parameters, network]);
+  }, [parameters, network, validateNodeId]);
   
   // Track if we've already initialized for this network
   const initializedNetworkRef = useRef<string | null>(null);
@@ -609,44 +533,25 @@ export const useSimulation = () => {
   
   // Start animation loop when isRunning changes
   useEffect(() => {
-    // Make sure we clean up any existing animation frame before changing state
+    // Always clean up any existing animation frame first
     if (animationFrameRef.current !== null) {
-      console.log("Cleaning up existing animation frame before state change");
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
     
-    if (isRunning) {
-      console.log("Starting animation loop, engine state:", engineRef.current?.isRunning());
-      
-      // Make sure engine and React states are in sync
-      if (engineRef.current && !engineRef.current.isRunning()) {
-        console.log("Engine was not running, resuming it");
+    // Only start animation if we're supposed to be running
+    if (isRunning && engineRef.current && graphRef.current) {
+      // Make sure engine state matches React state
+      if (!engineRef.current.isRunning()) {
         engineRef.current.resume();
       }
       
-      // Directly run a step immediately
-      if (engineRef.current && graphRef.current) {
-        console.log("Initial step when starting animation");
-        try {
-          engineRef.current.step();
-          setCurrentTime(engineRef.current.getCurrentTime());
-          setHasHistory(true);
-          console.log("Current time after initial step:", engineRef.current.getCurrentTime());
-        } catch (error) {
-          console.error("Error during initial step:", error);
-        }
-      }
-      
-      // Then start the animation loop
-      console.log("Requesting initial animation frame");
+      // Start the animation loop
       animationFrameRef.current = requestAnimationFrame(animationLoop);
-    } else {
-      console.log("Not starting animation loop because isRunning is false");
-      
-      // Make sure engine state matches React state
-      if (engineRef.current && engineRef.current.isRunning()) {
-        console.log("Engine was running but React state is not, pausing engine");
+    } 
+    else if (!isRunning && engineRef.current) {
+      // Make sure engine is paused when React state is not running
+      if (engineRef.current.isRunning()) {
         engineRef.current.pause();
       }
     }
@@ -654,7 +559,6 @@ export const useSimulation = () => {
     // Cleanup function
     return () => {
       if (animationFrameRef.current !== null) {
-        console.log("Cleaning up animation frame in effect cleanup");
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }

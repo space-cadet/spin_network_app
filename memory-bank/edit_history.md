@@ -2,6 +2,22 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-13: Fixed Simulation Animation Loop and LogViewerAdapter Components
+
+Modified files:
+- `/src/components/logs/LogViewerAdapter.tsx` - Added missing `useState` import and fixed controlled/uncontrolled input warnings
+- `/src/hooks/useSimulation.ts` - Fixed animation loop to properly handle pause/stop conditions and reduce console logging
+- `/src/hooks/useReduxSimulation.ts` - Fixed circular dependency with `syncSimulationDataToRedux` function
+- `/src/simulation/core/engineImplementation.ts` - Enhanced state management to prevent runaway loops
+
+Issues addressed:
+- Fixed LogViewerAdapter component error "useState is not defined" by adding proper React import
+- Fixed MultiSelect controlled/uncontrolled input warnings in LogViewerAdapter by ensuring consistent value types
+- Fixed play/pause functionality in simulation by properly canceling animation frames
+- Improved performance by reducing excessive console logging
+- Fixed circular dependency in useReduxSimulation that was causing the app to crash
+- Enhanced synchronization between engine state and UI state
+
 ## 2025-04-13 23:45 IST: Implemented Log Rotation and Isolated PrimeReact CSS
 
 Modified files:

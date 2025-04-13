@@ -1,5 +1,5 @@
 // src/components/logs/LogViewerAdapter.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -62,8 +62,11 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
 
   // Initialize query options on component mount
   useEffect(() => {
+    // Ensure type is always an array
+    const initialType = Array.isArray(defaultLogType) ? defaultLogType : [defaultLogType];
+    
     dispatch(setQueryOptions({
-      type: defaultLogType,
+      type: initialType,
       limit: defaultLimit,
       offset: 0,
       sort: 'desc'
@@ -98,9 +101,23 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
 
   // Handle filter changes
   const handleFilterChange = (changes: Partial<LogQueryOptions>) => {
+    // Ensure type is always an array or undefined
+    const updatedChanges = {...changes};
+    
+    if (updatedChanges.type !== undefined) {
+      // If empty array, set to undefined to clear filter
+      if (Array.isArray(updatedChanges.type) && updatedChanges.type.length === 0) {
+        updatedChanges.type = undefined;
+      }
+      // If single string, convert to array
+      else if (!Array.isArray(updatedChanges.type) && updatedChanges.type) {
+        updatedChanges.type = [updatedChanges.type];
+      }
+    }
+    
     dispatch(setQueryOptions({
       ...queryOptions,
-      ...changes,
+      ...updatedChanges,
       offset: 0 // Reset pagination when changing filters
     }));
   };
@@ -287,7 +304,7 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
             </span>
             
             <MultiSelect
-              value={Array.isArray(queryOptions.type) ? queryOptions.type : [queryOptions.type].filter(Boolean)}
+              value={Array.isArray(queryOptions.type) ? queryOptions.type : (queryOptions.type ? [queryOptions.type] : [])}
               options={logTypeOptions}
               onChange={(e) => handleFilterChange({ type: e.value })}
               placeholder="Filter by type"
