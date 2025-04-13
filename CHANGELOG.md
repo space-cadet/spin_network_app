@@ -5,7 +5,56 @@ All notable changes to the Spin Network Visualization and Diffusion App will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+---
+
 ## [Unreleased]
+
+### Added
+- Redux integration for simulation state and UI components
+- Debug panel and raw data display for diagnostics
+- Robust error handling and validation in simulation analysis and results display
+- Standalone simulation test page for debugging and verification
+- Undo/redo history for all network operations
+- Recent networks feature for quick access
+- Automatic state persistence using IndexedDB
+- Real-time type management with sidebar integration
+- Collapsible panels and persistent UI state
+- Dedicated panels for properties, type management, simulation controls, and network tools
+
+### Fixed
+- Simulation rendering loops and "Too many re-renders" errors
+- Null value handling in geometric and statistical calculations
+- Infinite console logging loop causing performance issues
+- Test simulation errors and matrix multiplication bugs
+- Event handler typing and synchronization issues
+- Performance bottlenecks and unnecessary re-renders
+- UI/UX issues in panels and controls
+
+### Changed
+- Improved performance: reduced re-renders, better memoization, throttling
+- Enhanced error handling and fallback mechanisms throughout the simulation system
+- Refactored large components for maintainability and stability
+- Enhanced results panel with real-time data and robust fallback mechanisms
+- Improved logging and diagnostics for simulation and analysis
+
+### In Progress
+- Advanced simulation analysis and visualization
+- Component refactoring for maintainability
+- Researching database solutions for log management
+
+### Planned
+- Further simulation visualization improvements
+- Database/log management integration
+
+---
+
+> For a detailed, chronological log of all file modifications, see `memory-bank/edit_history.md`.
+> For narrative changelog entries and key decisions, see `memory-bank/changelog.md`.
+> For current status and roadmap, see `memory-bank/activeContext.md` and `memory-bank/session_cache.md`.
+
+---
+
+## [Unreleased] (Previous Entries)
 
 ### Added
 - Real-time type management updates with immediate visualization feedback

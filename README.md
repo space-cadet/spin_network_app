@@ -1,18 +1,67 @@
 # Spin Network Visualization and Diffusion App
 
-An interactive web application for constructing, visualizing, and simulating diffusion processes on spin networks.
+An interactive web application for constructing, visualizing, and simulating diffusion processes on spin networks.  
+This project serves as an educational and research tool for exploring quantum geometric concepts through an interactive interface.
 
-![Spin Network Visualization App](public/spin-network-icon.svg)
+<!-- ![Spin Network Visualization App](public/spin-network-icon.svg) -->
+
+<img src="public/spin-network-icon.svg" alt="Spin Network Visualization App" width="200" height="200">
+
+---
+
+## Project Overview
+
+The Spin Network Visualization and Diffusion App enables users to:
+- Construct spin networks from scratch or templates
+- Edit network nodes (intertwiners) and edges (spins)
+- Visualize network structure, energy conservation, and simulation results
+- Simulate both ordinary and telegraph diffusion processes on arbitrary graphs
+- Analyze geometric and statistical properties of networks
 
 ## Features
 
-- Create and edit spin networks with various symmetries (lattice, circular, random)
-- Configure and run diffusion simulations with adjustable parameters
-- Visualize diffusion processes and energy conservation through interactive UI
-- Customizable workspace with resizable panels
-- Interactive network manipulation with intuitive controls
-- Comprehensive type management for visual customization
-- Simulation support for both ordinary and telegraph diffusion models
+- **Network Construction & Manipulation**
+  - Create and edit spin networks with various symmetries (lattice, circular, random)
+  - UI-based node/edge creation and deletion
+  - Comprehensive type management for visual customization (real-time updates, sidebar integration)
+- **Simulation Engine**
+  - Ordinary diffusion (heat equation) and telegraph equation models
+  - Multiple numerical solvers (Euler, Midpoint, RK4, Adaptive)
+  - Real-time visualization of propagation and energy conservation
+  - Parameter adjustment UI and results visualization
+- **State Management & Persistence**
+  - Redux for global state management (including simulation state)
+  - Undo/redo history for all network operations
+  - Recent networks feature for quick access
+  - Automatic state persistence using IndexedDB
+- **User Interface**
+  - Intuitive, responsive design with resizable and collapsible panels
+  - Dedicated panels for properties, type management, simulation controls, and network tools
+  - Hideable sidebars and customizable workspace
+  - Debug panel and raw data display for diagnostics
+- **Robust Error Handling & Diagnostics**
+  - Defensive programming throughout simulation and analysis
+  - Comprehensive logging and error feedback in the UI
+  - Fallback mechanisms for missing or invalid data
+  - Standalone simulation test page for debugging and verification
+
+## Current Status (April 2025)
+
+- ✅ Redux integration for simulation state and UI
+- ✅ Robust error handling and validation in all analysis modules
+- ✅ Performance optimizations: reduced re-renders, improved memoization, throttling
+- ✅ Debug tools: dedicated debug panel, raw data display, enhanced logging
+- ✅ Refactored large components for maintainability
+- 🔄 Ongoing: Advanced simulation analysis, component refactoring, database/log management
+
+## Technology Stack
+
+- **Frontend**: React with TypeScript
+- **Visualization**: Cytoscape.js (networks), D3.js (plots)
+- **Mathematics**: math.js, numeric.js
+- **State Management**: Redux
+- **Build System**: Vite
+- **Package Manager**: pnpm
 
 ## Getting Started
 
@@ -26,17 +75,28 @@ An interactive web application for constructing, visualizing, and simulating dif
 1. Clone this repository
 2. Install dependencies:
 
-```bash
-pnpm install
-```
+   ```bash
+   pnpm install
+   ```
 
 3. Start the development server:
 
-```bash
-pnpm dev
-```
+   ```bash
+   pnpm dev
+   ```
 
 4. Open your browser and navigate to [http://localhost:5173](http://localhost:5173)
+
+## Documentation & Memory Bank
+
+- For advanced usage, troubleshooting, and development history, see the `memory-bank/` directory:
+  - `projectbrief.md`: Project goals and requirements
+  - `progress.md`: Feature and milestone checklist
+  - `activeContext.md`: Current focus and roadmap
+  - `changelog.md`: Narrative changelog and key decisions
+  - `edit_history.md`: Chronological file modification log
+  - `session_cache.md`: Current session status and critical files
+- Additional technical docs are available in the `docs/` directory.
 
 ## User Interface
 
@@ -186,8 +246,4 @@ See the [CHANGELOG.md](CHANGELOG.md) for recent updates and the current developm
 
 ## License
 
-This project is for educational and research purposes.
-
-## Acknowledgments
-
-- The spin network and diffusion mathematics are based on concepts from loop quantum gravity and graph theory.
+[MIT](LICENSE)
