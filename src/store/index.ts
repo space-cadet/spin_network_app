@@ -16,6 +16,7 @@ import networkReducer from './slices/networkSlice';
 import uiReducer from './slices/uiSlice';
 import recentNetworksReducer from './slices/recentNetworksSlice';
 import typeReducer from './slices/typeSlice';
+import simulationReducer from './slices/simulationSlice';
 import typeUsageMiddleware from './middleware/typeUsageMiddleware';
 import { migrationFunction } from '../utils/migrations';
 
@@ -33,7 +34,7 @@ const persistConfig = {
   storage: localforage,
   migrate: migrationFunction,
   // We can blacklist any reducers we don't want to persist
-  blacklist: ['ui', 'recentNetworks', 'types'] // We handle these with their own persist configs
+  blacklist: ['ui', 'recentNetworks', 'types', 'simulation'] // We handle these with their own persist configs
 };
 
 // Configure UI persist options (selective persistence)
@@ -62,11 +63,22 @@ const typesPersistConfig = {
   migrate: migrationFunction,
 };
 
+// Configure simulation persist options
+const simulationPersistConfig = {
+  key: 'simulation',
+  version: 1, // Initial version
+  storage: localforage,
+  migrate: migrationFunction,
+  // Only persist parameters and recent results, not runtime state
+  whitelist: ['parameters', 'geometricData', 'statisticsData', 'conservationData']
+};
+
 // Create persisted reducers
 const persistedNetworkReducer = persistReducer(persistConfig, networkReducer);
 const persistedUiReducer = persistReducer(uiPersistConfig, uiReducer);
 const persistedRecentNetworksReducer = persistReducer(recentNetworksPersistConfig, recentNetworksReducer);
 const persistedTypeReducer = persistReducer(typesPersistConfig, typeReducer);
+const persistedSimulationReducer = persistReducer(simulationPersistConfig, simulationReducer);
 
 /**
  * Configure the Redux store with persisted reducers
@@ -77,6 +89,7 @@ const store = configureStore({
     ui: persistedUiReducer,
     recentNetworks: persistedRecentNetworksReducer,
     types: persistedTypeReducer,
+    simulation: persistedSimulationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

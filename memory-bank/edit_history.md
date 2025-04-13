@@ -2,6 +2,24 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-13: Implemented Redux Integration for Simulation State
+
+Modified files:
+- `/src/store/slices/simulationSlice.ts` - Created new Redux slice for simulation state
+- `/src/hooks/useReduxSimulation.ts` - Developed Redux-integrated simulation hook
+- `/src/components/simulation/SimulationResultsPanel.tsx` - Updated to use Redux state
+- `/src/components/panels/SimulationControlPanel.tsx` - Integrated with Redux actions
+- `/src/store/index.ts` - Added simulation state to Redux store with persistence
+- `/src/test-simulation.js` - Enhanced with improved error handling and data logging
+
+Issues addressed:
+- Fixed zero values in simulation results panels by centralizing state management
+- Implemented data persistence for simulation parameters and results
+- Added better synchronization between simulation engine and UI components
+- Enhanced error handling and fallback mechanisms throughout simulation system
+- Improved test simulation with better diagnostics and result collection
+- Created robust data flow architecture for simulation components
+
 ## 2025-04-13: Fixed Null Values in Simulation Data Processing and Display
 
 Modified files:

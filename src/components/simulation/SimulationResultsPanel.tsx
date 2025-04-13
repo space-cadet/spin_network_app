@@ -1,28 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaChartPie, FaChartLine, FaRuler, FaInfoCircle } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
-import { useSimulation } from '../../hooks/useSimulation';
+import { useReduxSimulation } from '../../hooks/useReduxSimulation';
 import { SpinNetworkGeometryCalculator } from '../../simulation/analysis/geometricProps';
 import { SimulationAnalyzer } from '../../simulation/analysis/statistics';
 import { simulationLogger } from '../../simulation/core/simulationLogger';
 import RawDataDisplay from './RawDataDisplay';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 const SimulationResultsPanel: React.FC = () => {
-  // Handle undefined values from useSimulation gracefully
-  const simulation = useSimulation();
-  const currentTime = simulation?.currentTime || 0;
-  const [hasHistory, setHasHistory] = useState(simulation?.hasHistory || false);
-  const isRunning = simulation?.isRunning || false;
+  // Get simulation from Redux-integrated hook
+  const simulation = useReduxSimulation();
+  
+  // Get simulation state directly from Redux
+  const { currentTime, isRunning, hasHistory, geometricData, statisticsData, conservationData } = useSelector(
+    (state: RootState) => state.simulation
+  );
+  
+  // Use a local state for active tab to avoid too many Redux updates for UI
+  const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
+  const [refreshCounter, setRefreshCounter] = useState(0); // Used to force re-renders
   
   // Enhanced logging to debug simulation data flow
-  console.log("useSimulation hook returned:", {
+  console.log("useReduxSimulation hook and Redux state:", {
     currentTime,
     hasHistory,
     isRunning,
     hasGetGraph: typeof simulation?.getGraph === 'function',
     hasGetCurrentState: typeof simulation?.getCurrentState === 'function',
-    graphData: simulation && typeof simulation.getGraph === 'function' ? 'Fetching graph...' : 'No getGraph method',
-    stateData: simulation && typeof simulation.getCurrentState === 'function' ? 'Fetching state...' : 'No getCurrentState method'
+    geometricData,
+    statisticsData,
+    conservationData
   });
   
   // Inspect actual graph and state data
@@ -44,447 +53,30 @@ const SimulationResultsPanel: React.FC = () => {
     });
   }
   
-  const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
-  const [refreshCounter, setRefreshCounter] = useState(0); // Used to force re-renders
-  const [geometricData, setGeometricData] = useState({
-    totalVolume: 0,
-    totalArea: 0,
-    effectiveDimension: 0,
-    volumeEntropy: 0
-  });
-  
-  const [statisticsData, setStatisticsData] = useState({
-    mean: 0,
-    variance: 0,
-    skewness: 0,
-    kurtosis: 0
-  });
-  
-  // Run initial calculation once when component mounts
+  // Effect to log when component mounts or refreshes
   useEffect(() => {
-    console.log("SimulationResultsPanel mounted - will perform initial data calculation");
-    // Delay the initial calculation to ensure all hooks are properly initialized
-    setTimeout(() => {
-      if (simulation && (simulation.isRunning || simulation.hasHistory)) {
-        console.log("Running initial analysis calculation");
-        // Get initial data
-        try {
-          const currentState = simulation.getCurrentState ? simulation.getCurrentState() : null;
-          const graph = simulation.getGraph ? simulation.getGraph() : null;
-          if (currentState && graph) {
-            console.log("Initial data available - calculating");
-            // Intentionally call function logic directly rather than through updateAnalysisData
-            // to avoid any issues with function references or closures
-            const geometryCalculator = new SpinNetworkGeometryCalculator();
-            setGeometricData({
-              totalVolume: geometryCalculator.calculateTotalVolume(currentState),
-              volumeEntropy: geometryCalculator.calculateVolumeEntropy(currentState),
-              totalArea: geometryCalculator.calculateTotalArea(graph),
-              effectiveDimension: geometryCalculator.calculateEffectiveDimension(graph, currentState)
-            });
-            
-            const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
-            setStatisticsData({
-              mean: stats.mean,
-              variance: stats.variance,
-              skewness: 0,
-              kurtosis: 0
-            });
-          }
-        } catch (error) {
-          console.error("Error in initial analysis calculation:", error);
-        }
-      }
-    }, 100);
+    console.log("SimulationResultsPanel mounted/refreshed - using Redux data:", {
+      geometricData,
+      statisticsData,
+      conservationData
+    });
+  }, [geometricData, statisticsData, conservationData]);
+  
+  // Force refresh function that will cause Redux to update by forcing a data sync
+  const forceDataRefresh = useCallback(() => {
+    console.log("Force refresh requested");
+    setRefreshCounter(prev => prev + 1);
   }, []);
   
-  // Get conservation data from simulation with better fallback handling
-  const conservationData = (() => {
-    try {
-      // First try to get data directly from simulation engine
-      if (simulation && simulation.getConservationLaws) {
-        const data = simulation.getConservationLaws();
-        
-        // Check if we actually got valid data
-        if (data && typeof data.totalProbability === 'number' && data.totalProbability > 0) {
-          console.log("Got valid conservation data from simulation:", data);
-          return data;
-        } else {
-          console.warn("Conservation data from simulation was invalid:", data);
-        }
-      }
-      
-      // Try to get data from simulation logs as a fallback
-      // This is especially useful after a simulation has finished running
-      const simulationLogs = simulationLogger.getCurrentSession();
-      if (simulationLogs && simulationLogs.results.length > 0) {
-        // Get the most recent result
-        const latestResult = simulationLogs.results[simulationLogs.results.length - 1];
-        
-        if (latestResult && latestResult.conservation) {
-          console.log("Using conservation data from logs:", latestResult.conservation);
-          return latestResult.conservation;
-        }
-      }
-      
-      console.warn("Could not get valid conservation data from any source");
-      return {
-        totalProbability: 0,
-        positivity: false,
-        normVariation: 0,
-      };
-    } catch (error) {
-      console.error("Error getting conservation data:", error);
-      return {
-        totalProbability: 0,
-        positivity: false,
-        normVariation: 0,
-      };
-    }
-  })();
-  
-  // Enhanced helper function to safely update analysis data with fallbacks
-  const updateAnalysisData = () => {
-    if (!simulation) {
-      console.warn("updateAnalysisData called with no simulation object");
-      return;
-    }
-    
-    try {
-      // Try to get the current state and graph
-      const currentState = simulation.getCurrentState ? simulation.getCurrentState() : null;
-      const graph = simulation.getGraph ? simulation.getGraph() : null;
-      
-      // More detailed diagnostics
-      console.log("Analysis data check:", {
-        hasCurrentState: !!currentState,
-        hasGraph: !!graph,
-        currentStateSize: currentState ? currentState.size : 0,
-        graphNodeCount: graph ? graph.nodes.length : 0,
-        graphEdgeCount: graph ? graph.edges.length : 0,
-        simulationTime: simulation.currentTime
-      });
-      
-      // Default values in case calculations fail
-      let calculatedGeometricData = {
-        totalVolume: 0,
-        volumeEntropy: 0,
-        totalArea: 0,
-        effectiveDimension: 0
-      };
-      
-      let calculatedStatisticsData = {
-        mean: 0,
-        variance: 0,
-        skewness: 0,
-        kurtosis: 0
-      };
-      
-      // Flag to track if we've successfully calculated any data
-      let hasCalculatedAnyData = false;
-      let dataSource = "none";
-      
-      // CRITICAL FIX: Always check logs first to have a fallback
-      // Even if we have current state data, we'll still load logs data as a backup
-      console.log("Checking logs for backup data...");
-      
-      const logsSession = simulationLogger.getCurrentSession();
-      if (logsSession && logsSession.results.length > 0) {
-        // Get the most recent result
-        const latestResult = logsSession.results[logsSession.results.length - 1];
-        
-        // Load backup data from logs if available
-        if (latestResult) {
-          console.log("Found log data for fallback:", latestResult);
-          
-          // Backup geometric data
-          if (latestResult.geometric) {
-            calculatedGeometricData = {
-              totalVolume: latestResult.geometric.totalVolume || 0,
-              volumeEntropy: latestResult.geometric.volumeEntropy || 0,
-              totalArea: latestResult.geometric.totalArea || 0,
-              effectiveDimension: latestResult.geometric.effectiveDimension || 0
-            };
-            hasCalculatedAnyData = true;
-            dataSource = "logs";
-          }
-          
-          // Backup statistics data
-          if (latestResult.statistics) {
-            calculatedStatisticsData = {
-              mean: latestResult.statistics.mean || 0,
-              variance: latestResult.statistics.variance || 0,
-              skewness: latestResult.statistics.skewness || 0,
-              kurtosis: latestResult.statistics.kurtosis || 0
-            };
-            hasCalculatedAnyData = true;
-            dataSource = "logs";
-          }
-          
-          console.log("Loaded backup data from logs, will use if live calculations fail");
-        }
-      }
-      
-      // If we have valid state and graph, attempt live calculations
-      if (currentState && graph && currentState.size > 0 && graph.nodes.length > 0) {
-        console.log("Valid simulation state and graph available, performing live calculations");
-        
-        try {
-          // Calculate geometric properties
-          console.log("Beginning geometric calculations...");
-          const geometryCalculator = new SpinNetworkGeometryCalculator();
-          
-          // Use try/catch for each calculation to prevent one failure from stopping others
-          let totalVolume = 0;
-          let volumeEntropy = 0;
-          let totalArea = 0;
-          let effectiveDimension = 0;
-          let liveCalculationSucceeded = false;
-          
-          // Total Volume
-          try {
-            console.log("Calculating total volume...");
-            totalVolume = geometryCalculator.calculateTotalVolume(currentState);
-            if (Number.isFinite(totalVolume) && totalVolume !== 0) {
-              calculatedGeometricData.totalVolume = totalVolume;
-              liveCalculationSucceeded = true;
-            }
-          } catch (volumeError) {
-            console.error("Error calculating total volume:", volumeError);
-          }
-          
-          // Volume Entropy
-          try {
-            console.log("Calculating volume entropy...");
-            volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
-            if (Number.isFinite(volumeEntropy)) {
-              calculatedGeometricData.volumeEntropy = volumeEntropy;
-              liveCalculationSucceeded = true;
-            }
-          } catch (entropyError) {
-            console.error("Error calculating volume entropy:", entropyError);
-          }
-          
-          // Total Area
-          try {
-            console.log("Calculating total area...");
-            totalArea = geometryCalculator.calculateTotalArea(graph);
-            if (Number.isFinite(totalArea) && totalArea !== 0) {
-              calculatedGeometricData.totalArea = totalArea;
-              liveCalculationSucceeded = true;
-            }
-          } catch (areaError) {
-            console.error("Error calculating total area:", areaError);
-          }
-          
-          // Effective Dimension
-          try {
-            console.log("Calculating effective dimension...");
-            effectiveDimension = geometryCalculator.calculateEffectiveDimension(graph, currentState);
-            if (Number.isFinite(effectiveDimension) && effectiveDimension !== 0) {
-              calculatedGeometricData.effectiveDimension = effectiveDimension;
-              liveCalculationSucceeded = true;
-            }
-          } catch (dimensionError) {
-            console.error("Error calculating effective dimension:", dimensionError);
-          }
-          
-          if (liveCalculationSucceeded) {
-            console.log("Live geometric calculations succeeded:", calculatedGeometricData);
-            hasCalculatedAnyData = true;
-            dataSource = "live";
-          } else {
-            console.warn("Live geometric calculations failed, using log data if available");
-          }
-          
-          // Calculate statistics
-          try {
-            console.log("Beginning statistics calculations...");
-            const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
-            
-            if (stats && Number.isFinite(stats.mean)) {
-              calculatedStatisticsData.mean = stats.mean;
-              calculatedStatisticsData.variance = stats.variance;
-              
-              // We don't calculate these yet, but keep placeholders
-              calculatedStatisticsData.skewness = 0; 
-              calculatedStatisticsData.kurtosis = 0;
-              
-              console.log("Live statistics calculations succeeded:", calculatedStatisticsData);
-              hasCalculatedAnyData = true;
-              dataSource = "live";
-            } else {
-              console.warn("Live statistics calculations produced invalid data");
-            }
-          } catch (statsError) {
-            console.error("Error calculating statistics:", statsError);
-          }
-        } catch (calculationError) {
-          console.error("Error during live calculations:", calculationError);
-        }
-      } else {
-        console.warn("Missing or invalid simulation data, using logs fallback exclusively");
-      }
-      
-      // Force hasHistory to true if we're using log data
-      if (dataSource === "logs" && simulation && typeof simulation.getHistory === 'function') {
-        try {
-          const history = simulation.getHistory();
-          if (history && typeof history.getTimes === 'function') {
-            const times = history.getTimes();
-            setHasHistory(times.length > 0);
-          }
-        } catch (historyError) {
-          console.error("Error checking history:", historyError);
-        }
-      }
-      
-      // Update state with our calculated data, regardless of source
-      if (hasCalculatedAnyData) {
-        console.log(`Updating UI with ${dataSource} data:`, {
-          geometric: calculatedGeometricData,
-          statistics: calculatedStatisticsData
-        });
-        
-        setGeometricData(calculatedGeometricData);
-        setStatisticsData(calculatedStatisticsData);
-      } else {
-        console.warn("No valid data calculated from any source");
-      }
-    } catch (error) {
-      console.error("Error calculating analysis data:", error);
-      
-      // Type-safe error handling
-      if (error instanceof Error) {
-        console.error("Error details:", {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
-      } else {
-        console.error("Unknown error type:", error);
-      }
-    }
-  };
-  
-  // Calculate geometric and statistical data
+  // Minimal refresh effect that connects refresh counter to Redux sync
   useEffect(() => {
-    // Only calculate if simulation has data
-    if (simulation && (simulation.isRunning || simulation.hasHistory)) {
-      console.log("Triggering analysis data calculation");
-      updateAnalysisData();
-    } else {
-      console.log("Simulation not running or no history, skipping analysis calculations");
+    if (refreshCounter > 0 && simulation) {
+      // The useReduxSimulation hook already handles syncing data to Redux
+      console.log("Refresh counter incremented, data sync should occur in the hook");
     }
-    
-    // Add a console log showing the specific changes that triggered this effect
-    console.log("Analysis calculation effect triggered by:", {
-      refreshCounter,
-      currentTime: simulation?.currentTime,
-      isRunning: simulation?.isRunning,
-      simulationChanged: true,
-      hasHistory: simulation?.hasHistory
-    });
-  }, [simulation, refreshCounter, simulation?.currentTime, simulation?.isRunning, simulation?.hasHistory]);
+  }, [refreshCounter, simulation]);
 
-  // Enhanced auto-refresh for simulation results
-  useEffect(() => {
-    console.log("Setting up enhanced refresh mechanism:", {
-      isRunning,
-      hasHistory,
-      currentTime,
-      simulationExists: !!simulation
-    });
-    
-    // Create both interval-based and animation frame-based refresh
-    let timer: number | null = null;
-    let animationFrame: number | null = null;
-    
-    const refreshFunction = () => {
-      // Only update if simulation still exists
-      if (simulation) {
-        // Check if simulation data has actually changed
-        const newTime = simulation.currentTime;
-        const newRunning = simulation.isRunning;
-        
-        console.log("Checking for simulation state changes:", {
-          newTime,
-          currentTimeInState: currentTime,
-          newRunning,
-          isRunningInState: isRunning
-        });
-        
-        // Force update counter on any change to trigger recalculation
-        if (newTime !== currentTime || newRunning !== isRunning) {
-          console.log("Simulation state changed - forcing refresh");
-          setRefreshCounter(prev => prev + 1);
-          updateAnalysisData();
-        }
-        
-        // Schedule next animation frame if still running
-        if (newRunning) {
-          animationFrame = requestAnimationFrame(refreshFunction);
-        }
-      }
-    };
-    
-    if (isRunning) {
-      // Initial calculation
-      console.log("Simulation is running - performing initial calculation");
-      updateAnalysisData();
-      
-      // Use both interval for guaranteed updates and animation frame for smooth updates
-      
-      // Interval-based polling as a fallback (at a lower frequency)
-      timer = window.setInterval(() => {
-        console.log("Interval timer triggered - checking state");
-        setRefreshCounter(prev => prev + 1);
-        updateAnalysisData();
-      }, 1000); // Every second as a fallback
-      
-      // Animation frame for smooth, continuous updates
-      animationFrame = requestAnimationFrame(refreshFunction);
-      
-      console.log("Enhanced refresh mechanism set up with both interval and animation frame");
-    } else if (hasHistory) {
-      // If not running but has history, calculate once
-      console.log("Simulation not running but has history - performing one-time calculation");
-      updateAnalysisData();
-      
-      // Even for non-running simulations, set up a slow polling interval
-      // to catch any external state changes (e.g., from debug panel)
-      timer = window.setInterval(() => {
-        updateAnalysisData();
-      }, 2000); // Every 2 seconds for history mode
-    } else {
-      console.log("Neither running nor has history - setting up minimal polling");
-      
-      // Even when no data exists, set up a very infrequent check
-      // to detect when simulation becomes available
-      timer = window.setInterval(() => {
-        if (simulation?.isRunning || simulation?.hasHistory) {
-          console.log("Simulation became available during polling");
-          setRefreshCounter(prev => prev + 1);
-          updateAnalysisData();
-        }
-      }, 3000); // Every 3 seconds when idle
-    }
-    
-    return () => {
-      // Clean up both timers
-      if (timer !== null) {
-        console.log("Cleaning up interval timer");
-        window.clearInterval(timer);
-      }
-      
-      if (animationFrame !== null) {
-        console.log("Cleaning up animation frame");
-        cancelAnimationFrame(animationFrame);
-      }
-    };
-  }, [isRunning, hasHistory, simulation]);
-
-  // Enhanced data availability detection with more robust checks
+  // Enhanced data availability detection with more robust checks - now using Redux state
   const hasAnyData = (() => {
     // Function to check if a value is valid and non-zero
     const isValidData = (value: any): boolean => {
@@ -512,66 +104,33 @@ const SimulationResultsPanel: React.FC = () => {
                                isValidData(statisticsData.skewness) || 
                                isValidData(statisticsData.kurtosis);
     
-    // Check logs as a fallback
+    // Logs check is still a good fallback even with Redux
     let fromLogs = false;
     try {
       const logsSession = simulationLogger.getCurrentSession();
       if (logsSession && Array.isArray(logsSession.results) && logsSession.results.length > 0) {
-        // Further validate log data - check if the latest result has any valid properties
         const latestResult = logsSession.results[logsSession.results.length - 1];
-        
-        if (latestResult) {
-          // Check for valid conservation data in logs
-          if (latestResult.conservation && 
-              Number.isFinite(latestResult.conservation.totalProbability) && 
-              latestResult.conservation.totalProbability > 0) {
-            fromLogs = true;
-          }
-          
-          // Check for valid geometric data in logs
-          if (latestResult.geometric && (
-              isValidData(latestResult.geometric.totalVolume) || 
-              isValidData(latestResult.geometric.totalArea) || 
-              isValidData(latestResult.geometric.effectiveDimension) || 
-              isValidData(latestResult.geometric.volumeEntropy))) {
-            fromLogs = true;
-          }
-          
-          // Check for valid statistics data in logs
-          if (latestResult.statistics && (
-              isValidData(latestResult.statistics.mean) || 
-              isValidData(latestResult.statistics.variance))) {
-            fromLogs = true;
-          }
-        }
+        fromLogs = !!latestResult && (
+          (latestResult.conservation && Number.isFinite(latestResult.conservation.totalProbability)) ||
+          (latestResult.geometric && isValidData(latestResult.geometric.totalVolume)) ||
+          (latestResult.statistics && isValidData(latestResult.statistics.mean))
+        );
       }
     } catch (error) {
       console.error("Error checking log data:", error);
     }
     
-    // Detailed logging of data sources
-    console.log("Data source check:", {
+    // Log debug information
+    console.log("Redux Data source check:", {
       fromRunningState,
       fromHistoryFlag,
       fromConservationData,
       fromGeometricData,
       fromStatisticsData,
       fromLogs,
-      conservationData: conservationData ? {
-        totalProbability: conservationData.totalProbability,
-        normVariation: conservationData.normVariation,
-        positivity: conservationData.positivity
-      } : null,
-      geometricData: {
-        totalVolume: geometricData.totalVolume,
-        totalArea: geometricData.totalArea,
-        effectiveDimension: geometricData.effectiveDimension,
-        volumeEntropy: geometricData.volumeEntropy
-      },
-      statisticsData: {
-        mean: statisticsData.mean,
-        variance: statisticsData.variance
-      },
+      conservationData,
+      geometricData,
+      statisticsData,
       hasHistory,
       isRunning
     });

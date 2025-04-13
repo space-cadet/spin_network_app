@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   FaPlay, 
   FaPause, 
@@ -11,13 +11,14 @@ import {
   FaChevronUp
 } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
-import { useSimulation } from '../../hooks/useSimulation';
-import { useSelector } from 'react-redux';
+import { useReduxSimulation } from '../../hooks/useReduxSimulation';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { 
   SimulationParameters, 
   StandardWeightFunction 
 } from '../../simulation/core/types';
+import { setActiveTab, setIsPanelExpanded } from '../../store/slices/simulationSlice';
 
 interface TimeSliderProps {
   currentTime: number;
@@ -290,16 +291,21 @@ const TabNav: React.FC<TabInterface> = ({ activeTab, onTabChange }) => {
 };
 
 const SimulationControlPanel: React.FC = () => {
-  // Check if network exists first - access the current network correctly
+  // Check if network exists first
   const network = useSelector((state: RootState) => state.network?.currentNetwork);
   const hasNetwork = !!(network && network.nodes && network.nodes.length > 0);
   
-  // Safe access to useSimulation
+  // Get Redux dispatch function
+  const dispatch = useDispatch();
+  
+  // Get simulation from Redux-integrated hook
   const {
     isRunning,
     parameters,
     currentTime,
     hasHistory,
+    activeTab,
+    isPanelExpanded,
     startSimulation,
     pauseSimulation,
     stepSimulation,
@@ -307,17 +313,23 @@ const SimulationControlPanel: React.FC = () => {
     jumpToTime,
     updateParameters,
     updateInitialStateParams
-  } = useSimulation();
+  } = useReduxSimulation();
   
-  const [activeTab, setActiveTab] = useState<'parameters' | 'analysis'>('parameters');
-  const [isPanelExpanded, setIsPanelExpanded] = useState<boolean>(true);
+  // Use Redux actions for UI state
+  const handleSetActiveTab = (tab: 'parameters' | 'analysis') => {
+    dispatch(setActiveTab(tab));
+  };
+  
+  const handleSetIsPanelExpanded = (expanded: boolean) => {
+    dispatch(setIsPanelExpanded(expanded));
+  };
 
   return (
     <div className="simulation-control-panel overflow-hidden border rounded-md shadow-sm">
       {/* Collapsible header */}
       <div 
         className="bg-gray-50 p-3 border-b flex items-center justify-between cursor-pointer"
-        onClick={() => setIsPanelExpanded(!isPanelExpanded)}
+        onClick={() => handleSetIsPanelExpanded(!isPanelExpanded)}
       >
         <h3 className="text-lg font-medium flex items-center">
           <span>Simulation Controls</span>
@@ -338,7 +350,7 @@ const SimulationControlPanel: React.FC = () => {
       {isPanelExpanded && (
         <div className="p-4 overflow-y-auto">
           {/* Tab navigation */}
-          <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+          <TabNav activeTab={activeTab} onTabChange={handleSetActiveTab} />
       
           {/* Network warning banner */}
           {!hasNetwork && (
