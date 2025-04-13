@@ -5,7 +5,9 @@ This project serves as an educational and research tool for exploring quantum ge
 
 <!-- ![Spin Network Visualization App](public/spin-network-icon.svg) -->
 
-<img src="public/spin-network-icon.svg" alt="Spin Network Visualization App" width="200" height="200">
+<p align="center">
+<img src="public/spin-network-icon.svg" alt="Spin Network Visualization App" width="200" height="200" class="center">
+</p>
 
 ---
 
