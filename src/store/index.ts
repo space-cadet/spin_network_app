@@ -17,6 +17,7 @@ import uiReducer from './slices/uiSlice';
 import recentNetworksReducer from './slices/recentNetworksSlice';
 import typeReducer from './slices/typeSlice';
 import simulationReducer from './slices/simulationSlice';
+import logsReducer from './slices/logsSlice';
 import typeUsageMiddleware from './middleware/typeUsageMiddleware';
 import { migrationFunction } from '../utils/migrations';
 
@@ -80,6 +81,19 @@ const persistedRecentNetworksReducer = persistReducer(recentNetworksPersistConfi
 const persistedTypeReducer = persistReducer(typesPersistConfig, typeReducer);
 const persistedSimulationReducer = persistReducer(simulationPersistConfig, simulationReducer);
 
+// Configure logs persist options
+const logsPersistConfig = {
+  key: 'logs',
+  version: 1, // Initial version
+  storage: localforage,
+  migrate: migrationFunction,
+  // Only persist query options and not the log data itself
+  whitelist: ['queryOptions']
+};
+
+// Create persisted reducers
+const persistedLogsReducer = persistReducer(logsPersistConfig, logsReducer);
+
 /**
  * Configure the Redux store with persisted reducers
  */
@@ -90,6 +104,7 @@ const store = configureStore({
     recentNetworks: persistedRecentNetworksReducer,
     types: persistedTypeReducer,
     simulation: persistedSimulationReducer,
+    logs: persistedLogsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

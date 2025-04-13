@@ -1,5 +1,6 @@
 // src/components/logs/LogViewerAdapter.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
@@ -12,9 +13,29 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { LogEntry, LogType, LogQueryOptions } from '../../database/models/logModels';
-import { LogService } from '../../database/services/logService';
+import { 
+  fetchLogs, 
+  markErrorFixed, 
+  exportLogs, 
+  setQueryOptions 
+} from '../../store/slices/logsSlice';
+import { RootState } from '../../store';
 
-// ... props interface from before ...
+/**
+ * Props for LogViewerAdapter component
+ */
+export interface LogViewerAdapterProps {
+  /** Default log types to display */
+  defaultLogType?: LogType | LogType[];
+  /** Default limit of logs to fetch per page */
+  defaultLimit?: number;
+  /** Whether to show filtering controls */
+  showFilters?: boolean;
+  /** Whether to allow exporting logs */
+  allowExport?: boolean;
+  /** Height of the DataTable */
+  height?: string;
+}
 
 export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
   defaultLogType = ['error', 'edit'],
@@ -23,32 +44,90 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
   allowExport = true,
   height = '600px',
 }) => {
-  // ... state variables from before ...
+  const dispatch = useDispatch();
+  const { 
+    logs, 
+    totalLogs, 
+    status, 
+    error, 
+    queryOptions 
+  } = useSelector((state: RootState) => state.logs);
+
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
   const dt = useRef<any>(null);
   const toast = useRef<any>(null);
+  
+  const loading = status === 'loading';
 
-  // ... fetchLogs effect, handleSearch, handleFilterChange, and handleExport from before ...
+  // Initialize query options on component mount
+  useEffect(() => {
+    dispatch(setQueryOptions({
+      type: defaultLogType,
+      limit: defaultLimit,
+      offset: 0,
+      sort: 'desc'
+    }));
+  }, [dispatch, defaultLogType, defaultLimit]);
 
-  const onPage = (event) => {
-    setQueryOptions((prev) => ({
-      ...prev,
+  // Fetch logs when query options change
+  useEffect(() => {
+    dispatch(fetchLogs(queryOptions));
+  }, [dispatch, queryOptions]);
+
+  // Show error toast if fetch fails
+  useEffect(() => {
+    if (status === 'failed' && error) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Failed to fetch logs: ${error}`,
+        life: 3000
+      });
+    }
+  }, [status, error]);
+
+  // Handle search input
+  const handleSearch = (value: string) => {
+    dispatch(setQueryOptions({
+      ...queryOptions,
+      search: value || undefined,
+      offset: 0 // Reset pagination when searching
+    }));
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (changes: Partial<LogQueryOptions>) => {
+    dispatch(setQueryOptions({
+      ...queryOptions,
+      ...changes,
+      offset: 0 // Reset pagination when changing filters
+    }));
+  };
+
+  // Handle export
+  const handleExport = (format: 'json' | 'markdown') => {
+    dispatch(exportLogs({ format, options: queryOptions }));
+  };
+
+  const onPage = (event: any) => {
+    dispatch(setQueryOptions({
+      ...queryOptions,
       limit: event.rows,
       offset: event.first,
     }));
   };
 
-  const onSort = (event) => {
-    setQueryOptions((prev) => ({
-      ...prev,
+  const onSort = (event: any) => {
+    dispatch(setQueryOptions({
+      ...queryOptions,
       sort: event.sortOrder === 1 ? 'asc' : 'desc',
     }));
   };
 
-  const onFilter = (event) => {
-    setQueryOptions((prev) => ({
-      ...prev,
+  const onFilter = (event: any) => {
+    dispatch(setQueryOptions({
+      ...queryOptions,
       search: event.filters.global?.value || undefined,
     }));
   };
@@ -167,19 +246,15 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
               <Button 
                 label="Mark as Fixed" 
                 className="mt-2" 
-                onClick={async () => {
+                onClick={() => {
                   try {
-                    await LogService.markErrorAsFixed(selectedLog.id!);
+                    dispatch(markErrorFixed(selectedLog.id!));
                     toast.current.show({ 
                       severity: 'success', 
                       summary: 'Success', 
                       detail: 'Error marked as fixed' 
                     });
                     setDetailsVisible(false);
-                    
-                    // Refresh logs
-                    const fetchedLogs = await LogService.queryLogs(queryOptions);
-                    setLogs(fetchedLogs);
                   } catch (err) {
                     toast.current.show({ 
                       severity: 'error', 
@@ -197,7 +272,7 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
   };
 
   return (
-    <div className="card">
+    <div className="card primereact-scope">
       <Toast ref={toast} />
       
       {showFilters && (

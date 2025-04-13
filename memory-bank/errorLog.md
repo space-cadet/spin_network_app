@@ -1,5 +1,38 @@
 # Error Log
 
+## 2025-04-13 23:45 IST - Syntax Error in Template Literals
+
+**File:** `src/utils/logMigrationUtil.ts`
+
+**Error Message:**
+```
+/Users/deepak/code/spin_network_app/src/utils/logMigrationUtil.ts:160:19: ERROR: Syntax error "`"
+  Plugin: vite:esbuild
+  File: /Users/deepak/code/spin_network_app/src/utils/logMigrationUtil.ts:160:19
+  Syntax error "`"
+  158|      if (result.success) {
+  159|        console.log('✅ Migration completed successfully:');
+  160|        console.log(\`- Error logs migrated: \${result.errorLogsMigrated}\`);
+     |                     ^
+  161|        console.log(\`- Edit logs migrated: \${result.editLogsMigrated}\`);
+  162|        console.log(\`- Total logs migrated: \${result.totalLogsMigrated}\`);
+```
+
+**Cause:**
+The template literals in the log messages were using escaped backticks (`\``) instead of regular backticks (`\``). This occurred because the file was created using a heredoc in the shell script which required escaping the backticks, but the actual TypeScript file needed unescaped backticks.
+
+**Fix:**
+Updated the template literals to use proper syntax:
+
+```typescript
+console.log(`- Error logs migrated: ${result.errorLogsMigrated}`);
+console.log(`- Edit logs migrated: ${result.editLogsMigrated}`);
+console.log(`- Total logs migrated: ${result.totalLogsMigrated}`);
+```
+
+**Affected Files:**
+- src/utils/logMigrationUtil.ts
+
 ## 2025-04-13 14:45 IST - Infinite Loop and React Render Loop on Simulation Pause
 
 **File:** `src/hooks/useSimulation.ts`, `src/components/simulation/SimulationResultsPanel.tsx`

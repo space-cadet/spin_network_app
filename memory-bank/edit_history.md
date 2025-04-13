@@ -2,6 +2,30 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-13 23:45 IST: Implemented Log Rotation and Isolated PrimeReact CSS
+
+Modified files:
+- `/src/main.tsx` - Updated to use scoped PrimeReact CSS instead of global styles
+- `/src/styles/primereact-scoped.css` - Created new file with scoped CSS for PrimeReact components
+- `/src/components/logs/LogViewerAdapter.tsx` - Updated to use scoped CSS class
+- `/src/components/logs/LogMigrationTool.tsx` - Created tool for migrating logs
+- `/src/components/logs/SimulationLogsPanel.tsx` - Added combined log viewer
+- `/src/components/logs/index.ts` - Updated to export all log components
+- `/src/components/simulation/EnhancedLogsPanel.tsx` - Created enhanced logs panel with tabs
+- `/src/components/simulation/index.ts` - Updated to use enhanced logs panel
+- `/src/utils/logRotationUtil.ts` - Added utility for log rotation
+- `/src/hooks/useLogRotation.ts` - Added hook for log rotation during startup
+- `/integrated-rules-v2.md` - Updated with log rotation protocol
+- `/memory-bank/archive` - Created directory structure for log rotation
+
+Issues addressed:
+- Implemented CSS isolation for PrimeReact components to maintain original app appearance
+- Created log rotation protocol and utility following Linux-style log rotation
+- Added enhanced logs panel with tabs for simulation logs and application logs
+- Added log migration tool for importing from Markdown to database
+- Fixed syntax errors in template literals
+- Created proper directory structure for log archive
+
 ## 2025-04-13 23:15 IST: Implemented Database Solution with PrimeReact Log Viewer
 
 Modified files:

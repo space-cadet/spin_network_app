@@ -517,6 +517,48 @@ The edit history should be organized chronologically with timestamps:
 
 For rapid sequential edits, changes can be batched under a single time entry to maintain efficiency while preserving the chronological record.
 
+### 9.6 Log Rotation Protocol
+
+To maintain manageable file sizes and performance, logs should be rotated following these guidelines:
+
+```markdown
+# Log Rotation Protocol
+
+## Error and Edit History Log Management
+
+1. **File Format and Location**
+   - errorLog.md and edit_history.md will remain as Markdown text files
+   - Files will be stored in the memory-bank directory
+   - Format remains consistent with existing templates
+
+2. **Log Rotation Criteria**
+   - Rotate logs when they reach a predefined size (default: 500KB)
+   - Rotate logs when they reach a maximum entry count (default: 200 entries)
+   - Rotate logs at predefined time intervals (e.g., quarterly)
+
+3. **Rotation Process**
+   - When rotation criteria are met:
+     a. Rename current log file with timestamp suffix (e.g., errorLog-20250413.md)
+     b. Move renamed file to memory-bank/archive directory
+     c. Create new empty log file with standard template
+     d. Add rotation note as the first entry in the new log
+
+4. **Archive Management**
+   - Keep a maximum of 10 archived log files
+   - Oldest files may be compressed or removed based on project requirements
+   - Archive directory structure: memory-bank/archive/[year]/[filename]
+
+5. **Index File**
+   - Maintain an index.md file listing all archived logs
+   - Include rotation dates, file sizes, and entry counts
+   - Update automatically during rotation process
+
+6. **Accessing Log History**
+   - Current logs are directly accessible in memory-bank
+   - Log viewer interface should support viewing both current and archived logs
+   - Search functionality should span across current and archived logs
+```
+
 ## 10. External Tools and Integration
 
 ### 10.1 MCP (Model Context Protocol) Servers

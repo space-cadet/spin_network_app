@@ -4,6 +4,12 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import App from './App.tsx';
 import { store, persistor } from './store';
+
+// Import PrimeReact core functionality (without global styling)
+import 'primeicons/primeicons.css'; // Only icons - required for icons to display
+
+// Import our scoped CSS for PrimeReact components
+import './styles/primereact-scoped.css';
 import './styles/index.css';
 
 // Import test utility in development mode

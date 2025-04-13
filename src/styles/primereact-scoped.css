@@ -1,0 +1,198 @@
+/* 
+ * Scoped PrimeReact styles
+ * This CSS file isolates PrimeReact styling to specific components only
+ */
+
+/* Define a wrapper class that will contain all PrimeReact components */
+.primereact-scope .p-component,
+.primereact-scope.p-component {
+  /* Override font to match the application */
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Reset borders and backgrounds to match application */
+.primereact-scope .p-component,
+.primereact-scope.p-component,
+.primereact-scope .p-inputtext,
+.primereact-scope .p-button {
+  border-radius: 0.25rem;
+}
+
+/* Specific components overrides */
+.primereact-scope .p-datatable {
+  font-family: inherit;
+}
+
+.primereact-scope .p-datatable .p-datatable-header {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-width: 1px 1px 0 1px;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.primereact-scope .p-datatable .p-datatable-thead > tr > th {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.primereact-scope .p-datatable .p-datatable-tbody > tr > td {
+  border: 1px solid #e9ecef;
+  border-width: 0 0 1px 0;
+  padding: 0.75rem 1rem;
+}
+
+.primereact-scope .p-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  margin-right: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.primereact-scope .p-tag.p-tag-danger {
+  background-color: #f44336;
+  color: #ffffff;
+}
+
+.primereact-scope .p-tag.p-tag-warning {
+  background-color: #ff9800;
+  color: #ffffff;
+}
+
+.primereact-scope .p-tag.p-tag-success {
+  background-color: #4caf50;
+  color: #ffffff;
+}
+
+.primereact-scope .p-tag.p-tag-info {
+  background-color: #2196f3;
+  color: #ffffff;
+}
+
+.primereact-scope .p-tag.p-tag-secondary {
+  background-color: #607d8b;
+  color: #ffffff;
+}
+
+.primereact-scope .p-tag.p-tag-primary {
+  background-color: #3f51b5;
+  color: #ffffff;
+}
+
+/* Dialog styling */
+.primereact-scope .p-dialog {
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
+              0 4px 5px 0 rgba(0, 0, 0, 0.14),
+              0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.primereact-scope .p-dialog .p-dialog-header {
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+  color: #495057;
+  padding: 1rem;
+  border-top-right-radius: 0.25rem;
+  border-top-left-radius: 0.25rem;
+}
+
+.primereact-scope .p-dialog .p-dialog-content {
+  background: #ffffff;
+  color: #495057;
+  padding: 1rem;
+}
+
+/* Button styling */
+.primereact-scope .p-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.primereact-scope .p-button:not(.p-button-icon-only) .p-button-icon-left {
+  margin-right: 0.5rem;
+}
+
+/* Message styling */
+.primereact-scope .p-message {
+  margin: 0.5rem 0;
+  border-radius: 0.25rem;
+}
+
+.primereact-scope .p-message .p-message-wrapper {
+  padding: 0.75rem 1rem;
+}
+
+/* Multi-select styling */
+.primereact-scope .p-multiselect {
+  width: 100%;
+  display: inline-flex;
+}
+
+/* Input styling */
+.primereact-scope .p-inputtext {
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+}
+
+/* Toast styling */
+.primereact-scope .p-toast {
+  opacity: 1;
+}
+
+.primereact-scope .p-toast .p-toast-message {
+  margin: 0.5rem 0;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
+              0 4px 5px 0 rgba(0, 0, 0, 0.14),
+              0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* Progress bar */
+.primereact-scope .p-progressbar {
+  height: 0.5rem;
+  background: #e9ecef;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.primereact-scope .p-progressbar .p-progressbar-value {
+  background: #3f51b5;
+}
+
+/* Calendar */
+.primereact-scope .p-calendar {
+  display: inline-flex;
+  position: relative;
+  width: 100%;
+}
+
+/* Dropdown */
+.primereact-scope .p-dropdown {
+  display: inline-flex;
+  position: relative;
+  width: 100%;
+}
+
+/* Add responsive formatting */
+@media screen and (max-width: 640px) {
+  .primereact-scope .p-datatable .p-datatable-thead > tr > th,
+  .primereact-scope .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.5rem;
+  }
+  
+  .primereact-scope .p-dialog {
+    width: 90vw !important;
+  }
+}
