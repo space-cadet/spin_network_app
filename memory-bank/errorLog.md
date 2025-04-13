@@ -1,5 +1,93 @@
 # Error Log
 
+## 2025-04-14 - Maximum Update Depth and Time Slider Update Issues
+
+**Files:** `src/hooks/useReduxSimulation.ts`, `src/hooks/useSimulation.ts`, `src/components/panels/SimulationControlPanel.tsx`
+
+**Error Messages:**
+```
+typeUsageMiddleware.ts:11 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at SimulationControlPanel (http://localhost:5173/src/components/panels/SimulationControlPanel.tsx?t=1744568676947:550:19)
+```
+
+```
+useReduxSimulation.ts:132 Error synchronizing simulation data to Redux: Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+```
+
+**Cause:**
+Multiple issues were causing infinite update loops and synchronization problems:
+
+1. The `useReduxSimulation` hook had bidirectional synchronization between Redux state and the simulation engine without adequate safeguards against re-entrancy
+2. In `SimulationControlPanel`, the alpha slider onChange handler had an unnecessary console.log that contributed to rendering overhead
+3. The animation loop in `useSimulation.ts` had a critical bug where it compared currentTime with itself instead of tracking the last time value
+4. The interval-based synchronization in `useReduxSimulation` was causing excessive component updates
+
+**Fix:**
+1. Added safeguards against re-entrancy in parameter update cycles:
+   - Used flags to prevent recursive updates between hook and Redux
+   - Added debounce mechanisms with timeouts
+   - Ensured state updates have time to propagate before next update
+
+2. Fixed time comparison bug in animation loop:
+   - Added a `lastTimeRef` to properly track previous time value
+   - Changed variable names for clarity between simulation time and component state
+   - Fixed the comparison that was incorrectly written as `Math.abs(currentTime - currentTime)`
+
+3. Replaced setInterval with setTimeout:
+   - Changed from interval-based to sequential timeout approach
+   - Added proper component mount tracking with `isMounted` flag
+   - Added rate limiting to prevent too many syncs
+
+4. Removed unnecessary console.log in SimulationControlPanel
+
+**Key Code Changes:**
+```typescript
+// Added to prevent re-entrancy
+const isUpdatingFromHookRef = useRef<boolean>(false);
+
+// Fixed parameter sync from Redux to simulation
+useEffect(() => {
+  // Skip if we're already updating from the hook
+  if (isUpdatingFromHookRef.current) {
+    isUpdatingFromHookRef.current = false;
+    return;
+  }
+  
+  // Avoid cyclical updates
+  if (!needsSyncRef.current) return;
+
+  // Update simulation after deep comparison
+  // [...implementation...]
+}, [simulationState.parameters, simulation]);
+
+// Fixed timer mechanism for sync
+useEffect(() => {
+  // Use RAF instead of interval for better performance
+  const syncLoop = () => {
+    if (!isMounted) return;
+    
+    syncSimulationDataToRedux();
+    refreshTimerRef.current = window.setTimeout(syncLoop, 500);
+  };
+  
+  refreshTimerRef.current = window.setTimeout(syncLoop, 500);
+  
+  return () => {
+    // Clean up on unmount
+    isMounted = false;
+    if (refreshTimerRef.current !== null) {
+      window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+  };
+}, [simulation.isRunning, simulation.hasHistory, syncSimulationDataToRedux]);
+```
+
+**Affected Files:**
+- src/hooks/useReduxSimulation.ts
+- src/hooks/useSimulation.ts
+- src/components/panels/SimulationControlPanel.tsx
+
 ## 2025-04-13 - Simulation Play/Pause and Redux Synchronization Issues
 
 **Files:** `src/hooks/useSimulation.ts`, `src/hooks/useReduxSimulation.ts`, `src/components/logs/LogViewerAdapter.tsx`

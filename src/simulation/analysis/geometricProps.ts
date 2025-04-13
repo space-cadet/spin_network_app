@@ -200,9 +200,15 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
       let laplacian;
       try {
         laplacian = graph.toLaplacianMatrix();
-        
-        // Validate laplacian matrix
-        if (!laplacian || !Array.isArray(laplacian) || laplacian.length === 0) {
+
+        // For validation, convert to plain array if possible
+        // For validation, convert to plain array if possible
+        let laplacianArray = laplacian && typeof laplacian.toArray === 'function'
+          ? laplacian.toArray()
+          : laplacian;
+
+        // Validate laplacian matrix (as array)
+        if (!laplacianArray || !Array.isArray(laplacianArray) || laplacianArray.length === 0) {
           console.warn('Invalid Laplacian matrix:', laplacian);
           return 0;
         }
@@ -210,7 +216,7 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
         console.error('Error creating Laplacian matrix:', error);
         return 0;
       }
-      
+
       // Calculate eigenvalues with error handling
       let eigenvalues;
       try {

@@ -455,7 +455,7 @@ const SimulationControlPanel: React.FC = () => {
                       // Reset simulation when alpha changes significantly
                       ...(Math.abs(newAlpha - parameters.alpha) > 0.05 ? { timeStep: 0.005 } : {})
                     });
-                    console.log("Updated alpha to:", newAlpha);
+                    // Removed console.log that might contribute to performance issues
                   }}
                   className="w-full"
                 />

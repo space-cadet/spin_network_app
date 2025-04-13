@@ -1,4 +1,22 @@
 # Edit History
+*Created: April, 14, 2025*
+
+## April 14, 2025
+### 12:55 - Fix Time Slider Update Issues
+- Modified `src/hooks/useReduxSimulation.ts`: Replaced setInterval with setTimeout for better control
+- Modified `src/hooks/useReduxSimulation.ts`: Added proper component mount tracking
+- Modified `src/hooks/useSimulation.ts`: Fixed incorrect time comparison in animation loop
+- Modified `src/hooks/useSimulation.ts`: Added lastTimeRef to properly track time changes
+
+These changes fix the issue with the time slider not updating during simulation by ensuring time updates are correctly propagated from the simulation engine to the UI components.
+
+### 12:45 - Fix Infinite Update Loop Issue
+- Modified `src/components/panels/SimulationControlPanel.tsx`: Removed console.log in alpha slider onChange handler
+- Modified `src/hooks/useReduxSimulation.ts`: Added safeguards against re-entrancy in parameter update cycles
+- Modified `src/hooks/useReduxSimulation.ts`: Improved sync function with rate limiting
+- Modified `src/hooks/useReduxSimulation.ts`: Enhanced updateParametersWithRedux to prevent state feedback loops
+
+These changes address the "Maximum update depth exceeded" errors by breaking circular update cycles between Redux state and the simulation engine. The issue was caused by bidirectional synchronization that created an infinite loop of updates when parameters were changed.# Edit History
 
 This file tracks specific file and folder changes in the project.
 

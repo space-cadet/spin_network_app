@@ -4,6 +4,7 @@ import Workspace from './components/workspace/Workspace'
 import NetworkTools from './components/tools/NetworkTools'
 import { PropertiesPanel, TypeManagementPanel, SimulationControlPanel } from './components/panels'
 import { SimulationResultsPanel, SimulationLogsPanel, SimulationDebugPanel } from './components/simulation'
+import { LogViewerAdapter } from './components/logs'
 import PersistentResizablePanel from './components/common/PersistentResizablePanel'
 import PersistenceStatus from './components/common/PersistenceStatus'
 import SidebarToggle from './components/common/SidebarToggle'
@@ -22,7 +23,7 @@ function App() {
   const bottomSidebarVisible = useSelector(selectBottomSidebarVisible);
   
   // State for bottom panel tabs
-  const [bottomPanelTab, setBottomPanelTab] = useState<'results' | 'logs' | 'debug'>('results');
+  const [bottomPanelTab, setBottomPanelTab] = useState<'results' | 'logs' | 'debug' | 'application'>('results');
   
   return (
     <ThemeProvider>
@@ -114,6 +115,16 @@ function App() {
                         >
                           Debug Panel
                         </button>
+                        <button
+                          className={`px-4 py-2 text-sm font-medium ${
+                            bottomPanelTab === 'application' 
+                              ? 'border-b-2 border-blue-500 text-blue-600' 
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                          onClick={() => setBottomPanelTab('application')}
+                        >
+                          Application Logs
+                        </button>
                       </div>
                     </div>
                     
@@ -122,6 +133,14 @@ function App() {
                       <SimulationResultsPanel />
                     ) : bottomPanelTab === 'logs' ? (
                       <SimulationLogsPanel />
+                    ) : bottomPanelTab === 'application' ? (
+                      <LogViewerAdapter 
+                        defaultLogType={['error', 'edit']}
+                        defaultLimit={50}
+                        showFilters={true}
+                        allowExport={true}
+                        height="calc(100vh - 300px)"
+                      />
                     ) : (
                       <SimulationDebugPanel />
                     )}

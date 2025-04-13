@@ -94,6 +94,9 @@ export const useSimulation = () => {
     };
   }, []);
   
+  // Track last time to avoid redundant updates
+  const lastTimeRef = useRef<number>(0);
+  
   // Enhanced animation loop for updating simulation
   const animationLoop = useCallback(() => {
     // IMPORTANT: Don't proceed if we're not supposed to be running
@@ -112,11 +115,13 @@ export const useSimulation = () => {
     try {
       engineRef.current.step();
       
-      const currentTime = engineRef.current.getCurrentTime();
+      const simulationTime = engineRef.current.getCurrentTime();
       
-      // Update current time (only if different to avoid unnecessary renders)
-      if (Math.abs(currentTime - currentTime) > 1e-10) {
-        setCurrentTime(currentTime);
+      // Update current time (only if actually changed to avoid unnecessary renders)
+      // Fix: the previous code was comparing currentTime with itself
+      if (Math.abs(simulationTime - lastTimeRef.current) > 1e-10) {
+        lastTimeRef.current = simulationTime;
+        setCurrentTime(simulationTime);
       }
       
       // Update history status
@@ -127,12 +132,12 @@ export const useSimulation = () => {
       // Log occasionally (every second of simulation time)
       // This reduces log clutter while still providing useful data
       const timeStep = parameters.timeStep || 0.01;
-      if (Math.floor(currentTime / 1.0) > Math.floor((currentTime - timeStep) / 1.0)) {
+      if (Math.floor(simulationTime / 1.0) > Math.floor((simulationTime - timeStep) / 1.0)) {
         // Get conservation laws for logging
         const conservation = engineRef.current.getConservationLaws();
         
         // Log simulation step with conservation data (only at interval points)
-        simulationLogger.logResults(currentTime, {
+        simulationLogger.logResults(simulationTime, {
           conservation: {
             totalProbability: conservation.totalProbability || 0,
             normVariation: conservation.normVariation || 0,
@@ -401,16 +406,16 @@ export const useSimulation = () => {
     if (initializedNetworkRef.current === networkId) {
       return;
     }
-    
+
     // Mark this network as initialized
     initializedNetworkRef.current = networkId;
-    
+
     try {
       console.log("Network changed, creating simulation graph with", network.nodes.length, "nodes");
-      
+
       // Create simulation graph from network
       graphRef.current = createSimulationGraph(network);
-      
+
       // Always update the parameters first to ensure we have a valid nodeId
       // Update default node ID if it's not set or doesn't exist in network
       const nodeId = parameters.initialStateParams?.nodeId;
@@ -424,21 +429,8 @@ export const useSimulation = () => {
           dispatch(updateInitialStateParams({ nodeId: firstNodeId }));
         }
 
-        // Only initialize once after setting parameters
-        setTimeout(() => {
-          if (engineRef.current && graphRef.current) {
-            console.log("Initializing simulation engine with updated parameters");
-            engineRef.current.initialize(graphRef.current, {
-              ...parameters,
-              initialStateParams: {
-                ...parameters.initialStateParams,
-                nodeId: firstNodeId
-              }
-            });
-            setCurrentTime(0);
-            setHasHistory(false);
-          }
-        }, 100);
+        // Do NOT initialize engine here. Wait for Redux state to update.
+        // Initialization will be handled by the effect below.
       } else {
         // If we don't need to update nodeId, initialize immediately
         if (engineRef.current && graphRef.current) {
@@ -452,6 +444,20 @@ export const useSimulation = () => {
       console.error("Error initializing simulation with new network:", error);
     }
   }, [network, parameters.initialStateParams.nodeId]);
+
+  // New effect: initialize engine when nodeId is valid and graph is ready
+  useEffect(() => {
+    if (!network || !network.nodes || network.nodes.length === 0) return;
+    if (!graphRef.current) return;
+    const nodeId = parameters.initialStateParams?.nodeId;
+    const nodeExists = network.nodes.some(node => node.id === nodeId);
+    if (nodeExists && engineRef.current && graphRef.current) {
+      console.log("Deferred initialization: initializing simulation engine after Redux nodeId update");
+      engineRef.current.initialize(graphRef.current, parameters);
+      setCurrentTime(0);
+      setHasHistory(false);
+    }
+  }, [parameters.initialStateParams.nodeId, network]);
   
   // Create simulation engine on first render
   useEffect(() => {

@@ -34,10 +34,20 @@ export const useReduxSimulation = () => {
   const needsSyncRef = useRef<boolean>(true);
   const refreshTimerRef = useRef<number | null>(null);
   
+  // Last time we performed a sync
+  const lastSyncTimeRef = useRef<number>(0);
+  
   // Function to sync simulation data to Redux - MUST DEFINE THIS FIRST
   const syncSimulationDataToRedux = useCallback(() => {
     // Only proceed if sync is needed
     if (!needsSyncRef.current) return;
+    
+    // Rate limit syncs
+    const now = Date.now();
+    if (now - lastSyncTimeRef.current < 100) {
+      return; // Don't sync more than 10 times per second
+    }
+    lastSyncTimeRef.current = now;
     
     try {
       // Update time, running state, and history status
@@ -210,12 +220,24 @@ export const useReduxSimulation = () => {
   
   // Update parameters with Redux integration
   const updateParametersWithRedux = useCallback((params: any) => {
+    // Set flag to prevent re-entry in the useEffect
+    isUpdatingFromHookRef.current = true;
+    
+    // Store new parameters
+    previousParametersRef.current = {...simulationState.parameters, ...params};
+    
     // Call the original updateParameters
     simulation.updateParameters(params);
     
     // Update Redux state
     dispatch(updateParameters(params));
-  }, [simulation, dispatch]);
+    
+    // Brief delay before allowing syncs again
+    needsSyncRef.current = false;
+    setTimeout(() => {
+      needsSyncRef.current = true;
+    }, 50);
+  }, [simulation, dispatch, simulationState.parameters]);
   
   // Update initial state params with Redux integration
   const updateInitialStateParamsWithRedux = useCallback((params: any) => {
@@ -234,13 +256,24 @@ export const useReduxSimulation = () => {
       refreshTimerRef.current = null;
     }
     
+    let isMounted = true;
+    
     // If simulation is running, set up regular sync interval
     if (simulation.isRunning) {
       // Sync immediately first
-      syncSimulationDataToRedux();
+      if (isMounted) {
+        syncSimulationDataToRedux();
+      }
       
-      // Then set up interval (less frequent to reduce overhead)
-      refreshTimerRef.current = window.setInterval(syncSimulationDataToRedux, 500);
+      // Use RAF instead of interval for better performance and less chance of stacking
+      const syncLoop = () => {
+        if (!isMounted) return;
+        
+        syncSimulationDataToRedux();
+        refreshTimerRef.current = window.setTimeout(syncLoop, 500);
+      };
+      
+      refreshTimerRef.current = window.setTimeout(syncLoop, 500);
     } 
     // If not running but we have history, do a one-time sync
     else if (simulation.hasHistory && needsSyncRef.current) {
@@ -250,9 +283,10 @@ export const useReduxSimulation = () => {
     }
     
     return () => {
-      // Clean up interval on unmount or dependency change
+      // Clean up on unmount or dependency change
+      isMounted = false;
       if (refreshTimerRef.current !== null) {
-        window.clearInterval(refreshTimerRef.current);
+        window.clearTimeout(refreshTimerRef.current);
         refreshTimerRef.current = null;
       }
     };
@@ -260,14 +294,33 @@ export const useReduxSimulation = () => {
   
   // Sync simulation parameters from Redux to the engine when they change
   const previousParametersRef = useRef<any>(null);
+  const isUpdatingFromHookRef = useRef<boolean>(false);
+  
   useEffect(() => {
+    // Skip if we're already in the process of updating from the hook
+    if (isUpdatingFromHookRef.current) {
+      isUpdatingFromHookRef.current = false;
+      return;
+    }
+    
     // Avoid cyclical updates by checking if we just updated Redux
     if (!needsSyncRef.current) return;
 
     // Deep compare current and previous parameters
     if (!isEqual(simulationState.parameters, previousParametersRef.current)) {
+      // Store previous parameters
+      previousParametersRef.current = {...simulationState.parameters};
+      
+      // Set flag to avoid re-entry
+      needsSyncRef.current = false;
+      
+      // Update simulation parameters
       simulation.updateParameters(simulationState.parameters);
-      previousParametersRef.current = simulationState.parameters;
+      
+      // Reset flag after a brief delay
+      setTimeout(() => {
+        needsSyncRef.current = true;
+      }, 50);
     }
   }, [simulationState.parameters, simulation]);
   
