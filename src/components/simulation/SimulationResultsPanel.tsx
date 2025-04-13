@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { FaChartBar, FaChartPie, FaChartLine, FaRuler, FaInfoCircle } from 'react-icons/fa';
 import CollapsibleSection from '../common/CollapsibleSection';
 import { useReduxSimulation } from '../../hooks/useReduxSimulation';
@@ -8,6 +8,70 @@ import { simulationLogger } from '../../simulation/core/simulationLogger';
 import RawDataDisplay from './RawDataDisplay';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+
+// Time points display component to prevent render loops
+const TimePointsDisplay = React.memo(({ simulation }) => {
+  // Use a ref to store the last fetched times to avoid re-rendering on every check
+  const timePointsRef = useRef<Array<number>>([]);
+  const [lastUpdateTime, setLastUpdateTime] = useState(0);
+  
+  // Effect to update the time points data periodically
+  useEffect(() => {
+    const updateTimePoints = () => {
+      if (simulation?.getHistory && typeof simulation.getHistory === 'function') {
+        try {
+          const history = simulation.getHistory();
+          const times = history.getTimes();
+          if (times && times.length > 0) {
+            timePointsRef.current = times;
+            setLastUpdateTime(Date.now());
+          }
+        } catch (error) {
+          console.error("Error retrieving time points:", error);
+        }
+      }
+    };
+    
+    // Update immediately
+    updateTimePoints();
+    
+    // Then set up an interval for periodic updates
+    const interval = setInterval(updateTimePoints, 1000);
+    
+    return () => clearInterval(interval);
+  }, [simulation]);
+  
+  // Render the time points display
+  const times = timePointsRef.current;
+  
+  if (!simulation?.getHistory || typeof simulation.getHistory !== 'function') {
+    return <div className="text-gray-500">History function not available</div>;
+  }
+  
+  if (!times || times.length === 0) {
+    return <div className="text-gray-500">No time points available</div>;
+  }
+  
+  // Show a sample of the most recent time points
+  const sampleSize = Math.min(5, times.length);
+  const samples = times.slice(-sampleSize); // Show most recent
+  
+  return (
+    <div className="bg-gray-100 p-1 rounded">
+      {samples.map((t, index) => (
+        <div key={index} className="flex justify-between">
+          <span>t{index}:</span>
+          <span>{t.toFixed(4)}</span>
+        </div>
+      ))}
+      {times.length > sampleSize && (
+        <div className="text-gray-500 text-center mt-1">
+          +{times.length - sampleSize} more time points
+        </div>
+      )}
+    </div>
+  );
+});
 
 const SimulationResultsPanel: React.FC = () => {
   // Get simulation from Redux-integrated hook
@@ -22,36 +86,54 @@ const SimulationResultsPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'conservation' | 'geometric' | 'statistics'>('conservation');
   const [refreshCounter, setRefreshCounter] = useState(0); // Used to force re-renders
   
-  // Enhanced logging to debug simulation data flow
-  console.log("useReduxSimulation hook and Redux state:", {
-    currentTime,
-    hasHistory,
-    isRunning,
-    hasGetGraph: typeof simulation?.getGraph === 'function',
-    hasGetCurrentState: typeof simulation?.getCurrentState === 'function',
-    geometricData,
-    statisticsData,
-    conservationData
-  });
+  // Create refs for time tracking at the top level
+  const loggingTimeRef = useRef<number>(0);
+  const renderTimeRef = useRef<number>(0);
   
-  // Inspect actual graph and state data
-  if (simulation?.getGraph) {
-    const graph = simulation.getGraph();
-    console.log("Graph data:", {
-      hasGraph: !!graph,
-      nodeCount: graph ? graph.nodes.length : 0,
-      edgeCount: graph ? graph.edges.length : 0
-    });
-  }
+  // Enhanced logging to debug simulation data flow - but only once per second
+  useEffect(() => {
+    const now = Date.now();
+    
+    // Only log every second to prevent console flood
+    if (now - loggingTimeRef.current > 1000) {
+      console.log("useReduxSimulation hook and Redux state:", {
+        currentTime,
+        hasHistory,
+        isRunning,
+        hasGetGraph: typeof simulation?.getGraph === 'function',
+        hasGetCurrentState: typeof simulation?.getCurrentState === 'function',
+        geometricData,
+        statisticsData,
+        conservationData
+      });
+      
+      loggingTimeRef.current = now;
+    }
+  }, [
+    currentTime, hasHistory, isRunning, 
+    simulation, geometricData, statisticsData, conservationData
+  ]);
   
-  if (simulation?.getCurrentState) {
-    const state = simulation.getCurrentState();
-    console.log("State data:", {
-      hasState: !!state,
-      size: state ? state.size : 0,
-      hasValidData: state ? state.size > 0 : false
-    });
-  }
+  // Inspect actual graph and state data - but only once per render
+  useEffect(() => {
+    if (simulation?.getGraph) {
+      const graph = simulation.getGraph();
+      console.log("Graph data:", {
+        hasGraph: !!graph,
+        nodeCount: graph ? graph.nodes.length : 0,
+        edgeCount: graph ? graph.edges.length : 0
+      });
+    }
+    
+    if (simulation?.getCurrentState) {
+      const state = simulation.getCurrentState();
+      console.log("State data:", {
+        hasState: !!state,
+        size: state ? state.size : 0,
+        hasValidData: state ? state.size > 0 : false
+      });
+    }
+  }, [simulation]);
   
   // Effect to log when component mounts or refreshes
   useEffect(() => {
@@ -120,8 +202,8 @@ const SimulationResultsPanel: React.FC = () => {
       console.error("Error checking log data:", error);
     }
     
-    // Log debug information
-    console.log("Redux Data source check:", {
+    // Log debug information - but store in a ref instead of logging every render
+    const dataSourceInfo = {
       fromRunningState,
       fromHistoryFlag,
       fromConservationData,
@@ -133,25 +215,44 @@ const SimulationResultsPanel: React.FC = () => {
       statisticsData,
       hasHistory,
       isRunning
-    });
+    };
+    
+    // Store in component instance instead of logging on every render
+    // This can be accessed in dev tools for debugging
+    (window as any).__dataSourceInfo = dataSourceInfo;
     
     return fromRunningState || fromHistoryFlag || fromConservationData || 
            fromGeometricData || fromStatisticsData || fromLogs;
   })();
   
-  console.log("SimulationResultsPanel render:", {
-    hasAnyData,
-    isRunning,
-    hasHistory,
-    conservationData,
-    geometricData,
-    statisticsData,
-    hasLogsData: (() => {
-      const session = simulationLogger.getCurrentSession();
-      const results = session?.results;
-      return results && results.length > 0;
-    })()
-  });
+  // Store render info in a ref for debugging instead of logging on every render
+  useEffect(() => {
+    // Store in component instance for debugging in dev tools
+    (window as any).__simulationResultsInfo = {
+      hasAnyData,
+      isRunning,
+      hasHistory,
+      conservationData,
+      geometricData,
+      statisticsData,
+      hasLogsData: (() => {
+        const session = simulationLogger.getCurrentSession();
+        const results = session?.results;
+        return results && results.length > 0;
+      })()
+    };
+    
+    // Only log once per second to prevent console flood
+    const now = Date.now();
+    
+    if (now - renderTimeRef.current > 1000) {
+      console.log("SimulationResultsPanel render state updated");
+      renderTimeRef.current = now;
+    }
+  }, [
+    hasAnyData, isRunning, hasHistory, 
+    conservationData, geometricData, statisticsData
+  ]);
 
   // No longer need to import debug view here since we have a dedicated panel
   
@@ -581,41 +682,8 @@ const SimulationResultsPanel: React.FC = () => {
                       <span className="font-mono">{statisticsData.variance.toFixed(4)}</span>
                     </div>
                     <div className="mt-2 font-medium">Time Points:</div>
-                    {(() => {
-                      try {
-                        if (simulation.getHistory && typeof simulation.getHistory === 'function') {
-                          const history = simulation.getHistory();
-                          const times = history.getTimes();
-                          
-                          if (times && times.length > 0) {
-                            // Just show a few time points
-                            const sampleSize = Math.min(5, times.length);
-                            const samples = times.slice(-sampleSize); // Show most recent
-                            
-                            return (
-                              <div className="bg-gray-100 p-1 rounded">
-                                {samples.map((t, index) => (
-                                  <div key={index} className="flex justify-between">
-                                    <span>t{index}:</span>
-                                    <span>{t.toFixed(4)}</span>
-                                  </div>
-                                ))}
-                                {times.length > sampleSize && (
-                                  <div className="text-gray-500 text-center mt-1">
-                                    +{times.length - sampleSize} more time points
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          }
-                          return <div className="text-gray-500">No time points available</div>;
-                        }
-                        return <div className="text-gray-500">History function not available</div>;
-                      } catch (error) {
-                        console.error("Error retrieving time points:", error);
-                        return <div className="text-red-500">Error retrieving time points</div>;
-                      }
-                    })()}
+                    {/* Use memoized time points data to prevent render loops */}
+                    <TimePointsDisplay simulation={simulation} />
                     <div className="text-center mt-2">
                       <span className="text-xs text-gray-500 italic">
                         Using fallback display - time evolution visualization in progress

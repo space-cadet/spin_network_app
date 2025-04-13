@@ -2,6 +2,23 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-13: Fixed Simulation Rendering Loops and Improved Stability
+
+Modified files:
+- `/src/hooks/useSimulation.ts` - Fixed getHistory function to prevent state updates on every call
+- `/src/components/simulation/SimulationResultsPanel.tsx` - Added proper React.memo component for time points display
+- `/src/hooks/useReduxSimulation.ts` - Improved synchronization between UI and simulation engine
+
+Issues addressed:
+- Fixed "Too many re-renders" error when pausing simulation
+- Fixed infinite console logging loop that caused performance issues
+- Improved React pattern usage with proper memoization and useEffect
+- Enhanced performance by reducing unnecessary re-renders
+- Added better throttling for state updates and console logs
+- Implemented safer state update patterns using refs to track update history
+- Created specialized components to prevent render loops in parent components
+- Fixed graph initialization and tracking for more consistent simulation behavior
+
 ## 2025-04-13: Implemented Redux Integration for Simulation State
 
 Modified files:

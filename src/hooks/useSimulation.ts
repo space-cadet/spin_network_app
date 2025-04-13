@@ -41,16 +41,31 @@ export const useSimulation = () => {
   
   // Define all callback functions first to avoid reference errors
   
+  // To prevent reinitializing parameters in a loop
+  const lastParameterUpdateRef = useRef<number>(0);
+  
   // Update simulation parameters
   const updateParameters = useCallback((newParams: Partial<SimulationParameters>) => {
+    const now = Date.now();
+    
+    // Prevent rapid reinitializations (throttle to max once per 500ms)
+    if (now - lastParameterUpdateRef.current < 500) {
+      console.log("Throttling parameter update");
+      return;
+    }
+    
+    lastParameterUpdateRef.current = now;
+    
     setParameters(prev => {
       const updated = { ...prev, ...newParams };
       
       // Log parameter change
       simulationLogger.logParameterChange(prev, updated);
       
-      // If engine already exists, update it
-      if (engineRef.current && graphRef.current) {
+      // If engine already exists, update it - but only if user is interacting
+      // This prevents an initialization feedback loop
+      if (engineRef.current && graphRef.current && !engineRef.current.isRunning()) {
+        console.log("Reinitializing engine with new parameters:", newParams);
         engineRef.current.initialize(graphRef.current, updated);
       }
       
@@ -60,6 +75,16 @@ export const useSimulation = () => {
   
   // Update initial state parameters
   const updateInitialStateParams = useCallback((newParams: Record<string, any>) => {
+    const now = Date.now();
+    
+    // Prevent rapid reinitializations (throttle to max once per 500ms)
+    if (now - lastParameterUpdateRef.current < 500) {
+      console.log("Throttling initial state parameter update");
+      return;
+    }
+    
+    lastParameterUpdateRef.current = now;
+    
     setParameters(prev => {
       const updated = {
         ...prev,
@@ -69,8 +94,10 @@ export const useSimulation = () => {
         }
       };
       
-      // If engine already exists, update it
-      if (engineRef.current && graphRef.current) {
+      // If engine already exists, update it - but only if user is interacting
+      // This helps prevent initialization loops
+      if (engineRef.current && graphRef.current && !engineRef.current.isRunning()) {
+        console.log("Reinitializing engine with new initial state parameters:", newParams);
         engineRef.current.initialize(graphRef.current, updated);
       }
       
@@ -497,12 +524,24 @@ export const useSimulation = () => {
     }
   }, [parameters, network]);
   
+  // Track if we've already initialized for this network
+  const initializedNetworkRef = useRef<string | null>(null);
+  
   // Initialize simulation with current network when it changes
   useEffect(() => {
     // Only proceed if network exists and has nodes
     if (!network || !network.nodes || network.nodes.length === 0) {
       return;
     }
+    
+    // Skip if we've already initialized for this network
+    const networkId = network.id || JSON.stringify(network.nodes.map(n => n.id).sort());
+    if (initializedNetworkRef.current === networkId) {
+      return;
+    }
+    
+    // Mark this network as initialized
+    initializedNetworkRef.current = networkId;
     
     try {
       console.log("Network changed, creating simulation graph with", network.nodes.length, "nodes");
@@ -525,22 +564,36 @@ export const useSimulation = () => {
             nodeId: firstNodeId
           }
         }));
-      }
-      
-      // Initialize engine with updated parameters after a short delay
-      // This ensures the parameters are fully updated before initialization
-      setTimeout(() => {
+        
+        // Only initialize once after setting parameters
+        // This helps prevent multiple initializations in a single render cycle
+        setTimeout(() => {
+          if (engineRef.current && graphRef.current) {
+            console.log("Initializing simulation engine with updated parameters");
+            engineRef.current.initialize(graphRef.current, {
+              ...parameters,
+              initialStateParams: {
+                ...parameters.initialStateParams,
+                nodeId: firstNodeId
+              }
+            });
+            setCurrentTime(0);
+            setHasHistory(false);
+          }
+        }, 100);
+      } else {
+        // If we don't need to update nodeId, initialize immediately
         if (engineRef.current && graphRef.current) {
-          console.log("Initializing simulation engine with updated parameters");
+          console.log("Initializing simulation engine with existing parameters");
           engineRef.current.initialize(graphRef.current, parameters);
           setCurrentTime(0);
           setHasHistory(false);
         }
-      }, 100);
+      }
     } catch (error) {
       console.error("Error initializing simulation with new network:", error);
     }
-  }, [network]);
+  }, [network, parameters.initialStateParams.nodeId]);
   
   // Create simulation engine on first render
   useEffect(() => {
@@ -610,16 +663,24 @@ export const useSimulation = () => {
 
   // Get the current simulation graph with enhanced error handling
   const getGraph = useCallback(() => {
-    console.log("getGraph called, graph exists:", !!graphRef.current);
-    
-    // Always return the graph reference, even if null
-    // This helps debugging by showing the actual state
-    if (!graphRef.current) {
-      console.warn("getGraph: Graph reference is null, this may cause display issues");
+    // Only log the first time or when the value changes
+    const isEmpty = !graphRef.current;
+    if (isEmpty) {
+      // Use static variable to avoid logging the same message repeatedly
+      if (!getGraph.hasWarnedNull) {
+        console.warn("getGraph: Graph reference is null, this may cause display issues");
+        getGraph.hasWarnedNull = true;
+      }
+    } else {
+      // Reset the warning flag if graph becomes available
+      getGraph.hasWarnedNull = false;
     }
     
     return graphRef.current;
   }, []);
+  
+  // Add static property to track warning state
+  getGraph.hasWarnedNull = false;
 
   // Get the current state directly with improved error handling
   const getCurrentState = useCallback(() => {
@@ -632,10 +693,18 @@ export const useSimulation = () => {
         if (state && state.size > 0) {
           return state;
         } else {
-          console.warn("getCurrentState: State exists but has no data");
+          // Use static variable to avoid logging the same message repeatedly
+          if (!getCurrentState.hasWarnedNoData) {
+            console.warn("getCurrentState: State exists but has no data");
+            getCurrentState.hasWarnedNoData = true;
+          }
         }
       } else {
-        console.warn("getCurrentState: No engine reference available");
+        // Use static variable to avoid logging the same message repeatedly
+        if (!getCurrentState.hasWarnedNoEngine) {
+          console.warn("getCurrentState: No engine reference available");
+          getCurrentState.hasWarnedNoEngine = true;
+        }
       }
     } catch (error) {
       console.error("Error in getCurrentState:", error);
@@ -643,35 +712,66 @@ export const useSimulation = () => {
     return null;
   }, []);
   
+  // Add static properties to track warning states
+  getCurrentState.hasWarnedNoData = false;
+  getCurrentState.hasWarnedNoEngine = false;
+  
+  // To avoid excessive logging during getHistory calls
+  const lastHistoryCallTimeRef = useRef<number>(0);
+  const historyCallCountRef = useRef<number>(0);
+  
   // Get the simulation history with enhanced error handling and status tracking
   const getHistory = useCallback(() => {
     try {
       if (engineRef.current) {
         const history = engineRef.current.getHistory();
         
-        // Get the times and log them for debugging
+        // Get the times for validation
         const times = history.getTimes();
-        console.log("getHistory called, timepoints:", times.length);
         
-        // Always set hasHistory to true if simulation is running or has run
-        // This ensures the debug panel shows history is available
-        if (currentTime > 0 || isRunning) {
-          setHasHistory(true);
-        } else {
-          // Only update based on actual times if we're not running
-          setHasHistory(times.length > 0);
+        // Update hasHistory state only once on first call or when simulation status changes
+        // This prevents setting state on every call, which can cause render loops
+        const hasActualTimes = times.length > 0;
+        const shouldHaveHistory = currentTime > 0 || isRunning;
+        
+        // Check for status changes that require hasHistory updates
+        // But don't update state on every call - use refs to track state
+        if (!getHistory.hasUpdatedHistory) {
+          // Only set the state if there's a reason to change it
+          if (hasActualTimes || shouldHaveHistory) {
+            if (!hasHistory) {
+              setHasHistory(true);
+              getHistory.hasUpdatedHistory = true;
+            }
+          } else if (hasHistory) {
+            setHasHistory(false);
+            getHistory.hasUpdatedHistory = true;
+          }
+        }
+        
+        // Limit logging frequency to avoid console spam
+        const now = Date.now();
+        historyCallCountRef.current++;
+        
+        if (now - lastHistoryCallTimeRef.current > 1000) {
+          console.log(`getHistory called ${historyCallCountRef.current} times in the last second, timepoints:`, times.length);
+          lastHistoryCallTimeRef.current = now;
+          historyCallCountRef.current = 0;
         }
         
         return history;
       } else {
-        console.warn("getHistory: No engine reference available");
+        // Limit logging frequency
+        if (Date.now() - lastHistoryCallTimeRef.current > 1000) {
+          console.warn("getHistory: No engine reference available");
+          lastHistoryCallTimeRef.current = Date.now();
+        }
       }
     } catch (error) {
       console.error("Error in getHistory:", error);
     }
     
     // Return a dummy history object if real one is unavailable
-    console.warn("Returning dummy history object due to error or missing engine");
     return {
       getTimes: () => [],
       getStateAtTime: () => null,
@@ -680,7 +780,15 @@ export const useSimulation = () => {
       clear: () => {},
       getDuration: (): number => 0
     };
-  }, [currentTime, isRunning]);
+  }, [currentTime, isRunning, hasHistory]);
+  
+  // Static property to track if we've already updated history
+  getHistory.hasUpdatedHistory = false;
+  
+  // Reset history update flag when simulation status changes
+  useEffect(() => {
+    getHistory.hasUpdatedHistory = false;
+  }, [isRunning, currentTime]);
 
   return {
     isRunning,

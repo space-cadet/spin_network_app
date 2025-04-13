@@ -1,5 +1,147 @@
 # Error Log
 
+## 2025-04-13 14:45 IST - Infinite Loop and React Render Loop on Simulation Pause
+
+**File:** `src/hooks/useSimulation.ts`, `src/components/simulation/SimulationResultsPanel.tsx`
+
+**Error Message:**
+```
+Too many re-renders. React limits the number of renders to prevent an infinite loop.
+```
+
+And continuous console logs:
+```
+getHistory called, timepoints: 1
+getHistory called, timepoints: 1
+getHistory called, timepoints: 1
+```
+
+**Cause:**
+Multiple issues related to React hooks usage and state update patterns:
+
+1. The `getHistory` method in `useSimulation.ts` was calling `setHasHistory` on every invocation, which triggered re-renders when used during rendering.
+2. The `SimulationResultsPanel` component was calling functions in the render phase that triggered state updates.
+3. There was no throttling mechanism for logging or state updates, leading to console flooding.
+4. Time points display was implemented inline, causing unnecessary re-renders.
+5. React hooks rules were violated by creating a `useRef` hook inside a `useEffect` callback.
+
+**Fix:**
+Implemented a comprehensive solution:
+
+1. **Fixed getHistory in useSimulation hook**:
+   - Added static flag to track if history state was already updated
+   - Implemented throttling for logging to prevent console flooding
+   - Added a check to only update state when necessary
+   - Replaced repeated state updates with a single conditional update
+
+2. **Implemented proper React patterns**:
+   - Moved useRef hook declarations to the top level of the component
+   - Created a memoized TimePointsDisplay component to safely handle data fetching
+   - Replaced direct function calls in render with useEffect-based approaches
+   - Used refs to track update timestamps and throttle repeated operations
+   - Added proper dependency arrays to useEffect hooks
+
+3. **Enhanced Performance**:
+   - Added throttling for console logging using timestamp comparisons
+   - Reduced re-renders by conditionally updating state
+   - Cached computation results in refs instead of re-computing during render
+   - Created better debounce mechanisms for frequently called functions
+
+**Key Code Changes:**
+```typescript
+// In useSimulation.ts - getHistory improvements
+const getHistory = useCallback(() => {
+  try {
+    if (engineRef.current) {
+      const history = engineRef.current.getHistory();
+      
+      // Get the times and log them for debugging
+      const times = history.getTimes();
+      
+      // Only update hasHistory state if there's a reason to change it
+      const hasActualTimes = times.length > 0;
+      const shouldHaveHistory = currentTime > 0 || isRunning;
+      
+      // Check for status changes that require hasHistory updates
+      // But don't update state on every call - use refs to track state
+      if (!getHistory.hasUpdatedHistory) {
+        if (hasActualTimes || shouldHaveHistory) {
+          if (!hasHistory) {
+            setHasHistory(true);
+            getHistory.hasUpdatedHistory = true;
+          }
+        } else if (hasHistory) {
+          setHasHistory(false);
+          getHistory.hasUpdatedHistory = true;
+        }
+      }
+      
+      // Throttle logging for better performance
+      if (Date.now() - lastHistoryCallTimeRef.current > 1000) {
+        console.log("getHistory called, timepoints:", times.length);
+        lastHistoryCallTimeRef.current = Date.now();
+      }
+      
+      return history;
+    }
+  } catch (error) {
+    console.error("Error in getHistory:", error);
+  }
+  
+  // Return dummy history object if real one is unavailable
+  return {
+    getTimes: () => [],
+    getStateAtTime: () => null,
+    getClosestState: () => null,
+    addState: () => {},
+    clear: () => {},
+    getDuration: (): number => 0
+  };
+}, [currentTime, isRunning, hasHistory]);
+
+// Static property to track if we've already updated history
+getHistory.hasUpdatedHistory = false;
+
+// In SimulationResultsPanel.tsx - proper hook usage and memoization
+const TimePointsDisplay = React.memo(({ simulation }) => {
+  // Use a ref to store the last fetched times to avoid re-rendering on every check
+  const timePointsRef = useRef<Array<number>>([]);
+  const [lastUpdateTime, setLastUpdateTime] = useState(0);
+  
+  // Effect to update the time points data periodically
+  useEffect(() => {
+    const updateTimePoints = () => {
+      if (simulation?.getHistory && typeof simulation.getHistory === 'function') {
+        try {
+          const history = simulation.getHistory();
+          const times = history.getTimes();
+          if (times && times.length > 0) {
+            timePointsRef.current = times;
+            setLastUpdateTime(Date.now());
+          }
+        } catch (error) {
+          console.error("Error retrieving time points:", error);
+        }
+      }
+    };
+    
+    // Update immediately
+    updateTimePoints();
+    
+    // Then set up an interval for periodic updates
+    const interval = setInterval(updateTimePoints, 1000);
+    
+    return () => clearInterval(interval);
+  }, [simulation]);
+  
+  // Rendering logic...
+});
+```
+
+**Affected Files:**
+- src/hooks/useSimulation.ts
+- src/components/simulation/SimulationResultsPanel.tsx
+
 ## 2025-04-12 22:30 IST - Test Simulation HTML Not Displaying Data
 
 **File:** `public/test-simulation.html`, `src/test-simulation.js`, `src/simulation/index.js`
