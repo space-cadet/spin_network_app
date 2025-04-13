@@ -1,5 +1,31 @@
 # Error Log
 
+## 2025-04-13 - Simulation Play/Pause and Redux Synchronization Issues
+
+**Files:** `src/hooks/useSimulation.ts`, `src/hooks/useReduxSimulation.ts`, `src/components/logs/LogViewerAdapter.tsx`
+
+**Error Messages:**
+- Simulation would not pause correctly; animation continued after pause.
+- Redux state and simulation engine state would get out of sync.
+- LogViewerAdapter: "useState is not defined" and controlled/uncontrolled input warnings.
+- Circular dependency in useReduxSimulation.ts.
+
+**Cause:**
+- Animation loop and state management logic did not properly synchronize React and engine state.
+- Animation frames were not always cleaned up on pause.
+- Redux synchronization logic had a circular dependency due to function order.
+- LogViewerAdapter was missing a useState import and did not normalize MultiSelect values.
+
+**Fix:**
+- Refactored animation loop and pause logic in useSimulation.ts.
+- Reordered function declarations in useReduxSimulation.ts.
+- Added missing useState import and normalized MultiSelect value handling in LogViewerAdapter.tsx.
+
+**Affected Files:**
+- src/hooks/useSimulation.ts
+- src/hooks/useReduxSimulation.ts
+- src/components/logs/LogViewerAdapter.tsx
+
 ## 2025-04-13 - useState Not Defined in LogViewerAdapter Component
 
 **File:** `src/components/logs/LogViewerAdapter.tsx`

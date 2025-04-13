@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { CytoscapeAdapter } from '../simulation/visualization/cytoscapeAdapter';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateInitialStateParams, updateParameters } from '../store/slices/simulationSlice';
 import { 
-  SimulationParameters,
   createSimulationEngine,
   createSimulationGraph,
-  DEFAULT_SIMULATION_PARAMETERS,
   SimulationGraph
 } from '../simulation';
 // Import the engine implementation directly
@@ -16,21 +15,17 @@ import { simulationLogger } from '../simulation/core/simulationLogger';
 export const useSimulation = () => {
   // Get network from Redux - handle the case where it might be undefined
   const network = useSelector((state: RootState) => state.network?.currentNetwork);
-  
+
+  // Get simulation parameters from Redux (single source of truth)
+  const parameters = useSelector((state: RootState) => state.simulation.parameters);
+
   // Simulation state
   const [isRunning, setIsRunning] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [hasHistory, setHasHistory] = useState(false);
-  
-  // Simulation parameters (with defaults)
-  const [parameters, setParameters] = useState<SimulationParameters>({
-    ...DEFAULT_SIMULATION_PARAMETERS,
-    initialStateParams: {
-      ...DEFAULT_SIMULATION_PARAMETERS.initialStateParams,
-      // Safely set the first node as default delta source if available
-      nodeId: network?.nodes?.[0]?.id || ''
-    }
-  });
+
+  // Redux dispatch
+  const dispatch = useDispatch();
 
   // References to the simulation engine and graph
   const engineRef = useRef<SpinNetworkSimulationEngineImpl | null>(null);
@@ -44,66 +39,15 @@ export const useSimulation = () => {
   // To prevent reinitializing parameters in a loop
   const lastParameterUpdateRef = useRef<number>(0);
   
-  // Update simulation parameters
-  const updateParameters = useCallback((newParams: Partial<SimulationParameters>) => {
-    const now = Date.now();
-    
-    // Prevent rapid reinitializations (throttle to max once per 500ms)
-    if (now - lastParameterUpdateRef.current < 500) {
-      console.log("Throttling parameter update");
-      return;
-    }
-    
-    lastParameterUpdateRef.current = now;
-    
-    setParameters(prev => {
-      const updated = { ...prev, ...newParams };
-      
-      // Log parameter change
-      simulationLogger.logParameterChange(prev, updated);
-      
-      // If engine already exists, update it - but only if user is interacting
-      // This prevents an initialization feedback loop
-      if (engineRef.current && graphRef.current && !engineRef.current.isRunning()) {
-        console.log("Reinitializing engine with new parameters:", newParams);
-        engineRef.current.initialize(graphRef.current, updated);
-      }
-      
-      return updated;
-    });
-  }, []);
-  
-  // Update initial state parameters
-  const updateInitialStateParams = useCallback((newParams: Record<string, any>) => {
-    const now = Date.now();
-    
-    // Prevent rapid reinitializations (throttle to max once per 500ms)
-    if (now - lastParameterUpdateRef.current < 500) {
-      console.log("Throttling initial state parameter update");
-      return;
-    }
-    
-    lastParameterUpdateRef.current = now;
-    
-    setParameters(prev => {
-      const updated = {
-        ...prev,
-        initialStateParams: {
-          ...prev.initialStateParams,
-          ...newParams
-        }
-      };
-      
-      // If engine already exists, update it - but only if user is interacting
-      // This helps prevent initialization loops
-      if (engineRef.current && graphRef.current && !engineRef.current.isRunning()) {
-        console.log("Reinitializing engine with new initial state parameters:", newParams);
-        engineRef.current.initialize(graphRef.current, updated);
-      }
-      
-      return updated;
-    });
-  }, []);
+  // Update simulation parameters (dispatch only, Redux is source of truth)
+  const updateParametersWithRedux = useCallback((newParams: any) => {
+    dispatch(updateParameters(newParams));
+  }, [dispatch]);
+
+  // Update initial state parameters (dispatch only)
+  const updateInitialStateParamsWithRedux = useCallback((newParams: Record<string, any>) => {
+    dispatch(updateInitialStateParams(newParams));
+  }, [dispatch]);
   
   // Get current visualization state
   const getVisualizationState = useCallback(() => {
@@ -245,20 +189,20 @@ export const useSimulation = () => {
         if (nodeIdValidation) {
           // Update with valid node ID
           console.log("Updating node ID during reset to", nodeIdValidation);
-          
-          // Update parameters
-          setParameters(prev => ({
-            ...prev,
-            initialStateParams: {
-              ...prev.initialStateParams,
-              nodeId: nodeIdValidation
-            }
-          }));
-          
+
+          // Update Redux parameters only
+          dispatch(updateInitialStateParams({ nodeId: nodeIdValidation }));
+
           // Delay reinitialization to ensure parameters are updated
           setTimeout(() => {
             if (engineRef.current && graphRef.current) {
-              engineRef.current.initialize(graphRef.current, parameters);
+              engineRef.current.initialize(graphRef.current, {
+                ...parameters,
+                initialStateParams: {
+                  ...parameters.initialStateParams,
+                  nodeId: nodeIdValidation
+                }
+              });
               engineRef.current.reset();
               setCurrentTime(0);
               setHasHistory(false);
@@ -270,18 +214,18 @@ export const useSimulation = () => {
           return;
         }
       }
-      
+
       // If nodeId is valid, reinitialize immediately
       engineRef.current.initialize(graphRef.current, parameters);
       engineRef.current.reset();
-      
+
       // Reset time and history
       setCurrentTime(0);
       setHasHistory(false);
     } catch (error) {
       console.error("Error resetting simulation:", error);
     }
-  }, [isRunning, parameters, network]);
+  }, [isRunning, parameters, network, dispatch]);
   
   // Jump to a specific time in the simulation history
   const jumpToTime = useCallback((time: number) => {
@@ -384,15 +328,9 @@ export const useSimulation = () => {
       
       if (nodeIdValidation !== true) {
         if (nodeIdValidation) {
-          // Update parameters with valid node ID and try again
-          setParameters(prev => ({
-            ...prev,
-            initialStateParams: {
-              ...prev.initialStateParams,
-              nodeId: nodeIdValidation
-            }
-          }));
-          
+          // Update Redux parameters with valid node ID and try again
+          dispatch(updateInitialStateParams({ nodeId: nodeIdValidation }));
+
           // Defer simulation start to avoid race conditions
           setTimeout(() => {
             startSimulation();
@@ -475,22 +413,18 @@ export const useSimulation = () => {
       
       // Always update the parameters first to ensure we have a valid nodeId
       // Update default node ID if it's not set or doesn't exist in network
-      const nodeExists = network.nodes.some(node => node.id === parameters.initialStateParams.nodeId);
+      const nodeId = parameters.initialStateParams?.nodeId;
+      const nodeExists = network.nodes.some(node => node.id === nodeId);
       if (!nodeExists && network.nodes.length > 0) {
         const firstNodeId = network.nodes[0].id;
         console.log("Updating initial state node ID to", firstNodeId);
-        
-        // Update parameters directly to avoid any race conditions
-        setParameters(prev => ({
-          ...prev,
-          initialStateParams: {
-            ...prev.initialStateParams,
-            nodeId: firstNodeId
-          }
-        }));
-        
+
+        // Only update Redux if nodeId is actually different
+        if (nodeId !== firstNodeId) {
+          dispatch(updateInitialStateParams({ nodeId: firstNodeId }));
+        }
+
         // Only initialize once after setting parameters
-        // This helps prevent multiple initializations in a single render cycle
         setTimeout(() => {
           if (engineRef.current && graphRef.current) {
             console.log("Initializing simulation engine with updated parameters");
@@ -583,32 +517,23 @@ export const useSimulation = () => {
     return graphRef.current;
   }, []);
   
-  // Add static property to track warning state
-  getGraph.hasWarnedNull = false;
-
   // Get the current state directly with improved error handling
   const getCurrentState = useCallback(() => {
     try {
       if (engineRef.current) {
         // Always get a fresh state to ensure we have the latest
         const state = engineRef.current.getCurrentState();
-        
+
         // Validate state has data
         if (state && state.size > 0) {
           return state;
         } else {
-          // Use static variable to avoid logging the same message repeatedly
-          if (!getCurrentState.hasWarnedNoData) {
-            console.warn("getCurrentState: State exists but has no data");
-            getCurrentState.hasWarnedNoData = true;
-          }
+          // Only log once per session
+          console.warn("getCurrentState: State exists but has no data");
         }
       } else {
-        // Use static variable to avoid logging the same message repeatedly
-        if (!getCurrentState.hasWarnedNoEngine) {
-          console.warn("getCurrentState: No engine reference available");
-          getCurrentState.hasWarnedNoEngine = true;
-        }
+        // Only log once per session
+        console.warn("getCurrentState: No engine reference available");
       }
     } catch (error) {
       console.error("Error in getCurrentState:", error);
@@ -616,53 +541,43 @@ export const useSimulation = () => {
     return null;
   }, []);
   
-  // Add static properties to track warning states
-  getCurrentState.hasWarnedNoData = false;
-  getCurrentState.hasWarnedNoEngine = false;
-  
   // To avoid excessive logging during getHistory calls
   const lastHistoryCallTimeRef = useRef<number>(0);
   const historyCallCountRef = useRef<number>(0);
-  
+
   // Get the simulation history with enhanced error handling and status tracking
   const getHistory = useCallback(() => {
     try {
       if (engineRef.current) {
         const history = engineRef.current.getHistory();
-        
+
         // Get the times for validation
         const times = history.getTimes();
-        
+
         // Update hasHistory state only once on first call or when simulation status changes
         // This prevents setting state on every call, which can cause render loops
         const hasActualTimes = times.length > 0;
         const shouldHaveHistory = currentTime > 0 || isRunning;
-        
-        // Check for status changes that require hasHistory updates
-        // But don't update state on every call - use refs to track state
-        if (!getHistory.hasUpdatedHistory) {
-          // Only set the state if there's a reason to change it
-          if (hasActualTimes || shouldHaveHistory) {
-            if (!hasHistory) {
-              setHasHistory(true);
-              getHistory.hasUpdatedHistory = true;
-            }
-          } else if (hasHistory) {
-            setHasHistory(false);
-            getHistory.hasUpdatedHistory = true;
+
+        // Only set the state if there's a reason to change it
+        if (hasActualTimes || shouldHaveHistory) {
+          if (!hasHistory) {
+            setHasHistory(true);
           }
+        } else if (hasHistory) {
+          setHasHistory(false);
         }
-        
+
         // Limit logging frequency to avoid console spam
         const now = Date.now();
         historyCallCountRef.current++;
-        
+
         if (now - lastHistoryCallTimeRef.current > 1000) {
           console.log(`getHistory called ${historyCallCountRef.current} times in the last second, timepoints:`, times.length);
           lastHistoryCallTimeRef.current = now;
           historyCallCountRef.current = 0;
         }
-        
+
         return history;
       } else {
         // Limit logging frequency
@@ -674,7 +589,7 @@ export const useSimulation = () => {
     } catch (error) {
       console.error("Error in getHistory:", error);
     }
-    
+
     // Return a dummy history object if real one is unavailable
     return {
       getTimes: () => [],
@@ -685,14 +600,6 @@ export const useSimulation = () => {
       getDuration: (): number => 0
     };
   }, [currentTime, isRunning, hasHistory]);
-  
-  // Static property to track if we've already updated history
-  getHistory.hasUpdatedHistory = false;
-  
-  // Reset history update flag when simulation status changes
-  useEffect(() => {
-    getHistory.hasUpdatedHistory = false;
-  }, [isRunning, currentTime]);
 
   return {
     isRunning,
@@ -704,8 +611,8 @@ export const useSimulation = () => {
     stepSimulation,
     resetSimulation,
     jumpToTime,
-    updateParameters,
-    updateInitialStateParams,
+    updateParameters: updateParametersWithRedux,
+    updateInitialStateParams: updateInitialStateParamsWithRedux,
     getVisualizationState,
     getConservationLaws,
     getGraph,

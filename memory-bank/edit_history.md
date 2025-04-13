@@ -2,6 +2,22 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-13 23:55 IST: Fixed Simulation Play/Pause, Redux Synchronization, and LogViewerAdapter Issues
+
+Modified files:
+- `/src/hooks/useSimulation.ts` - Fixed animation loop to properly handle play/pause, improved state synchronization with Redux, and enhanced animation frame cleanup.
+- `/src/hooks/useReduxSimulation.ts` - Fixed circular dependency by reordering function declarations and improved synchronization logic.
+- `/src/components/logs/LogViewerAdapter.tsx` - Added missing `useState` import and fixed controlled/uncontrolled input warnings in MultiSelect.
+- `/memory-bank/session_cache.md` - Updated to reflect that simulation play/pause and Redux sync issues are now fixed.
+- `/memory-bank/activeContext.md` - Updated to mark simulation play/pause and Redux sync as complete, and log management/database integration as complete.
+
+Issues addressed:
+- Fixed simulation play/pause functionality so that animation stops and resumes correctly.
+- Fixed Redux state synchronization with simulation engine.
+- Fixed missing `useState` import and controlled/uncontrolled input warnings in LogViewerAdapter.
+- Fixed circular dependency in useReduxSimulation.
+- Updated documentation to reflect current status and completed tasks.
+
 ## 2025-04-13: Fixed Simulation Animation Loop and LogViewerAdapter Components
 
 Modified files:

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import isEqual from 'lodash/isEqual';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   setSimulationRunning,
@@ -258,12 +259,16 @@ export const useReduxSimulation = () => {
   }, [simulation.isRunning, simulation.hasHistory, syncSimulationDataToRedux]);
   
   // Sync simulation parameters from Redux to the engine when they change
+  const previousParametersRef = useRef<any>(null);
   useEffect(() => {
     // Avoid cyclical updates by checking if we just updated Redux
     if (!needsSyncRef.current) return;
-    
-    // Update the simulation engine parameters
-    simulation.updateParameters(simulationState.parameters);
+
+    // Deep compare current and previous parameters
+    if (!isEqual(simulationState.parameters, previousParametersRef.current)) {
+      simulation.updateParameters(simulationState.parameters);
+      previousParametersRef.current = simulationState.parameters;
+    }
   }, [simulationState.parameters, simulation]);
   
   // Return combined interface with Redux and original simulation functions
