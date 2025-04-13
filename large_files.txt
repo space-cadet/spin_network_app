@@ -1,0 +1,19 @@
+    3100 ./pnpm-lock.yaml
+     561 ./integrated-rules-v2.md
+     825 ./storage/Empty Network-2025-04-06T15-09-58.json
+    1650 ./storage/Lattice Network-2025-04-08T21-38-28.json
+    2022 ./storage/tetrahedron-2025-04-11T09-11-28.json
+     737 ./storage/Lattice Network-2025-04-06T15-14-11.json
+    1864 ./storage/Lattice Network-2025-04-07T04-47-20.json
+     643 ./memory-bank/edit_history.md
+     503 ./memory-bank/mathematical-implementation.md
+    1399 ./memory-bank/errorLog.md
+     525 ./public/test-simulation.html
+     561 ./.github/copilot-instructions.md
+     642 ./src/simulation/core/engineImplementation.ts
+     637 ./src/components/settings/SettingsDropdown.tsx
+     904 ./src/components/workspace/Workspace.tsx.backup
+     842 ./src/components/workspace/Workspace.tsx.old_backup
+     645 ./src/components/panels/SimulationControlPanel.tsx
+     719 ./src/components/simulation/SimulationResultsPanel.tsx
+     810 ./src/hooks/useSimulation.ts

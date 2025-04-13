@@ -14,6 +14,9 @@ dependencies:
   d3:
     specifier: ^7.8.5
     version: 7.9.0
+  dexie:
+    specifier: 4.0.11
+    version: 4.0.11
   localforage:
     specifier: 1.10.0
     version: 1.10.0
@@ -1701,6 +1704,10 @@ packages:
     resolution: {integrity: sha512-8nvh+XBe96aCESrGOqMp/84b13H9cdKbG5P2ejQCh4d4sK9RL4371qou9drQjMhvnPmhWl5hnmqbEE0fXr9Xnw==}
     dependencies:
       robust-predicates: 3.0.2
+    dev: false
+
+  /dexie@4.0.11:
+    resolution: {integrity: sha512-SOKO002EqlvBYYKQSew3iymBoN2EQ4BDw/3yprjh7kAfFzjBYkaMNa/pZvcA7HSWlcKSQb9XhPe3wKyQ0x4A8A==}
     dev: false
 
   /didyoumean@1.2.2:
