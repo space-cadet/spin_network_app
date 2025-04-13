@@ -36,38 +36,127 @@ export class SimulationAnalyzer {
     state: StateVector, 
     time: number
   ): SimulationStatistics {
-    const nodeValues: Record<string, number> = {};
-    let sum = 0;
-    let sumSquared = 0;
-    let min = Number.POSITIVE_INFINITY;
-    let max = Number.NEGATIVE_INFINITY;
+    // Default statistics object with safe values
+    const defaultStats: SimulationStatistics = {
+      mean: 0,
+      variance: 0,
+      standardDeviation: 0,
+      min: 0,
+      max: 0,
+      nodeValues: {},
+      time: time || 0
+    };
     
-    // Calculate basic statistics
-    for (let i = 0; i < state.size; i++) {
-      const nodeId = state.nodeIds[i];
-      const value = state.getValueAtIndex(i);
-      
-      nodeValues[nodeId] = value;
-      sum += value;
-      sumSquared += value * value;
-      
-      if (value < min) min = value;
-      if (value > max) max = value;
+    // Validate input
+    if (!state || typeof state.size !== 'number' || state.size <= 0) {
+      console.warn('Invalid state provided to calculateStatistics');
+      return defaultStats;
     }
     
-    const mean = sum / state.size;
-    const variance = (sumSquared / state.size) - (mean * mean);
-    const standardDeviation = Math.sqrt(Math.max(0, variance));
-    
-    return {
-      mean,
-      variance,
-      standardDeviation,
-      min,
-      max,
-      nodeValues,
-      time
-    };
+    try {
+      // Validate nodeIds
+      if (!state.nodeIds || !Array.isArray(state.nodeIds) || state.nodeIds.length === 0) {
+        console.warn('State has invalid nodeIds array');
+        return defaultStats;
+      }
+      
+      const nodeValues: Record<string, number> = {};
+      let sum = 0;
+      let sumSquared = 0;
+      let min = Number.POSITIVE_INFINITY;
+      let max = Number.NEGATIVE_INFINITY;
+      let validValueCount = 0;
+      
+      // Calculate basic statistics with robust error handling
+      for (let i = 0; i < state.size; i++) {
+        const nodeId = state.nodeIds[i];
+        
+        // Skip if nodeId is invalid
+        if (nodeId === undefined || nodeId === null) {
+          console.warn(`Invalid nodeId at index ${i}`);
+          continue;
+        }
+        
+        let value: number;
+        
+        try {
+          value = state.getValueAtIndex(i);
+          
+          // Skip non-numeric or infinite values
+          if (value === null || value === undefined || !Number.isFinite(value)) {
+            console.warn(`Invalid value for node ${nodeId} at index ${i}:`, value);
+            continue;
+          }
+        } catch (error) {
+          console.error(`Error getting value for node ${nodeId} at index ${i}:`, error);
+          continue;
+        }
+        
+        // Store valid value and update statistics
+        nodeValues[nodeId] = value;
+        sum += value;
+        sumSquared += value * value;
+        validValueCount++;
+        
+        if (value < min) min = value;
+        if (value > max) max = value;
+      }
+      
+      // If no valid values were found, return default stats
+      if (validValueCount === 0) {
+        console.warn('No valid values found in state');
+        return defaultStats;
+      }
+      
+      // Calculate statistics using the valid value count
+      const mean = sum / validValueCount;
+      
+      // Handle potential calculation errors
+      if (!Number.isFinite(mean)) {
+        console.warn('Calculated non-finite mean:', mean);
+        return {
+          ...defaultStats,
+          nodeValues,
+          min: Number.isFinite(min) ? min : 0,
+          max: Number.isFinite(max) ? max : 0
+        };
+      }
+      
+      // Calculate variance with validation
+      let variance = 0;
+      try {
+        variance = (sumSquared / validValueCount) - (mean * mean);
+        // Variance should never be negative due to floating point errors
+        variance = Math.max(0, variance);
+      } catch (error) {
+        console.error('Error calculating variance:', error);
+      }
+      
+      // Calculate standard deviation with validation
+      let standardDeviation = 0;
+      try {
+        standardDeviation = Math.sqrt(variance);
+      } catch (error) {
+        console.error('Error calculating standard deviation:', error);
+      }
+      
+      // Handle edge cases for min/max
+      if (min === Number.POSITIVE_INFINITY) min = 0;
+      if (max === Number.NEGATIVE_INFINITY) max = 0;
+      
+      return {
+        mean,
+        variance,
+        standardDeviation,
+        min,
+        max,
+        nodeValues,
+        time: time || 0
+      };
+    } catch (error) {
+      console.error('Unhandled error in calculateStatistics:', error);
+      return defaultStats;
+    }
   }
   
   /**

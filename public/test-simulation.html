@@ -25,6 +25,13 @@
     button:hover {
       background-color: #2563eb;
     }
+    button.reset {
+      background-color: #64748b;
+      margin-left: 8px;
+    }
+    button.reset:hover {
+      background-color: #475569;
+    }
     pre {
       background-color: #f1f5f9;
       padding: 15px;
@@ -41,6 +48,41 @@
     h2 {
       color: #2563eb;
       margin-top: 30px;
+    }
+    .error-value {
+      color: #dc2626 !important;
+    }
+    .warning-value {
+      color: #d97706 !important;
+    }
+    .success-value {
+      color: #059669 !important;
+    }
+    .results-panel {
+      transition: opacity 0.3s ease;
+    }
+    #geometric-results div, #statistics-results div {
+      padding: 4px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    #geometric-results span, #statistics-results span {
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .error-message {
+      background-color: #fee2e2;
+      border: 1px solid #ef4444;
+      color: #b91c1c;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .debug-info {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #64748b;
     }
   </style>
 </head>
@@ -131,119 +173,250 @@
     function updateResultsPanel() {
       console.log("updateResultsPanel called");
       
+      // Default values to display when data isn't available
+      const defaultGeometric = {
+        totalVolume: 0,
+        totalArea: 0,
+        effectiveDimension: 0,
+        volumeEntropy: 0
+      };
+      
+      const defaultStats = {
+        mean: 0,
+        variance: 0,
+        standardDeviation: 0,
+        min: 0,
+        max: 0
+      };
+      
+      // Always show the results panel, even with default values
+      resultsPanel.style.display = 'block';
+      
+      // Function to format numbers safely
+      function safeFormat(value, decimals = 4) {
+        if (value === null || value === undefined || !Number.isFinite(value)) {
+          return "0.0000";
+        }
+        return value.toFixed(decimals);
+      }
+      
+      // Function to check if data is valid and non-zero
+      function isValidData(value) {
+        return value !== null && value !== undefined && Number.isFinite(value) && value !== 0;
+      }
+      
+      // Clear previous error styling
+      document.querySelectorAll('#geometric-results span, #statistics-results span').forEach(span => {
+        span.style.color = ''; // Reset to default color
+      });
+      
       if (!window.currentEngine || !window.currentGraph) {
         console.warn("Cannot update results: engine or graph is null");
         // Show more detailed diagnostic info
         console.warn("currentEngine:", window.currentEngine);
         console.warn("currentGraph:", window.currentGraph);
-        return null;
+        
+        // Update UI with default values and error state
+        totalVolumeElem.textContent = "0.0000";
+        totalAreaElem.textContent = "0.0000";
+        effectiveDimensionElem.textContent = "0.0000";
+        volumeEntropyElem.textContent = "0.0000";
+        
+        meanElem.textContent = "0.0000";
+        varianceElem.textContent = "0.0000";
+        skewnessElem.textContent = "0.0000";
+        kurtosisElem.textContent = "0.0000";
+        
+        // Add error styling
+        document.querySelectorAll('#geometric-results span, #statistics-results span').forEach(span => {
+          span.style.color = '#dc2626'; // Red color for error
+        });
+        
+        return {
+          geometric: defaultGeometric,
+          statistics: defaultStats,
+          error: "Missing engine or graph"
+        };
       }
       
       try {
+        // Get state with error handling
         console.log("Getting current state from engine");
-        const state = window.currentEngine.getCurrentState();
-        console.log("Current state obtained:", state ? "Available" : "Not available");
-        
-        if (!state) {
-          console.error("State is null or undefined");
-          return null;
+        let state;
+        try {
+          state = window.currentEngine.getCurrentState();
+          console.log("Current state obtained:", state ? "Available" : "Not available");
+        } catch (stateError) {
+          console.error("Error getting current state:", stateError);
+          state = null;
         }
         
-        console.log("Creating geometry calculator");
-        const geometryCalculator = new SpinNetworkGeometryCalculator();
+        // Initialize result objects
+        const geometric = { ...defaultGeometric };
+        const stats = { ...defaultStats };
+        let hasValidData = false;
         
-        // First log the state and graph to help with debugging
-        console.log("State properties:", {
-          size: state.size,
-          nodeIds: state.nodeIds ? state.nodeIds.length : "undefined",
-          hasGetValue: typeof state.getValue === 'function'
+        // Try to get time even if other operations fail
+        let currentTime = 0;
+        try {
+          currentTime = window.currentEngine.getCurrentTime() || 0;
+        } catch (timeError) {
+          console.error("Error getting current time:", timeError);
+        }
+        
+        // Log diagnostics even if state is missing
+        console.log("Engine diagnostic info:", {
+          hasCurrentState: !!state,
+          hasGetCurrentState: typeof window.currentEngine.getCurrentState === 'function',
+          hasGraph: !!window.currentGraph,
+          currentTime: currentTime
         });
         
-        console.log("Graph properties:", {
-          nodes: window.currentGraph.nodes.length,
-          edges: window.currentGraph.edges.length
-        });
-        
-        // Calculate geometric properties with more detailed error handling
-        console.log("Calculating total volume...");
-        let totalVolume = 0;
-        try {
-          totalVolume = geometryCalculator.calculateTotalVolume(state);
-          console.log("Total volume calculated:", totalVolume);
-        } catch (volumeError) {
-          console.error("Error calculating total volume:", volumeError);
-          totalVolume = 0;
+        // If state is available, calculate properties
+        if (state) {
+          // Log detailed state info for debugging
+          console.log("State properties:", {
+            size: state.size,
+            nodeIds: state.nodeIds ? state.nodeIds.length : "undefined",
+            hasGetValue: typeof state.getValue === 'function',
+            hasGetValueAtIndex: typeof state.getValueAtIndex === 'function'
+          });
+          
+          console.log("Graph properties:", {
+            nodes: window.currentGraph.nodes.length,
+            edges: window.currentGraph.edges.length,
+            hasToLaplacianMatrix: typeof window.currentGraph.toLaplacianMatrix === 'function'
+          });
+          
+          try {
+            console.log("Creating geometry calculator");
+            const geometryCalculator = new SpinNetworkGeometryCalculator();
+            
+            // Calculate geometric properties with enhanced error handling
+            console.log("Calculating total volume...");
+            try {
+              geometric.totalVolume = geometryCalculator.calculateTotalVolume(state);
+              console.log("Total volume calculated:", geometric.totalVolume);
+              if (isValidData(geometric.totalVolume)) hasValidData = true;
+            } catch (volumeError) {
+              console.error("Error calculating total volume:", volumeError);
+              geometric.totalVolume = 0;
+            }
+            
+            console.log("Calculating total area...");
+            try {
+              geometric.totalArea = geometryCalculator.calculateTotalArea(window.currentGraph);
+              console.log("Total area calculated:", geometric.totalArea);
+              if (isValidData(geometric.totalArea)) hasValidData = true;
+            } catch (areaError) {
+              console.error("Error calculating total area:", areaError);
+              geometric.totalArea = 0;
+            }
+            
+            console.log("Calculating effective dimension...");
+            try {
+              geometric.effectiveDimension = geometryCalculator.calculateEffectiveDimension(
+                window.currentGraph, state
+              );
+              console.log("Effective dimension calculated:", geometric.effectiveDimension);
+              if (isValidData(geometric.effectiveDimension)) hasValidData = true;
+            } catch (dimensionError) {
+              console.error("Error calculating effective dimension:", dimensionError);
+              geometric.effectiveDimension = 0;
+            }
+            
+            console.log("Calculating volume entropy...");
+            try {
+              geometric.volumeEntropy = geometryCalculator.calculateVolumeEntropy(state);
+              console.log("Volume entropy calculated:", geometric.volumeEntropy);
+              if (isValidData(geometric.volumeEntropy)) hasValidData = true;
+            } catch (entropyError) {
+              console.error("Error calculating volume entropy:", entropyError);
+              geometric.volumeEntropy = 0;
+            }
+            
+            // Calculate statistics
+            console.log("Calculating simulation statistics...");
+            try {
+              const calculatedStats = SimulationAnalyzer.calculateStatistics(
+                state, currentTime
+              );
+              console.log("Statistics calculated:", calculatedStats);
+              
+              // Copy valid properties to our stats object
+              if (calculatedStats) {
+                stats.mean = calculatedStats.mean || 0;
+                stats.variance = calculatedStats.variance || 0;
+                stats.standardDeviation = calculatedStats.standardDeviation || 0;
+                stats.min = calculatedStats.min || 0;
+                stats.max = calculatedStats.max || 0;
+                
+                // Check if we have valid statistical data
+                if (isValidData(stats.mean) || isValidData(stats.variance)) hasValidData = true;
+              }
+            } catch (statsError) {
+              console.error("Error calculating statistics:", statsError);
+            }
+          } catch (calculatorError) {
+            console.error("Error creating calculators:", calculatorError);
+          }
+        } else {
+          console.warn("State is missing, using default values");
         }
         
-        console.log("Calculating total area...");
-        let totalArea = 0;
-        try {
-          totalArea = geometryCalculator.calculateTotalArea(window.currentGraph);
-          console.log("Total area calculated:", totalArea);
-        } catch (areaError) {
-          console.error("Error calculating total area:", areaError);
-          totalArea = 0;
-        }
+        // Update UI with calculated or default values
+        totalVolumeElem.textContent = safeFormat(geometric.totalVolume);
+        totalAreaElem.textContent = safeFormat(geometric.totalArea);
+        effectiveDimensionElem.textContent = safeFormat(geometric.effectiveDimension);
+        volumeEntropyElem.textContent = safeFormat(geometric.volumeEntropy);
         
-        console.log("Calculating effective dimension...");
-        let effectiveDimension = 0;
-        try {
-          effectiveDimension = geometryCalculator.calculateEffectiveDimension(
-            window.currentGraph, state
-          );
-          console.log("Effective dimension calculated:", effectiveDimension);
-        } catch (dimensionError) {
-          console.error("Error calculating effective dimension:", dimensionError);
-          effectiveDimension = 0;
-        }
-        
-        console.log("Calculating volume entropy...");
-        let volumeEntropy = 0;
-        try {
-          volumeEntropy = geometryCalculator.calculateVolumeEntropy(state);
-          console.log("Volume entropy calculated:", volumeEntropy);
-        } catch (entropyError) {
-          console.error("Error calculating volume entropy:", entropyError);
-          volumeEntropy = 0;
-        }
-        
-        // Update geometric property elements
-        totalVolumeElem.textContent = totalVolume.toFixed(4);
-        totalAreaElem.textContent = totalArea.toFixed(4);
-        effectiveDimensionElem.textContent = effectiveDimension.toFixed(4);
-        volumeEntropyElem.textContent = volumeEntropy.toFixed(4);
-        
-        // Calculate statistics with more detailed error handling
-        console.log("Calculating simulation statistics...");
-        let stats = { mean: 0, variance: 0, standardDeviation: 0, min: 0, max: 0 };
-        try {
-          stats = SimulationAnalyzer.calculateStatistics(
-            state, window.currentEngine.getCurrentTime()
-          );
-          console.log("Statistics calculated:", stats);
-        } catch (statsError) {
-          console.error("Error calculating statistics:", statsError);
-        }
-        
-        // Update statistics elements
-        meanElem.textContent = stats.mean.toFixed(4);
-        varianceElem.textContent = stats.variance.toFixed(4);
+        meanElem.textContent = safeFormat(stats.mean);
+        varianceElem.textContent = safeFormat(stats.variance);
         skewnessElem.textContent = "0.0000"; // Placeholder for now
         kurtosisElem.textContent = "0.0000"; // Placeholder for now
         
-        // Show the results panel
-        resultsPanel.style.display = 'block';
-        console.log("Results panel made visible");
+        // Add error styling for zero values
+        if (!isValidData(geometric.totalVolume)) totalVolumeElem.style.color = '#dc2626';
+        if (!isValidData(geometric.totalArea)) totalAreaElem.style.color = '#dc2626';
+        if (!isValidData(geometric.effectiveDimension)) effectiveDimensionElem.style.color = '#dc2626';
+        if (!isValidData(geometric.volumeEntropy)) volumeEntropyElem.style.color = '#dc2626';
+        
+        if (!isValidData(stats.mean)) meanElem.style.color = '#dc2626';
+        if (!isValidData(stats.variance)) varianceElem.style.color = '#dc2626';
+        
+        console.log("Results panel updated with " + (hasValidData ? "valid data" : "default values"));
         
         return {
-          geometric: { totalVolume, totalArea, effectiveDimension, volumeEntropy },
-          statistics: { ...stats }
+          geometric,
+          statistics: stats,
+          hasValidData
         };
       } catch (error) {
-        console.error("Error updating results panel:", error);
+        console.error("Unhandled error updating results panel:", error);
         console.error("Error details:", error.message);
-        console.error("Stack trace:", error.stack);
-        return null;
+        console.error("Error stack trace:", error.stack);
+        
+        // Update UI with default values in case of error
+        totalVolumeElem.textContent = "0.0000";
+        totalAreaElem.textContent = "0.0000";
+        effectiveDimensionElem.textContent = "0.0000";
+        volumeEntropyElem.textContent = "0.0000";
+        
+        meanElem.textContent = "0.0000";
+        varianceElem.textContent = "0.0000";
+        skewnessElem.textContent = "0.0000";
+        kurtosisElem.textContent = "0.0000";
+        
+        // Add error styling
+        document.querySelectorAll('#geometric-results span, #statistics-results span').forEach(span => {
+          span.style.color = '#dc2626'; // Red color for error
+        });
+        
+        return {
+          geometric: defaultGeometric,
+          statistics: defaultStats,
+          error: error.message
+        };
       }
     }
     

@@ -20,20 +20,44 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
    * quantum state at each node (intertwiner).
    */
   calculateTotalVolume(state: StateVector): number {
-    let totalVolume = 0;
-    
-    // Sum up the volumes associated with each node
-    for (let i = 0; i < state.size; i++) {
-      const stateValue = state.getValueAtIndex(i);
-      
-      // The volume contribution of a node is proportional to |ψ|^2
-      // This is a simplified model; in full LQG, volume depends on
-      // intertwiner quantum numbers in a more complex way
-      const volumeContribution = Math.abs(stateValue) ** 2;
-      totalVolume += volumeContribution;
+    // Validate input to prevent null/undefined errors
+    if (!state || typeof state.size !== 'number' || state.size <= 0) {
+      console.warn('Invalid state provided to calculateTotalVolume');
+      return 0;
     }
     
-    return totalVolume;
+    try {
+      let totalVolume = 0;
+      
+      // Sum up the volumes associated with each node
+      for (let i = 0; i < state.size; i++) {
+        // Get state value with error handling
+        let stateValue = 0;
+        try {
+          stateValue = state.getValueAtIndex(i);
+          
+          // Validate we got a finite number
+          if (stateValue === null || stateValue === undefined || !Number.isFinite(stateValue)) {
+            console.warn(`Invalid state value at index ${i}:`, stateValue);
+            stateValue = 0;
+          }
+        } catch (error) {
+          console.error(`Error getting state value at index ${i}:`, error);
+          stateValue = 0;
+        }
+        
+        // The volume contribution of a node is proportional to |ψ|^2
+        // This is a simplified model; in full LQG, volume depends on
+        // intertwiner quantum numbers in a more complex way
+        const volumeContribution = Math.abs(stateValue) ** 2;
+        totalVolume += volumeContribution;
+      }
+      
+      return totalVolume;
+    } catch (error) {
+      console.error('Error calculating total volume:', error);
+      return 0;
+    }
   }
   
   /**
@@ -43,33 +67,66 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
    * volume at node i and V_tot is the total volume.
    */
   calculateVolumeEntropy(state: StateVector): number {
-    const totalVolume = this.calculateTotalVolume(state);
-    
-    // If total volume is 0, return 0 to avoid division by zero
-    if (totalVolume === 0) {
+    // Validate input to prevent null/undefined errors
+    if (!state || typeof state.size !== 'number' || state.size <= 0) {
+      console.warn('Invalid state provided to calculateVolumeEntropy');
       return 0;
     }
     
-    let entropy = 0;
-    
-    // Calculate entropy based on volume distribution
-    for (let i = 0; i < state.size; i++) {
-      const stateValue = state.getValueAtIndex(i);
-      const volumeContribution = Math.abs(stateValue) ** 2;
+    try {
+      const totalVolume = this.calculateTotalVolume(state);
       
-      // Skip nodes with zero volume
-      if (volumeContribution === 0) {
-        continue;
+      // If total volume is 0, return 0 to avoid division by zero
+      if (totalVolume === 0 || !Number.isFinite(totalVolume)) {
+        return 0;
       }
       
-      // Calculate the volume fraction
-      const volumeFraction = volumeContribution / totalVolume;
+      let entropy = 0;
       
-      // Add to entropy: -p * ln(p)
-      entropy -= volumeFraction * Math.log(volumeFraction);
+      // Calculate entropy based on volume distribution
+      for (let i = 0; i < state.size; i++) {
+        // Get state value with error handling
+        let stateValue = 0;
+        try {
+          stateValue = state.getValueAtIndex(i);
+          
+          // Validate we got a finite number
+          if (stateValue === null || stateValue === undefined || !Number.isFinite(stateValue)) {
+            continue; // Skip invalid values
+          }
+        } catch (error) {
+          console.error(`Error getting state value at index ${i}:`, error);
+          continue; // Skip on error
+        }
+        
+        const volumeContribution = Math.abs(stateValue) ** 2;
+        
+        // Skip nodes with zero volume
+        if (volumeContribution === 0 || !Number.isFinite(volumeContribution)) {
+          continue;
+        }
+        
+        // Calculate the volume fraction
+        const volumeFraction = volumeContribution / totalVolume;
+        
+        // Add to entropy: -p * ln(p) with validation
+        if (volumeFraction > 0 && Number.isFinite(volumeFraction)) {
+          try {
+            const logTerm = Math.log(volumeFraction);
+            if (Number.isFinite(logTerm)) {
+              entropy -= volumeFraction * logTerm;
+            }
+          } catch (error) {
+            console.error('Error calculating log term for entropy:', error);
+          }
+        }
+      }
+      
+      return Number.isFinite(entropy) ? entropy : 0;
+    } catch (error) {
+      console.error('Error calculating volume entropy:', error);
+      return 0;
     }
-    
-    return entropy;
   }
   
   /**
@@ -79,16 +136,41 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
    * is proportional to sqrt(j(j+1)) where j is the spin.
    */
   calculateTotalArea(graph: SimulationGraph): number {
-    let totalArea = 0;
-    
-    // Sum up the areas associated with each edge
-    for (const edge of graph.edges) {
-      // The area contribution of an edge is proportional to sqrt(j(j+1))
-      const areaContribution = Math.sqrt(edge.spin * (edge.spin + 1));
-      totalArea += areaContribution;
+    // Validate input to prevent null/undefined errors
+    if (!graph || !Array.isArray(graph.edges) || graph.edges.length === 0) {
+      console.warn('Invalid graph provided to calculateTotalArea');
+      return 0;
     }
     
-    return totalArea;
+    try {
+      let totalArea = 0;
+      
+      // Sum up the areas associated with each edge
+      for (const edge of graph.edges) {
+        // Validate edge object and spin property
+        if (!edge || typeof edge.spin !== 'number' || !Number.isFinite(edge.spin)) {
+          console.warn('Invalid edge or spin value:', edge);
+          continue; // Skip invalid edges
+        }
+        
+        try {
+          // The area contribution of an edge is proportional to sqrt(j(j+1))
+          const spinValue = Math.max(0, edge.spin); // Ensure non-negative
+          const areaContribution = Math.sqrt(spinValue * (spinValue + 1));
+          
+          if (Number.isFinite(areaContribution)) {
+            totalArea += areaContribution;
+          }
+        } catch (error) {
+          console.error('Error calculating area contribution for edge:', edge, error);
+        }
+      }
+      
+      return Number.isFinite(totalArea) ? totalArea : 0;
+    } catch (error) {
+      console.error('Error calculating total area:', error);
+      return 0;
+    }
   }
   
   /**
@@ -101,57 +183,161 @@ export class SpinNetworkGeometryCalculator implements GeometricCalculator {
     graph: SimulationGraph,
     state: StateVector
   ): number {
-    // Create the Laplacian matrix
-    const laplacian = graph.toLaplacianMatrix();
-    
-    // Calculate eigenvalues
-    const { values } = MathAdapter.eigenDecomposition(laplacian);
-    
-    // Sort eigenvalues (excluding the zero eigenvalue)
-    const sortedEigenvalues = values
-      .filter(v => Math.abs(v) > 1e-10) // Remove zero eigenvalues
-      .sort((a, b) => a - b);
-    
-    // If we don't have enough eigenvalues, return 0
-    if (sortedEigenvalues.length < 2) {
+    // Validate input to prevent null/undefined errors
+    if (!graph || !state) {
+      console.warn('Invalid graph or state provided to calculateEffectiveDimension');
       return 0;
     }
     
-    // Calculate the spectral dimension using the smallest non-zero eigenvalues
-    // Based on the asymptotic formula: d_s = -2 * d(log N(λ)) / d(log λ)
-    // where N(λ) is the cumulative eigenvalue distribution
-    
-    // Take a sample of the smallest eigenvalues
-    const sampleSize = Math.min(10, Math.floor(sortedEigenvalues.length / 3));
-    const logEigenvalues = sortedEigenvalues
-      .slice(0, sampleSize)
-      .map(v => Math.log(v));
-    
-    // Generate log(N(λ)) data points
-    const logCumulative = [];
-    for (let i = 0; i < sampleSize; i++) {
-      // N(λ) = (i+1) / total
-      logCumulative.push(Math.log((i + 1) / sortedEigenvalues.length));
+    try {
+      // Verify graph has required methods
+      if (typeof graph.toLaplacianMatrix !== 'function') {
+        console.warn('Graph is missing toLaplacianMatrix method');
+        return 0;
+      }
+      
+      // Create the Laplacian matrix with error handling
+      let laplacian;
+      try {
+        laplacian = graph.toLaplacianMatrix();
+        
+        // Validate laplacian matrix
+        if (!laplacian || !Array.isArray(laplacian) || laplacian.length === 0) {
+          console.warn('Invalid Laplacian matrix:', laplacian);
+          return 0;
+        }
+      } catch (error) {
+        console.error('Error creating Laplacian matrix:', error);
+        return 0;
+      }
+      
+      // Calculate eigenvalues with error handling
+      let eigenvalues;
+      try {
+        const result = MathAdapter.eigenDecomposition(laplacian);
+        eigenvalues = result.values;
+        
+        // Validate eigenvalues
+        if (!eigenvalues || !Array.isArray(eigenvalues) || eigenvalues.length === 0) {
+          console.warn('Invalid eigenvalues:', eigenvalues);
+          return 0;
+        }
+      } catch (error) {
+        console.error('Error calculating eigenvalues:', error);
+        return 0;
+      }
+      
+      // Filter and sort eigenvalues with validation
+      let sortedEigenvalues;
+      try {
+        sortedEigenvalues = eigenvalues
+          .filter(v => Number.isFinite(v) && Math.abs(v) > 1e-10) // Remove zeros and invalid values
+          .sort((a, b) => a - b);
+        
+        // If we don't have enough eigenvalues, return 0
+        if (sortedEigenvalues.length < 2) {
+          console.warn('Insufficient non-zero eigenvalues for dimension calculation');
+          return 0;
+        }
+      } catch (error) {
+        console.error('Error processing eigenvalues:', error);
+        return 0;
+      }
+      
+      // Calculate the spectral dimension
+      try {
+        // Take a sample of the smallest eigenvalues
+        const sampleSize = Math.min(10, Math.floor(sortedEigenvalues.length / 3));
+        if (sampleSize < 2) {
+          console.warn('Insufficient sample size for regression');
+          return 0;
+        }
+        
+        // Calculate log eigenvalues with validation
+        const logEigenvalues = [];
+        for (let i = 0; i < sampleSize; i++) {
+          const eigenvalue = sortedEigenvalues[i];
+          if (eigenvalue <= 0) continue;
+          
+          try {
+            const logValue = Math.log(eigenvalue);
+            if (Number.isFinite(logValue)) {
+              logEigenvalues.push(logValue);
+            }
+          } catch (error) {
+            console.error(`Error calculating log of eigenvalue ${eigenvalue}:`, error);
+          }
+        }
+        
+        // Check if we have enough valid log eigenvalues
+        if (logEigenvalues.length < 2) {
+          console.warn('Insufficient valid log eigenvalues for regression');
+          return 0;
+        }
+        
+        // Generate log(N(λ)) data points with validation
+        const logCumulative = [];
+        for (let i = 0; i < logEigenvalues.length; i++) {
+          try {
+            const cumulative = (i + 1) / sortedEigenvalues.length;
+            const logCumul = Math.log(cumulative);
+            
+            if (Number.isFinite(logCumul)) {
+              logCumulative.push(logCumul);
+            }
+          } catch (error) {
+            console.error(`Error calculating log cumulative at index ${i}:`, error);
+          }
+        }
+        
+        // Check if we have matching arrays
+        if (logEigenvalues.length !== logCumulative.length || logEigenvalues.length < 2) {
+          console.warn('Mismatched or insufficient data points for regression');
+          return 0;
+        }
+        
+        // Calculate the slope using linear regression
+        let sumXY = 0;
+        let sumX = 0;
+        let sumY = 0;
+        let sumXX = 0;
+        
+        for (let i = 0; i < logEigenvalues.length; i++) {
+          sumXY += logEigenvalues[i] * logCumulative[i];
+          sumX += logEigenvalues[i];
+          sumY += logCumulative[i];
+          sumXX += logEigenvalues[i] * logEigenvalues[i];
+        }
+        
+        const denominator = (logEigenvalues.length * sumXX - sumX * sumX);
+        
+        // Check for division by zero
+        if (Math.abs(denominator) < 1e-10) {
+          console.warn('Near-zero denominator in regression calculation');
+          return 0;
+        }
+        
+        const slope = (logEigenvalues.length * sumXY - sumX * sumY) / denominator;
+        
+        // d_s = -2 * slope
+        const dimension = -2 * slope;
+        
+        // Validate the result
+        if (!Number.isFinite(dimension)) {
+          console.warn('Invalid dimension calculated:', dimension);
+          return 0;
+        }
+        
+        // Dimensions should be reasonable (between 0 and 10)
+        return Math.max(0, Math.min(10, dimension));
+      } catch (error) {
+        console.error('Error calculating effective dimension:', error);
+        return 0;
+      }
+    } catch (error) {
+      console.error('Unhandled error in calculateEffectiveDimension:', error);
+      return 0;
     }
-    
-    // Calculate the slope using linear regression
-    let sumXY = 0;
-    let sumX = 0;
-    let sumY = 0;
-    let sumXX = 0;
-    
-    for (let i = 0; i < sampleSize; i++) {
-      sumXY += logEigenvalues[i] * logCumulative[i];
-      sumX += logEigenvalues[i];
-      sumY += logCumulative[i];
-      sumXX += logEigenvalues[i] * logEigenvalues[i];
-    }
-    
-    const slope = (sampleSize * sumXY - sumX * sumY) / 
-                  (sampleSize * sumXX - sumX * sumX);
-    
-    // d_s = -2 * slope
-    return -2 * slope;
   }
   
   /**

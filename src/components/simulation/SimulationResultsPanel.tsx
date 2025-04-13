@@ -165,107 +165,192 @@ const SimulationResultsPanel: React.FC = () => {
         simulationTime: simulation.currentTime
       });
       
-      // CRITICAL FIX: Check logs for data when simulation state is missing
-      if (!currentState || !graph || currentState.size === 0 || graph.nodes.length === 0) {
-        console.warn("Missing or invalid simulation data, checking logs as fallback");
+      // Default values in case calculations fail
+      let calculatedGeometricData = {
+        totalVolume: 0,
+        volumeEntropy: 0,
+        totalArea: 0,
+        effectiveDimension: 0
+      };
+      
+      let calculatedStatisticsData = {
+        mean: 0,
+        variance: 0,
+        skewness: 0,
+        kurtosis: 0
+      };
+      
+      // Flag to track if we've successfully calculated any data
+      let hasCalculatedAnyData = false;
+      let dataSource = "none";
+      
+      // CRITICAL FIX: Always check logs first to have a fallback
+      // Even if we have current state data, we'll still load logs data as a backup
+      console.log("Checking logs for backup data...");
+      
+      const logsSession = simulationLogger.getCurrentSession();
+      if (logsSession && logsSession.results.length > 0) {
+        // Get the most recent result
+        const latestResult = logsSession.results[logsSession.results.length - 1];
         
-        // Try to get data from logs
-        const logsSession = simulationLogger.getCurrentSession();
-        if (logsSession && logsSession.results.length > 0) {
-          // Get the most recent result
-          const latestResult = logsSession.results[logsSession.results.length - 1];
+        // Load backup data from logs if available
+        if (latestResult) {
+          console.log("Found log data for fallback:", latestResult);
           
-          // Update conservation data from logs
-          if (latestResult.conservation) {
-            console.log("Using log data for analysis:", latestResult);
-            
-            // Directly update geometric data from logs if available
-            if (latestResult.geometric) {
-              setGeometricData({
-                totalVolume: latestResult.geometric.totalVolume || 0,
-                volumeEntropy: latestResult.geometric.volumeEntropy || 0,
-                totalArea: latestResult.geometric.totalArea || 0,
-                effectiveDimension: latestResult.geometric.effectiveDimension || 0
-              });
-              console.log("Updated geometric data from logs");
-            }
-            
-            // Update statistics from logs if available
-            if (latestResult.statistics) {
-              setStatisticsData({
-                mean: latestResult.statistics.mean || 0,
-                variance: latestResult.statistics.variance || 0,
-                skewness: latestResult.statistics.skewness || 0,
-                kurtosis: latestResult.statistics.kurtosis || 0
-              });
-              console.log("Updated statistics data from logs");
-            }
-            
-            // Force hasHistory to true since we have log data
-            if (simulation && typeof simulation.getHistory === 'function') {
-              const history = simulation.getHistory();
-              if (history && typeof history.getTimes === 'function') {
-                const times = history.getTimes();
-                setHasHistory(times.length > 0);
-              }
-            }
-            
-            return; // Exit early, we've updated from logs
+          // Backup geometric data
+          if (latestResult.geometric) {
+            calculatedGeometricData = {
+              totalVolume: latestResult.geometric.totalVolume || 0,
+              volumeEntropy: latestResult.geometric.volumeEntropy || 0,
+              totalArea: latestResult.geometric.totalArea || 0,
+              effectiveDimension: latestResult.geometric.effectiveDimension || 0
+            };
+            hasCalculatedAnyData = true;
+            dataSource = "logs";
           }
+          
+          // Backup statistics data
+          if (latestResult.statistics) {
+            calculatedStatisticsData = {
+              mean: latestResult.statistics.mean || 0,
+              variance: latestResult.statistics.variance || 0,
+              skewness: latestResult.statistics.skewness || 0,
+              kurtosis: latestResult.statistics.kurtosis || 0
+            };
+            hasCalculatedAnyData = true;
+            dataSource = "logs";
+          }
+          
+          console.log("Loaded backup data from logs, will use if live calculations fail");
         }
-        
-        // If we get here, we couldn't get data from logs either
-        console.warn("No valid data available from simulation or logs");
-        return;
       }
       
-      // Calculate geometric properties
-      console.log("Beginning geometric calculations...");
-      const geometryCalculator = new SpinNetworkGeometryCalculator();
+      // If we have valid state and graph, attempt live calculations
+      if (currentState && graph && currentState.size > 0 && graph.nodes.length > 0) {
+        console.log("Valid simulation state and graph available, performing live calculations");
+        
+        try {
+          // Calculate geometric properties
+          console.log("Beginning geometric calculations...");
+          const geometryCalculator = new SpinNetworkGeometryCalculator();
+          
+          // Use try/catch for each calculation to prevent one failure from stopping others
+          let totalVolume = 0;
+          let volumeEntropy = 0;
+          let totalArea = 0;
+          let effectiveDimension = 0;
+          let liveCalculationSucceeded = false;
+          
+          // Total Volume
+          try {
+            console.log("Calculating total volume...");
+            totalVolume = geometryCalculator.calculateTotalVolume(currentState);
+            if (Number.isFinite(totalVolume) && totalVolume !== 0) {
+              calculatedGeometricData.totalVolume = totalVolume;
+              liveCalculationSucceeded = true;
+            }
+          } catch (volumeError) {
+            console.error("Error calculating total volume:", volumeError);
+          }
+          
+          // Volume Entropy
+          try {
+            console.log("Calculating volume entropy...");
+            volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
+            if (Number.isFinite(volumeEntropy)) {
+              calculatedGeometricData.volumeEntropy = volumeEntropy;
+              liveCalculationSucceeded = true;
+            }
+          } catch (entropyError) {
+            console.error("Error calculating volume entropy:", entropyError);
+          }
+          
+          // Total Area
+          try {
+            console.log("Calculating total area...");
+            totalArea = geometryCalculator.calculateTotalArea(graph);
+            if (Number.isFinite(totalArea) && totalArea !== 0) {
+              calculatedGeometricData.totalArea = totalArea;
+              liveCalculationSucceeded = true;
+            }
+          } catch (areaError) {
+            console.error("Error calculating total area:", areaError);
+          }
+          
+          // Effective Dimension
+          try {
+            console.log("Calculating effective dimension...");
+            effectiveDimension = geometryCalculator.calculateEffectiveDimension(graph, currentState);
+            if (Number.isFinite(effectiveDimension) && effectiveDimension !== 0) {
+              calculatedGeometricData.effectiveDimension = effectiveDimension;
+              liveCalculationSucceeded = true;
+            }
+          } catch (dimensionError) {
+            console.error("Error calculating effective dimension:", dimensionError);
+          }
+          
+          if (liveCalculationSucceeded) {
+            console.log("Live geometric calculations succeeded:", calculatedGeometricData);
+            hasCalculatedAnyData = true;
+            dataSource = "live";
+          } else {
+            console.warn("Live geometric calculations failed, using log data if available");
+          }
+          
+          // Calculate statistics
+          try {
+            console.log("Beginning statistics calculations...");
+            const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
+            
+            if (stats && Number.isFinite(stats.mean)) {
+              calculatedStatisticsData.mean = stats.mean;
+              calculatedStatisticsData.variance = stats.variance;
+              
+              // We don't calculate these yet, but keep placeholders
+              calculatedStatisticsData.skewness = 0; 
+              calculatedStatisticsData.kurtosis = 0;
+              
+              console.log("Live statistics calculations succeeded:", calculatedStatisticsData);
+              hasCalculatedAnyData = true;
+              dataSource = "live";
+            } else {
+              console.warn("Live statistics calculations produced invalid data");
+            }
+          } catch (statsError) {
+            console.error("Error calculating statistics:", statsError);
+          }
+        } catch (calculationError) {
+          console.error("Error during live calculations:", calculationError);
+        }
+      } else {
+        console.warn("Missing or invalid simulation data, using logs fallback exclusively");
+      }
       
-      // Log each calculation step
-      console.log("Calculating total volume...");
-      const totalVolume = geometryCalculator.calculateTotalVolume(currentState);
+      // Force hasHistory to true if we're using log data
+      if (dataSource === "logs" && simulation && typeof simulation.getHistory === 'function') {
+        try {
+          const history = simulation.getHistory();
+          if (history && typeof history.getTimes === 'function') {
+            const times = history.getTimes();
+            setHasHistory(times.length > 0);
+          }
+        } catch (historyError) {
+          console.error("Error checking history:", historyError);
+        }
+      }
       
-      console.log("Calculating volume entropy...");
-      const volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
-      
-      console.log("Calculating total area...");
-      const totalArea = geometryCalculator.calculateTotalArea(graph);
-      
-      console.log("Calculating effective dimension...");
-      const effectiveDimension = geometryCalculator.calculateEffectiveDimension(graph, currentState);
-      
-      console.log("Calculated geometric data:", {
-        totalVolume,
-        volumeEntropy,
-        totalArea,
-        effectiveDimension,
-        calculationSuccess: true
-      });
-      
-      // Update state only if calculations succeeded
-      setGeometricData({
-        totalVolume,
-        totalArea,
-        effectiveDimension,
-        volumeEntropy
-      });
-      
-      // Calculate statistics
-      console.log("Beginning statistics calculations...");
-      const stats = SimulationAnalyzer.calculateStatistics(currentState, simulation.currentTime);
-      console.log("Calculated statistics:", {
-        ...stats,
-        calculationSuccess: true
-      });
-      
-      setStatisticsData({
-        mean: stats.mean,
-        variance: stats.variance,
-        skewness: 0,  // Placeholder - could be calculated 
-        kurtosis: 0   // Placeholder - could be calculated
-      });
+      // Update state with our calculated data, regardless of source
+      if (hasCalculatedAnyData) {
+        console.log(`Updating UI with ${dataSource} data:`, {
+          geometric: calculatedGeometricData,
+          statistics: calculatedStatisticsData
+        });
+        
+        setGeometricData(calculatedGeometricData);
+        setStatisticsData(calculatedStatisticsData);
+      } else {
+        console.warn("No valid data calculated from any source");
+      }
     } catch (error) {
       console.error("Error calculating analysis data:", error);
       
@@ -399,18 +484,70 @@ const SimulationResultsPanel: React.FC = () => {
     };
   }, [isRunning, hasHistory, simulation]);
 
-  // Enhanced data availability detection
+  // Enhanced data availability detection with more robust checks
   const hasAnyData = (() => {
-    // Check multiple sources of data
+    // Function to check if a value is valid and non-zero
+    const isValidData = (value: any): boolean => {
+      return value !== null && value !== undefined && Number.isFinite(value) && value !== 0;
+    };
+    
+    // Check multiple sources of data with more robust validation
     const fromRunningState = isRunning;
     const fromHistoryFlag = hasHistory;
-    const fromConservationData = conservationData && conservationData.totalProbability > 0;
-    const fromGeometricData = geometricData.totalVolume > 0;
-    const fromStatisticsData = statisticsData.mean !== 0 || statisticsData.variance !== 0;
+    
+    // Check conservation data with validation
+    const fromConservationData = conservationData && 
+                                 Number.isFinite(conservationData.totalProbability) && 
+                                 conservationData.totalProbability > 0;
+    
+    // Check geometric data with validation for each property
+    const fromGeometricData = isValidData(geometricData.totalVolume) || 
+                              isValidData(geometricData.totalArea) || 
+                              isValidData(geometricData.effectiveDimension) || 
+                              isValidData(geometricData.volumeEntropy);
+    
+    // Check statistics data with validation for each property
+    const fromStatisticsData = isValidData(statisticsData.mean) || 
+                               isValidData(statisticsData.variance) || 
+                               isValidData(statisticsData.skewness) || 
+                               isValidData(statisticsData.kurtosis);
     
     // Check logs as a fallback
-    const logsSession = simulationLogger.getCurrentSession();
-    const fromLogs = logsSession && logsSession.results.length > 0;
+    let fromLogs = false;
+    try {
+      const logsSession = simulationLogger.getCurrentSession();
+      if (logsSession && Array.isArray(logsSession.results) && logsSession.results.length > 0) {
+        // Further validate log data - check if the latest result has any valid properties
+        const latestResult = logsSession.results[logsSession.results.length - 1];
+        
+        if (latestResult) {
+          // Check for valid conservation data in logs
+          if (latestResult.conservation && 
+              Number.isFinite(latestResult.conservation.totalProbability) && 
+              latestResult.conservation.totalProbability > 0) {
+            fromLogs = true;
+          }
+          
+          // Check for valid geometric data in logs
+          if (latestResult.geometric && (
+              isValidData(latestResult.geometric.totalVolume) || 
+              isValidData(latestResult.geometric.totalArea) || 
+              isValidData(latestResult.geometric.effectiveDimension) || 
+              isValidData(latestResult.geometric.volumeEntropy))) {
+            fromLogs = true;
+          }
+          
+          // Check for valid statistics data in logs
+          if (latestResult.statistics && (
+              isValidData(latestResult.statistics.mean) || 
+              isValidData(latestResult.statistics.variance))) {
+            fromLogs = true;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking log data:", error);
+    }
     
     // Detailed logging of data sources
     console.log("Data source check:", {
@@ -420,7 +557,21 @@ const SimulationResultsPanel: React.FC = () => {
       fromGeometricData,
       fromStatisticsData,
       fromLogs,
-      conservationData,
+      conservationData: conservationData ? {
+        totalProbability: conservationData.totalProbability,
+        normVariation: conservationData.normVariation,
+        positivity: conservationData.positivity
+      } : null,
+      geometricData: {
+        totalVolume: geometricData.totalVolume,
+        totalArea: geometricData.totalArea,
+        effectiveDimension: geometricData.effectiveDimension,
+        volumeEntropy: geometricData.volumeEntropy
+      },
+      statisticsData: {
+        mean: statisticsData.mean,
+        variance: statisticsData.variance
+      },
       hasHistory,
       isRunning
     });

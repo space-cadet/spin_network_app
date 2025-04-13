@@ -2,6 +2,26 @@
 
 This file tracks specific file and folder changes in the project.
 
+## 2025-04-13: Fixed Null Values in Simulation Data Processing and Display
+
+Modified files:
+- `/src/simulation/analysis/geometricProps.ts` - Added robust error handling, validation, and fallbacks
+- `/src/simulation/analysis/statistics.ts` - Improved input validation and fallback mechanisms
+- `/src/components/simulation/SimulationResultsPanel.tsx` - Enhanced data source detection and fallback data processing
+- `/public/test-simulation.html` - Added better error visualization and handling
+
+Issues addressed:
+- Fixed null value handling in geometric property calculations
+- Enhanced error handling in all statistical calculations
+- Implemented proper validation for all simulation data
+- Added fallback mechanisms for missing or invalid data
+- Improved data source detection with multiple fallback options
+- Enhanced UI to better indicate when using fallback values
+- Added defensive programming throughout calculation pipeline
+- Strengthened error handling in test-simulation.html
+- Implemented safe formatting for numeric display values
+- Created better diagnostics for simulation data issues
+
 ## 2025-04-12: Fixed Test Simulation HTML and JavaScript Bridge
 
 Modified files:
