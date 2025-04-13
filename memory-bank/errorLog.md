@@ -1,5 +1,90 @@
 # Error Log
 
+## 2025-04-14 - Network Element Deletion Issues
+
+**Files:** `src/components/workspace/NetworkInteractionManager/hooks/useNetworkInteractions.ts`, `src/components/workspace/NetworkInteractionManager/handlers/canvasHandlers.ts`
+
+**Error Messages:**
+No explicit error message, but three distinct issues with deletion functionality:
+
+1. After deleting the first edge, cannot delete any other edges without exiting and re-entering delete mode
+2. Node deletion had the same problem, requiring mode toggle between each deletion
+3. Placeholder nodes couldn't be deleted at all
+
+**Cause:**
+1. In the delete mode, event handlers were being set up once when entering delete mode, but not being properly maintained after elements were deleted. This is because Cytoscape elements are removed from the DOM when deleted, taking their event handlers with them, but the code wasn't reattaching handlers to the remaining elements.
+
+2. For placeholder nodes, the deletion handler relied on an `edgeId` property that might not be present on all placeholder nodes. If a placeholder didn't have an associated edge (which could happen in certain edge creation scenarios), it couldn't be deleted.
+
+**Fix:**
+1. Enhanced the `useNetworkInteractions` hook:
+   - Added state tracking for deletion events with a timestamp
+   - Created wrapper functions around the deletion callbacks to trigger re-setup of event handlers
+   - Added a timeout to ensure proper handler reattachment after each deletion
+   - Made the delete mode effect dependent on this timestamp to ensure handlers are refreshed
+
+2. Improved the placeholder node handler in `canvasHandlers.ts`:
+   - Added fallback logic to delete the placeholder node directly when no `edgeId` is found
+   - This ensures all placeholder nodes can be deleted regardless of their association with edges
+
+**Key Code Changes:**
+```typescript
+// In useNetworkInteractions.ts - Added state for tracking deletions
+const [lastDeletionTime, setLastDeletionTime] = useState<number>(0);
+
+// Wrapped callbacks to trigger handler refresh
+const wrappedDeleteNode = (nodeId: string) => {
+  if (onDeleteNode) {
+    onDeleteNode(nodeId);
+    setLastDeletionTime(Date.now());
+  }
+};
+
+// In the effect that sets up handlers, added timeout and refresh
+useEffect(() => {
+  if (!cy) return;
+  
+  // First remove all tap handlers to start fresh
+  cy.nodes().unbind('tap');
+  cy.edges().unbind('tap');
+  
+  // Set up mode-specific handlers
+  if (mode === 'delete') {
+    if (onDeleteNode && onDeleteEdge) {
+      // Small timeout to ensure cy is in a stable state
+      setTimeout(() => {
+        setupDeleteHandlers(cy, {
+          onDeleteNode: wrappedDeleteNode,
+          onDeleteEdge: wrappedDeleteEdge
+        });
+      }, 50);
+    }
+  }
+  // ...
+}, [cy, mode, edgeSourceId, onDeleteNode, onDeleteEdge, lastDeletionTime]);
+
+// In canvasHandlers.ts - Added fallback for placeholder nodes
+cy.nodes().filter('[type = "placeholder"]').bind('tap', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  // Get the edge ID associated with this placeholder
+  const node = event.target;
+  const edgeId = node.data('edgeId');
+  
+  if (edgeId) {
+    callbacks.onDeleteEdge(edgeId);
+  } else {
+    // If there's no associated edge, delete the placeholder node directly
+    callbacks.onDeleteNode(node.id());
+  }
+});
+```
+
+**Affected Files:**
+- src/components/workspace/NetworkInteractionManager/hooks/useNetworkInteractions.ts
+- src/components/workspace/NetworkInteractionManager/handlers/canvasHandlers.ts
+
 ## 2025-04-14 - Maximum Update Depth and Time Slider Update Issues
 
 **Files:** `src/hooks/useReduxSimulation.ts`, `src/hooks/useSimulation.ts`, `src/components/panels/SimulationControlPanel.tsx`

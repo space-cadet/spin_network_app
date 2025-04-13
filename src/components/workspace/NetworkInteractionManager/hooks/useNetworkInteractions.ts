@@ -1,7 +1,7 @@
 /**
  * Hook for managing network interaction state and handlers
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import cytoscape from 'cytoscape';
 import { setupDeleteHandlers } from '../handlers/canvasHandlers';
 import { highlightNode, unhighlightNode } from '../handlers/nodeHandlers';
@@ -21,6 +21,7 @@ export const useNetworkInteractions = (
 ) => {
   const { mode, onDeleteNode, onDeleteEdge } = options;
   const [edgeSourceId, setEdgeSourceId] = useState<string | null>(null);
+  const [lastDeletionTime, setLastDeletionTime] = useState<number>(0);
   
   // Reset edge source when changing modes
   useEffect(() => {
@@ -30,7 +31,22 @@ export const useNetworkInteractions = (
     }
   }, [mode, cy, edgeSourceId]);
   
-  // Setup mode-specific handlers
+  // Wrap the delete callbacks to refresh handlers after deletion
+  const wrappedDeleteNode = (nodeId: string) => {
+    if (onDeleteNode) {
+      onDeleteNode(nodeId);
+      setLastDeletionTime(Date.now());
+    }
+  };
+  
+  const wrappedDeleteEdge = (edgeId: string) => {
+    if (onDeleteEdge) {
+      onDeleteEdge(edgeId);
+      setLastDeletionTime(Date.now());
+    }
+  };
+  
+  // Setup mode-specific handlers - reruns when lastDeletionTime changes 
   useEffect(() => {
     if (!cy) return;
     
@@ -41,10 +57,13 @@ export const useNetworkInteractions = (
     // Set up mode-specific handlers
     if (mode === 'delete') {
       if (onDeleteNode && onDeleteEdge) {
-        setupDeleteHandlers(cy, {
-          onDeleteNode,
-          onDeleteEdge
-        });
+        // Small timeout to ensure cy is in a stable state
+        setTimeout(() => {
+          setupDeleteHandlers(cy, {
+            onDeleteNode: wrappedDeleteNode,
+            onDeleteEdge: wrappedDeleteEdge
+          });
+        }, 50);
       }
     } else if (mode === 'addEdge') {
       // Setup edge creation mode handlers
@@ -73,7 +92,7 @@ export const useNetworkInteractions = (
       });
     }
     
-  }, [cy, mode, edgeSourceId, onDeleteNode, onDeleteEdge]);
+  }, [cy, mode, edgeSourceId, onDeleteNode, onDeleteEdge, lastDeletionTime]);
   
   // Reset any styling when changing modes
   useEffect(() => {

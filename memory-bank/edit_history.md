@@ -2,6 +2,17 @@
 *Created: April, 14, 2025*
 
 ## April 14, 2025
+### 16:30 - Fixed Network Node/Edge Deletion Issues
+- Modified `src/components/workspace/NetworkInteractionManager/hooks/useNetworkInteractions.ts`: Added state to track deletion time and wrap deletion callbacks
+- Modified `src/components/workspace/NetworkInteractionManager/hooks/useNetworkInteractions.ts`: Added timeout for reattaching handlers after deletion
+- Modified `src/components/workspace/NetworkInteractionManager/handlers/canvasHandlers.ts`: Improved placeholder node deletion logic
+
+These changes fix three issues with network element deletion:
+1. After deleting the first edge, cannot delete additional edges without re-entering delete mode
+2. Similar issue with node deletion requiring mode reset between deletions
+3. Placeholder nodes not being properly deleted
+
+## April 14, 2025
 ### 12:55 - Fix Time Slider Update Issues
 - Modified `src/hooks/useReduxSimulation.ts`: Replaced setInterval with setTimeout for better control
 - Modified `src/hooks/useReduxSimulation.ts`: Added proper component mount tracking

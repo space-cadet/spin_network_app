@@ -114,6 +114,9 @@ export const setupDeleteHandlers = (
     
     if (edgeId) {
       callbacks.onDeleteEdge(edgeId);
+    } else {
+      // If there's no associated edge, delete the placeholder node directly
+      callbacks.onDeleteNode(node.id());
     }
   });
   
