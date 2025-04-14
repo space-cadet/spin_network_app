@@ -92,6 +92,7 @@
   <p>This page runs a simple test of the simulation engine to verify that it's working correctly.</p>
   
   <button id="run-test">Run Simulation Test</button>
+  <button id="regenerate" class="reset">Generate New Random Network</button>
   
   <div class="results-panel" style="margin-top: 20px; display: none;">
     <h2>Simulation Results:</h2>
@@ -518,6 +519,45 @@
         window.runSimulationTest();
       } catch (error) {
         console.error('Test failed with error:', error);
+      }
+    });
+    
+    // Set up the regenerate button
+    document.getElementById('regenerate').addEventListener('click', () => {
+      consoleOutput.textContent = ''; // Clear previous output
+      console.log('Generating new random network...');
+      
+      try {
+        // Import necessary functions with error handling
+        const regenerateFunction = async () => {
+          try {
+            // Generate a new random network
+            const testSimulation = await import('../src/test-simulation.js');
+            
+            // Call generateRandomNetwork with random parameters
+            const numNodes = 3 + Math.floor(Math.random() * 5); // 3-7 nodes
+            const connectivity = 0.3 + Math.random() * 0.5; // 0.3-0.8 connectivity
+            
+            const newNetwork = testSimulation.generateRandomNetwork(numNodes, connectivity);
+            console.log(`Generated new network with ${newNetwork.nodes.length} nodes and ${newNetwork.edges.length} edges`);
+            console.log('Nodes:', newNetwork.nodes.map(n => n.id).join(', '));
+            console.log('Edges:', newNetwork.edges.map(e => `${e.source}->${e.target} (spin=${e.spin})`).join(', '));
+            
+            // Run the test with the new network
+            if (typeof testSimulation.runSimulationTest === 'function') {
+              console.log('Running simulation with new network...');
+              await testSimulation.runSimulationTest();
+            } else {
+              console.error('runSimulationTest function not found');
+            }
+          } catch (error) {
+            console.error('Error regenerating network:', error);
+          }
+        };
+        
+        regenerateFunction();
+      } catch (error) {
+        console.error('Failed to regenerate network:', error);
       }
     });
   </script>

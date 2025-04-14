@@ -16,26 +16,97 @@ import {
 import { CytoscapeAdapter } from './simulation/visualization/cytoscapeAdapter';
 import { simulationLogger } from './simulation/core/simulationLogger';
 
-// Create a test network - exported for test-simulation.html
-export const testNetwork = {
-  nodes: [
-    { id: 'node1', position: { x: 100, y: 100 }, intertwiner: 1, type: 'default' },
-    { id: 'node2', position: { x: 200, y: 100 }, intertwiner: 1, type: 'default' },
-    { id: 'node3', position: { x: 150, y: 150 }, intertwiner: 1, type: 'default' }
-  ],
-  edges: [
-    { id: 'edge1', source: 'node1', target: 'node2', spin: 0.5, type: 'default' },
-    { id: 'edge2', source: 'node2', target: 'node3', spin: 0.5, type: 'default' },
-    { id: 'edge3', source: 'node3', target: 'node1', spin: 0.5, type: 'default' }
-  ],
-  metadata: {
-    name: 'Test Network',
-    description: 'A simple test network for simulation testing',
-    type: 'custom',
-    created: new Date().toISOString(),
-    modified: new Date().toISOString()
+/**
+ * Generate a randomized network with a specified number of nodes and connectivity
+ * @param {number} numNodes - Number of nodes to create
+ * @param {number} connectivity - Probability of edge creation between nodes (0-1)
+ * @returns {Object} A network with random nodes and edges
+ */
+export const generateRandomNetwork = (numNodes = 5, connectivity = 0.6) => {
+  // Generate nodes with random positions
+  const nodes = [];
+  for (let i = 1; i <= numNodes; i++) {
+    nodes.push({
+      id: `node${i}`,
+      position: { 
+        x: 100 + Math.random() * 300, 
+        y: 100 + Math.random() * 300 
+      },
+      intertwiner: Math.floor(Math.random() * 3) + 1, // Random intertwiner values 1-3
+      type: 'default'
+    });
   }
+  
+  // Generate edges with random connectivity
+  const edges = [];
+  let edgeCounter = 1;
+  
+  // Ensure the network is connected (create a spanning tree first)
+  // This guarantees all nodes are reachable
+  const connectedNodes = [0]; // Indices of connected nodes (start with first node)
+  const unconnectedNodes = [...Array(numNodes - 1).keys()].map(i => i + 1); // Rest of the nodes
+  
+  // Connect all nodes to form a connected graph
+  while (unconnectedNodes.length > 0) {
+    // Pick a random connected node
+    const sourceIndex = connectedNodes[Math.floor(Math.random() * connectedNodes.length)];
+    
+    // Pick a random unconnected node
+    const targetIndexInArray = Math.floor(Math.random() * unconnectedNodes.length);
+    const targetIndex = unconnectedNodes[targetIndexInArray];
+    
+    // Create an edge between them
+    edges.push({
+      id: `edge${edgeCounter++}`,
+      source: nodes[sourceIndex].id,
+      target: nodes[targetIndex].id,
+      spin: (Math.floor(Math.random() * 4) + 1) / 2, // Random spin values: 0.5, 1, 1.5, or 2
+      type: 'default'
+    });
+    
+    // Move the target node to the connected set
+    connectedNodes.push(targetIndex);
+    unconnectedNodes.splice(targetIndexInArray, 1);
+  }
+  
+  // Add more random edges based on connectivity parameter
+  for (let i = 0; i < numNodes; i++) {
+    for (let j = i + 1; j < numNodes; j++) {
+      // Skip if already connected in the spanning tree
+      if (edges.some(edge => 
+          (edge.source === nodes[i].id && edge.target === nodes[j].id) ||
+          (edge.source === nodes[j].id && edge.target === nodes[i].id))) {
+        continue;
+      }
+      
+      // Add edge with probability determined by connectivity
+      if (Math.random() < connectivity) {
+        edges.push({
+          id: `edge${edgeCounter++}`,
+          source: nodes[i].id,
+          target: nodes[j].id,
+          spin: (Math.floor(Math.random() * 4) + 1) / 2, // Random spin values: 0.5, 1, 1.5, or 2
+          type: 'default'
+        });
+      }
+    }
+  }
+  
+  return {
+    nodes,
+    edges,
+    metadata: {
+      name: 'Random Test Network',
+      description: 'A randomly generated network for simulation testing',
+      type: 'custom',
+      created: new Date().toISOString(),
+      modified: new Date().toISOString()
+    }
+  };
 };
+
+// Create a test network - dynamically generated for test-simulation.html
+export const testNetwork = generateRandomNetwork();
 
 // Run a simulation test
 const runSimulationTest = () => {
