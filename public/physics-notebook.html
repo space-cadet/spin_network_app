@@ -7,11 +7,108 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
       line-height: 1.6;
       color: #333;
+      display: flex;
+    }
+    .toc-sidebar {
+      width: 280px;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      background-color: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px;
+      box-sizing: border-box;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    }
+    .toc-sidebar h2 {
+      font-size: 1.2em;
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .toc-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .toc-section {
+      margin-bottom: 10px;
+    }
+    .toc-section > a {
+      font-weight: 600;
+      display: block;
+      padding: 8px 5px;
+      border-radius: 4px;
+      color: #1e3a8a;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .toc-section > a:hover {
+      background-color: #e0e7ff;
+      text-decoration: none;
+    }
+    .toc-section > a.active {
+      background-color: #e0e7ff;
+      border-left: 3px solid #4f46e5;
+    }
+    .toc-subsection a.active {
+      background-color: #e0f2fe;
+      border-left: 3px solid #0ea5e9;
+    }
+    .toc-subsection {
+      list-style-type: none;
+      padding-left: 15px;
+      margin: 5px 0;
+    }
+    .toc-subsection li {
+      margin: 3px 0;
+    }
+    .toc-subsection a {
+      font-size: 0.9em;
+      display: block;
+      padding: 4px 5px;
+      border-radius: 4px;
+      color: #3b82f6;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .toc-subsection a:hover {
+      background-color: #e0f2fe;
+      text-decoration: none;
+    }
+    .main-content {
+      margin-left: 280px;
+      padding: 20px;
+      max-width: 900px;
+      box-sizing: border-box;
+    }
+    .mobile-toc-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      z-index: 1000;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s, background-color 0.3s;
+    }
+    .mobile-toc-toggle:hover {
+      background-color: #2563eb;
+      transform: scale(1.05);
+    }
+    .mobile-toc-toggle:active {
+      transform: scale(0.95);
     }
     h1, h2, h3, h4 {
       font-weight: 600;
@@ -152,6 +249,94 @@
       margin: 20px 0;
       border-radius: 4px;
     }
+    
+    /* Collapsible sections */
+    .section-header {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      user-select: none;
+      transition: background-color 0.2s;
+      padding: 8px 12px;
+      margin: 0 -12px;
+      border-radius: 6px;
+    }
+    .section-header:hover {
+      background-color: #f1f5f9;
+    }
+    .section-header::before {
+      content: '▼';
+      display: inline-block;
+      margin-right: 10px;
+      transition: transform 0.3s;
+      font-size: 0.7em;
+      color: #3b82f6;
+    }
+    .section-header.collapsed::before {
+      transform: rotate(-90deg);
+    }
+    .section-content {
+      transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+      max-height: 10000px;
+      opacity: 1;
+      overflow: hidden;
+    }
+    .section-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    
+    /* Top TOC */
+    .top-toc {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .top-toc h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .top-toc-list {
+      column-count: 2;
+      column-gap: 20px;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .top-toc-list li {
+      margin-bottom: 5px;
+      break-inside: avoid;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 1024px) {
+      .toc-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 100;
+      }
+      .toc-sidebar.visible {
+        transform: translateX(0);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+      }
+      .mobile-toc-toggle {
+        display: block;
+      }
+      .top-toc-list {
+        column-count: 1;
+      }
+    }
   </style>
   <!-- Include KaTeX for math rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
@@ -159,16 +344,36 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 </head>
 <body>
-  <h1>Spin Network Physics Notebook</h1>
+  <!-- Mobile TOC toggle button -->
+  <button class="mobile-toc-toggle" id="toc-toggle">≡</button>
   
-  <p>This notebook explains the physics behind the spin network simulation, the mathematical models used, and how each component of the calculation is implemented in code. To see the simulation in action, visit the <a href="test-simulation.html" style="font-weight: bold; color: #2563eb;">Test Simulation Page</a>.</p>
+  <!-- Table of Contents Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <h2>Table of Contents</h2>
+    <ul class="toc-list" id="toc-list">
+      <!-- Will be populated via JavaScript -->
+    </ul>
+  </aside>
   
-  <div class="note">
-    <strong>Note:</strong> This is an educational notebook designed to help understand the simulation code in <code>test-simulation.html</code>. It breaks down the calculations step-by-step to explain the physics concepts involved.
-  </div>
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Spin Network Physics Notebook</h1>
+    
+    <p>This notebook explains the physics behind the spin network simulation, the mathematical models used, and how each component of the calculation is implemented in code. To see the simulation in action, visit the <a href="test-simulation.html" style="font-weight: bold; color: #2563eb;">Test Simulation Page</a>.</p>
+    
+    <div class="top-toc">
+      <h3>Contents</h3>
+      <ul class="top-toc-list" id="top-toc-list">
+        <!-- Will be populated via JavaScript -->
+      </ul>
+    </div>
+    
+    <div class="note">
+      <strong>Note:</strong> This is an educational notebook designed to help understand the simulation code in <code>test-simulation.html</code>. It breaks down the calculations step-by-step to explain the physics concepts involved.
+    </div>
   
   <!-- SECTION 1: Introduction to Spin Networks -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-1">
     <div class="notebook-section-header">
       <h2>1. Introduction to Spin Networks</h2>
     </div>
@@ -208,7 +413,7 @@
   </div>
   
   <!-- SECTION 2: Network Structure and Representation -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-2">
     <div class="notebook-section-header">
       <h2>2. Network Structure and Representation</h2>
     </div>
@@ -281,7 +486,7 @@ toLaplacianMatrix(weightFunction?: WeightFunction): math.Matrix {
   </div>
   
   <!-- SECTION 3: State Vector Representation -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-3">
     <div class="notebook-section-header">
       <h2>3. State Vector Representation</h2>
     </div>
@@ -370,7 +575,7 @@ if (initialStateType === 'delta') {
   </div>
   
   <!-- SECTION 4: Diffusion Models -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-4">
     <div class="notebook-section-header">
       <h2>4. Diffusion Models</h2>
     </div>
@@ -484,7 +689,7 @@ const newStateArray = this.mathAdapter.add(stateMinusPrev, wavetermScaled);</cod
   </div>
   
   <!-- SECTION 5: Geometric Properties Calculation -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-5">
     <div class="notebook-section-header">
       <h2>5. Geometric Properties Calculation</h2>
     </div>
@@ -686,7 +891,7 @@ calculateVolumeEntropy(state: StateVector): number {
   </div>
   
   <!-- SECTION 6: Statistical Analysis -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-6">
     <div class="notebook-section-header">
       <h2>6. Statistical Analysis</h2>
     </div>
@@ -806,7 +1011,7 @@ static calculateStatistics(state: StateVector, time: number): SimulationStatisti
   </div>
   
   <!-- SECTION 7: Conservation Laws -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-7">
     <div class="notebook-section-header">
       <h2>7. Conservation Laws</h2>
     </div>
@@ -898,7 +1103,7 @@ getConservationLaws() {
   </div>
   
   <!-- SECTION 8: Simulation Steps and Execution Flow -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-8">
     <div class="notebook-section-header">
       <h2>8. Simulation Steps and Execution Flow</h2>
     </div>
@@ -1023,7 +1228,7 @@ for (let i = 0; i < 10; i++) {
   </div>
   
   <!-- SECTION 9: Comparing Different Parameters -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-9">
     <div class="notebook-section-header">
       <h2>9. Comparing Different Initial States and Parameters</h2>
     </div>
@@ -1146,7 +1351,7 @@ for (let i = 0; i < 10; i++) {
   </div>
   
   <!-- SECTION 10: Conclusion and Further Exploration -->
-  <div class="notebook-section">
+  <div class="notebook-section" id="section-10">
     <div class="notebook-section-header">
       <h2>10. Conclusion and Further Exploration</h2>
     </div>
@@ -1200,8 +1405,11 @@ for (let i = 0; i < 10; i++) {
     </div>
   </div>
 
+  </div> <!-- End of main-content div -->
+  
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      // Render math equations
       renderMathInElement(document.body, {
         delimiters: [
           {left: "\\(", right: "\\)", display: false},
@@ -1210,6 +1418,233 @@ for (let i = 0; i < 10; i++) {
         ],
         throwOnError: false
       });
+      
+      // Make sections collapsible
+      const sections = document.querySelectorAll('.notebook-section-header h2');
+      
+      sections.forEach(section => {
+        // Add section-header class
+        section.classList.add('section-header');
+        
+        // Get parent section
+        const sectionDiv = section.closest('.notebook-section');
+        const content = sectionDiv.querySelector('.notebook-section-header').nextElementSibling;
+        
+        // Create a container for all content after the header
+        const contentContainer = document.createElement('div');
+        contentContainer.classList.add('section-content');
+        
+        // Move all content after the header into the container
+        while (content && content.nextElementSibling) {
+          contentContainer.appendChild(content.nextElementSibling);
+        }
+        
+        // Move the first content element into the container
+        if (content && content !== section) {
+          contentContainer.insertBefore(content, contentContainer.firstChild);
+        }
+        
+        // Append the content container to the section
+        sectionDiv.appendChild(contentContainer);
+        
+        // Add click event to toggle collapse
+        section.addEventListener('click', () => {
+          section.classList.toggle('collapsed');
+          contentContainer.classList.toggle('collapsed');
+          
+          // Update the section's hash in the URL for direct linking to sections
+          if (!section.classList.contains('collapsed')) {
+            const sectionId = section.textContent.trim().split('.')[0];
+            window.location.hash = sectionId;
+          }
+        });
+      });
+      
+      // Generate Table of Contents
+      const tocList = document.getElementById('toc-list');
+      const topTocList = document.getElementById('top-toc-list');
+      
+      // Clear existing content
+      tocList.innerHTML = '';
+      topTocList.innerHTML = '';
+      
+      // Get all section headings
+      const sectionHeadings = document.querySelectorAll('.notebook-section-header h2');
+      
+      sectionHeadings.forEach(heading => {
+        const sectionNum = heading.textContent.split('.')[0].trim();
+        const sectionTitle = heading.textContent.substring(heading.textContent.indexOf('.') + 1).trim();
+        const sectionId = sectionNum;
+        
+        // Assign an ID to the section heading for navigation
+        heading.id = sectionId;
+        
+        // Create sidebar TOC entry
+        const sectionItem = document.createElement('li');
+        sectionItem.classList.add('toc-section');
+        sectionItem.innerHTML = `<a href="#${sectionId}">${heading.textContent}</a>`;
+        
+        // Create subsection list
+        const subsectionList = document.createElement('ul');
+        subsectionList.classList.add('toc-subsection');
+        
+        // Get all subsection headings in this section
+        const section = heading.closest('.notebook-section');
+        const subsectionHeadings = section.querySelectorAll('h3');
+        
+        subsectionHeadings.forEach((subheading, index) => {
+          const subheadingTitle = subheading.textContent;
+          const subheadingId = `${sectionId}-${index + 1}`;
+          
+          // Assign an ID to the subsection heading
+          subheading.id = subheadingId;
+          
+          // Create sidebar TOC subsection entry
+          const subsectionItem = document.createElement('li');
+          subsectionItem.innerHTML = `<a href="#${subheadingId}">${subheadingTitle}</a>`;
+          subsectionList.appendChild(subsectionItem);
+        });
+        
+        // Add subsections to sidebar TOC
+        if (subsectionHeadings.length > 0) {
+          sectionItem.appendChild(subsectionList);
+        }
+        
+        tocList.appendChild(sectionItem);
+        
+        // Create top TOC entry
+        const topTocItem = document.createElement('li');
+        topTocItem.innerHTML = `<a href="#${sectionId}">${heading.textContent}</a>`;
+        topTocList.appendChild(topTocItem);
+      });
+      
+      // Add click handlers to all TOC links to ensure sections expand properly
+      document.querySelectorAll('#toc-list a, #top-toc-list a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Get the target ID
+          const targetId = this.getAttribute('href').substring(1);
+          const targetElement = document.getElementById(targetId);
+          
+          if (targetElement) {
+            e.preventDefault();
+            
+            // Find the section containing this element
+            const section = targetElement.closest('.notebook-section');
+            
+            if (section) {
+              // Find the section header
+              const sectionHeader = section.querySelector('.section-header');
+              
+              // If the section is collapsed, expand it
+              if (sectionHeader && sectionHeader.classList.contains('collapsed')) {
+                sectionHeader.click();
+              }
+              
+              // After a short delay to allow expansion, scroll to the target
+              setTimeout(() => {
+                targetElement.scrollIntoView({
+                  behavior: 'smooth'
+                });
+                
+                // Update the URL hash
+                history.pushState(null, null, `#${targetId}`);
+              }, 300);
+            }
+          }
+        });
+      });
+      
+      // Mobile TOC toggle
+      const tocToggle = document.getElementById('toc-toggle');
+      const tocSidebar = document.getElementById('toc-sidebar');
+      
+      tocToggle.addEventListener('click', () => {
+        tocSidebar.classList.toggle('visible');
+      });
+      
+      // Handle hash-based navigation
+      if (window.location.hash) {
+        const id = window.location.hash.substring(1);
+        const targetElement = document.getElementById(id);
+        
+        if (targetElement) {
+          // If the target is a section heading, make sure it's expanded
+          if (targetElement.classList.contains('section-header') && targetElement.classList.contains('collapsed')) {
+            targetElement.click();
+          }
+          
+          // Or if it's a subsection, make sure its parent section is expanded
+          const parentSection = targetElement.closest('.notebook-section');
+          if (parentSection) {
+            const sectionHeader = parentSection.querySelector('.section-header');
+            if (sectionHeader && sectionHeader.classList.contains('collapsed')) {
+              sectionHeader.click();
+            }
+          }
+          
+          // Scroll to the target element with a slight delay to ensure content is expanded
+          setTimeout(() => {
+            targetElement.scrollIntoView({
+              behavior: 'smooth'
+            });
+          }, 300);
+        }
+      }
+      
+      // Add active class highlighting for TOC based on scroll position
+      function updateTOCActiveState() {
+        // Get all section elements
+        const sections = document.querySelectorAll('.notebook-section');
+        let currentSectionId = null;
+        let currentSubsectionId = null;
+        
+        // Find which section is currently in the viewport
+        sections.forEach(section => {
+          const rect = section.getBoundingClientRect();
+          // Check if the top of the section is within the viewport or above it
+          // but still has content visible (not completely scrolled past)
+          if (rect.top <= 100 && rect.bottom > 0) {
+            currentSectionId = section.id;
+            
+            // Check for subsections
+            const subsections = section.querySelectorAll('h3');
+            subsections.forEach(subsection => {
+              const subRect = subsection.getBoundingClientRect();
+              if (subRect.top <= 100 && subRect.bottom > 0) {
+                currentSubsectionId = subsection.id;
+              }
+            });
+          }
+        });
+        
+        // Update TOC active states for sections
+        document.querySelectorAll('.toc-section > a').forEach(link => {
+          const href = link.getAttribute('href').substring(1);
+          if (href === currentSectionId) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+        
+        // Update TOC active states for subsections
+        document.querySelectorAll('.toc-subsection a').forEach(link => {
+          const href = link.getAttribute('href').substring(1);
+          if (href === currentSubsectionId) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+      
+      // Listen for scroll events
+      window.addEventListener('scroll', function() {
+        updateTOCActiveState();
+      });
+      
+      // Initial call to set the correct active states
+      updateTOCActiveState();
     });
   </script>
 </body>
