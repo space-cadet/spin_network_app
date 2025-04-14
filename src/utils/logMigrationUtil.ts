@@ -5,17 +5,32 @@ import { LogService } from '../database/services/logService';
 import { migrateLogsFromMarkdown } from '../database/migrations/logMigration';
 
 /**
- * Helper function to read a file using XMLHttpRequest (backup method)
+ * Helper function to read a file using fetch API
+ * @param filePath Path to the file to read (relative to the public folder)
+ * @returns File contents as a string
+ */
+function readFileWithFetch(filePath: string): Promise<string> {
+  // Make sure the path starts with a '/' for proper URL formation
+  const url = filePath.startsWith('/') ? filePath : `/${filePath}`;
+  
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.text();
+    });
+}
+
+/**
+ * Legacy helper function to read a file using XMLHttpRequest (backup method)
  * @param filePath Path to the file to read
  * @returns File contents as a string
  */
 function readFileWithXHR(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    // Use file:// protocol for local files
-    const formattedPath = filePath.startsWith('/') ? `file://${filePath}` : filePath;
-    
-    xhr.open('GET', formattedPath, true);
+    xhr.open('GET', filePath, true);
     xhr.onload = function() {
       if (xhr.status === 200) {
         resolve(xhr.responseText);
@@ -36,9 +51,15 @@ function readFileWithXHR(filePath: string): Promise<string> {
  * @param editHistoryPath Path to the edit history markdown file
  * @returns Summary of migration results
  */
+/**
+ * Fetch and migrate logs from markdown files located in the public folder
+ * @param errorLogPath Path to the error log markdown file (relative to public folder)
+ * @param editHistoryPath Path to the edit history markdown file (relative to public folder)
+ * @returns Summary of migration results
+ */
 export async function migrateMarkdownLogs(
-  errorLogPath: string = '/Users/deepak/code/spin_network_app/memory-bank/errorLog.md',
-  editHistoryPath: string = '/Users/deepak/code/spin_network_app/memory-bank/edit_history.md'
+  errorLogPath: string = '/memory-bank/errorLog.md',
+  editHistoryPath: string = '/memory-bank/edit_history.md'
 ): Promise<{
   errorLogsMigrated: number;
   editLogsMigrated: number;
@@ -68,23 +89,23 @@ export async function migrateMarkdownLogs(
     // Try to read error log file
     try {
       try {
-        // First try using window.fs with text encoding
-        errorLogContent = await window.fs.readFile(errorLogPath, { encoding: 'utf8' });
+        // First try using fetch (now that files are in public folder)
+        console.log('Attempting to fetch error log from:', errorLogPath);
+        errorLogContent = await readFileWithFetch(errorLogPath);
       } catch (e) {
-        console.log('Failed first attempt to read error log file, trying alternative methods...');
+        console.log('Failed to read error log with fetch, trying XMLHttpRequest...', e);
         
         try {
-          // If that fails, try binary and convert
-          const errorLogBuffer = await window.fs.readFile(errorLogPath);
-          errorLogContent = new TextDecoder('utf-8').decode(errorLogBuffer);
+          // Try XMLHttpRequest as backup
+          errorLogContent = await readFileWithXHR(errorLogPath);
         } catch (e2) {
-          console.log('Binary read failed too, trying XMLHttpRequest as fallback...');
+          console.log('XMLHttpRequest failed too, trying legacy file system methods...', e2);
           
           try {
-            // Last resort: try XMLHttpRequest
-            errorLogContent = await readFileWithXHR(errorLogPath);
+            // Legacy fallback: try window.fs if available
+            errorLogContent = await window.fs.readFile(errorLogPath, { encoding: 'utf8' });
           } catch (e3) {
-            console.log('All file reading methods failed for error log. Creating test entry...');
+            console.log('All file reading methods failed for error log. Creating test entry...', e3);
             
             // Create a minimal error log for testing
             errorLogContent = `# Error Log
@@ -124,23 +145,23 @@ Added test error entry to verify migration works.
     // Try to read edit history file
     try {
       try {
-        // First try using window.fs with text encoding
-        editHistoryContent = await window.fs.readFile(editHistoryPath, { encoding: 'utf8' });
+        // First try using fetch (now that files are in public folder)
+        console.log('Attempting to fetch edit history from:', editHistoryPath);
+        editHistoryContent = await readFileWithFetch(editHistoryPath);
       } catch (e) {
-        console.log('Failed first attempt to read edit history file, trying alternative methods...');
+        console.log('Failed to read edit history with fetch, trying XMLHttpRequest...', e);
         
         try {
-          // If that fails, try binary and convert
-          const editHistoryBuffer = await window.fs.readFile(editHistoryPath);
-          editHistoryContent = new TextDecoder('utf-8').decode(editHistoryBuffer);
+          // Try XMLHttpRequest as backup
+          editHistoryContent = await readFileWithXHR(editHistoryPath);
         } catch (e2) {
-          console.log('Binary read failed too, trying XMLHttpRequest as fallback...');
+          console.log('XMLHttpRequest failed too, trying legacy file system methods...', e2);
           
           try {
-            // Last resort: try XMLHttpRequest
-            editHistoryContent = await readFileWithXHR(editHistoryPath);
+            // Legacy fallback: try window.fs if available
+            editHistoryContent = await window.fs.readFile(editHistoryPath, { encoding: 'utf8' });
           } catch (e3) {
-            console.log('All file reading methods failed for edit history. Creating test entry...');
+            console.log('All file reading methods failed for edit history. Creating test entry...', e3);
             
             // Create a minimal edit history for testing
             editHistoryContent = `# Edit History
@@ -388,14 +409,17 @@ export function createLogMigrationComponent() {
 /**
  * Command-line function to migrate logs
  * This can be used in a script or from the console
+ * 
+ * Note: This function now reads memory bank files from the public folder,
+ * not directly from the file system
  */
 export async function migrateLogsFromConsole() {
   console.log('Starting log migration from Markdown files to database...');
   
   try {
     // First, check if files exist
-    const errorLogPath = '/Users/deepak/code/spin_network_app/memory-bank/errorLog.md';
-    const editHistoryPath = '/Users/deepak/code/spin_network_app/memory-bank/edit_history.md';
+    const errorLogPath = '/memory-bank/errorLog.md';
+    const editHistoryPath = '/memory-bank/edit_history.md';
     
     console.log(`Checking for error log at: ${errorLogPath}`);
     console.log(`Checking for edit history at: ${editHistoryPath}`);
@@ -404,7 +428,8 @@ export async function migrateLogsFromConsole() {
     
     try {
       // Check if files exist and contain content
-      errorLogContent = await window.fs.readFile(errorLogPath, { encoding: 'utf8' });
+      console.log('Attempting to fetch error log for console migration...');
+      errorLogContent = await readFileWithFetch(errorLogPath);
       console.log(`Error log file found, content length: ${errorLogContent.length} bytes`);
       
       // Output the first few headings to see the structure
@@ -414,7 +439,8 @@ export async function migrateLogsFromConsole() {
       // Print the first 500 characters
       console.log('Error log sample:', errorLogContent.substring(0, 500) + '...');
       
-      editHistoryContent = await window.fs.readFile(editHistoryPath, { encoding: 'utf8' });
+      console.log('Attempting to fetch edit history for console migration...');
+      editHistoryContent = await readFileWithFetch(editHistoryPath);
       console.log(`Edit history file found, content length: ${editHistoryContent.length} bytes`);
       
       // Output the first few headings to see the structure

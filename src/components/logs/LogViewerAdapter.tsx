@@ -309,6 +309,14 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
               onChange={(e) => handleFilterChange({ type: e.value })}
               placeholder="Filter by type"
               className="w-full md:w-15rem"
+              panelClassName="logs-filter-panel"
+              style={{ 
+                backgroundColor: 'white', 
+                border: '1px solid #e2e8f0',
+                borderRadius: '0.375rem'
+              }}
+              display="chip"
+              showClear={true}
             />
           </div>
           

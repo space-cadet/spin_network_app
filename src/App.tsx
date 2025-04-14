@@ -143,7 +143,7 @@ function App() {
                               const { migrateMarkdownLogs } = await import('./utils/logMigrationUtil');
                               if (window.confirm('Run log migration from Markdown files to database?')) {
                                 try {
-                                  console.log('Starting migration process...');
+                                  console.log('Starting migration process from public/memory-bank files...');
                                   const result = await migrateMarkdownLogs();
                                   
                                   if (result.success) {

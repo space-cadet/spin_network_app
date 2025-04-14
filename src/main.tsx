@@ -11,6 +11,8 @@ import 'primeicons/primeicons.css'; // Only icons - required for icons to displa
 // Import our scoped CSS for PrimeReact components
 import './styles/primereact-scoped.css';
 import './styles/index.css';
+// Import direct fixes for PrimeReact overlays
+import './styles/primereact-fixes.css';
 
 // Import test utility in development mode
 if (import.meta.env.DEV) {

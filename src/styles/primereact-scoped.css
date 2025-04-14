@@ -141,10 +141,137 @@
   display: inline-flex;
 }
 
+/* Fix for transparent dropdown background in MultiSelect - with higher specificity */
+body .primereact-scope .p-multiselect-panel,
+.p-multiselect-panel.p-component {
+  background: #ffffff !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 0.25rem !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.primereact-scope .p-multiselect-panel .p-multiselect-items-wrapper,
+.p-multiselect-panel .p-multiselect-items-wrapper {
+  background: #ffffff !important;
+}
+
+.primereact-scope .p-multiselect-items,
+.p-multiselect-items {
+  padding: 0.5rem 0 !important;
+  background: #ffffff !important;
+}
+
+.primereact-scope .p-multiselect-item,
+.p-multiselect-panel .p-multiselect-item {
+  padding: 0.5rem 1rem !important;
+  margin: 0 !important;
+  border: 0 none !important;
+  cursor: pointer !important;
+  font-weight: normal !important;
+  white-space: nowrap !important;
+  position: relative !important;
+  overflow: hidden !important;
+  background-color: #ffffff !important;
+  color: #495057 !important;
+}
+
+.primereact-scope .p-multiselect-item:hover,
+.p-multiselect-panel .p-multiselect-item:hover {
+  background-color: #f8f9fa !important;
+  color: #495057 !important;
+}
+
+.primereact-scope .p-multiselect-item.p-highlight,
+.p-multiselect-panel .p-multiselect-item.p-highlight {
+  background-color: #e9f2ff !important;
+  color: #3b82f6 !important;
+}
+
+/* Checkbox styling in MultiSelect */
+.primereact-scope .p-checkbox {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.primereact-scope .p-checkbox .p-checkbox-box {
+  border: 2px solid #ced4da;
+  background: #ffffff;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.primereact-scope .p-checkbox .p-checkbox-box.p-highlight {
+  border-color: #3b82f6;
+  background: #3b82f6;
+}
+
+.primereact-scope .p-checkbox .p-checkbox-box .p-checkbox-icon {
+  color: #ffffff;
+  font-size: 12px;
+}
+
+/* Dark mode checkbox styles */
+.dark-mode .primereact-scope .p-checkbox .p-checkbox-box {
+  border-color: #475569;
+  background: #1e293b;
+}
+
+.dark-mode .primereact-scope .p-checkbox .p-checkbox-box.p-highlight {
+  border-color: #60a5fa;
+  background: #60a5fa;
+}
+
+/* For Dark Mode support */
+.dark-mode .primereact-scope .p-multiselect-panel {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .primereact-scope .p-multiselect-item {
+  color: #f8fafc;
+}
+
+.dark-mode .primereact-scope .p-multiselect-item:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+.dark-mode .primereact-scope .p-multiselect-item.p-highlight {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
 /* Input styling */
 .primereact-scope .p-inputtext {
   padding: 0.5rem 0.75rem;
   width: 100%;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+}
+
+.primereact-scope .p-inputtext:enabled:focus {
+  outline: 0 none;
+  outline-offset: 0;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  border-color: #93c5fd;
+}
+
+/* Dark mode input styling */
+.dark-mode .primereact-scope .p-inputtext {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.dark-mode .primereact-scope .p-inputtext:enabled:focus {
+  border-color: #60a5fa;
 }
 
 /* Toast styling */
@@ -183,6 +310,78 @@
   display: inline-flex;
   position: relative;
   width: 100%;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+}
+
+.primereact-scope .p-dropdown-panel {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.primereact-scope .p-dropdown-items {
+  padding: 0.5rem 0;
+}
+
+.primereact-scope .p-dropdown-item {
+  padding: 0.5rem 1rem;
+  margin: 0;
+  border: 0 none;
+  cursor: pointer;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.primereact-scope .p-dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.primereact-scope .p-dropdown-item.p-highlight {
+  background-color: #e9f2ff;
+  color: #3b82f6;
+}
+
+/* Dark mode dropdown styles */
+.dark-mode .primereact-scope .p-dropdown {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.dark-mode .primereact-scope .p-dropdown-panel {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .primereact-scope .p-dropdown-item {
+  color: #f8fafc;
+}
+
+.dark-mode .primereact-scope .p-dropdown-item:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+.dark-mode .primereact-scope .p-dropdown-item.p-highlight {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* Ensure overlay components are properly visible */
+.p-component-overlay {
+  z-index: 1000;
+}
+
+.primereact-scope .p-dropdown-panel,
+.primereact-scope .p-multiselect-panel,
+.primereact-scope .p-calendar-panel,
+.primereact-scope .p-menu,
+.primereact-scope .p-dialog,
+.primereact-scope .p-toast {
+  z-index: 1001;
 }
 
 /* Add responsive formatting */

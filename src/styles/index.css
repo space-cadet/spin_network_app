@@ -2,6 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix for transparent PrimeReact overlays */
+.p-component-overlay {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.p-multiselect-panel,
+.p-dropdown-panel,
+.p-calendar-panel {
+  background: #ffffff !important;
+  color: #495057 !important;
+}
+
+.p-multiselect-items-wrapper,
+.p-multiselect-header,
+.p-multiselect-footer,
+.p-dropdown-items-wrapper,
+.p-calendar-content {
+  background: #ffffff !important;
+}
+
+.p-multiselect-item,
+.p-dropdown-item {
+  background: #ffffff !important;
+  color: #495057 !important;
+}
+
+/* Dark mode overlay fixes */
+.dark-mode .p-multiselect-panel,
+.dark-mode .p-dropdown-panel,
+.dark-mode .p-calendar-panel {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+.dark-mode .p-multiselect-items-wrapper,
+.dark-mode .p-multiselect-header,
+.dark-mode .p-multiselect-footer,
+.dark-mode .p-dropdown-items-wrapper,
+.dark-mode .p-calendar-content {
+  background: #1e293b !important;
+}
+
+.dark-mode .p-multiselect-item,
+.dark-mode .p-dropdown-item {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
 :root {
   --primary: #3b82f6;
   --secondary: #4f46e5;
