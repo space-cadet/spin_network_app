@@ -1,5 +1,98 @@
 # Error Log
 
+## 2025-04-14 19:15 IST - T4: PrimeReact Dropdown Transparency Issue
+
+**Files:** `src/components/logs/LogViewerAdapter.tsx`, `src/styles/primereact-scoped.css`, `src/styles/index.css`
+
+**Error Message:**
+No explicit error message, but the MultiSelect dropdown in the Application Logs panel had a transparent background, making the dropdown options difficult to read.
+
+**Cause:**
+The CSS styling for PrimeReact components, particularly the dropdown panel and menu items, was missing explicit background-color settings. This led to transparency issues where the dropdown menus appeared with no background, showing content behind them.
+
+Specifically:
+1. The `.p-multiselect-panel` and similar overlay components did not have explicit `background-color` properties
+2. The styling for `.p-multiselect-items` and `.p-multiselect-item` elements was also missing background settings
+3. The z-index values weren't properly configured, leading to potential stacking issues
+
+**Fix:**
+Implemented a comprehensive solution with multiple layers of styling:
+
+1. Created a dedicated CSS file for PrimeReact fixes:
+   - Added `src/styles/primereact-fixes.css` with specific targeting for dropdown panels
+   - Used `!important` flags to ensure styles were applied correctly
+   - Added explicit background color, border, and shadow styles
+
+2. Enhanced existing PrimeReact CSS:
+   - Updated `src/styles/primereact-scoped.css` with better styling for dropdowns
+   - Improved checkbox styling for better visibility
+   - Fixed z-index issues to prevent overlapping components
+
+3. Added direct component styling:
+   - Updated the MultiSelect component in LogViewerAdapter with explicit styling props
+   - Added `panelClassName` for targeted styling
+   - Set inline styles for consistent appearance
+
+4. Included dark mode support:
+   - Added dark theme styles for all dropdown components
+   - Ensured proper color contrast in both light and dark modes
+   - Added styling for hover and highlight states
+
+**Key Code Changes:**
+```css
+/* Global dropdown panel fixes in primereact-fixes.css */
+.p-dropdown-panel,
+.p-multiselect-panel {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden !important;
+  margin-top: 0.25rem !important;
+}
+
+/* MultiSelect items in primereact-fixes.css */
+.p-multiselect-panel .p-multiselect-items {
+  background-color: white !important;
+  padding: 0.25rem 0 !important;
+}
+
+.p-multiselect-panel .p-multiselect-item {
+  background-color: white !important;
+  color: #334155 !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  transition: background-color 0.2s ease !important;
+}
+```
+
+```typescript
+// Component updates in LogViewerAdapter.tsx
+<MultiSelect
+  value={Array.isArray(queryOptions.type) ? queryOptions.type : (queryOptions.type ? [queryOptions.type] : [])}
+  options={logTypeOptions}
+  onChange={(e) => handleFilterChange({ type: e.value })}
+  placeholder="Filter by type"
+  className="w-full md:w-15rem"
+  panelClassName="logs-filter-panel"
+  style={{ 
+    backgroundColor: 'white', 
+    border: '1px solid #e2e8f0',
+    borderRadius: '0.375rem'
+  }}
+  display="chip"
+  showClear={true}
+/>
+```
+
+**Affected Files:**
+- `/src/styles/primereact-fixes.css` (new file)
+- `/src/styles/primereact-scoped.css`
+- `/src/styles/index.css`
+- `/src/components/logs/LogViewerAdapter.tsx`
+- `/src/main.tsx`
+
 ## 2025-04-14 - Network Element Deletion Issues
 
 **Files:** `src/components/workspace/NetworkInteractionManager/hooks/useNetworkInteractions.ts`, `src/components/workspace/NetworkInteractionManager/handlers/canvasHandlers.ts`

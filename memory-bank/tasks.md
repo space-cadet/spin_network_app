@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 14, 2025 (18:15 IST)*
+*Last Updated: April 14, 2025 (19:15 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -7,6 +7,7 @@
 | T1 | Simulation Library Abstraction | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 | T2 | Advanced Simulation Analysis | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T3 | Component Refactoring | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
+| T4 | Fix PrimeReact Dropdown Transparency | ✅ COMPLETE | HIGH | 2025-04-14 | - | Deepak |
 
 ## Task Details
 
@@ -85,10 +86,34 @@ This task will be resumed after the simulation library abstraction is complete, 
 **Notes**:
 This refactoring will be more efficient after the simulation library abstraction is complete, as the new architecture will clarify component boundaries and responsibilities.
 
+### T4: Fix PrimeReact Dropdown Transparency
+**Description**: Fix transparency issue in PrimeReact dropdown components, particularly in the Application Logs panel's MultiSelect filter. Improve styling to match the application's design system.
+**Status**: ✅ COMPLETE
+**Started**: April 14, 2025 (18:30 IST)
+**Completed**: April 14, 2025 (19:15 IST)
+**Completion Criteria**:
+- Fix transparent background in MultiSelect dropdown
+- Ensure consistent styling with application design
+- Support dark mode
+- Improve visual appearance of dropdown items and checkboxes
+- Fix z-index issues to prevent overlapping
+- Ensure cross-browser compatibility
+
+**Related Files**:
+- `/src/styles/primereact-fixes.css` (new file)
+- `/src/styles/primereact-scoped.css`
+- `/src/styles/index.css`
+- `/src/components/logs/LogViewerAdapter.tsx`
+- `/src/main.tsx`
+
+**Notes**:
+Created a dedicated CSS file for PrimeReact fixes to avoid modifying the core component library. Used multiple layers of CSS targeting to ensure the styles are applied correctly across all PrimeReact components. Improved overall styling of dropdown components to better match the application's design system.
+
 ## Completed Tasks
 | ID | Title | Completed | Related Tasks |
 |----|-------|-----------|---------------|
 | T0 | Fix Simulation Play/Pause & Redux Sync | 2025-04-13 | - |
+| T4 | Fix PrimeReact Dropdown Transparency | 2025-04-14 | - |
 
 ## Task Relationships
 ```mermaid
@@ -97,8 +122,10 @@ graph TD
     T2[T2: Advanced Simulation Analysis]
     T3[T3: Component Refactoring]
     T0[T0: Fix Simulation Play/Pause & Redux Sync]
+    T4[T4: Fix PrimeReact Dropdown Transparency]
     
     T0 --> T1
     T1 --> T2
     T1 --> T3
+    T4 --> T3
 ```
