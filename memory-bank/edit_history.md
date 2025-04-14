@@ -6,6 +6,14 @@
 
 ### April 14, 2025
 
+#### 22:45 - T5: Enhanced Simulation Test Pages
+- Modified `/public/test-simulation.html` - Added "Generate New Random Network" button and improved UI with physics notebook link
+- Modified `/src/test-simulation.js` - Added generateRandomNetwork function to create dynamically changing networks
+- Created `/public/physics-notebook.html` - Comprehensive physics notebook with educational content about simulation calculations
+- Updated styles and created interactive features including collapsible sections and table of contents
+
+This update enhances the test simulation page with randomized networks to better demonstrate how network topology affects simulation results. The new physics notebook provides detailed explanations of all calculations with both mathematical equations and corresponding code, making the simulation more accessible to users.
+
 #### 19:15 - T4: Fix PrimeReact Dropdown Transparency
 - Created `/src/styles/primereact-fixes.css` - Added dedicated CSS file with fixes for PrimeReact dropdown transparency and styling
 - Modified `/src/styles/primereact-scoped.css` - Enhanced MultiSelect and Dropdown styling

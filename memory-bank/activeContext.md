@@ -1,20 +1,31 @@
 # Active Context
 
-*Last Updated: April 14, 2025 (19:15 IST)*
+*Last Updated: April 14, 2025 (22:45 IST)*
 
 ## Current Focus
-**Primary Task:** T1: Simulation Library Abstraction
-**Secondary Tasks:** T2: Advanced Simulation Analysis, T3: Component Refactoring
+**Primary Task:** T5: Enhanced Simulation Test Pages
+**Secondary Tasks:** T1: Simulation Library Abstraction
 
 ## Active Tasks
+- T5: Enhancing simulation test pages with randomized networks and physics explanations - 🔄 IN PROGRESS
 - T1: Creating a standalone simulation library separate from UI components - 🔄 IN PROGRESS
 - T2: Adding more in-depth analysis and visualization of simulation results - ⏸️ PAUSED
 - T3: Breaking down large components into smaller, more maintainable units - ⏸️ PAUSED
 
 ## Implementation Focus
-Currently focusing on the Simulation Library Abstraction (T1) which involves extracting simulation functionality from UI components, creating a clean API, and ensuring modularity.
+Currently focusing on the Enhanced Simulation Test Pages (T5) which involves improving the test-simulation.html page with randomized network generation and creating a detailed physics notebook page that explains the mathematical foundations and implementation details of the simulation.
 
 ## Task-Specific Context
+
+### Task T5: Enhanced Simulation Test Pages
+We are improving the test-simulation.html page and creating a new physics-notebook.html page to provide better testing capabilities and educational resources:
+
+Key aspects of this work:
+- Adding randomized network generation to demonstrate how network topology affects simulation results
+- Creating a comprehensive physics notebook explaining all calculations with equations and code
+- Making sections collapsible and adding a table of contents for better usability
+- Implementing responsive design for all viewport sizes
+- Linking the test simulation page and physics notebook for seamless navigation
 
 ### Task T1: Simulation Library Abstraction
 We are abstracting the simulation functionality into a standalone library that can be used independently of the UI components. This will enable users to import the library into their own code to run simulations on spin networks without requiring the full application.
@@ -33,13 +44,22 @@ This task will implement more advanced analysis tools once the library abstracti
 This task aims to break down large components (like SimulationResultsPanel.tsx with 941 lines) into smaller, more maintainable units, improving code organization and reducing complexity.
 
 ## Current Decisions
-- The library will be structured with core, models, analysis, adapters, and utils modules
+- The enhanced test pages will focus on educational value and accessibility 
+- The physics notebook will be organized in a logical progression from basic concepts to advanced calculations
+- We will use collapsible sections and a table of contents to improve navigation
+- The randomized network generation will ensure users can see how network topology affects simulation results
+- We will implement a responsive design that works well on all device sizes
+- The test page and notebook will be cross-linked for easy navigation between them
+
+Other ongoing decisions:
+- The simulation library will be structured with core, models, analysis, adapters, and utils modules
 - Minimal dependencies will be maintained for the core functionality
 - TypeScript will be used throughout with comprehensive type definitions
 - The API will be designed around factory functions for easy instantiation
 - Backward compatibility will be preserved for the existing application
 
 ## Next Actions By Task
+- T5: Consider adding interactive demos as a future enhancement
 - T1: Create new directory structure and set up package configuration
 - T2: On hold until T1 is completed
 - T3: On hold until T1 is completed
@@ -60,8 +80,15 @@ The following major tasks have been completed prior to the current focus:
 11. ✅ **Simulation Performance**: Fixed infinite update loops and time slider updating issues
 12. ✅ **Network Element Deletion**: Fixed issues with multiple element deletion
 13. ✅ **UI Component Styling**: Fixed PrimeReact dropdown transparency issues and improved UI consistency
+14. ✅ **Enhanced Test Pages**: Added randomized network generation and comprehensive physics notebook
 
 ## Recent Improvements
+- Enhanced testing capabilities with randomized network generation
+- Created comprehensive physics notebook explaining all simulation calculations
+- Improved educational value with detailed explanations of equations and code
+- Added collapsible sections and table of contents for better navigation
+- Implemented responsive design for all viewport sizes
+- Added cross-linking between test page and notebook for seamless navigation
 - UI organization and component structure improved for better user experience
 - Application logs and simulation logs properly separated
 - Simulation component performance and stability significantly improved
@@ -70,6 +97,27 @@ The following major tasks have been completed prior to the current focus:
 - Network element deletion works reliably without needing to toggle modes
 - PrimeReact dropdown transparency issues fixed in Application Logs panel
 - UI styling consistency improved for dropdown components
+
+## Implementation Plan (T5)
+The implementation of the enhanced simulation test pages (T5) has been completed successfully:
+
+1. Added randomized network generation to test-simulation.js
+   - Created spanning tree algorithm to ensure connected networks
+   - Added random spin and intertwiner values
+   - Implemented controls for node count and connectivity
+
+2. Updated test-simulation.html to use randomized networks
+   - Added "Generate New Random Network" button
+   - Enhanced UI with physics notebook link
+   - Improved results display and error handling
+
+3. Created comprehensive physics-notebook.html
+   - Organized content into 10 logical sections
+   - Added detailed explanations of all equations and code
+   - Made sections collapsible for better navigation
+   - Implemented table of contents in sidebar and at top
+   - Added responsive design with mobile support
+   - Connected with test-simulation.html via navigation links
 
 ## Implementation Plan (T1)
 The detailed implementation plan for the simulation library abstraction is documented in `/memory-bank/implementation-details/simulation-library-abstraction.md` and includes:

@@ -7,7 +7,7 @@
 | T1 | Simulation Library Abstraction | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 | T2 | Advanced Simulation Analysis | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T3 | Component Refactoring | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
-| T4 | Fix PrimeReact Dropdown Transparency | ✅ COMPLETE | HIGH | 2025-04-14 | - | Deepak |
+| T5 | Enhanced Simulation Test Pages | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 
 ## Task Details
 
@@ -86,6 +86,35 @@ This task will be resumed after the simulation library abstraction is complete, 
 **Notes**:
 This refactoring will be more efficient after the simulation library abstraction is complete, as the new architecture will clarify component boundaries and responsibilities.
 
+### T5: Enhanced Simulation Test Pages
+**Description**: Improve the test-simulation.html page by adding randomized network generation and create a detailed physics notebook page that explains the simulation's mathematical foundations and implementation details.
+**Status**: 🔄 IN PROGRESS
+**Last Active**: April 14, 2025 (22:15 IST)
+**Completion Criteria**:
+- Add randomized network generation to test-simulation.html
+- Create a new physics-notebook.html page with detailed explanations
+- Include mathematical equations and their corresponding code implementations
+- Break down all geometric properties calculations
+- Explain diffusion models and their physics foundations
+- Make sections collapsible for better usability
+- Add table of contents for easy navigation
+- Link the test and notebook pages together
+- Create responsive design for all viewport sizes
+
+**Related Files**:
+- `/public/test-simulation.html`
+- `/public/physics-notebook.html` (new file)
+- `/src/test-simulation.js`
+
+**Notes**:
+The enhanced test pages will serve as educational resources to help users understand the physics and mathematics behind the simulation. The randomized network generation will allow users to see how different network topologies affect the simulation results. The physics notebook provides a comprehensive explanation of all equations and their code implementations.
+
+## Completed Tasks
+| ID | Title | Completed | Related Tasks |
+|----|-------|-----------|---------------|
+| T0 | Fix Simulation Play/Pause & Redux Sync | 2025-04-13 | - |
+| T4 | Fix PrimeReact Dropdown Transparency | 2025-04-14 | - |
+
 ### T4: Fix PrimeReact Dropdown Transparency
 **Description**: Fix transparency issue in PrimeReact dropdown components, particularly in the Application Logs panel's MultiSelect filter. Improve styling to match the application's design system.
 **Status**: ✅ COMPLETE
@@ -109,12 +138,6 @@ This refactoring will be more efficient after the simulation library abstraction
 **Notes**:
 Created a dedicated CSS file for PrimeReact fixes to avoid modifying the core component library. Used multiple layers of CSS targeting to ensure the styles are applied correctly across all PrimeReact components. Improved overall styling of dropdown components to better match the application's design system.
 
-## Completed Tasks
-| ID | Title | Completed | Related Tasks |
-|----|-------|-----------|---------------|
-| T0 | Fix Simulation Play/Pause & Redux Sync | 2025-04-13 | - |
-| T4 | Fix PrimeReact Dropdown Transparency | 2025-04-14 | - |
-
 ## Task Relationships
 ```mermaid
 graph TD
@@ -123,9 +146,11 @@ graph TD
     T3[T3: Component Refactoring]
     T0[T0: Fix Simulation Play/Pause & Redux Sync]
     T4[T4: Fix PrimeReact Dropdown Transparency]
+    T5[T5: Enhanced Simulation Test Pages]
     
     T0 --> T1
     T1 --> T2
     T1 --> T3
     T4 --> T3
+    T5 --> T2
 ```
