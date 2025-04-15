@@ -1,5 +1,99 @@
 # Error Log
 
+## 2025-04-15 10:45 IST - T6: Database Service Type Errors and Missing Functions
+
+**File:** `src/database/index.ts`, `src/database/services/graphService.ts`, `src/database/services/logService.ts`, `src/database/services/simulationService.ts`, `src/database/migrations/logMigration.ts`
+
+**Error Message:**
+```
+src/database/index.ts(29,11): error TS2304: Cannot find name 'initDatabase'.
+src/database/index.ts(52,26): error TS2552: Cannot find name 'getDatabaseStatus'. Did you mean 'getDatabaseStats'?
+src/database/services/graphService.ts(74,14): error TS2365: Operator '>' cannot be applied to types 'void' and 'number'.
+src/database/services/logService.ts(198,11): error TS2769: No overload matches this call.
+src/database/migrations/logMigration.ts(746,38): error TS2339: Property 'fs' does not exist on type 'Window & typeof globalThis'.
+src/database/services/simulationService.ts(117,13): error TS2367: This comparison appears to be unintentional because the types 'void' and 'number' have no overlap.
+src/database/services/simulationService.ts(299,27): error TS2339: Property 'filter' does not exist on type 'PromiseExtended<SimulationResultRecord[]>'.
+```
+
+**Cause:**
+There were multiple TypeScript errors in the database service files:
+
+1. In `database/index.ts`, functions `initDatabase` and `getDatabaseStatus` were being used directly but not imported correctly from `db.config.ts`.
+
+2. In `database/services/graphService.ts` and `simulationService.ts`, there was a comparison between void (returned by `db.update()`) and a number value, which TypeScript doesn't allow.
+
+3. In `database/services/logService.ts`, there was a filter condition that could potentially receive undefined which needed to be handled.
+
+4. In `database/migrations/logMigration.ts`, `window.fs` was being used but not properly defined as a TypeScript type.
+
+5. In `database/services/simulationService.ts`, Promise-extended Dexie results were being treated as regular arrays with `filter` and other array methods, but these were not available on the Promise object.
+
+**Fix:**
+1. **Fixed Import Issues:**
+   - Modified `database/index.ts` to dynamically import the functions from `db.config.ts`:
+   ```typescript
+   const { initDatabase } = await import('./db.config');
+   const { getDatabaseStatus } = await import('./db.config');
+   ```
+
+2. **Fixed Type Comparison Issues:**
+   - Enhanced the update methods to properly store the result before comparison:
+   ```typescript
+   // Store count as a number before comparison
+   const count: number = await db.graphs.update(id, updates);
+   return count > 0;
+   ```
+
+3. **Added Type Safety for Filters:**
+   - Added a wrapper around the filter condition to ensure boolean comparison:
+   ```typescript
+   if (options.fixed !== undefined) {
+     query = query.filter(log => {
+       // Ensure boolean comparison
+       const fixedValue = !!options.fixed;
+       return log.fixed === fixedValue;
+     });
+   }
+   ```
+
+4. **Created Window Type Extension:**
+   - Added a global type definition file for `window.fs`:
+   ```typescript
+   // src/types/global.d.ts
+   interface Window {
+     fs?: {
+       readFile(path: string, options?: { encoding?: string }): Promise<string | ArrayBuffer>;
+     };
+   }
+   ```
+   - Added validation and type safety in methods using `window.fs`:
+   ```typescript
+   if (!window.fs || typeof window.fs.readFile !== 'function') {
+     throw new Error('File system API is not available');
+   }
+   ```
+
+5. **Fixed Promise Handling:**
+   - Modified `simulationService.ts` to properly await the Promise results before using array methods:
+   ```typescript
+   // Using await to properly resolve the Promise
+   const rawResults = await db.simulationResults
+     .where('simulationId')
+     .equals(options.simulationId)
+     .sortBy('timePoint');
+   
+   // Now use array methods on the resolved results
+   let filteredResults = [...rawResults];
+   ```
+
+**Affected Files:**
+- `/src/database/index.ts`
+- `/src/database/services/graphService.ts`
+- `/src/database/services/logService.ts`
+- `/src/database/services/simulationService.ts`
+- `/src/database/migrations/logMigration.ts`
+- `/src/types/global.d.ts` (new file)
+
 ## 2025-04-14 19:15 IST - T4: PrimeReact Dropdown Transparency Issue
 
 **Files:** `src/components/logs/LogViewerAdapter.tsx`, `src/styles/primereact-scoped.css`, `src/styles/index.css`
