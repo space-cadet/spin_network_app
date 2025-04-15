@@ -1,11 +1,11 @@
 # Session Cache
 
-*Last Updated: April 15, 2025 (18:30 IST)*
+*Last Updated: April 15, 2025 (21:30 IST)*
 
 ## Overview
-- Active Tasks: 5
+- Active Tasks: 6
 - Paused Tasks: 2
-- Last Task Focus: T10
+- Last Task Focus: T11
 - Completed Tasks: 3
 
 ## Task Registry
@@ -19,8 +19,53 @@
 - T8: Implement Edit History File Rotation - ✅ COMPLETE
 - T9: Fix UI and Simulation TypeScript Errors - 🔄 IN PROGRESS
 - T10: Standalone Test Page for Simulation Library - 🔄 IN PROGRESS
+- T11: Fix Library Build Errors - 🔄 IN PROGRESS
 
 ## Active Tasks
+
+### T11: Fix Library Build Errors
+**Status:** 🔄 IN PROGRESS
+**Priority:** HIGH
+**Started:** 2025-04-15
+**Last Active:** 2025-04-15 22:30 IST
+**Dependencies:** T1, T10
+
+#### Context
+Fixing build errors in the standalone library by implementing missing analysis modules and simplifying adapters to get the core simulation functionality working.
+
+#### Critical Files
+- `/lib/analysis/index.ts` - References missing modules
+- `/lib/analysis/conservation.ts` - Created based on src version
+- `/lib/analysis/geometricProps.ts` - Created based on src version
+- `/lib/analysis/statistics.ts` - Created based on src version
+- `/lib/adapters/index.ts` - Simplified to avoid visualization dependencies
+- `/src/simulation/analysis/conservation.ts` - Reference implementation
+- `/src/simulation/analysis/geometricProps.ts` - Reference implementation
+- `/src/simulation/analysis/statistics.ts` - Reference implementation
+
+#### Implementation Progress
+1. ✅ Analyze build errors to identify missing modules
+2. ✅ Create directory structure for analysis modules
+3. ✅ Implement conservation.ts based on src version
+4. ✅ Implement geometricProps.ts based on src version
+5. ✅ Implement statistics.ts based on src version
+6. ✅ Simplify adapters/index.ts to remove visualization dependencies
+7. ⬜ Test library build
+8. ⬜ Verify integration with standalone test page
+
+#### Working State
+Made significant progress in fixing the library build errors:
+
+1. First fixed the analysis modules error by implementing:
+   - `conservation.ts` with ConservationLawChecker interface and implementations for ProbabilityConservation, TotalOccupancyConservation, and PositivityConservation
+   - `geometricProps.ts` with GeometricPropertiesCalculator implementation for volume, area, dimension, and entropy calculations
+   - `statistics.ts` with SimulationAnalyzer class for statistical analysis, mean square displacement, spectral dimension, return probability, and diffusion coefficient
+
+2. Encountered a second build error related to missing visualization modules, so:
+   - Simplified the adapters/index.ts file to provide a minimal implementation without visualization dependencies
+   - Focused on making the core simulation functionality available first
+
+This approach prioritizes getting the standalone test working with the core simulation features before implementing the full visualization capabilities. The next step is to test if these changes have resolved the build errors.
 
 ### T10: Standalone Test Page for Simulation Library
 **Status:** 🔄 IN PROGRESS

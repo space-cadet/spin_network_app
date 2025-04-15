@@ -3,14 +3,12 @@
  * 
  * This module provides optional adapters for visualizing spin network
  * simulations using various visualization libraries.
+ * 
+ * Note: Currently minimal implementation for core functionality only.
  */
 
-// Export visualization types
-export * from './visualizationTypes';
-
-// Export Cytoscape.js adapter
-export { 
-  CytoscapeAdapter,
-  createCytoscapeAdapter,
-  CytoscapeVisualizationOptions
-} from './cytoscapeAdapter';
+// Minimal exports for now - visualization adapters will be implemented later
+export interface MinimalVisualizationAdapter {
+  initialize: (graph: any) => void;
+  updateState: (state: any) => void;
+}

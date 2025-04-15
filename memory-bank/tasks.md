@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 15, 2025 (15:30 IST)*
+*Last Updated: April 15, 2025 (21:30 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -10,8 +10,38 @@
 | T5 | Enhanced Simulation Test Pages | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 | T6 | Fix Database Service Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
 | T9 | Fix UI and Simulation TypeScript Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
+| T10 | Standalone Test Page for Simulation Library | 🔄 IN PROGRESS | HIGH | 2025-04-15 | T1 | Deepak |
+| T11 | Fix Library Build Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | T1 | Deepak |
 
 ## Task Details
+
+### T11: Fix Library Build Errors
+**Description**: Fix the build errors in the standalone library by implementing missing analysis modules (conservation.ts, geometricProps.ts, statistics.ts) in the lib directory. Currently, the library cannot be built as shown by the error "Could not resolve './conservation' from 'lib/analysis/index.ts'".
+**Status**: 🔄 IN PROGRESS
+**Last Active**: April 15, 2025 (22:30 IST)
+**Completion Criteria**:
+- ✅ Create directory structure for analysis modules
+- ✅ Implement conservation.ts based on the src/simulation/analysis/conservation.ts file
+- ✅ Implement geometricProps.ts based on the src/simulation/analysis/geometricProps.ts file
+- ✅ Implement statistics.ts based on the src/simulation/analysis/statistics.ts file
+- ✅ Simplify adapters/index.ts to avoid additional missing modules
+- ⬜ Test library build process (pnpm run build:lib)
+- ⬜ Ensure standalone test page works with built library
+- ⬜ Update documentation to reflect the changes
+
+**Related Files**:
+- `/lib/analysis/index.ts`
+- `/lib/analysis/conservation.ts` (to be created)
+- `/lib/analysis/geometricProps.ts` (to be created)
+- `/lib/analysis/statistics.ts` (to be created)
+- `/src/simulation/analysis/conservation.ts` (reference)
+- `/src/simulation/analysis/geometricProps.ts` (reference)
+- `/src/simulation/analysis/statistics.ts` (reference)
+- `/lib-bundle.config.js`
+- `/package.json`
+
+**Notes**:
+This task is critical for enabling the standalone library functionality that is required by the Standalone Test Page (T10). The build error is due to missing analysis modules that are referenced in the analysis/index.ts file but don't exist in the lib directory.
 
 ### T8: Implement Edit History File Rotation
 **Description**: Implement the file rotation system for the edit_history.md file which has grown beyond the 500-line threshold. Apply the size-based rotation protocol to preserve recent entries while archiving older ones.
@@ -294,11 +324,13 @@ graph TD
     T8[T8: Implement Edit History File Rotation]
     T9[T9: Fix UI and Simulation TypeScript Errors]
     T10[T10: Standalone Test Page for Simulation Library]
+    T11[T11: Fix Library Build Errors]
     
     T0 --> T1
     T1 --> T2
     T1 --> T3
     T1 --> T10
+    T1 --> T11
     T4 --> T3
     T5 --> T2
     T6 --> T1
@@ -311,4 +343,6 @@ graph TD
     T9 --> T3
     T9 -.-> T6
     T10 -.-> T5
+    T10 --> T11
+    T11 -.-> T1
 ```
