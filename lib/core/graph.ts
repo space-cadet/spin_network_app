@@ -46,80 +46,247 @@ export class SpinNetworkGraph implements SimulationGraph {
    * Get a specific node by ID
    */
   getNode(id: string): SimulationNode | undefined {
-    // TO BE IMPLEMENTED
-    return undefined;
+    return this._nodes.get(id);
   }
 
   /**
    * Get a specific edge by ID
    */
   getEdge(id: string): SimulationEdge | undefined {
-    // TO BE IMPLEMENTED
-    return undefined;
+    return this._edges.get(id);
   }
 
   /**
    * Get all nodes adjacent to a specific node
    */
   getAdjacentNodes(nodeId: string): SimulationNode[] {
-    // TO BE IMPLEMENTED
-    return [];
+    const adjacentNodeIds = this._adjacencyList.get(nodeId) || new Set<string>();
+    return Array.from(adjacentNodeIds)
+      .map(id => this._nodes.get(id))
+      .filter((node): node is SimulationNode => node !== undefined);
   }
 
   /**
    * Get all edges connected to a specific node
    */
   getConnectedEdges(nodeId: string): SimulationEdge[] {
-    // TO BE IMPLEMENTED
-    return [];
+    const edgeIds = this._nodeEdges.get(nodeId) || new Set<string>();
+    return Array.from(edgeIds)
+      .map(id => this._edges.get(id))
+      .filter((edge): edge is SimulationEdge => edge !== undefined);
   }
 
   /**
    * Get the number of nodes in the graph
    */
   getNodeCount(): number {
-    // TO BE IMPLEMENTED
-    return 0;
+    return this._nodes.size;
   }
 
   /**
    * Get the number of edges in the graph
    */
   getEdgeCount(): number {
-    // TO BE IMPLEMENTED
-    return 0;
+    return this._edges.size;
   }
 
   /**
    * Add a node to the graph
    */
   addNode(node: SimulationNode): SimulationGraph {
-    // TO BE IMPLEMENTED
-    return this;
+    // Create a new graph to maintain immutability
+    const newGraph = new SpinNetworkGraph();
+    
+    // Copy existing nodes and edges
+    this._nodes.forEach(n => newGraph._nodes.set(n.id, n));
+    this._edges.forEach(e => newGraph._edges.set(e.id, e));
+    
+    // Copy adjacency and node-edge relationships
+    this._adjacencyList.forEach((adjNodes, nodeId) => {
+      newGraph._adjacencyList.set(nodeId, new Set(adjNodes));
+    });
+    this._nodeEdges.forEach((edges, nodeId) => {
+      newGraph._nodeEdges.set(nodeId, new Set(edges));
+    });
+    
+    // Add the new node
+    newGraph._nodes.set(node.id, node);
+    newGraph._adjacencyList.set(node.id, new Set<string>());
+    newGraph._nodeEdges.set(node.id, new Set<string>());
+    
+    return newGraph;
   }
 
   /**
    * Remove a node from the graph
    */
   removeNode(nodeId: string): SimulationGraph {
-    // TO BE IMPLEMENTED
-    return this;
+    // Create a new graph to maintain immutability
+    const newGraph = new SpinNetworkGraph();
+    
+    // If node doesn't exist, return a copy of the current graph
+    if (!this._nodes.has(nodeId)) {
+      this._nodes.forEach(n => newGraph._nodes.set(n.id, n));
+      this._edges.forEach(e => newGraph._edges.set(e.id, e));
+      
+      this._adjacencyList.forEach((adjNodes, nId) => {
+        newGraph._adjacencyList.set(nId, new Set(adjNodes));
+      });
+      this._nodeEdges.forEach((edges, nId) => {
+        newGraph._nodeEdges.set(nId, new Set(edges));
+      });
+      
+      return newGraph;
+    }
+    
+    // Get the edges connected to this node
+    const connectedEdges = this.getConnectedEdges(nodeId);
+    
+    // Copy nodes (except the one being removed)
+    this._nodes.forEach((n) => {
+      if (n.id !== nodeId) {
+        newGraph._nodes.set(n.id, n);
+      }
+    });
+    
+    // Copy edges (except those connected to the removed node)
+    this._edges.forEach((e) => {
+      if (e.sourceId !== nodeId && e.targetId !== nodeId) {
+        newGraph._edges.set(e.id, e);
+      }
+    });
+    
+    // Update adjacency list and node-edge relationships
+    this._adjacencyList.forEach((adjNodes, nId) => {
+      if (nId !== nodeId) {
+        const newAdjNodes = new Set<string>();
+        adjNodes.forEach(adjId => {
+          if (adjId !== nodeId) {
+            newAdjNodes.add(adjId);
+          }
+        });
+        newGraph._adjacencyList.set(nId, newAdjNodes);
+      }
+    });
+    
+    this._nodeEdges.forEach((edges, nId) => {
+      if (nId !== nodeId) {
+        const newEdges = new Set<string>();
+        edges.forEach(edgeId => {
+          const edge = this._edges.get(edgeId);
+          if (edge && edge.sourceId !== nodeId && edge.targetId !== nodeId) {
+            newEdges.add(edgeId);
+          }
+        });
+        newGraph._nodeEdges.set(nId, newEdges);
+      }
+    });
+    
+    return newGraph;
   }
 
   /**
    * Add an edge to the graph
    */
   addEdge(edge: SimulationEdge): SimulationGraph {
-    // TO BE IMPLEMENTED
-    return this;
+    // Verify that source and target nodes exist
+    if (!this._nodes.has(edge.sourceId) || !this._nodes.has(edge.targetId)) {
+      throw new Error(`Source or target node not found for edge ${edge.id}`);
+    }
+    
+    // Create a new graph to maintain immutability
+    const newGraph = new SpinNetworkGraph();
+    
+    // Copy existing nodes and edges
+    this._nodes.forEach(n => newGraph._nodes.set(n.id, n));
+    this._edges.forEach(e => newGraph._edges.set(e.id, e));
+    
+    // Copy adjacency and node-edge relationships
+    this._adjacencyList.forEach((adjNodes, nodeId) => {
+      newGraph._adjacencyList.set(nodeId, new Set(adjNodes));
+    });
+    this._nodeEdges.forEach((edges, nodeId) => {
+      newGraph._nodeEdges.set(nodeId, new Set(edges));
+    });
+    
+    // Add the new edge
+    newGraph._edges.set(edge.id, edge);
+    
+    // Update adjacency lists
+    const sourceAdjList = newGraph._adjacencyList.get(edge.sourceId) || new Set<string>();
+    sourceAdjList.add(edge.targetId);
+    newGraph._adjacencyList.set(edge.sourceId, sourceAdjList);
+    
+    const targetAdjList = newGraph._adjacencyList.get(edge.targetId) || new Set<string>();
+    targetAdjList.add(edge.sourceId);
+    newGraph._adjacencyList.set(edge.targetId, targetAdjList);
+    
+    // Update node-edge relationships
+    const sourceEdges = newGraph._nodeEdges.get(edge.sourceId) || new Set<string>();
+    sourceEdges.add(edge.id);
+    newGraph._nodeEdges.set(edge.sourceId, sourceEdges);
+    
+    const targetEdges = newGraph._nodeEdges.get(edge.targetId) || new Set<string>();
+    targetEdges.add(edge.id);
+    newGraph._nodeEdges.set(edge.targetId, targetEdges);
+    
+    return newGraph;
   }
 
   /**
    * Remove an edge from the graph
    */
   removeEdge(edgeId: string): SimulationGraph {
-    // TO BE IMPLEMENTED
-    return this;
+    // Create a new graph to maintain immutability
+    const newGraph = new SpinNetworkGraph();
+    
+    // If edge doesn't exist, return a copy of the current graph
+    const edge = this._edges.get(edgeId);
+    if (!edge) {
+      this._nodes.forEach(n => newGraph._nodes.set(n.id, n));
+      this._edges.forEach(e => newGraph._edges.set(e.id, e));
+      
+      this._adjacencyList.forEach((adjNodes, nodeId) => {
+        newGraph._adjacencyList.set(nodeId, new Set(adjNodes));
+      });
+      this._nodeEdges.forEach((edges, nodeId) => {
+        newGraph._nodeEdges.set(nodeId, new Set(edges));
+      });
+      
+      return newGraph;
+    }
+    
+    // Copy nodes
+    this._nodes.forEach(n => newGraph._nodes.set(n.id, n));
+    
+    // Copy edges (except the one being removed)
+    this._edges.forEach(e => {
+      if (e.id !== edgeId) {
+        newGraph._edges.set(e.id, e);
+      }
+    });
+    
+    // Update adjacency list
+    this._adjacencyList.forEach((adjNodes, nId) => {
+      const newAdjNodes = new Set<string>(adjNodes);
+      if (nId === edge.sourceId) {
+        newAdjNodes.delete(edge.targetId);
+      } else if (nId === edge.targetId) {
+        newAdjNodes.delete(edge.sourceId);
+      }
+      newGraph._adjacencyList.set(nId, newAdjNodes);
+    });
+    
+    // Update node-edge relationships
+    this._nodeEdges.forEach((edges, nId) => {
+      const newEdges = new Set<string>(edges);
+      if (nId === edge.sourceId || nId === edge.targetId) {
+        newEdges.delete(edgeId);
+      }
+      newGraph._nodeEdges.set(nId, newEdges);
+    });
+    
+    return newGraph;
   }
 
   /**
