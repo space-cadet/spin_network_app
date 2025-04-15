@@ -142,9 +142,9 @@ export class SimulationHistoryImpl implements SimulationHistory {
 }
 
 /**
- * Implementation of the SimulationEngine
+ * Implementation of the SimulationEngine interface for spin network simulations
  */
-export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
+export class SpinNetworkSimulationEngine implements SimulationEngine {
   private _graph?: SimulationGraph;
   private _parameters?: SimulationParameters;
   private _currentTime: number = 0;
@@ -154,77 +154,350 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
   private _history: SimulationHistoryImpl = new SimulationHistoryImpl();
   private _diffusionModel?: DiffusionModel;
   private _eventListeners: Map<string, Function[]> = new Map();
+  private _laplacianMatrix?: math.Matrix;
+
+  /**
+   * Initialize the state vector based on simulation parameters
+   */
+  private _initializeState(): void {
+    if (!this._graph || !this._parameters) {
+      throw new Error('Cannot initialize state: graph or parameters missing');
+    }
+
+    const nodeIds = this._graph.nodes.map(node => node.id);
+    
+    // Create state vector based on initial state type
+    switch (this._parameters.initialStateType) {
+      case 'delta': {
+        // Single node excitation
+        const nodeId = this._parameters.initialStateParams.nodeId;
+        const value = this._parameters.initialStateParams.value || 1.0;
+        
+        if (!nodeIds.includes(nodeId)) {
+          throw new Error(`Initial state node "${nodeId}" not found in the graph`);
+        }
+        
+        this._currentState = SimulationStateVector.createDeltaState(nodeIds, nodeId, value);
+        break;
+      }
+      
+      case 'uniform': {
+        // Uniform distribution across all nodes
+        const value = this._parameters.initialStateParams.value || 1.0;
+        this._currentState = SimulationStateVector.createUniformState(nodeIds, value);
+        break;
+      }
+      
+      case 'gaussian': {
+        // Gaussian distribution centered at a node
+        const centerNodeId = this._parameters.initialStateParams.centerNodeId;
+        const sigma = this._parameters.initialStateParams.sigma || 1.0;
+        
+        if (!nodeIds.includes(centerNodeId)) {
+          throw new Error(`Center node "${centerNodeId}" not found in the graph`);
+        }
+        
+        // Create position map
+        const nodePositions = new Map(
+          this._graph.nodes.map(node => [node.id, node.position])
+        );
+        
+        this._currentState = SimulationStateVector.createGaussianState(
+          nodeIds, 
+          centerNodeId, 
+          sigma,
+          nodePositions
+        );
+        break;
+      }
+      
+      case 'custom': {
+        // Custom state provided directly
+        const values = this._parameters.initialStateParams.values;
+        
+        if (!Array.isArray(values) || values.length !== nodeIds.length) {
+          throw new Error('Custom initial state values must be an array matching the number of nodes');
+        }
+        
+        this._currentState = new SimulationStateVector(nodeIds, values);
+        break;
+      }
+      
+      default:
+        throw new Error(`Unknown initial state type: ${this._parameters.initialStateType}`);
+    }
+    
+    // Save a copy of the initial state
+    this._initialState = this._currentState.clone();
+    
+    // Pre-compute the Laplacian matrix for evolution
+    this._laplacianMatrix = this._createLaplacianMatrix();
+  }
+  
+  /**
+   * Create the Laplacian matrix for evolution
+   */
+  private _createLaplacianMatrix(): math.Matrix {
+    if (!this._graph || !this._parameters) {
+      throw new Error('Cannot create Laplacian: graph or parameters missing');
+    }
+    
+    // Get the weight function based on the parameter
+    const weightFunctionName = this._parameters.weightFunction;
+    
+    // This is a placeholder - in a real implementation, you would use a proper factory
+    const weightFunction = (edge: SimulationEdge): number => {
+      switch (weightFunctionName) {
+        case 'spin':
+          return edge.spin;
+        case 'casimir':
+          return edge.spin * (edge.spin + 1);
+        case 'dimension':
+          return 2 * edge.spin + 1;
+        case 'area':
+          return Math.sqrt(edge.spin * (edge.spin + 1));
+        default:
+          return edge.spin; // Default to spin value
+      }
+    };
+    
+    // Create the Laplacian matrix
+    return MathAdapter.createLaplacianMatrix(this._graph, weightFunction);
+  }
+  
+  /**
+   * Evolve the state by one time step
+   */
+  private _evolveState(): void {
+    if (!this._graph || !this._parameters || !this._currentState || !this._laplacianMatrix) {
+      throw new Error('Cannot evolve state: simulation not fully initialized');
+    }
+    
+    const dt = this._parameters.timeStep;
+    
+    // Evolve based on diffusion type
+    if (this._parameters.diffusionType === 'ordinary') {
+      // For ordinary diffusion, use the analytic solution
+      const alpha = this._parameters.alpha;
+      const nodeIds = this._graph.nodes.map(node => node.id);
+      
+      // Get the current state as a math.js array
+      const stateArray = this._currentState.toMathArray();
+      
+      // Solve the diffusion equation
+      const newStateArray = MathAdapter.solveOrdinaryDiffusion(
+        this._laplacianMatrix,
+        stateArray,
+        alpha,
+        dt
+      );
+      
+      // Update current state
+      this._currentState = SimulationStateVector.fromMathArray(
+        newStateArray as unknown as math.MathArray,
+        nodeIds
+      );
+      
+    } else if (this._parameters.diffusionType === 'telegraph') {
+      // For telegraph equation, need to solve second-order ODE
+      // This requires more state information (velocity)
+      // Simplified implementation pending
+      
+      // TODO: Implement telegraph equation evolution
+      throw new Error('Telegraph equation evolution not implemented');
+      
+    } else {
+      throw new Error(`Unknown diffusion type: ${this._parameters.diffusionType}`);
+    }
+    
+    // Update current time
+    this._currentTime += dt;
+  }
+  
+  /**
+   * Notify listeners of an event
+   */
+  private _notifyListeners(event: string, data?: any): void {
+    if (!this._eventListeners.has(event)) {
+      return;
+    }
+    
+    const listeners = this._eventListeners.get(event)!;
+    for (const callback of listeners) {
+      try {
+        if (data !== undefined) {
+          callback(data);
+        } else {
+          callback();
+        }
+      } catch (error) {
+        console.error(`Error in event listener for "${event}":`, error);
+      }
+    }
+  }
   
   /**
    * Initialize the simulation with a graph and parameters
    */
   initialize(graph: SimulationGraph, parameters: SimulationParameters): void {
-    // TO BE IMPLEMENTED
+    this._graph = graph;
+    this._parameters = parameters;
+    this._currentTime = 0;
+    this._running = false;
+    this._history.clear();
+    
+    // Create initial state based on parameters
+    this._initializeState();
+    
+    // Record initial state in history if needed
+    if (parameters.recordHistory) {
+      this._history.addState(0, this._currentState!);
+    }
+    
+    // Notify listeners
+    this._notifyListeners(SimulationEvent.SIMULATION_RESET);
   }
   
   /**
    * Run simulation for one step
    */
   step(): void {
-    // TO BE IMPLEMENTED
+    if (!this._graph || !this._parameters || !this._currentState) {
+      throw new Error('Simulation not initialized');
+    }
+    
+    // Check if we've reached the total simulation time
+    if (this._currentTime >= this._parameters.totalTime) {
+      this._running = false;
+      this._notifyListeners(SimulationEvent.SIMULATION_COMPLETE);
+      return;
+    }
+    
+    // Advance the simulation by one time step
+    this._evolveState();
+    
+    // Record state in history if needed
+    if (this._parameters.recordHistory && 
+        Math.round(this._currentTime / this._parameters.historyInterval) * 
+        this._parameters.historyInterval === this._currentTime) {
+      this._history.addState(this._currentTime, this._currentState);
+    }
+    
+    // Notify listeners
+    this._notifyListeners(SimulationEvent.STEP_COMPLETE);
   }
   
   /**
    * Run simulation until a specific time
    */
   runUntil(time: number): void {
-    // TO BE IMPLEMENTED
+    if (!this._graph || !this._parameters || !this._currentState) {
+      throw new Error('Simulation not initialized');
+    }
+    
+    if (time <= this._currentTime) {
+      return;
+    }
+    
+    this._running = true;
+    this._notifyListeners(SimulationEvent.SIMULATION_RESUMED);
+    
+    // Run until we reach the target time or total simulation time
+    const targetTime = Math.min(time, this._parameters.totalTime);
+    while (this._running && this._currentTime < targetTime) {
+      this.step();
+    }
   }
   
   /**
    * Run simulation for a specific number of steps
    */
   runSteps(steps: number): void {
-    // TO BE IMPLEMENTED
+    if (!this._graph || !this._parameters || !this._currentState) {
+      throw new Error('Simulation not initialized');
+    }
+    
+    if (steps <= 0) {
+      return;
+    }
+    
+    this._running = true;
+    this._notifyListeners(SimulationEvent.SIMULATION_RESUMED);
+    
+    // Run for the specified number of steps, or until we reach the end
+    for (let i = 0; i < steps && this._running && this._currentTime < this._parameters.totalTime; i++) {
+      this.step();
+    }
+    
+    // Check if we've reached the end of the simulation
+    if (this._currentTime >= this._parameters.totalTime) {
+      this._running = false;
+      this._notifyListeners(SimulationEvent.SIMULATION_COMPLETE);
+    }
   }
   
   /**
    * Pause simulation
    */
   pause(): void {
-    // TO BE IMPLEMENTED
+    if (this._running) {
+      this._running = false;
+      this._notifyListeners(SimulationEvent.SIMULATION_PAUSED);
+    }
   }
   
   /**
    * Resume simulation
    */
   resume(): void {
-    // TO BE IMPLEMENTED
+    if (!this._running && this._currentState && this._currentTime < this._parameters!.totalTime) {
+      this._running = true;
+      this._notifyListeners(SimulationEvent.SIMULATION_RESUMED);
+    }
   }
   
   /**
    * Reset simulation to initial state
    */
   reset(): void {
-    // TO BE IMPLEMENTED
+    if (!this._graph || !this._parameters) {
+      throw new Error('Simulation not initialized');
+    }
+    
+    this._currentTime = 0;
+    this._running = false;
+    this._currentState = this._initialState!.clone();
+    this._history.clear();
+    
+    // Record initial state in history if needed
+    if (this._parameters.recordHistory) {
+      this._history.addState(0, this._currentState);
+    }
+    
+    this._notifyListeners(SimulationEvent.SIMULATION_RESET);
   }
   
   /**
    * Get current state
    */
   getCurrentState(): StateVector {
-    // TO BE IMPLEMENTED
-    return new SimulationStateVector([]);
+    if (!this._currentState) {
+      throw new Error('Simulation not initialized');
+    }
+    return this._currentState;
   }
   
   /**
    * Get current time
    */
   getCurrentTime(): number {
-    // TO BE IMPLEMENTED
-    return 0;
+    return this._currentTime;
   }
   
   /**
    * Get simulation history
    */
   getHistory(): SimulationHistory {
-    // TO BE IMPLEMENTED
     return this._history;
   }
   
@@ -232,21 +505,35 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
    * Check if simulation is running
    */
   isRunning(): boolean {
-    // TO BE IMPLEMENTED
-    return false;
+    return this._running;
   }
   
   /**
    * Add event listener
    */
   addEventListener(event: string, callback: Function): void {
-    // TO BE IMPLEMENTED
+    if (!this._eventListeners.has(event)) {
+      this._eventListeners.set(event, []);
+    }
+    
+    const listeners = this._eventListeners.get(event)!;
+    if (!listeners.includes(callback)) {
+      listeners.push(callback);
+    }
   }
   
   /**
    * Remove event listener
    */
   removeEventListener(event: string, callback: Function): void {
-    // TO BE IMPLEMENTED
+    if (!this._eventListeners.has(event)) {
+      return;
+    }
+    
+    const listeners = this._eventListeners.get(event)!;
+    const index = listeners.indexOf(callback);
+    if (index >= 0) {
+      listeners.splice(index, 1);
+    }
   }
 }

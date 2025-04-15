@@ -10,6 +10,6 @@ export { SpinNetworkGraph } from './graph';
 export { SimulationStateVector } from './stateVector';
 export { MathAdapter } from './mathAdapter';
 export { 
-  SpinNetworkSimulationEngineImpl as SpinNetworkSimulationEngine,
+  SpinNetworkSimulationEngine,
   SimulationHistoryImpl 
 } from './engineImplementation';
