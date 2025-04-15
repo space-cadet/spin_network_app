@@ -199,6 +199,33 @@ Made significant progress in fixing TypeScript errors by addressing several crit
 
 Some TypeScript errors still remain to be fixed. The incremental approach allows us to validate each fix individually while making steady progress toward a successful build.
 
+### T10: Standalone Test Page for Simulation Library
+**Description**: Create a standalone HTML test page for demonstrating and testing the simulation library without requiring the full application. Implement a simple interface for creating networks, running simulations, and visualizing results.
+**Status**: 🔄 IN PROGRESS
+**Started**: April 15, 2025 (19:30 IST)
+**Last Active**: April 15, 2025 (20:45 IST)
+**Dependencies**: T1
+**Completion Criteria**:
+- ✅ Create HTML structure with controls and visualization areas
+- ✅ Implement JavaScript for graph creation and simulation control
+- ✅ Add basic visualization using Canvas
+- ✅ Implement simulation metrics calculation and display
+- ✅ Create bundling configuration for the standalone library
+- ⬜ Fix build errors in the library
+- ⬜ Add more interactive controls
+- ⬜ Enhance visualization with more data views
+- ⬜ Add parameter adjustment interface
+- ⬜ Create comprehensive documentation
+
+**Related Files**:
+- `/public/standalone-test.html` (new file)
+- `/public/standalone-test.js` (new file)
+- `/lib-bundle.config.js` (new file)
+- `/package.json` (updated with build:lib script)
+
+**Notes**:
+This standalone test page serves as both a demonstration of the library's capabilities and a testing tool for the library's functionality. It provides a simpler way to test the simulation engine without depending on the full React application. The page includes basic controls for creating a graph, running simulations, and visualizing the results. A mock implementation of the library was created for browser testing while the actual library bundling is being set up.
+
 ### T5: Enhanced Simulation Test Pages
 **Description**: Improve the test-simulation.html page by adding randomized network generation and create a detailed physics notebook page that explains the simulation's mathematical foundations and implementation details.
 **Status**: 🔄 IN PROGRESS
@@ -266,10 +293,12 @@ graph TD
     T7[T7: Implement Memory Bank File Rotation]
     T8[T8: Implement Edit History File Rotation]
     T9[T9: Fix UI and Simulation TypeScript Errors]
+    T10[T10: Standalone Test Page for Simulation Library]
     
     T0 --> T1
     T1 --> T2
     T1 --> T3
+    T1 --> T10
     T4 --> T3
     T5 --> T2
     T6 --> T1
@@ -281,4 +310,5 @@ graph TD
     T9 --> T2
     T9 --> T3
     T9 -.-> T6
+    T10 -.-> T5
 ```
