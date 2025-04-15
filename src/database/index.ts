@@ -26,6 +26,7 @@ export * from './migrations/simulationMigration';
 export async function initDatabaseServices(): Promise<void> {
   try {
     // Initialize the database
+    const { initDatabase } = await import('./db.config');
     await initDatabase();
     
     // Additional initialization can be added here
@@ -49,6 +50,7 @@ export async function getDatabaseStats(): Promise<{
   totalRecords: number;
 }> {
   try {
+    const { getDatabaseStatus } = await import('./db.config');
     const status = await getDatabaseStatus();
     
     const counts = status.tableCount;

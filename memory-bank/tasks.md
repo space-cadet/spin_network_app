@@ -8,8 +8,32 @@
 | T2 | Advanced Simulation Analysis | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T3 | Component Refactoring | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T5 | Enhanced Simulation Test Pages | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
+| T6 | Fix Database Service Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
 
 ## Task Details
+
+### T6: Fix Database Service Errors
+**Description**: Fix TypeScript errors in database services that are preventing the application from building successfully. Focus on database initialization, service methods, and type compatibility issues.
+**Status**: 🔄 IN PROGRESS
+**Last Active**: April 15, 2025 (Current)
+**Completion Criteria**:
+- Fix missing function references (initDatabase, getDatabaseStatus)
+- Resolve type mismatches in database service methods
+- Fix Promise handling issues in simulationService.ts
+- Correct filter conditions in database queries
+- Ensure proper typing for all database operations
+- Fix window.fs related errors in logMigration.ts
+- Validate build success after each fix
+
+**Related Files**:
+- `/src/database/index.ts`
+- `/src/database/services/graphService.ts`
+- `/src/database/services/logService.ts`
+- `/src/database/services/simulationService.ts`
+- `/src/database/migrations/logMigration.ts`
+
+**Notes**:
+These database service errors are preventing the application from building successfully. Fixing these errors is critical for the application to function properly, as they affect core data storage and retrieval functionality.
 
 ### T1: Simulation Library Abstraction
 **Description**: Abstract the simulation functionality from the UI components to create standalone libraries that users can import into their code to run simulations on spin networks without UI dependencies. This will improve modularity and allow for more flexible usage of the simulation engine.
@@ -147,10 +171,14 @@ graph TD
     T0[T0: Fix Simulation Play/Pause & Redux Sync]
     T4[T4: Fix PrimeReact Dropdown Transparency]
     T5[T5: Enhanced Simulation Test Pages]
+    T6[T6: Fix Database Service Errors]
     
     T0 --> T1
     T1 --> T2
     T1 --> T3
     T4 --> T3
     T5 --> T2
+    T6 --> T1
+    T6 --> T2
+    T6 --> T3
 ```

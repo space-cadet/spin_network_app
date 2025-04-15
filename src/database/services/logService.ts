@@ -189,7 +189,11 @@ export class LogService {
       }
       
       if (options.fixed !== undefined) {
-        query = query.filter(log => log.fixed === options.fixed);
+        query = query.filter(log => {
+          // Ensure boolean comparison
+          const fixedValue = !!options.fixed;
+          return log.fixed === fixedValue;
+        });
       }
       
       if (options.search) {

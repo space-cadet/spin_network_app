@@ -4,6 +4,23 @@
 
 ## File Modification Log
 
+### April 15, 2025
+
+#### 10:15 - T6: Fix Database Service Errors
+
+- Created task for fixing database service errors identified in build_errors-v10.md
+- Updated `/memory-bank/tasks.md` to add new task T6 for database service error fixes
+- Updated task relationships to show dependencies on database functionality
+
+#### 10:30 - T6: Fix Database Service Errors
+
+- Modified `/src/database/index.ts` - Fixed missing function imports by using dynamic imports for initDatabase and getDatabaseStatus
+- Created `/src/types/global.d.ts` - Added TypeScript definition for window.fs to fix file system type errors
+- Modified `/src/database/migrations/logMigration.ts` - Added proper error handling for window.fs and file operations
+- Modified `/src/database/services/graphService.ts` - Fixed comparison operator issue between void and number types
+- Modified `/src/database/services/logService.ts` - Fixed filter condition to ensure boolean comparisons
+- Modified `/tsconfig.json` - Updated to include new type definitions
+
 ### April 14, 2025
 
 #### 22:45 - T5: Enhanced Simulation Test Pages

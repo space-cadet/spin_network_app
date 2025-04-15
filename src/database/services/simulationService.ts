@@ -73,7 +73,8 @@ export class SimulationService {
     updates: Partial<Omit<SimulationRecord, 'id'>>
   ): Promise<boolean> {
     try {
-      const count = await db.simulations.update(id, updates);
+      // Store count as a number before comparison
+      const count: number = await db.simulations.update(id, updates);
       return count > 0;
     } catch (error) {
       console.error('Failed to update simulation record:', error);
@@ -287,41 +288,41 @@ export class SimulationService {
   static async querySimulationResults(options: ResultQueryOptions): Promise<SimulationResultRecord[]> {
     try {
       // Start with filter by simulationId
-      let query = db.simulationResults
+      const rawResults = await db.simulationResults
         .where('simulationId')
         .equals(options.simulationId)
         .sortBy('timePoint');
       
       // Apply filters in memory (Dexie doesn't support complex filtering on non-indexed fields)
-      let results = query;
+      let filteredResults = [...rawResults]; // Create a new array to work with
       
       if (options.startTimePoint !== undefined) {
-        results = results.filter(result => result.timePoint >= options.startTimePoint!);
+        filteredResults = filteredResults.filter(result => result.timePoint >= options.startTimePoint!);
       }
       
       if (options.endTimePoint !== undefined) {
-        results = results.filter(result => result.timePoint <= options.endTimePoint!);
+        filteredResults = filteredResults.filter(result => result.timePoint <= options.endTimePoint!);
       }
       
       // Sample results if step is provided
       if (options.step && options.step > 1) {
-        results = results.filter((_, index) => index % options.step! === 0);
+        filteredResults = filteredResults.filter((_, index) => index % options.step! === 0);
       }
       
       // Strip state snapshots if not requested
       if (!options.includeSnapshots) {
-        results = results.map(result => ({
+        filteredResults = filteredResults.map(result => ({
           ...result,
           stateSnapshot: undefined
         }));
       }
       
       // Apply limit
-      if (options.limit !== undefined && results.length > options.limit) {
-        results = results.slice(0, options.limit);
+      if (options.limit !== undefined && filteredResults.length > options.limit) {
+        filteredResults = filteredResults.slice(0, options.limit);
       }
       
-      return results;
+      return filteredResults;
     } catch (error) {
       console.error('Failed to query simulation results:', error);
       throw error;

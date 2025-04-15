@@ -743,19 +743,31 @@ export async function initLogsFromMemoryBank(
     let editHistoryContent: string;
     
     try {
-      errorLogContent = await window.fs.readFile(errorLogPath, { encoding: 'utf8' });
+      if (!window.fs || typeof window.fs.readFile !== 'function') {
+        throw new Error('File system API is not available');
+      }
+      
+      const errorLogData = await window.fs.readFile(errorLogPath, { encoding: 'utf8' });
+      errorLogContent = typeof errorLogData === 'string' ? errorLogData : new TextDecoder().decode(errorLogData as ArrayBuffer);
       console.log(`Successfully read error log file (${errorLogContent.length} bytes)`);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to read error log file:', error);
-      throw new Error('Failed to read error log file: ' + error.message);
+      throw new Error('Failed to read error log file: ' + errorMessage);
     }
     
     try {
-      editHistoryContent = await window.fs.readFile(editHistoryPath, { encoding: 'utf8' });
+      if (!window.fs || typeof window.fs.readFile !== 'function') {
+        throw new Error('File system API is not available');
+      }
+      
+      const editHistoryData = await window.fs.readFile(editHistoryPath, { encoding: 'utf8' });
+      editHistoryContent = typeof editHistoryData === 'string' ? editHistoryData : new TextDecoder().decode(editHistoryData as ArrayBuffer);
       console.log(`Successfully read edit history file (${editHistoryContent.length} bytes)`);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to read edit history file:', error);
-      throw new Error('Failed to read edit history file: ' + error.message);
+      throw new Error('Failed to read edit history file: ' + errorMessage);
     }
     
     if (!errorLogContent || !editHistoryContent) {

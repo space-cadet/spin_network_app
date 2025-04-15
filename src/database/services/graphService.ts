@@ -55,7 +55,8 @@ export class GraphService {
     updates: Partial<Omit<GraphRecord, 'id'>>
   ): Promise<boolean> {
     try {
-      const count = await db.graphs.update(id, updates);
+      // Store count as a number before comparison
+      const count: number = await db.graphs.update(id, updates);
       return count > 0;
     } catch (error) {
       console.error('Failed to update graph record:', error);
