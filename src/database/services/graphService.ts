@@ -56,9 +56,10 @@ export class GraphService {
   ): Promise<boolean> {
     try {
       // Store count as a number 
-      const count = await db.graphs.update(id, updates);
-      // Ensure count is a number before comparison
-      return count !== undefined && typeof count === 'number' && count > 0;
+      const result = await db.graphs.update(id, updates);
+      // Handle result properly, ensuring it's a number
+      const count = typeof result === 'number' ? result : 0;
+      return count > 0;
     } catch (error) {
       console.error('Failed to update graph record:', error);
       throw error;
@@ -72,7 +73,8 @@ export class GraphService {
    */
   static async deleteGraph(id: number): Promise<boolean> {
     try {
-      const count = await db.graphs.delete(id);
+      const result = await db.graphs.delete(id);
+      const count = typeof result === 'number' ? result : 0;
       return count > 0;
     } catch (error) {
       console.error('Failed to delete graph record:', error);

@@ -112,8 +112,8 @@ const SimulationResultsPanel: React.FC = () => {
   const { currentTime, isRunning, hasHistory, geometricData, statisticsData, conservationData } = useSelector(
     (state: RootState) => ({
       currentTime: state.simulation.currentTime,
-      isRunning: state.simulation.isRunning || false, // Ensure boolean with default
-      hasHistory: state.simulation.hasHistory || false, // Ensure boolean with default
+      isRunning: state.simulation.isRunning === true, // Ensure boolean with default
+      hasHistory: state.simulation.hasHistory === true, // Ensure boolean with default
       geometricData: state.simulation.geometricData as GeometricState,
       statisticsData: state.simulation.statisticsData as StatisticsState,
       conservationData: state.simulation.conservationData as ConservationState
@@ -225,12 +225,12 @@ const SimulationResultsPanel: React.FC = () => {
                                isValidData(statisticsData.kurtosis);
     
     // Logs check is still a good fallback even with Redux
-    let fromLogs = false;
+    let fromLogs = false as boolean;
     try {
       const logsSession = simulationLogger.getCurrentSession();
       if (logsSession && Array.isArray(logsSession.results) && logsSession.results.length > 0) {
         const latestResult = logsSession.results[logsSession.results.length - 1];
-        fromLogs = !!latestResult && (
+        fromLogs = latestResult !== undefined && latestResult !== null && (
           (latestResult.conservation && Number.isFinite(latestResult.conservation.totalProbability)) ||
           (latestResult.geometric && isValidData(latestResult.geometric.totalVolume)) ||
           (latestResult.statistics && isValidData(latestResult.statistics.mean))

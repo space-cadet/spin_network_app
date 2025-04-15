@@ -1,7 +1,7 @@
 // src/components/logs/LogViewerAdapter.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector, AnyAction } from 'react-redux';
-import { ThunkDispatch } from '@reduxjs/toolkit';
+import { useDispatch, useSelector } from 'react-redux';
+import { ThunkDispatch, AnyAction } from '@reduxjs/toolkit';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
@@ -45,7 +45,7 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
   allowExport = true,
   height = '600px',
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<ThunkDispatch<RootState, unknown, AnyAction>>();
   const { 
     logs, 
     totalLogs, 
@@ -76,8 +76,7 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
 
   // Fetch logs when query options change
   useEffect(() => {
-    const action = fetchLogs(queryOptions);
-    dispatch(action);
+    dispatch(fetchLogs(queryOptions));
   }, [dispatch, queryOptions]);
 
   // Show error toast if fetch fails
@@ -126,8 +125,7 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
 
   // Handle export
   const handleExport = (format: 'json' | 'markdown') => {
-    const action = exportLogs({ format, options: queryOptions });
-    dispatch(action);
+    dispatch(exportLogs({ format, options: queryOptions }));
   };
 
   const onPage = (event: any) => {
@@ -268,8 +266,7 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
                 className="mt-2" 
                 onClick={() => {
                   try {
-                    const action = markErrorFixed(selectedLog.id!);
-                    dispatch(action);
+                    dispatch(markErrorFixed(selectedLog.id!));
                     toast.current.show({ 
                       severity: 'success', 
                       summary: 'Success', 

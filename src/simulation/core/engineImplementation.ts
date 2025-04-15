@@ -287,9 +287,10 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
           if (!node) continue;
           
           // Calculate Euclidean distance
-          const dx = node.position.x - centerNode.position.x;
-          const dy = node.position.y - centerNode.position.y;
-          const dz = (node.position.z || 0) - (centerNode.position.z || 0);
+          // Using null assertion operator since we've already checked both node and centerNode are defined
+          const dx = node.position.x - centerNode!.position.x;
+          const dy = node.position.y - centerNode!.position.y;
+          const dz = (node.position.z || 0) - (centerNode!.position.z || 0);
           const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
           
           // Calculate Gaussian value
@@ -350,7 +351,7 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
         }
       }
       
-      console.log(`State validation: max value=${maxValue.toFixed(6)}, non-zero nodes=${nonZeroCount}/${this.state.size}`);
+      console.log(`State validation: max value=${maxValue.toFixed(6)}, non-zero nodes=${nonZeroCount}/${this.state?.size || 0}`);
       
       if (maxValue < 1e-10) {
         console.error("State validation failed: all values are zero or near zero");
@@ -600,8 +601,8 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       
       // Calculate norms directly
       for (let i = 0; i < size; i++) {
-        const initialValue = this.initialState.getValueAtIndex(i);
-        const currentValue = this.state.getValueAtIndex(i);
+        const initialValue = this.initialState!.getValueAtIndex(i);
+        const currentValue = this.state!.getValueAtIndex(i);
         
         initialNorm += initialValue * initialValue;
         currentNorm += currentValue * currentValue;
@@ -619,14 +620,16 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       
       // Calculate the variation
       const normVariation = Math.abs(currentNorm - initialNorm) / 
-                           (initialNorm > 1e-10 ? initialNorm : 1.0);
+                           (initialNorm! > 1e-10 ? initialNorm! : 1.0);
       
       // Check positivity
       let positivity = true;
-      for (let i = 0; i < this.state.size; i++) {
-        if (this.state.getValueAtIndex(i) < -1e-10) {
-          positivity = false;
-          break;
+      if (this.state) {
+        for (let i = 0; i < this.state.size; i++) {
+          if (this.state.getValueAtIndex(i) < -1e-10) {
+            positivity = false;
+            break;
+          }
         }
       }
       

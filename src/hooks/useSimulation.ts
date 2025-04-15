@@ -229,13 +229,17 @@ export const useSimulation = () => {
           // Delay reinitialization to ensure parameters are updated
           setTimeout(() => {
             if (engineRef.current && graphRef.current) {
-              engineRef.current.initialize(graphRef.current, {
+              // Create a safe version of parameters with guaranteed nodeId
+              const safeParameters = {
                 ...parameters,
                 initialStateParams: {
                   ...parameters.initialStateParams,
                   nodeId: nodeIdValidation
                 }
-              });
+              };
+              // Cast parameters to the right type with unknown as intermediate step
+      const simParams = safeParameters as unknown as import('../simulation/core/types').SimulationParameters;
+      engineRef.current.initialize(graphRef.current, simParams);
               engineRef.current.reset();
               setCurrentTime(0);
               setHasHistory(false);
@@ -249,7 +253,9 @@ export const useSimulation = () => {
       }
 
       // If nodeId is valid, reinitialize immediately
-      engineRef.current.initialize(graphRef.current, parameters);
+      // Cast parameters to the right type with unknown as intermediate step
+      const simParams = parameters as unknown as import('../simulation/core/types').SimulationParameters;
+      engineRef.current.initialize(graphRef.current, simParams);
       engineRef.current.reset();
 
       // Reset time and history
@@ -301,7 +307,7 @@ export const useSimulation = () => {
     if (engineRef.current && graphRef.current) {
       // Initialize engine if not already done
       if (currentTime === 0) {
-        engineRef.current.initialize(graphRef.current, parameters);
+        engineRef.current.initialize(graphRef.current, parameters as import('../simulation/core/types').SimulationParameters);
       }
       
       // Step once
@@ -382,8 +388,16 @@ export const useSimulation = () => {
         historyInterval: 1
       };
       
-      // Initialize engine with enhanced parameters - cast to ensure compatible type
-      engineRef.current.initialize(graphRef.current, enhancedParameters as any);
+      // Initialize engine with enhanced parameters - properly cast to compatible type
+      // Create a type-safe version by ensuring nodeId exists in initialStateParams
+      const safeParameters = {
+        ...enhancedParameters,
+        initialStateParams: {
+          ...enhancedParameters.initialStateParams,
+          nodeId: enhancedParameters.initialStateParams.nodeId || ''
+        }
+      };
+      engineRef.current.initialize(graphRef.current, safeParameters as import('../simulation/core/types').SimulationParameters);
       
       // Verify initial state
       const initialState = engineRef.current.getCurrentState();
@@ -463,7 +477,7 @@ export const useSimulation = () => {
         // If we don't need to update nodeId, initialize immediately
         if (engineRef.current && graphRef.current) {
           console.log("Initializing simulation engine with existing parameters");
-          engineRef.current.initialize(graphRef.current, parameters as any);
+          engineRef.current.initialize(graphRef.current, parameters as import('../simulation/core/types').SimulationParameters);
           setCurrentTime(0);
           setHasHistory(false);
         }
@@ -481,7 +495,7 @@ export const useSimulation = () => {
     const nodeExists = network.nodes.some((node: any) => node.id === nodeId);
     if (nodeExists && engineRef.current && graphRef.current) {
       console.log("Deferred initialization: initializing simulation engine after Redux nodeId update");
-      engineRef.current.initialize(graphRef.current, parameters as any);
+      engineRef.current.initialize(graphRef.current, parameters as import('../simulation/core/types').SimulationParameters);
       setCurrentTime(0);
       setHasHistory(false);
     }
