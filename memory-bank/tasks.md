@@ -9,10 +9,30 @@
 | T3 | Component Refactoring | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T5 | Enhanced Simulation Test Pages | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 | T6 | Fix Database Service Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
-| T7 | Implement Memory Bank File Rotation | ✅ COMPLETE | MEDIUM | 2025-04-15 | - | Deepak |
-| T8 | Implement Edit History File Rotation | 🔄 IN PROGRESS | MEDIUM | 2025-04-15 | - | Deepak |
 
 ## Task Details
+
+### T8: Implement Edit History File Rotation
+**Description**: Implement the file rotation system for the edit_history.md file which has grown beyond the 500-line threshold. Apply the size-based rotation protocol to preserve recent entries while archiving older ones.
+**Status**: ✅ COMPLETE
+**Last Active**: April 15, 2025 (09:23 IST)
+**Completed**: April 15, 2025 (09:23 IST)
+**Completion Criteria**:
+- Implement rotation for edit_history.md with preservation of recent entries
+- Create archive file with proper date-based naming
+- Ensure both files have appropriate content and structure
+- Verify file sizes after rotation
+- Update tasks.md to reflect the completed rotation task
+- Update session_cache.md with rotation details
+
+**Related Files**:
+- `/memory-bank/edit_history.md`
+- `/memory-bank/archive/edit_history_2025-04.md`
+- `/memory-bank/tasks.md`
+- `/memory-bank/session_cache.md`
+
+**Notes**:
+Following the Memory Bank Size Management Protocol from Section 3.6 of the Integrated Code Rules and the detailed log rotation protocol.
 
 ### T7: Implement Memory Bank File Rotation
 **Description**: Implement the file rotation system for Memory Bank files that have grown too large, starting with errorLog.md. This follows the size-based rotation protocol specified in the Integrated Code Rules.
@@ -161,7 +181,8 @@ The enhanced test pages will serve as educational resources to help users unders
 |----|-------|-----------|---------------|
 | T0 | Fix Simulation Play/Pause & Redux Sync | 2025-04-13 | - |
 | T4 | Fix PrimeReact Dropdown Transparency | 2025-04-14 | - |
-| T7 | Implement Memory Bank File Rotation | 2025-04-15 | - |
+| T7 | Implement Memory Bank File Rotation | 2025-04-15 | T8 |
+| T8 | Implement Edit History File Rotation | 2025-04-15 | - |
 
 ### T4: Fix PrimeReact Dropdown Transparency
 **Description**: Fix transparency issue in PrimeReact dropdown components, particularly in the Application Logs panel's MultiSelect filter. Improve styling to match the application's design system.
@@ -197,6 +218,7 @@ graph TD
     T5[T5: Enhanced Simulation Test Pages]
     T6[T6: Fix Database Service Errors]
     T7[T7: Implement Memory Bank File Rotation]
+    T8[T8: Implement Edit History File Rotation]
     
     T0 --> T1
     T1 --> T2
@@ -207,4 +229,5 @@ graph TD
     T6 --> T2
     T6 --> T3
     T7 -.-> T6
+    T7 --> T8
 ```
