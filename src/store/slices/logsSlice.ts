@@ -39,7 +39,8 @@ export const fetchLogs = createAsyncThunk(
         totalLogs: allLogs.length,
       };
     } catch (error) {
-      return rejectWithValue(error.message);
+      const err = error as Error;
+      return rejectWithValue(err.message);
     }
   }
 );
@@ -56,7 +57,8 @@ export const markErrorFixed = createAsyncThunk(
       
       return id;
     } catch (error) {
-      return rejectWithValue(error.message);
+      const err = error as Error;
+      return rejectWithValue(err.message);
     }
   }
 );
@@ -77,7 +79,8 @@ export const exportLogs = createAsyncThunk(
         return await LogService.exportLogsToMarkdown(options);
       }
     } catch (error) {
-      return rejectWithValue(error.message);
+      const err = error as Error;
+      return rejectWithValue(err.message);
     }
   }
 );

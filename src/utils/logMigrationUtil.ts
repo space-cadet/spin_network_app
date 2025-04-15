@@ -103,7 +103,11 @@ export async function migrateMarkdownLogs(
           
           try {
             // Legacy fallback: try window.fs if available
-            errorLogContent = await window.fs.readFile(errorLogPath, { encoding: 'utf8' });
+            if (window.fs) {
+              errorLogContent = await window.fs.readFile(errorLogPath, { encoding: 'utf8' }) as string;
+            } else {
+              throw new Error('window.fs is not available');
+            }
           } catch (e3) {
             console.log('All file reading methods failed for error log. Creating test entry...', e3);
             
@@ -137,8 +141,9 @@ Added test error entry to verify migration works.
         console.error('Error log file appears to be empty or too short');
       }
     } catch (err) {
-      console.error('Failed to read error log file after all attempts:', err);
-      result.error = `Failed to read error log file: ${err.message}`;
+      const error = err as Error;
+      console.error('Failed to read error log file after all attempts:', error);
+      result.error = `Failed to read error log file: ${error.message}`;
       return result;
     }
     
@@ -159,7 +164,11 @@ Added test error entry to verify migration works.
           
           try {
             // Legacy fallback: try window.fs if available
-            editHistoryContent = await window.fs.readFile(editHistoryPath, { encoding: 'utf8' });
+            if (window.fs) {
+              editHistoryContent = await window.fs.readFile(editHistoryPath, { encoding: 'utf8' }) as string;
+            } else {
+              throw new Error('window.fs is not available');
+            }
           } catch (e3) {
             console.log('All file reading methods failed for edit history. Creating test entry...', e3);
             
@@ -186,8 +195,9 @@ Issues addressed:
         console.error('Edit history file appears to be empty or too short');
       }
     } catch (err) {
-      console.error('Failed to read edit history file after all attempts:', err);
-      result.error = `Failed to read edit history file: ${err.message}`;
+      const error = err as Error;
+      console.error('Failed to read edit history file after all attempts:', error);
+      result.error = `Failed to read edit history file: ${error.message}`;
       return result;
     }
     
@@ -263,8 +273,9 @@ Issues addressed:
         };
       }
     } catch (migrationError) {
-      console.error('Error during migration process:', migrationError);
-      result.error = `Migration process failed: ${migrationError.message}`;
+      const error = migrationError as Error;
+      console.error('Error during migration process:', error);
+      result.error = `Migration process failed: ${error.message}`;
       
       // Try direct database entry as a fallback
       try {
@@ -450,13 +461,14 @@ export async function migrateLogsFromConsole() {
       // Print the first 500 characters
       console.log('Edit history sample:', editHistoryContent.substring(0, 500) + '...');
     } catch (fileError) {
-      console.error('Failed to read log files:', fileError);
+      const error = fileError as Error;
+      console.error('Failed to read log files:', error);
       return {
         errorLogsMigrated: 0,
         editLogsMigrated: 0,
         totalLogsMigrated: 0,
         success: false,
-        error: fileError.message
+        error: error.message
       };
     }
     

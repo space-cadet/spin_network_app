@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 15, 2025 (09:10 IST)*
+*Last Updated: April 15, 2025 (11:00 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -9,6 +9,7 @@
 | T3 | Component Refactoring | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T5 | Enhanced Simulation Test Pages | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 | T6 | Fix Database Service Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
+| T9 | Fix UI and Simulation TypeScript Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
 
 ## Task Details
 
@@ -153,6 +154,37 @@ This task will be resumed after the simulation library abstraction is complete, 
 **Notes**:
 This refactoring will be more efficient after the simulation library abstraction is complete, as the new architecture will clarify component boundaries and responsibilities.
 
+### T9: Fix UI and Simulation TypeScript Errors
+**Description**: Fix TypeScript errors in UI components, hooks, and simulation code that are preventing the application from building successfully. This complements the database service error fixes in task T6.
+**Status**: 🔄 IN PROGRESS
+**Last Active**: April 15, 2025 (14:30 IST)
+**Completion Criteria**:
+- Fix error handling in App.tsx and logMigrationUtil.ts (unknown type issues)
+- Fix prop type mismatches in LogViewerAdapter.tsx
+- Fix Tag component prop type errors in LogViewerAdapter
+- Fix AsyncThunkAction type issues in LogViewerAdapter
+- Resolve property accesses on empty objects in SimulationResultsPanel.tsx
+- Fix type compatibility issues in state objects in SimulationResultsPanel.tsx
+- Fix null safety issues in engineImplementation.ts 
+- Resolve missing type definitions in useSimulation.ts
+- Fix the hasWarnedNull property issues in useSimulation.ts
+- Check each fix with TypeScript to ensure compatibility
+- Validate that all fixes maintain existing functionality
+- Ensure build completes successfully after fixes are applied
+
+**Related Files**:
+- `/src/App.tsx`
+- `/src/components/logs/LogViewerAdapter.tsx` 
+- `/src/components/simulation/SimulationResultsPanel.tsx`
+- `/src/hooks/useSimulation.ts`
+- `/src/simulation/core/engineImplementation.ts`
+- `/src/store/slices/logsSlice.ts`
+- `/src/utils/logMigrationUtil.ts`
+- `/src/types/simulation.d.ts` (may need to create)
+
+**Notes**:
+These TypeScript errors are preventing the application from building successfully. The focus is on resolving type safety issues while maintaining the existing functionality. Some errors may require creating or updating type definitions to properly represent the application's data structures.
+
 ### T5: Enhanced Simulation Test Pages
 **Description**: Improve the test-simulation.html page by adding randomized network generation and create a detailed physics notebook page that explains the simulation's mathematical foundations and implementation details.
 **Status**: 🔄 IN PROGRESS
@@ -219,6 +251,7 @@ graph TD
     T6[T6: Fix Database Service Errors]
     T7[T7: Implement Memory Bank File Rotation]
     T8[T8: Implement Edit History File Rotation]
+    T9[T9: Fix UI and Simulation TypeScript Errors]
     
     T0 --> T1
     T1 --> T2
@@ -230,4 +263,8 @@ graph TD
     T6 --> T3
     T7 -.-> T6
     T7 --> T8
+    T9 --> T1
+    T9 --> T2
+    T9 --> T3
+    T9 -.-> T6
 ```

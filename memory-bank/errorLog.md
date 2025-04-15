@@ -1,5 +1,105 @@
 # Error Log
 
+## 2025-04-15 14:35 IST - T9: TypeScript Build Errors in UI and Simulation Components
+
+**File:** Multiple files across UI components, database services, and simulation code
+
+**Error Message:**
+Various TypeScript errors preventing successful build:
+```
+src/App.tsx(164,77): error TS18046: 'err' is of type 'unknown'.
+src/components/logs/LogViewerAdapter.tsx(78,14): error TS2345: Argument of type 'AsyncThunkAction<{ logs: LogEntry[]; totalLogs: number; }, LogQueryOptions, AsyncThunkConfig>' is not assignable to parameter of type 'AnyAction'.
+src/components/simulation/SimulationResultsPanel.tsx(647,50): error TS7006: Parameter 'nodeId' implicitly has an 'any' type.
+src/database/services/graphService.ts(75,14): error TS2365: Operator '>' cannot be applied to types 'void' and 'number'.
+src/database/services/logService.ts(295,7): error TS2322: Type 'void' is not assignable to type 'number'.
+src/hooks/useSimulation.ts(291,61): error TS2304: Cannot find name 'SimulationParameters'.
+src/hooks/useSimulation.ts(514,21): error TS2339: Property 'hasWarnedNull' does not exist on type '() => SimulationGraph | null'.
+src/simulation/core/engineImplementation.ts(213,18): error TS2531: Object is possibly 'null'.
+src/store/slices/logsSlice.ts(42,30): error TS18046: 'error' is of type 'unknown'.
+src/utils/logMigrationUtil.ts(106,37): error TS18048: 'window.fs' is possibly 'undefined'.
+```
+
+**Cause:**
+1. TypeScript strict mode violations, particularly with handling of the `unknown` type
+2. Improper handling of nullable values in simulation and database code
+3. Redux AsyncThunkAction types not compatible with dispatch function
+4. Database services returning void instead of number for certain operations
+5. Missing type definitions for simulation parameters and custom functions
+6. Issues with accessing properties on null objects in engineImplementation.ts
+7. Implicit any types in map function parameters
+
+**Fix:**
+1. **Error Handling and Type Safety**:
+   - Added proper type casting for error objects: `const error = err as Error`
+   - Added null checks for `window.fs` to prevent undefined access
+   - Added explicit type annotations for map function parameters: `samples.map((nodeId: string) => ...)`
+
+2. **Database Service Fixes**:
+   - Fixed void/number comparison issues by properly handling return values
+   - Modified database methods to return appropriate types
+   - Implemented proper count handling in clearLogs to return number instead of void
+   - Enhanced boolean comparisons in filter conditions
+
+3. **Simulation Component Improvements**:
+   - Added interface definitions for state objects (ConservationState, GeometricState, etc.)
+   - Added proper typing for SimulationParameters
+   - Fixed hasWarnedNull property issues with function interface extensions
+   - Added null safety checks in engine implementation
+
+4. **Redux Action Typing**:
+   - Added proper typing for AsyncThunkAction in LogViewerAdapter
+   - Fixed dispatch function to properly handle typed actions
+
+**Key Code Changes:**
+```typescript
+// Error handling with type casting
+try {
+  // code...
+} catch (err) {
+  const error = err as Error;
+  console.error('Error:', error);
+  alert(`Error: ${error.message}`);
+}
+
+// Null safety for window.fs
+if (window.fs) {
+  const content = await window.fs.readFile(path, { encoding: 'utf8' }) as string;
+} else {
+  throw new Error('window.fs is not available');
+}
+
+// Proper type definitions
+interface SimulationParameters {
+  initialStateParams: {
+    nodeId: string;
+    [key: string]: any;
+  };
+  timeStep?: number;
+  [key: string]: any;
+}
+
+// Function with static properties
+interface GetGraphFunction {
+  (): SimulationGraph | null;
+  hasWarnedNull?: boolean;
+}
+
+// Fixed database query method
+return count !== undefined && typeof count === 'number' && count > 0;
+```
+
+**Affected Files:**
+- src/App.tsx
+- src/components/logs/LogViewerAdapter.tsx
+- src/components/simulation/SimulationResultsPanel.tsx
+- src/database/services/graphService.ts
+- src/database/services/logService.ts
+- src/database/services/simulationService.ts
+- src/hooks/useSimulation.ts
+- src/simulation/core/engineImplementation.ts
+- src/store/slices/logsSlice.ts
+- src/utils/logMigrationUtil.ts
+
 ## 2025-04-15 10:45 IST - T6: Database Service Type Errors and Missing Functions
 ## 2025-04-10 19:30 IST - Build and Runtime Errors in Simulation Component
 

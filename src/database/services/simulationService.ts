@@ -73,9 +73,10 @@ export class SimulationService {
     updates: Partial<Omit<SimulationRecord, 'id'>>
   ): Promise<boolean> {
     try {
-      // Store count as a number before comparison
-      const count: number = await db.simulations.update(id, updates);
-      return count > 0;
+      // Ensure count is a number
+      const count = await db.simulations.update(id, updates);
+      // Validate and return boolean result
+      return count !== undefined && typeof count === 'number' && count > 0;
     } catch (error) {
       console.error('Failed to update simulation record:', error);
       throw error;
@@ -172,10 +173,11 @@ export class SimulationService {
       
       if (options.search) {
         const searchTerm = options.search.toLowerCase();
-        query = query.filter(sim => 
-          (sim.name && sim.name.toLowerCase().includes(searchTerm)) ||
-          (sim.description && sim.description.toLowerCase().includes(searchTerm))
-        );
+        query = query.filter(sim => {
+          const nameMatch = sim.name ? sim.name.toLowerCase().includes(searchTerm) : false;
+          const descMatch = sim.description ? sim.description.toLowerCase().includes(searchTerm) : false;
+          return nameMatch || descMatch;
+        });
       }
       
       // Apply sort

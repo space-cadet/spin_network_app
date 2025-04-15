@@ -161,8 +161,9 @@ ${result.skippedDuplicates || 0} duplicate entries skipped`;
                                     console.error('Migration failed with error:', result.error);
                                   }
                                 } catch (err) {
-                                  alert(`Migration failed with exception: ${err.message}`);
-                                  console.error('Migration exception:', err);
+                                  const error = err as Error;
+                                  alert(`Migration failed with exception: ${error.message}`);
+                                  console.error('Migration exception:', error);
                                 }
                               }
                             }}

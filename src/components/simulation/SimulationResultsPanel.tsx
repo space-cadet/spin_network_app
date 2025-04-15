@@ -9,8 +9,39 @@ import RawDataDisplay from './RawDataDisplay';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 
+// Define type interfaces for the simulation state objects
+interface ConservationState {
+  totalProbability: number;
+  normVariation: number;
+  positivity: boolean; // Ensure positivity is explicitly defined as boolean
+  [key: string]: string | number | boolean;
+}
+
+interface GeometricState {
+  totalVolume: number;
+  totalArea: number;
+  effectiveDimension: number;
+  volumeEntropy: number;
+  [key: string]: string | number | boolean;
+}
+
+interface StatisticsState {
+  mean: number;
+  variance: number;
+  skewness: number;
+  kurtosis: number;
+  [key: string]: string | number | boolean;
+}
+
 // Time points display component to prevent render loops
-const TimePointsDisplay = React.memo(({ simulation }) => {
+interface TimePointsDisplayProps {
+  simulation: {
+    getHistory?: () => any;
+    // Add other properties as needed
+  };
+}
+
+const TimePointsDisplay = React.memo(({ simulation }: TimePointsDisplayProps) => {
   // Use a ref to store the last fetched times to avoid re-rendering on every check
   const timePointsRef = useRef<Array<number>>([]);
   const [lastUpdateTime, setLastUpdateTime] = useState(0);
@@ -79,7 +110,14 @@ const SimulationResultsPanel: React.FC = () => {
   
   // Get simulation state directly from Redux
   const { currentTime, isRunning, hasHistory, geometricData, statisticsData, conservationData } = useSelector(
-    (state: RootState) => state.simulation
+    (state: RootState) => ({
+      currentTime: state.simulation.currentTime,
+      isRunning: state.simulation.isRunning || false, // Ensure boolean with default
+      hasHistory: state.simulation.hasHistory || false, // Ensure boolean with default
+      geometricData: state.simulation.geometricData as GeometricState,
+      statisticsData: state.simulation.statisticsData as StatisticsState,
+      conservationData: state.simulation.conservationData as ConservationState
+    })
   );
   
   // Use a local state for active tab to avoid too many Redux updates for UI
@@ -606,7 +644,7 @@ const SimulationResultsPanel: React.FC = () => {
                                 
                                 return (
                                   <div>
-                                    {samples.map(nodeId => (
+                                    {samples.map((nodeId: string) => (
                                       <div key={nodeId} className="flex justify-between">
                                         <span>{nodeId}:</span>
                                         <span>{state.getValue(nodeId).toFixed(4)}</span>

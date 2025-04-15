@@ -198,10 +198,11 @@ export class LogService {
       
       if (options.search) {
         const searchTerm = options.search.toLowerCase();
-        query = query.filter(log => 
-          log.message.toLowerCase().includes(searchTerm) ||
-          (log.details && log.details.toLowerCase().includes(searchTerm))
-        );
+        query = query.filter(log => {
+          const messageMatch = log.message ? log.message.toLowerCase().includes(searchTerm) : false;
+          const detailsMatch = log.details ? log.details.toLowerCase().includes(searchTerm) : false;
+          return messageMatch || detailsMatch;
+        });
       }
       
       // Apply sort direction
@@ -284,7 +285,7 @@ export class LogService {
   /**
    * Clear all logs
    * @param confirm Must be true to proceed with deletion
-   * @returns Number of deleted log entries
+   * @returns Number of deleted log entries (or 0 if clearing was successful but no count was returned)
    */
   static async clearLogs(confirm: boolean): Promise<number> {
     if (!confirm) {
@@ -292,7 +293,12 @@ export class LogService {
     }
     
     try {
-      return await db.logs.clear();
+      // First get the count
+      const count = await db.logs.count();
+      // Then clear the table
+      await db.logs.clear();
+      // Return the count we captured before clearing
+      return count;
     } catch (error) {
       console.error('Failed to clear logs:', error);
       throw error;

@@ -12,6 +12,34 @@ import { SpinNetworkSimulationEngineImpl } from '../simulation/core/engineImplem
 import { RootState } from '../store';
 import { simulationLogger } from '../simulation/core/simulationLogger';
 
+// Define missing SimulationParameters type
+interface SimulationParameters {
+  initialStateParams: {
+    nodeId: string;
+    [key: string]: any;
+  };
+  timeStep?: number;
+  recordHistory?: boolean;
+  historyInterval?: number;
+  [key: string]: any;
+}
+
+// Extend function interfaces with static properties
+interface GetGraphFunction {
+  (): SimulationGraph | null;
+  hasWarnedNull?: boolean;
+}
+
+interface GetCurrentStateFunction {
+  (): any;
+  hasWarnedNull?: boolean;
+}
+
+interface GetHistoryFunction {
+  (): any;
+  hasWarnedNull?: boolean;
+}
+
 export const useSimulation = () => {
   // Get network from Redux - handle the case where it might be undefined
   const network = useSelector((state: RootState) => state.network?.currentNetwork);
@@ -188,7 +216,7 @@ export const useSimulation = () => {
       simulationLogger.endSession();
       
       // Validate node ID
-      const nodeIdValidation = validateNodeId(network, parameters);
+      const nodeIdValidation = validateNodeId(network, parameters as SimulationParameters);
       
       if (nodeIdValidation !== true) {
         if (nodeIdValidation) {
@@ -354,8 +382,8 @@ export const useSimulation = () => {
         historyInterval: 1
       };
       
-      // Initialize engine with enhanced parameters
-      engineRef.current.initialize(graphRef.current, enhancedParameters);
+      // Initialize engine with enhanced parameters - cast to ensure compatible type
+      engineRef.current.initialize(graphRef.current, enhancedParameters as any);
       
       // Verify initial state
       const initialState = engineRef.current.getCurrentState();
@@ -402,7 +430,7 @@ export const useSimulation = () => {
     }
     
     // Skip if we've already initialized for this network
-    const networkId = network.id || JSON.stringify(network.nodes.map(n => n.id).sort());
+    const networkId = (network as any).id || JSON.stringify(network.nodes.map((n: any) => n.id).sort());
     if (initializedNetworkRef.current === networkId) {
       return;
     }
@@ -435,7 +463,7 @@ export const useSimulation = () => {
         // If we don't need to update nodeId, initialize immediately
         if (engineRef.current && graphRef.current) {
           console.log("Initializing simulation engine with existing parameters");
-          engineRef.current.initialize(graphRef.current, parameters);
+          engineRef.current.initialize(graphRef.current, parameters as any);
           setCurrentTime(0);
           setHasHistory(false);
         }
@@ -450,10 +478,10 @@ export const useSimulation = () => {
     if (!network || !network.nodes || network.nodes.length === 0) return;
     if (!graphRef.current) return;
     const nodeId = parameters.initialStateParams?.nodeId;
-    const nodeExists = network.nodes.some(node => node.id === nodeId);
+    const nodeExists = network.nodes.some((node: any) => node.id === nodeId);
     if (nodeExists && engineRef.current && graphRef.current) {
       console.log("Deferred initialization: initializing simulation engine after Redux nodeId update");
-      engineRef.current.initialize(graphRef.current, parameters);
+      engineRef.current.initialize(graphRef.current, parameters as any);
       setCurrentTime(0);
       setHasHistory(false);
     }
@@ -506,7 +534,7 @@ export const useSimulation = () => {
   }, [isRunning, animationLoop]);
 
   // Get the current simulation graph with enhanced error handling
-  const getGraph = useCallback(() => {
+  const getGraph: GetGraphFunction = useCallback(() => {
     // Only log the first time or when the value changes
     const isEmpty = !graphRef.current;
     if (isEmpty) {
@@ -524,7 +552,7 @@ export const useSimulation = () => {
   }, []);
   
   // Get the current state directly with improved error handling
-  const getCurrentState = useCallback(() => {
+  const getCurrentState: GetCurrentStateFunction = useCallback(() => {
     try {
       if (engineRef.current) {
         // Always get a fresh state to ensure we have the latest
@@ -552,7 +580,7 @@ export const useSimulation = () => {
   const historyCallCountRef = useRef<number>(0);
 
   // Get the simulation history with enhanced error handling and status tracking
-  const getHistory = useCallback(() => {
+  const getHistory: GetHistoryFunction = useCallback(() => {
     try {
       if (engineRef.current) {
         const history = engineRef.current.getHistory();

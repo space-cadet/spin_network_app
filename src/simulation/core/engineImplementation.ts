@@ -258,10 +258,10 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
         // Create a Gaussian distribution centered on a node
         let centerNodeId = initialStateParams.nodeId;
         
-        // Validate that the center node ID exists
-        if (!centerNodeId || !this.graph.getNode(centerNodeId)) {
+        // Validate that the center node ID exists and graph is available
+        if (!this.graph || !centerNodeId || !this.graph.getNode(centerNodeId)) {
           centerNodeId = nodeIds[0];
-          console.warn(`Center node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${centerNodeId} instead`);
+          console.warn(`Center node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${nodeIds[0]} instead`);
         }
         
         const centerValue = initialStateParams.centerValue || 1.0;
@@ -273,7 +273,7 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
         this.state = this.state.setValue(centerNodeId, centerValue);
         
         // Get center node position
-        const centerNode = this.graph.getNode(centerNodeId);
+        const centerNode = this.graph ? this.graph.getNode(centerNodeId) : null;
         if (!centerNode) {
           console.error("Center node not found even after validation");
           return;
@@ -587,8 +587,19 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       let initialNorm = 0;
       let currentNorm = 0;
       
+      // Make sure state size is valid and matching
+      const stateSize = this.state.size;
+      const initialStateSize = this.initialState.size;
+      
+      if (stateSize !== initialStateSize) {
+        console.warn(`State size mismatch: current=${stateSize}, initial=${initialStateSize}`);
+      }
+      
+      // Use the minimum size to avoid out of bounds errors
+      const size = Math.min(stateSize, initialStateSize);
+      
       // Calculate norms directly
-      for (let i = 0; i < this.state.size; i++) {
+      for (let i = 0; i < size; i++) {
         const initialValue = this.initialState.getValueAtIndex(i);
         const currentValue = this.state.getValueAtIndex(i);
         

@@ -55,9 +55,10 @@ export class GraphService {
     updates: Partial<Omit<GraphRecord, 'id'>>
   ): Promise<boolean> {
     try {
-      // Store count as a number before comparison
-      const count: number = await db.graphs.update(id, updates);
-      return count > 0;
+      // Store count as a number 
+      const count = await db.graphs.update(id, updates);
+      // Ensure count is a number before comparison
+      return count !== undefined && typeof count === 'number' && count > 0;
     } catch (error) {
       console.error('Failed to update graph record:', error);
       throw error;
@@ -119,10 +120,11 @@ export class GraphService {
       
       if (options.search) {
         const searchTerm = options.search.toLowerCase();
-        query = query.filter(graph => 
-          (graph.name && graph.name.toLowerCase().includes(searchTerm)) ||
-          (graph.description && graph.description.toLowerCase().includes(searchTerm))
-        );
+        query = query.filter(graph => {
+          const nameMatch = graph.name ? graph.name.toLowerCase().includes(searchTerm) : false;
+          const descMatch = graph.description ? graph.description.toLowerCase().includes(searchTerm) : false;
+          return nameMatch || descMatch;
+        });
       }
       
       // Apply sort

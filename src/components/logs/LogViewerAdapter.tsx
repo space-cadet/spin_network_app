@@ -1,6 +1,7 @@
 // src/components/logs/LogViewerAdapter.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, AnyAction } from 'react-redux';
+import { ThunkDispatch } from '@reduxjs/toolkit';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
@@ -75,7 +76,8 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
 
   // Fetch logs when query options change
   useEffect(() => {
-    dispatch(fetchLogs(queryOptions));
+    const action = fetchLogs(queryOptions);
+    dispatch(action);
   }, [dispatch, queryOptions]);
 
   // Show error toast if fetch fails
@@ -124,7 +126,8 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
 
   // Handle export
   const handleExport = (format: 'json' | 'markdown') => {
-    dispatch(exportLogs({ format, options: queryOptions }));
+    const action = exportLogs({ format, options: queryOptions });
+    dispatch(action);
   };
 
   const onPage = (event: any) => {
@@ -178,7 +181,7 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
           ? 'info' 
           : rowData.type === 'debug' 
             ? 'secondary' 
-            : 'primary';
+            : 'success';  // Changed from 'primary' to 'success' which is a valid severity
     
     return <Tag value={rowData.type} severity={severity} />;
   };
@@ -265,7 +268,8 @@ export const LogViewerAdapter: React.FC<LogViewerAdapterProps> = ({
                 className="mt-2" 
                 onClick={() => {
                   try {
-                    dispatch(markErrorFixed(selectedLog.id!));
+                    const action = markErrorFixed(selectedLog.id!);
+                    dispatch(action);
                     toast.current.show({ 
                       severity: 'success', 
                       summary: 'Success', 
