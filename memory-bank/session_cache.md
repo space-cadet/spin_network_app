@@ -18,6 +18,7 @@
 - T7: Implement Memory Bank File Rotation - ✅ COMPLETE
 - T8: Implement Edit History File Rotation - ✅ COMPLETE
 - T9: Fix UI and Simulation TypeScript Errors - 🔄 IN PROGRESS
+- T1: Simulation Library Abstraction - 🔄 IN PROGRESS (Updated core graph methods)
 
 ## Active Tasks
 

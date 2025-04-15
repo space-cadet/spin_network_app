@@ -8,6 +8,7 @@
 
 #### 16:45 - T1: Simulation Library Abstraction - Creating Library Structure
 - Created `/Users/deepak/code/spin_network_app/lib/package.json` - Set up the library package with dependencies and build scripts
+- Implemented core graph methods in `lib/core/graph.ts`: getDegree, getNeighbors, toAdjacencyMatrix, toLaplacianMatrix, toJSON, fromJSON
 - Created `/Users/deepak/code/spin_network_app/lib/index.ts` - Main entry point for the library with exports and factory functions
 - Created `/Users/deepak/code/spin_network_app/lib/core/index.ts` - Core module entry point
 - Created `/Users/deepak/code/spin_network_app/lib/core/types.ts` - Core type definitions without UI dependencies

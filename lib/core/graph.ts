@@ -293,47 +293,118 @@ export class SpinNetworkGraph implements SimulationGraph {
    * Get the degree of a node (number of connected nodes)
    */
   getDegree(nodeId: string): number {
-    // TO BE IMPLEMENTED
-    return 0;
+    const neighbors = this._adjacencyList.get(nodeId);
+    return neighbors ? neighbors.size : 0;
   }
 
   /**
    * Get the IDs of all neighboring nodes
    */
   getNeighbors(nodeId: string): string[] {
-    // TO BE IMPLEMENTED
-    return [];
+    const neighbors = this._adjacencyList.get(nodeId);
+    return neighbors ? Array.from(neighbors) : [];
   }
 
   /**
    * Convert the graph to an adjacency matrix using math.js
    */
   toAdjacencyMatrix(): math.Matrix {
-    // TO BE IMPLEMENTED
-    return math.matrix([]);
+    const nodeIds = Array.from(this._nodes.keys());
+    const size = nodeIds.length;
+    const matrixData: number[][] = Array(size).fill(0).map(() => Array(size).fill(0));
+
+    const nodeIndexMap = new Map<string, number>();
+    nodeIds.forEach((id, index) => {
+      nodeIndexMap.set(id, index);
+    });
+
+    this._edges.forEach(edge => {
+      const sourceIndex = nodeIndexMap.get(edge.sourceId);
+      const targetIndex = nodeIndexMap.get(edge.targetId);
+      if (sourceIndex !== undefined && targetIndex !== undefined) {
+        matrixData[sourceIndex][targetIndex] = 1;
+        matrixData[targetIndex][sourceIndex] = 1;
+      }
+    });
+
+    return math.matrix(matrixData);
   }
 
   /**
    * Convert the graph to a Laplacian matrix using math.js
    */
   toLaplacianMatrix(weightFunction?: WeightFunction): math.Matrix {
-    // TO BE IMPLEMENTED
-    return math.matrix([]);
+    const nodeIds = Array.from(this._nodes.keys());
+    const size = nodeIds.length;
+    const matrixData: number[][] = Array(size).fill(0).map(() => Array(size).fill(0));
+
+    const nodeIndexMap = new Map<string, number>();
+    nodeIds.forEach((id, index) => {
+      nodeIndexMap.set(id, index);
+    });
+
+    // Calculate degrees and fill off-diagonal entries
+    this._edges.forEach(edge => {
+      const sourceIndex = nodeIndexMap.get(edge.sourceId);
+      const targetIndex = nodeIndexMap.get(edge.targetId);
+      if (sourceIndex !== undefined && targetIndex !== undefined) {
+        const weight = weightFunction ? weightFunction(edge) : 1;
+        matrixData[sourceIndex][targetIndex] = -weight;
+        matrixData[targetIndex][sourceIndex] = -weight;
+        matrixData[sourceIndex][sourceIndex] += weight;
+        matrixData[targetIndex][targetIndex] += weight;
+      }
+    });
+
+    return math.matrix(matrixData);
   }
 
   /**
    * Serialize the graph to a JSON object
    */
   toJSON(): Record<string, any> {
-    // TO BE IMPLEMENTED
-    return {};
+    return {
+      nodes: this.nodes,
+      edges: this.edges,
+    };
   }
 
   /**
    * Create a graph from a JSON object
    */
   fromJSON(data: Record<string, any>): SimulationGraph {
-    // TO BE IMPLEMENTED
+    // Clear current graph data
+    this._nodes.clear();
+    this._edges.clear();
+    this._adjacencyList.clear();
+    this._nodeEdges.clear();
+
+    // Add nodes
+    if (Array.isArray(data.nodes)) {
+      data.nodes.forEach((node: SimulationNode) => {
+        this._nodes.set(node.id, node);
+        this._adjacencyList.set(node.id, new Set<string>());
+        this._nodeEdges.set(node.id, new Set<string>());
+      });
+    }
+
+    // Add edges
+    if (Array.isArray(data.edges)) {
+      data.edges.forEach((edge: SimulationEdge) => {
+        this._edges.set(edge.id, edge);
+        // Update adjacency list
+        const sourceAdj = this._adjacencyList.get(edge.sourceId);
+        const targetAdj = this._adjacencyList.get(edge.targetId);
+        if (sourceAdj) sourceAdj.add(edge.targetId);
+        if (targetAdj) targetAdj.add(edge.sourceId);
+        // Update node edges
+        const sourceEdges = this._nodeEdges.get(edge.sourceId);
+        const targetEdges = this._nodeEdges.get(edge.targetId);
+        if (sourceEdges) sourceEdges.add(edge.id);
+        if (targetEdges) targetEdges.add(edge.id);
+      });
+    }
+
     return this;
   }
 }
