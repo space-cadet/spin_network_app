@@ -20,8 +20,19 @@ const consoleOutput = document.getElementById('console-output');
 const createGraphButton = document.getElementById('create-graph');
 const runSimulationButton = document.getElementById('run-simulation');
 const pauseSimulationButton = document.getElementById('pause-simulation');
+const continueSimulationButton = document.getElementById('continue-simulation');
 const resetSimulationButton = document.getElementById('reset-simulation');
 const visualizationContainer = document.querySelector('.visualization');
+
+// Graph configuration controls
+const graphTypeSelect = document.getElementById('graph-type');
+const nodeCountInput = document.getElementById('node-count');
+const edgeSpinSelect = document.getElementById('edge-spin');
+const diffusionTypeSelect = document.getElementById('diffusion-type');
+const numericalMethodSelect = document.getElementById('numerical-method');
+const timeStepInput = document.getElementById('time-step');
+const diffusionCoefficientInput = document.getElementById('diffusion-coefficient');
+const autoNormalizeCheckbox = document.getElementById('auto-normalize');
 
 // State display elements
 const simulationStatus = document.getElementById('simulation-status');
@@ -51,20 +62,38 @@ function initializePage() {
   createGraphButton.addEventListener('click', handleCreateGraph);
   runSimulationButton.addEventListener('click', handleRunSimulation);
   pauseSimulationButton.addEventListener('click', handlePauseSimulation);
+  continueSimulationButton.addEventListener('click', handleContinueSimulation);
   resetSimulationButton.addEventListener('click', handleResetSimulation);
+  
+  // Set up configuration change listeners
+  graphTypeSelect.addEventListener('change', updateNodeCountVisibility);
+  
+  // Initialize UI state
+  updateNodeCountVisibility();
+  
+  // Helper function to toggle node count input visibility
+  function updateNodeCountVisibility() {
+    const graphType = graphTypeSelect.value;
+    if (graphType === 'custom') {
+      nodeCountInput.value = 5;
+      nodeCountInput.disabled = true;
+    } else {
+      nodeCountInput.disabled = false;
+    }
+  }
   
   log('Initialization complete. Click "Create Graph" to start.');
 }
 
 /**
- * Creates a sample graph for simulation
+ * Graph generator functions
  */
-function handleCreateGraph() {
-  log('Creating sample graph...');
-  
-  try {
-    // Create a new graph
-    simulationGraph = SpinNetwork.createGraph();
+const GraphGenerators = {
+  /**
+   * Create a custom 5-node graph (original example)
+   */
+  custom: function() {
+    const graph = SpinNetwork.createGraph();
     
     // Add nodes to the graph with positions
     const nodePositions = [
@@ -75,16 +104,16 @@ function handleCreateGraph() {
       { id: 'node5', x: 100, y: 174 }
     ];
     
+    let result = graph;
+    
     nodePositions.forEach(pos => {
-      simulationGraph = simulationGraph.addNode({
+      result = result.addNode({
         id: pos.id,
         intertwiner: 2, // Default intertwiner value
         position: { x: pos.x, y: pos.y },
         properties: {}
       });
     });
-    
-    log(`Added ${nodePositions.length} nodes to the graph`);
     
     // Add edges to the graph
     const edges = [
@@ -97,7 +126,7 @@ function handleCreateGraph() {
     ];
     
     edges.forEach(edge => {
-      simulationGraph = simulationGraph.addEdge({
+      result = result.addEdge({
         id: edge.id,
         sourceId: edge.sourceId,
         targetId: edge.targetId,
@@ -106,7 +135,268 @@ function handleCreateGraph() {
       });
     });
     
-    log(`Added ${edges.length} edges to the graph`);
+    return result;
+  },
+  
+  /**
+   * Create a linear chain of nodes
+   */
+  line: function(nodeCount, spinType) {
+    const graph = SpinNetwork.createGraph();
+    let result = graph;
+    
+    // Create nodes
+    for (let i = 0; i < nodeCount; i++) {
+      result = result.addNode({
+        id: `node${i+1}`,
+        intertwiner: 2,
+        position: { x: i * 100, y: 0 },
+        properties: {}
+      });
+    }
+    
+    // Create edges
+    for (let i = 0; i < nodeCount - 1; i++) {
+      const spin = spinType === 'random' ? 0.5 + Math.random() * 1.5 : 0.5;
+      
+      result = result.addEdge({
+        id: `edge${i+1}`,
+        sourceId: `node${i+1}`,
+        targetId: `node${i+2}`,
+        spin: spin,
+        properties: {}
+      });
+    }
+    
+    return result;
+  },
+  
+  /**
+   * Create a ring of nodes
+   */
+  ring: function(nodeCount, spinType) {
+    const graph = SpinNetwork.createGraph();
+    let result = graph;
+    
+    const radius = 150;
+    const centerX = radius;
+    const centerY = radius;
+    
+    // Create nodes in a circle
+    for (let i = 0; i < nodeCount; i++) {
+      const angle = (i / nodeCount) * 2 * Math.PI;
+      result = result.addNode({
+        id: `node${i+1}`,
+        intertwiner: 2,
+        position: { 
+          x: centerX + radius * Math.cos(angle), 
+          y: centerY + radius * Math.sin(angle) 
+        },
+        properties: {}
+      });
+    }
+    
+    // Create edges around the ring
+    for (let i = 0; i < nodeCount; i++) {
+      const nextIndex = (i + 1) % nodeCount;
+      const spin = spinType === 'random' ? 0.5 + Math.random() * 1.5 : 0.5;
+      
+      result = result.addEdge({
+        id: `edge${i+1}`,
+        sourceId: `node${i+1}`,
+        targetId: `node${nextIndex+1}`,
+        spin: spin,
+        properties: {}
+      });
+    }
+    
+    return result;
+  },
+  
+  /**
+   * Create a 2D grid of nodes
+   */
+  grid: function(nodeCount, spinType) {
+    const graph = SpinNetwork.createGraph();
+    let result = graph;
+    
+    // Determine grid dimensions
+    const size = Math.ceil(Math.sqrt(nodeCount));
+    const spacing = 80;
+    
+    // Create nodes in a grid
+    let nodeIndex = 1;
+    for (let row = 0; row < size && nodeIndex <= nodeCount; row++) {
+      for (let col = 0; col < size && nodeIndex <= nodeCount; col++) {
+        result = result.addNode({
+          id: `node${nodeIndex}`,
+          intertwiner: 2,
+          position: { x: col * spacing, y: row * spacing },
+          properties: {}
+        });
+        nodeIndex++;
+      }
+    }
+    
+    // Create horizontal edges
+    let edgeIndex = 1;
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size - 1; col++) {
+        const nodeIndex1 = row * size + col + 1;
+        const nodeIndex2 = row * size + col + 2;
+        
+        if (nodeIndex1 <= nodeCount && nodeIndex2 <= nodeCount) {
+          const spin = spinType === 'random' ? 0.5 + Math.random() * 1.5 : 0.5;
+          
+          result = result.addEdge({
+            id: `edge${edgeIndex++}`,
+            sourceId: `node${nodeIndex1}`,
+            targetId: `node${nodeIndex2}`,
+            spin: spin,
+            properties: {}
+          });
+        }
+      }
+    }
+    
+    // Create vertical edges
+    for (let row = 0; row < size - 1; row++) {
+      for (let col = 0; col < size; col++) {
+        const nodeIndex1 = row * size + col + 1;
+        const nodeIndex2 = (row + 1) * size + col + 1;
+        
+        if (nodeIndex1 <= nodeCount && nodeIndex2 <= nodeCount) {
+          const spin = spinType === 'random' ? 0.5 + Math.random() * 1.5 : 0.5;
+          
+          result = result.addEdge({
+            id: `edge${edgeIndex++}`,
+            sourceId: `node${nodeIndex1}`,
+            targetId: `node${nodeIndex2}`,
+            spin: spin,
+            properties: {}
+          });
+        }
+      }
+    }
+    
+    return result;
+  },
+  
+  /**
+   * Create a random graph with random connections
+   */
+  random: function(nodeCount, spinType) {
+    const graph = SpinNetwork.createGraph();
+    let result = graph;
+    
+    // Create nodes with random positions
+    for (let i = 0; i < nodeCount; i++) {
+      result = result.addNode({
+        id: `node${i+1}`,
+        intertwiner: 2,
+        position: { 
+          x: Math.random() * 300, 
+          y: Math.random() * 300 
+        },
+        properties: {}
+      });
+    }
+    
+    // Create random edges with a target connectivity (avoid disconnected nodes)
+    const edgeCount = Math.min(nodeCount * 2, nodeCount * (nodeCount - 1) / 2);
+    const connected = new Set([1]); // Start with node1 as connected
+    const unconnected = new Set(Array.from({length: nodeCount - 1}, (_, i) => i + 2)); // All other nodes
+    
+    let edgeIndex = 1;
+    
+    // First ensure all nodes are connected to at least one other node
+    while (unconnected.size > 0) {
+      const targetId = Array.from(unconnected)[0];
+      const sourceId = Array.from(connected)[Math.floor(Math.random() * connected.size)];
+      
+      const spin = spinType === 'random' ? 0.5 + Math.random() * 1.5 : 0.5;
+      
+      result = result.addEdge({
+        id: `edge${edgeIndex++}`,
+        sourceId: `node${sourceId}`,
+        targetId: `node${targetId}`,
+        spin: spin,
+        properties: {}
+      });
+      
+      connected.add(targetId);
+      unconnected.delete(targetId);
+    }
+    
+    // Add additional random edges to reach target count
+    while (edgeIndex <= edgeCount) {
+      const sourceId = Math.floor(Math.random() * nodeCount) + 1;
+      let targetId;
+      do {
+        targetId = Math.floor(Math.random() * nodeCount) + 1;
+      } while (targetId === sourceId);
+      
+      // Check if this edge already exists
+      const exists = result.edges.some(
+        e => (e.sourceId === `node${sourceId}` && e.targetId === `node${targetId}`) || 
+             (e.sourceId === `node${targetId}` && e.targetId === `node${sourceId}`)
+      );
+      
+      if (!exists) {
+        const spin = spinType === 'random' ? 0.5 + Math.random() * 1.5 : 0.5;
+        
+        result = result.addEdge({
+          id: `edge${edgeIndex++}`,
+          sourceId: `node${sourceId}`,
+          targetId: `node${targetId}`,
+          spin: spin,
+          properties: {}
+        });
+      }
+    }
+    
+    return result;
+  }
+};
+
+/**
+ * Creates a graph based on current configuration
+ */
+function handleCreateGraph() {
+  log('Creating graph based on configuration...');
+  
+  try {
+    // Get configuration values
+    const graphType = graphTypeSelect.value;
+    const nodeCount = parseInt(nodeCountInput.value, 10);
+    const spinType = edgeSpinSelect.value;
+    
+    // Validate node count
+    if (isNaN(nodeCount) || nodeCount < 2 || nodeCount > 50) {
+      log('Invalid node count. Using default of 5 nodes.');
+      nodeCountInput.value = 5;
+    }
+    
+    // Generate graph based on type
+    if (graphType === 'custom' && nodeCount === 5) {
+      simulationGraph = GraphGenerators.custom();
+      log('Created custom 5-node graph');
+    } else if (graphType === 'line') {
+      simulationGraph = GraphGenerators.line(nodeCount, spinType);
+      log(`Created linear chain with ${nodeCount} nodes`);
+    } else if (graphType === 'ring') {
+      simulationGraph = GraphGenerators.ring(nodeCount, spinType);
+      log(`Created ring with ${nodeCount} nodes`);
+    } else if (graphType === 'grid') {
+      simulationGraph = GraphGenerators.grid(nodeCount, spinType);
+      log(`Created ${Math.ceil(Math.sqrt(nodeCount))}x${Math.ceil(Math.sqrt(nodeCount))} grid with ${nodeCount} nodes`);
+    } else if (graphType === 'random') {
+      simulationGraph = GraphGenerators.random(nodeCount, spinType);
+      log(`Created random graph with ${nodeCount} nodes`);
+    } else {
+      simulationGraph = GraphGenerators.custom();
+      log('Using default custom graph');
+    }
     
     // Update UI
     updateGraphInfo();
@@ -141,6 +431,9 @@ function handleRunSimulation() {
       // Add event listeners
       simulationEngine.addEventListener(SpinNetwork.SimulationEvent.STEP_COMPLETE, handleStepComplete);
       simulationEngine.addEventListener(SpinNetwork.SimulationEvent.SIMULATION_COMPLETE, handleSimulationComplete);
+      simulationEngine.addEventListener(SpinNetwork.SimulationEvent.STATE_NORMALIZED, (event) => {
+        log('State normalized to prevent numerical instability.');
+      });
       simulationEngine.addEventListener(SpinNetwork.SimulationEvent.ERROR, (error) => {
         logError('Simulation error:', error);
       });
@@ -148,17 +441,25 @@ function handleRunSimulation() {
     
     // Initialize simulation if needed
     if (!simulationEngine.isRunning()) {
+      // Get configuration values from UI
+      const timeStep = parseFloat(timeStepInput.value) || 0.005;
+      const diffusionType = diffusionTypeSelect.value;
+      const alpha = parseFloat(diffusionCoefficientInput.value) || 0.5;
+      const numericalMethod = numericalMethodSelect.value;
+      const autoNormalize = autoNormalizeCheckbox.checked;
+      
       const simulationParameters = {
         // General simulation parameters
-        timeStep: 0.01,
+        timeStep: timeStep,
         totalTime: 10,
         
         // Diffusion model parameters
-        diffusionType: 'ordinary', // 'ordinary' or 'telegraph'
-        alpha: 1.0, // Diffusion coefficient
+        diffusionType: diffusionType,
+        alpha: alpha,
+        beta: 0.1, // For telegraph equation
         
         // Numerical method parameters
-        numericalMethod: 'rk4', // 'euler', 'midpoint', or 'rk4'
+        numericalMethod: numericalMethod,
         
         // Weight function configuration
         weightFunction: 'spin', // Use spin values as weights
@@ -166,7 +467,7 @@ function handleRunSimulation() {
         // Initial state configuration
         initialStateType: 'delta', // Delta function at a specific node
         initialStateParams: {
-          nodeId: 'node1', // Start at node1
+          nodeId: simulationGraph.nodes[0].id, // Start at first node
           value: 1.0 // Initial value
         },
         
@@ -175,8 +476,14 @@ function handleRunSimulation() {
         historyInterval: 5, // Record every 5 steps
         
         // Additional parameters
-        parameters: {}
+        parameters: {
+          normalizeFrequency: 5, // Normalize state more frequently (every 5 steps)
+          autoNormalize: autoNormalize,
+          stabilityThreshold: 1e4 // Lower threshold for earlier detection
+        }
       };
+      
+      log('Simulation parameters:', simulationParameters);
       
       // Initialize the simulation
       simulationEngine.initialize(simulationGraph, simulationParameters);
@@ -194,6 +501,7 @@ function handleRunSimulation() {
     simulationStatus.textContent = 'Running';
     runSimulationButton.disabled = true;
     pauseSimulationButton.disabled = false;
+    continueSimulationButton.disabled = true;
     
     // Start animation loop
     startAnimationLoop();
@@ -217,8 +525,9 @@ function handlePauseSimulation() {
       
       // Update UI
       simulationStatus.textContent = 'Paused';
-      runSimulationButton.disabled = false;
+      runSimulationButton.disabled = true;
       pauseSimulationButton.disabled = true;
+      continueSimulationButton.disabled = false;
       
       // Stop animation loop
       stopAnimationLoop();
@@ -229,6 +538,34 @@ function handlePauseSimulation() {
     }
   } catch (error) {
     logError('Error pausing simulation:', error);
+  }
+}
+
+/**
+ * Continues a paused simulation
+ */
+function handleContinueSimulation() {
+  log('Continuing simulation...');
+  
+  try {
+    if (simulationEngine && !simulationEngine.isRunning()) {
+      simulationEngine.resume();
+      
+      // Update UI
+      simulationStatus.textContent = 'Running';
+      runSimulationButton.disabled = true;
+      pauseSimulationButton.disabled = false;
+      continueSimulationButton.disabled = true;
+      
+      // Start animation loop
+      startAnimationLoop();
+      
+      log('Simulation continued');
+    } else {
+      log('No paused simulation to continue');
+    }
+  } catch (error) {
+    logError('Error continuing simulation:', error);
   }
 }
 
@@ -246,6 +583,7 @@ function handleResetSimulation() {
       simulationStatus.textContent = 'Reset';
       runSimulationButton.disabled = false;
       pauseSimulationButton.disabled = true;
+      continueSimulationButton.disabled = true;
       
       // Stop animation loop
       stopAnimationLoop();
@@ -284,6 +622,7 @@ function handleSimulationComplete(event) {
   simulationStatus.textContent = 'Completed';
   runSimulationButton.disabled = false;
   pauseSimulationButton.disabled = true;
+  continueSimulationButton.disabled = true;
   
   // Stop animation loop
   stopAnimationLoop();
@@ -410,8 +749,37 @@ function updateResults() {
       }
       
       // Check for numerical instability - if volume is too large, normalize the state
-      if (volume > 1e10) {
-        log(`Warning: Numerical instability detected (volume=${volume.toExponential(4)}). Consider adjusting parameters.`);
+      if (volume > 1e6) {
+        log(`Warning: Numerical instability detected (volume=${volume.toExponential(4)}). Normalizing state.`);
+        
+        // Normalize the state to prevent instability
+        const normalizationFactor = 1.0 / Math.sqrt(volume);
+        
+        // Create a normalized state
+        const nodeIds = currentState.nodeIds;
+        const normalizedValues = [];
+        
+        for (let i = 0; i < currentState.size; i++) {
+          const originalValue = currentState.getValueAtIndex(i);
+          normalizedValues.push(originalValue * normalizationFactor);
+        }
+        
+        // Set the normalized state back to the simulation engine
+        if (simulationEngine._setCurrentState) {
+          simulationEngine._setCurrentState(
+            new SpinNetwork.SimulationStateVector(nodeIds, normalizedValues)
+          );
+          
+          // Update our local reference
+          currentState = simulationEngine.getCurrentState();
+          
+          // Recalculate volume after normalization (should be ~1.0)
+          volume = 0;
+          for (let i = 0; i < currentState.size; i++) {
+            const value = currentState.getValueAtIndex(i);
+            volume += value * value;
+          }
+        }
       }
       
       totalVolume.textContent = formatValue(volume);

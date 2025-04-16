@@ -11,8 +11,40 @@
 | T6 | Fix Database Service Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
 | T9 | Fix UI and Simulation TypeScript Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
 | T10 | Standalone Test Page for Simulation Library | 🔄 IN PROGRESS | HIGH | 2025-04-15 | T1 | Deepak |
+| T12 | Fix Numerical Stability and Add Graph Config | 🔄 IN PROGRESS | HIGH | 2025-04-16 | T10 | Deepak |
 
 ## Task Details
+
+### T12: Fix Numerical Stability and Add Graph Config
+**Description**: Fix numerical instability issues in the standalone simulation test page and add graph configuration options. Implement missing simulationLogger.ts utility and proper continue/pause functionality.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 16, 2025
+**Last Active**: April 16, 2025
+**Dependencies**: T10
+**Completion Criteria**:
+- ✅ Implement simulationLogger.ts utility for stability monitoring
+- ✅ Add state normalization to prevent numerical explosion
+- ✅ Implement graph configuration UI for different topologies
+- ✅ Fix pause/continue button functionality
+- ✅ Add diffusion model and numerical solver selection
+- ✅ Integrate stability monitoring into simulation engine
+- ⬜ Complete proper RK4 solver implementation
+- ⬜ Implement telegraph equation model correctly
+- ⬜ Create test scripts to evaluate numerical stability
+- ⬜ Fine-tune stability parameters for optimal simulation
+- ⬜ Implement adaptive time-stepping based on stability metrics
+- ⬜ Add documentation on stability control
+
+**Related Files**:
+- `/lib/utils/simulationLogger.ts` (new file)
+- `/lib/core/engineImplementation.ts`
+- `/lib/core/types.ts`
+- `/public/standalone-test.html`
+- `/public/standalone-test.js`
+
+**Notes**:
+This task addresses the numerical instability issues observed in the simulation and implements a more flexible graph configuration system. The primary focus is on improving stability through normalization and better monitoring, while also enhancing usability with different graph types and simulation parameters.
 
 ### T11: Fix Library Build Errors
 **Description**: Fix the build errors in the standalone library by implementing missing analysis modules (conservation.ts, geometricProps.ts, statistics.ts) in the lib directory. Currently, the library cannot be built as shown by the error "Could not resolve './conservation' from 'lib/analysis/index.ts'".

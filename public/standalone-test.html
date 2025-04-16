@@ -100,6 +100,53 @@
     .visualization p {
       color: #64748b;
     }
+    
+    .graph-config {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8fafc;
+      border-radius: 5px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .graph-config h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #1e40af;
+    }
+    
+    .config-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #334155;
+    }
+    
+    .form-group input[type="number"],
+    .form-group select {
+      padding: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    #continue-simulation {
+      background-color: #10b981;
+    }
+    
+    #continue-simulation:hover {
+      background-color: #059669;
+    }
   </style>
 </head>
 <body>
@@ -112,7 +159,69 @@
       <button id="create-graph">Create Graph</button>
       <button id="run-simulation">Run Simulation</button>
       <button id="pause-simulation" disabled>Pause</button>
+      <button id="continue-simulation" disabled>Continue</button>
       <button id="reset-simulation" class="secondary">Reset</button>
+    </div>
+    
+    <div class="graph-config">
+      <h3>Graph Configuration</h3>
+      <div class="config-form">
+        <div class="form-group">
+          <label for="graph-type">Graph Type:</label>
+          <select id="graph-type">
+            <option value="custom">Custom (5 nodes)</option>
+            <option value="line">Linear Chain</option>
+            <option value="ring">Ring</option>
+            <option value="grid">Grid</option>
+            <option value="random">Random</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="node-count">Number of Nodes:</label>
+          <input type="number" id="node-count" min="2" max="50" value="5">
+        </div>
+        
+        <div class="form-group">
+          <label for="edge-spin">Edge Spin:</label>
+          <select id="edge-spin">
+            <option value="fixed">Fixed (0.5)</option>
+            <option value="random">Random (0.5-2.0)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="diffusion-type">Diffusion Model:</label>
+          <select id="diffusion-type">
+            <option value="ordinary">Ordinary Diffusion</option>
+            <option value="telegraph">Telegraph Diffusion</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="numerical-method">Numerical Method:</label>
+          <select id="numerical-method">
+            <option value="euler">Euler Method</option>
+            <option value="midpoint">Midpoint Method</option>
+            <option value="rk4">RK4 Method</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="time-step">Time Step:</label>
+          <input type="number" id="time-step" min="0.001" max="0.1" step="0.001" value="0.005">
+        </div>
+        
+        <div class="form-group">
+          <label for="diffusion-coefficient">Diffusion Coefficient (α):</label>
+          <input type="number" id="diffusion-coefficient" min="0.1" max="2.0" step="0.1" value="0.5">
+        </div>
+        
+        <div class="form-group">
+          <label for="auto-normalize">Auto-Normalize:</label>
+          <input type="checkbox" id="auto-normalize" checked>
+        </div>
+      </div>
     </div>
     
     <div class="visualization">

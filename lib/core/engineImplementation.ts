@@ -16,6 +16,12 @@ import {
 } from './types';
 import { SimulationStateVector } from './stateVector';
 import { MathAdapter } from './mathAdapter';
+import { 
+  SimulationLogger, 
+  defaultLogger, 
+  LogCategory,
+  monitorSimulationStability
+} from '../utils/simulationLogger';
 
 /**
  * Implementation of SimulationHistory for tracking simulation state over time
@@ -155,6 +161,8 @@ export class SpinNetworkSimulationEngine implements SimulationEngine {
   private _diffusionModel?: DiffusionModel;
   private _eventListeners: Map<string, Function[]> = new Map();
   private _laplacianMatrix?: math.Matrix;
+  private _logger: SimulationLogger = defaultLogger;
+  private _stabilityCheckCounter: number = 0;
 
   /**
    * Initialize the state vector based on simulation parameters
@@ -298,13 +306,77 @@ export class SpinNetworkSimulationEngine implements SimulationEngine {
         nodeIds
       );
       
+      // Check for numerical stability
+      this._stabilityCheckCounter++;
+      const normalizeFrequency = this._parameters.parameters?.normalizeFrequency || 10;
+      
+      if (this._stabilityCheckCounter >= normalizeFrequency) {
+        this._stabilityCheckCounter = 0;
+        
+        // Monitor stability and normalize if needed
+        const stabilityResult = monitorSimulationStability(
+          this._currentState,
+          this._currentTime,
+          this._parameters,
+          this._logger
+        );
+        
+        // Update state if normalization occurred
+        if (stabilityResult.normalized) {
+          this._currentState = stabilityResult.stateVector;
+          this._notifyListeners(SimulationEvent.STATE_NORMALIZED, {
+            time: this._currentTime,
+            volume: stabilityResult.volume
+          });
+        }
+      }
+      
     } else if (this._parameters.diffusionType === 'telegraph') {
       // For telegraph equation, need to solve second-order ODE
       // This requires more state information (velocity)
       // Simplified implementation pending
       
-      // TODO: Implement telegraph equation evolution
-      throw new Error('Telegraph equation evolution not implemented');
+      this._logger.warn(LogCategory.MODEL, 'Telegraph equation evolution not fully implemented yet. Using approximate solution.');
+      
+      // Implement a basic version of the telegraph equation
+      const alpha = this._parameters.alpha || 1.0;
+      const beta = this._parameters.beta || 0.1;
+      const nodeIds = this._graph.nodes.map(node => node.id);
+      
+      // Get the current state as a math.js array
+      const stateArray = this._currentState.toMathArray();
+      
+      // For now, we'll use a simplified approach similar to ordinary diffusion
+      // but with dampening
+      const newStateArray = MathAdapter.solveOrdinaryDiffusion(
+        this._laplacianMatrix,
+        stateArray,
+        alpha * Math.exp(-beta * this._currentTime), // Damped diffusion coefficient
+        dt
+      );
+      
+      // Update current state
+      this._currentState = SimulationStateVector.fromMathArray(
+        newStateArray as unknown as math.MathArray,
+        nodeIds
+      );
+      
+      // Check for numerical stability
+      const stabilityResult = monitorSimulationStability(
+        this._currentState,
+        this._currentTime,
+        this._parameters,
+        this._logger
+      );
+      
+      // Update state if normalization occurred
+      if (stabilityResult.normalized) {
+        this._currentState = stabilityResult.stateVector;
+        this._notifyListeners(SimulationEvent.STATE_NORMALIZED, {
+          time: this._currentTime,
+          volume: stabilityResult.volume
+        });
+      }
       
     } else {
       throw new Error(`Unknown diffusion type: ${this._parameters.diffusionType}`);
@@ -312,6 +384,11 @@ export class SpinNetworkSimulationEngine implements SimulationEngine {
     
     // Update current time
     this._currentTime += dt;
+    
+    // Log simulation progress periodically
+    if (Math.floor(this._currentTime / dt) % 100 === 0) {
+      this._logger.info(LogCategory.GENERAL, `Simulation at t=${this._currentTime.toFixed(4)}`);
+    }
   }
   
   /**
@@ -345,6 +422,34 @@ export class SpinNetworkSimulationEngine implements SimulationEngine {
     this._currentTime = 0;
     this._running = false;
     this._history.clear();
+    this._stabilityCheckCounter = 0;
+    
+    // Set default stability parameters if not provided
+    if (!parameters.parameters) {
+      parameters.parameters = {};
+    }
+    
+    if (parameters.parameters.stabilityThreshold === undefined) {
+      parameters.parameters.stabilityThreshold = 1e6;
+    }
+    
+    if (parameters.parameters.autoNormalize === undefined) {
+      parameters.parameters.autoNormalize = true;
+    }
+    
+    if (parameters.parameters.normalizeFrequency === undefined) {
+      parameters.parameters.normalizeFrequency = 10;
+    }
+    
+    // Log initialization
+    this._logger.info(LogCategory.GENERAL, 'Initializing simulation', {
+      nodeCount: graph.getNodeCount(),
+      edgeCount: graph.getEdgeCount(),
+      diffusionType: parameters.diffusionType,
+      timeStep: parameters.timeStep,
+      totalTime: parameters.totalTime,
+      numericalMethod: parameters.numericalMethod
+    });
     
     // Create initial state based on parameters
     this._initializeState();
@@ -356,6 +461,9 @@ export class SpinNetworkSimulationEngine implements SimulationEngine {
     
     // Notify listeners
     this._notifyListeners(SimulationEvent.SIMULATION_RESET);
+    
+    // Log successful initialization
+    this._logger.info(LogCategory.GENERAL, 'Simulation initialized successfully');
   }
   
   /**
@@ -535,5 +643,26 @@ export class SpinNetworkSimulationEngine implements SimulationEngine {
     if (index >= 0) {
       listeners.splice(index, 1);
     }
+  }
+  
+  /**
+   * Set the current state (used for normalization and stability control)
+   */
+  _setCurrentState(state: StateVector): void {
+    if (!this._graph || !this._parameters) {
+      throw new Error('Simulation not initialized');
+    }
+    
+    // Verify that the state is compatible with the graph
+    if (state.size !== this._graph.getNodeCount()) {
+      throw new Error(`State size mismatch: expected ${this._graph.getNodeCount()}, got ${state.size}`);
+    }
+    
+    // Set the new state
+    this._currentState = state;
+    
+    // Notify listeners of state change
+    this._notifyListeners(SimulationEvent.STATE_NORMALIZED);
+    this._notifyListeners(SimulationEvent.STEP_COMPLETE);
   }
 }

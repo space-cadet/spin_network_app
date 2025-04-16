@@ -295,5 +295,6 @@ export enum SimulationEvent {
   SIMULATION_PAUSED = 'simulation-paused',
   SIMULATION_RESUMED = 'simulation-resumed',
   STATE_CHANGED = 'state-changed',
+  STATE_NORMALIZED = 'state-normalized',
   ERROR = 'error'
 }

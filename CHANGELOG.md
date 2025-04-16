@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Standalone simulation library for use without UI dependencies
+- Graph configuration UI for different network topologies (line, ring, grid, random)
+- Diffusion model and numerical solver selection in standalone simulation
+- SimulationLogger utility for stability monitoring and structured logging
+- Automatic state normalization to prevent numerical explosion
+- Pause/continue functionality with proper button state management
 - Redux integration for simulation state and UI components
 - Debug panel and raw data display for diagnostics
 - Robust error handling and validation in simulation analysis and results display
@@ -22,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dedicated panels for properties, type management, simulation controls, and network tools
 
 ### Fixed
+- Numerical instability issues in standalone simulation page (partially resolved)
+- Pause button behavior in standalone simulation page (now properly supports continue)
+- Missing simulationLogger.ts utility implementation
 - Simulation rendering loops and "Too many re-renders" errors
 - Null value handling in geometric and statistical calculations
 - Infinite console logging loop causing performance issues
@@ -38,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved logging and diagnostics for simulation and analysis
 
 ### In Progress
+- Addressing persistent numerical stability issues in simulation
+- Completing proper RK4 solver implementation
+- Implementing telegraph equation model
+- Creating test scripts to evaluate numerical stability
 - Advanced simulation analysis and visualization
 - Component refactoring for maintainability
 - Researching database solutions for log management
