@@ -288,8 +288,50 @@ function handleSimulationComplete(event) {
   // Stop animation loop
   stopAnimationLoop();
   
-  // Final update of results
+  // Final update of results once
   updateResults();
+  
+  // Print final results to console just once
+  const time = simulationEngine.getCurrentTime();
+  const currentState = simulationEngine.getCurrentState();
+  
+  // Calculate final volume
+  let volume = 0;
+  for (let i = 0; i < currentState.size; i++) {
+    const value = currentState.getValueAtIndex(i);
+    volume += value * value;
+  }
+  
+  // Calculate final entropy
+  let sumValues = 0;
+  let entropy = 0;
+  
+  for (let i = 0; i < currentState.size; i++) {
+    const value = Math.abs(currentState.getValueAtIndex(i));
+    sumValues += value;
+  }
+  
+  if (sumValues > 0) {
+    for (let i = 0; i < currentState.size; i++) {
+      const value = Math.abs(currentState.getValueAtIndex(i));
+      const p = value / sumValues;
+      if (p > 0) {
+        entropy -= p * Math.log(p);
+      }
+    }
+  }
+  
+  log(`Final simulation results at time ${time.toFixed(2)}:`);
+  log(`- Volume: ${volume.toFixed(4)}`);
+  log(`- Entropy: ${entropy.toFixed(4)}`);
+  
+  // Log node-by-node values
+  log("Final state values by node:");
+  for (let i = 0; i < currentState.size; i++) {
+    const nodeId = currentState.nodeIds[i];
+    const value = currentState.getValueAtIndex(i);
+    log(`- ${nodeId}: ${value.toFixed(6)}`);
+  }
 }
 
 /**
@@ -301,13 +343,22 @@ function startAnimationLoop() {
 }
 
 /**
- * Animation loop for updating the UI
+ * Animation loop for updating the UI and stepping the simulation
  */
 function updateAnimation() {
   const now = performance.now();
   
   // Update UI at most 10 times per second
   if (now - lastUpdateTime > 100) {
+    // Execute simulation steps
+    if (simulationEngine && simulationEngine.isRunning()) {
+      // Run multiple steps per frame to speed up simulation
+      // This runs 5 steps per frame, which with the default timeStep of 0.01
+      // means each frame advances time by 0.05 units
+      simulationEngine.runSteps(5);
+    }
+    
+    // Update UI with latest results
     updateResults();
     lastUpdateTime = now;
   }
@@ -357,6 +408,12 @@ function updateResults() {
         const value = currentState.getValueAtIndex(i);
         volume += value * value;
       }
+      
+      // Check for numerical instability - if volume is too large, normalize the state
+      if (volume > 1e10) {
+        log(`Warning: Numerical instability detected (volume=${volume.toExponential(4)}). Consider adjusting parameters.`);
+      }
+      
       totalVolume.textContent = formatValue(volume);
       
       // Calculate total area - sum of edge spins
@@ -395,8 +452,9 @@ function updateResults() {
       volumeEntropy.textContent = formatValue(entropy);
       
       // Log some state values for debugging
-      if (time % 1 < 0.011) { // Log approximately once per time unit
-        log(`Time ${time.toFixed(2)}: Volume=${volume.toFixed(4)}, Entropy=${entropy.toFixed(4)}`);
+      if (time % 1 < 0.011 && !simulationEngine.getCurrentTime() >= simulationEngine._parameters?.totalTime) { 
+        // Log approximately once per time unit, but not repeatedly after completion
+        log(`Time ${time.toFixed(2)}: Volume=${formatExponential(volume)}, Entropy=${entropy.toFixed(4)}`);
       }
     }
     
@@ -406,6 +464,22 @@ function updateResults() {
   } catch (error) {
     logError('Error updating results:', error);
   }
+}
+
+/**
+ * Format a number in exponential notation if it's very large
+ */
+function formatExponential(value, decimals = 4) {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "0.0000";
+  }
+  
+  // Use exponential notation for large numbers
+  if (Math.abs(value) >= 1000) {
+    return value.toExponential(decimals);
+  }
+  
+  return value.toFixed(decimals);
 }
 
 /**

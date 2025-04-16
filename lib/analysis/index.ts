@@ -17,10 +17,16 @@ export {
 
 // Export conservation law analyzers
 export {
-  ConservationLawChecker,
+  ProbabilityConservation,
+  TotalOccupancyConservation,
+  PositivityConservation,
+  ConservationCheckerFactory,
   checkMassConservation,
   checkEnergyConservation
 } from './conservation';
+
+// Export the ConservationLawChecker interface
+export type { ConservationLawChecker } from './conservation';
 
 // Export statistical analysis tools
 export {

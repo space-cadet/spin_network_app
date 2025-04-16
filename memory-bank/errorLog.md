@@ -1,5 +1,192 @@
 # Error Log
 
+## 2025-04-16 07:35 IST - T11: Library Build Error with Interface Export
+
+**File:** `/Users/deepak/code/spin_network_app/lib/analysis/index.ts`
+
+**Error Message:**
+```
+error during build:
+lib/analysis/index.ts (20:2): "ConservationLawChecker" is not exported by "lib/analysis/conservation.ts", imported by "lib/analysis/index.ts".
+file: /Users/deepak/code/spin_network_app/lib/analysis/index.ts:20:2
+18: // Export conservation law analyzers
+19: export {
+20:   ConservationLawChecker,
+      ^
+21:   checkMassConservation,
+22:   checkEnergyConservation
+```
+
+**Cause:**
+The `ConservationLawChecker` interface was being incorrectly exported from `analysis/index.ts`. The issue was that `ConservationLawChecker` is an interface (a type), but it was being exported as a value in the export statement. Interfaces need to be exported using TypeScript's `export type` syntax.
+
+**Fix:**
+1. Changed the export statement in `lib/analysis/index.ts` to properly export the `ConservationLawChecker` interface using the `export type` syntax:
+   
+```typescript
+// Export the ConservationLawChecker interface
+export type { ConservationLawChecker } from './conservation';
+
+// Export concrete implementations and functions
+export {
+  ProbabilityConservation,
+  TotalOccupancyConservation,
+  PositivityConservation,
+  ConservationCheckerFactory,
+  checkMassConservation,
+  checkEnergyConservation
+} from './conservation';
+```
+
+2. Added exports for the concrete implementations of the interface that were defined in `conservation.ts` to make them available to library users.
+
+This change fixed the build error by correctly exporting the interface as a type rather than as a value. This is a common TypeScript pattern when exporting types and interfaces.
+
+**Affected Files:**
+- `/Users/deepak/code/spin_network_app/lib/analysis/index.ts`
+
+**Related Task:** T11: Fix Library Build Errors
+
+## 2025-04-16 07:15 IST - T10: Standalone Test Simulation Execution Issue
+
+**File:** `/Users/deepak/code/spin_network_app/public/standalone-test.js`
+
+**Error Message:**
+No explicit error; simulation appeared to run but no actual state changes occurred over time:
+
+```
+Initial state created, size: 5
+Simulation started
+Time 0.00: Volume=1.0000, Entropy=0.0000
+Time 0.00: Volume=1.0000, Entropy=0.0000
+Time 0.00: Volume=1.0000, Entropy=0.0000
+```
+
+**Cause:**
+The animation loop in the standalone test was not actually executing any simulation steps. The code was setting the simulation engine to "running" state with the `resume()` method, but there was no code to actually execute the steps. The animation loop was only updating the UI without advancing the simulation.
+
+**Fix:**
+Modified the `updateAnimation()` function in standalone-test.js to actually execute simulation steps:
+
+```javascript
+/**
+ * Animation loop for updating the UI and stepping the simulation
+ */
+function updateAnimation() {
+  const now = performance.now();
+  
+  // Update UI at most 10 times per second
+  if (now - lastUpdateTime > 100) {
+    // Execute simulation steps - THIS WAS MISSING
+    if (simulationEngine && simulationEngine.isRunning()) {
+      // Run multiple steps per frame to speed up simulation
+      simulationEngine.runSteps(5);
+    }
+    
+    // Update UI with latest results
+    updateResults();
+    lastUpdateTime = now;
+  }
+  
+  // Continue animation loop
+  animationFrameId = requestAnimationFrame(updateAnimation);
+}
+```
+
+Added code to run 5 simulation steps per animation frame to create a smooth visualization of the diffusion process. This allows the simulation state to change over time, showing the diffusion of the initial state from node1 to other nodes in the network.
+
+**Affected Files:**
+- `/Users/deepak/code/spin_network_app/public/standalone-test.js`
+
+**Related Task:** T10: Standalone Test Page for Simulation Library
+
+## 2025-04-16 07:25 IST - T10: Infinite Logging After Simulation Completion
+
+**File:** `/Users/deepak/code/spin_network_app/public/standalone-test.js`
+
+**Error Message:**
+After simulation completion, the console showed repeating log entries:
+
+```
+Time 10.01: Volume=5.101601693892961e+43, Entropy=1.3209
+Time 10.01: Volume=5.101601693892961e+43, Entropy=1.3209
+Time 10.01: Volume=5.101601693892961e+43, Entropy=1.3209
+Time 10.01: Volume=5.101601693892961e+43, Entropy=1.3209
+```
+
+**Cause:**
+After the simulation completed, the animation loop continued running. The condition for logging the simulation state (`time % 1 < 0.011`) was still being triggered repeatedly at the final time of 10.01, causing continuous logging of the same values.
+
+**Fix:**
+1. Enhanced the `handleSimulationComplete` function to properly stop the animation loop and show final results once:
+
+```javascript
+function handleSimulationComplete(event) {
+  log('Simulation completed');
+  
+  // Update UI
+  simulationStatus.textContent = 'Completed';
+  runSimulationButton.disabled = false;
+  pauseSimulationButton.disabled = true;
+  
+  // Stop animation loop
+  stopAnimationLoop();
+  
+  // Final update of results once
+  updateResults();
+  
+  // Print final results to console just once
+  const time = simulationEngine.getCurrentTime();
+  const currentState = simulationEngine.getCurrentState();
+  
+  // Calculate and log final metrics
+  log(`Final simulation results at time ${time.toFixed(2)}:`);
+  // Calculate and log volume, entropy, etc.
+  
+  // Log node-by-node values
+  log("Final state values by node:");
+  for (let i = 0; i < currentState.size; i++) {
+    const nodeId = currentState.nodeIds[i];
+    const value = currentState.getValueAtIndex(i);
+    log(`- ${nodeId}: ${value.toFixed(6)}`);
+  }
+}
+```
+
+2. Modified the logging condition in `updateResults()` to avoid repeating logs after completion:
+
+```javascript
+// Log some state values for debugging
+if (time % 1 < 0.011 && !simulationEngine.getCurrentTime() >= simulationEngine._parameters?.totalTime) { 
+  // Log approximately once per time unit, but not repeatedly after completion
+  log(`Time ${time.toFixed(2)}: Volume=${formatExponential(volume)}, Entropy=${entropy.toFixed(4)}`);
+}
+```
+
+3. Added `formatExponential()` function to handle large numbers more gracefully:
+
+```javascript
+function formatExponential(value, decimals = 4) {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "0.0000";
+  }
+  
+  // Use exponential notation for large numbers
+  if (Math.abs(value) >= 1000) {
+    return value.toExponential(decimals);
+  }
+  
+  return value.toFixed(decimals);
+}
+```
+
+These changes fixed the infinite logging issue and improved the display of large numbers that were occurring due to numerical instability in the simulation.
+
+**Affected Files:**
+- `/Users/deepak/code/spin_network_app/public/standalone-test.js`
+
+**Related Task:** T10: Standalone Test Page for Simulation Library
+
 ## 2025-04-15 15:30 IST - T9: Persistent TypeScript Build Errors
 
 **File:** Multiple files across the application
