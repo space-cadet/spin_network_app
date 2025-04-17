@@ -171,7 +171,13 @@ export const useSimulation = () => {
         const graph = engineRef.current.getGraph ? engineRef.current.getGraph() : null;
         
         // Always include geometric data, even if it's zeros
-        let geometric = {
+        let geometric: {
+          totalVolume: number;
+          totalArea: number;
+          effectiveDimension: number;
+          volumeEntropy: number;
+          [key: string]: number; // Add index signature to allow dynamic property access
+        } = {
           totalVolume: 0,
           totalArea: 0,
           effectiveDimension: 0,
@@ -255,7 +261,13 @@ export const useSimulation = () => {
         }
         
         // Always include statistics data with defaults
-        let statistics = {
+        let statistics: {
+          mean: number;
+          variance: number;
+          skewness: number;
+          kurtosis: number;
+          [key: string]: number; // Add index signature to allow dynamic property access
+        } = {
           mean: 0,
           variance: 0,
           skewness: 0,
@@ -377,8 +389,16 @@ export const useSimulation = () => {
                 }
               };
               // Cast parameters to the right type with unknown as intermediate step
-      const simParams = safeParameters as unknown as import('../simulation/core/types').SimulationParameters;
-      engineRef.current.initialize(graphRef.current, simParams);
+              // Ensure proper initialStateParams shape with nodeId always present
+              const simParams = {
+                ...safeParameters,
+                initialStateParams: {
+                  ...safeParameters.initialStateParams,
+                  nodeId: safeParameters.initialStateParams.nodeId || ''
+                }
+              } as unknown as import('../simulation/core/types').SimulationParameters;
+              
+              engineRef.current.initialize(graphRef.current, simParams);
               engineRef.current.reset();
               setCurrentTime(0);
               setHasHistory(false);
@@ -393,7 +413,15 @@ export const useSimulation = () => {
 
       // If nodeId is valid, reinitialize immediately
       // Cast parameters to the right type with unknown as intermediate step
-      const simParams = parameters as unknown as import('../simulation/core/types').SimulationParameters;
+      // Ensure proper initialStateParams shape with nodeId always present
+      const simParams = {
+        ...parameters,
+        initialStateParams: {
+          ...parameters.initialStateParams,
+          nodeId: parameters.initialStateParams.nodeId || ''
+        }
+      } as unknown as import('../simulation/core/types').SimulationParameters;
+      
       engineRef.current.initialize(graphRef.current, simParams);
       engineRef.current.reset();
 
@@ -446,7 +474,16 @@ export const useSimulation = () => {
     if (engineRef.current && graphRef.current) {
       // Initialize engine if not already done
       if (currentTime === 0) {
-        engineRef.current.initialize(graphRef.current, parameters as import('../simulation/core/types').SimulationParameters);
+        // Create a safe version with nodeId always present
+        const safeParams = {
+          ...parameters,
+          initialStateParams: {
+            ...parameters.initialStateParams,
+            nodeId: parameters.initialStateParams?.nodeId || ''
+          }
+        } as unknown as import('../simulation/core/types').SimulationParameters;
+        
+        engineRef.current.initialize(graphRef.current, safeParams);
       }
       
       // Step once
@@ -616,7 +653,17 @@ export const useSimulation = () => {
         // If we don't need to update nodeId, initialize immediately
         if (engineRef.current && graphRef.current) {
           console.log("Initializing simulation engine with existing parameters");
-          engineRef.current.initialize(graphRef.current, parameters as import('../simulation/core/types').SimulationParameters);
+          
+          // Create a safe version with nodeId always present
+          const safeParams = {
+            ...parameters,
+            initialStateParams: {
+              ...parameters.initialStateParams,
+              nodeId: nodeId || ''
+            }
+          } as unknown as import('../simulation/core/types').SimulationParameters;
+          
+          engineRef.current.initialize(graphRef.current, safeParams);
           setCurrentTime(0);
           setHasHistory(false);
         }
@@ -634,7 +681,17 @@ export const useSimulation = () => {
     const nodeExists = network.nodes.some((node: any) => node.id === nodeId);
     if (nodeExists && engineRef.current && graphRef.current) {
       console.log("Deferred initialization: initializing simulation engine after Redux nodeId update");
-      engineRef.current.initialize(graphRef.current, parameters as import('../simulation/core/types').SimulationParameters);
+      
+      // Create a safe version with nodeId always present
+      const safeParams = {
+        ...parameters,
+        initialStateParams: {
+          ...parameters.initialStateParams,
+          nodeId: nodeId || ''
+        }
+      } as unknown as import('../simulation/core/types').SimulationParameters;
+      
+      engineRef.current.initialize(graphRef.current, safeParams);
       setCurrentTime(0);
       setHasHistory(false);
     }

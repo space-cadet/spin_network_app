@@ -75,8 +75,9 @@ export class SimulationService {
     try {
       // Handle the result properly
       const result = await db.simulations.update(id, updates);
-      // Dexie returns a number indicating affected records
-      const count = typeof result === 'number' ? result : 0;
+      // Dexie returns a number indicating affected records or undefined
+      // Convert the result to a number safely
+      const count = result !== undefined && typeof result === 'number' ? result : 0;
       return count > 0;
     } catch (error) {
       console.error('Failed to update simulation record:', error);
@@ -96,7 +97,9 @@ export class SimulationService {
   ): Promise<boolean> {
     try {
       const result = await db.simulations.update(id, { status });
-      const count = typeof result === 'number' ? result : 0;
+      // Dexie returns a number indicating affected records or undefined
+      // Convert the result to a number safely
+      const count = result !== undefined && typeof result === 'number' ? result : 0;
       return count > 0;
     } catch (error) {
       console.error('Failed to update simulation status:', error);

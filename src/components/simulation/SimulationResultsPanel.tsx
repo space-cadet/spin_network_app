@@ -113,7 +113,7 @@ const SimulationResultsPanel: React.FC = () => {
     (state: RootState) => ({
       currentTime: state.simulation.currentTime,
       isRunning: state.simulation.isRunning === true, // Ensure boolean with default
-      hasHistory: state.simulation.hasHistory === true, // Ensure boolean with default
+      hasHistory: state.simulation.hasHistory === true ? true : false, // Explicitly convert to boolean
       geometricData: state.simulation.geometricData as GeometricState,
       statisticsData: state.simulation.statisticsData as StatisticsState,
       conservationData: state.simulation.conservationData as ConservationState
@@ -225,16 +225,16 @@ const SimulationResultsPanel: React.FC = () => {
                                isValidData(statisticsData.kurtosis);
     
     // Logs check is still a good fallback even with Redux
-    let fromLogs = false as boolean;
+    let fromLogs = false;
     try {
       const logsSession = simulationLogger.getCurrentSession();
       if (logsSession && Array.isArray(logsSession.results) && logsSession.results.length > 0) {
         const latestResult = logsSession.results[logsSession.results.length - 1];
-        fromLogs = latestResult !== undefined && latestResult !== null && (
+        fromLogs = Boolean(latestResult !== undefined && latestResult !== null && (
           (latestResult.conservation && Number.isFinite(latestResult.conservation.totalProbability)) ||
           (latestResult.geometric && isValidData(latestResult.geometric.totalVolume)) ||
           (latestResult.statistics && isValidData(latestResult.statistics.mean))
-        );
+        ));
       }
     } catch (error) {
       console.error("Error checking log data:", error);

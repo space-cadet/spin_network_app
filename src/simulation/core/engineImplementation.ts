@@ -129,6 +129,13 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
   private stepCounter: number = 0;
 
   /**
+   * Get the current simulation graph
+   */
+  getGraph(): SimulationGraph | null {
+    return this.graph;
+  }
+
+  /**
    * Initialize the simulation engine
    */
   initialize(graph: SimulationGraph, parameters: SimulationParameters): void {
@@ -287,10 +294,12 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
           if (!node) continue;
           
           // Calculate Euclidean distance
-          // Using null assertion operator since we've already checked both node and centerNode are defined
-          const dx = node.position.x - centerNode!.position.x;
-          const dy = node.position.y - centerNode!.position.y;
-          const dz = (node.position.z || 0) - (centerNode!.position.z || 0);
+          // We've verified centerNode is not null above, but we'll be extra safe here
+          if (!centerNode) continue; // Safety check (though we've verified above)
+          
+          const dx = node.position.x - centerNode.position.x;
+          const dy = node.position.y - centerNode.position.y;
+          const dz = (node.position.z || 0) - (centerNode.position.z || 0);
           const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
           
           // Calculate Gaussian value
@@ -601,8 +610,11 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       
       // Calculate norms directly
       for (let i = 0; i < size; i++) {
-        const initialValue = this.initialState!.getValueAtIndex(i);
-        const currentValue = this.state!.getValueAtIndex(i);
+        // We've already verified these aren't null above, but we'll add extra safety
+        if (!this.initialState || !this.state) break;
+        
+        const initialValue = this.initialState.getValueAtIndex(i);
+        const currentValue = this.state.getValueAtIndex(i);
         
         initialNorm += initialValue * initialValue;
         currentNorm += currentValue * currentValue;
@@ -618,9 +630,10 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
         stateSize: this.state.size
       });
       
-      // Calculate the variation
+      // Calculate the variation (avoid division by zero and handle nullability)
+      // Since we've already verified initialNorm is calculated, we don't need the non-null assertion
       const normVariation = Math.abs(currentNorm - initialNorm) / 
-                           (initialNorm! > 1e-10 ? initialNorm! : 1.0);
+                           (initialNorm > 1e-10 ? initialNorm : 1.0);
       
       // Check positivity
       let positivity = true;
