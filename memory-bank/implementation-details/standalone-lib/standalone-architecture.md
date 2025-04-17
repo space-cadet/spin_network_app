@@ -6,39 +6,33 @@ graph TD
         Core --> StateVector["State Vector"]
         Core --> Engine["Simulation Engine"]
         Core --> Math["Math Adapter"]
+        Core --> EventEmitter["Event System"]
     end
     
     subgraph "Model Components"
         DiffusionModels["Diffusion Models"] --> Ordinary["Ordinary Diffusion"]
         DiffusionModels --> Telegraph["Telegraph Diffusion"]
-        DiffusionModels --> Fractional["Fractional Diffusion"]
-        DiffusionModels --> Wave["Wave Equation"]
         
         Solvers["Numerical Solvers"] --> Euler["Euler"]
         Solvers --> RK4["4th Order Runge-Kutta"]
         Solvers --> Midpoint["Midpoint"]
-        Solvers --> Adaptive["Adaptive RKF45"]
-        
-        WFunctions["Weight Functions"] --> SpinWeights["Spin Weights"]
-        WFunctions --> CustomWeights["Custom Weights"]
     end
     
     subgraph "Analysis Tools"
         AnalysisTools["Analysis Components"] --> Geometric["Geometric Properties"]
         AnalysisTools --> Statistics["Statistical Analysis"]
         AnalysisTools --> Conservation["Conservation Laws"]
-        AnalysisTools --> Spectral["Spectral Analysis"]
     end
     
-    subgraph "Visualization"
-        VizLayer["Visualization Layer"] --> VizAdapters["Adapter Interfaces"]
+    subgraph "Adapters Layer"
+        Adapters["Integration Adapters"] --> VizAdapters["Visualization Adapters"]
+        Adapters --> StateAdapters["State Management Adapters"]
+        
         VizAdapters --> Canvas["Canvas Adapter"]
-        VizAdapters --> SVG["SVG Adapter"]
-        VizAdapters --> ThreeJS["Three.js Adapter"]
         VizAdapters --> Cytoscape["Cytoscape Adapter"]
-        VizLayer --> ColorMaps["Color Mapping"]
-        VizLayer --> Styles["Style Templates"]
-        VizLayer --> Animation["Animation Tools"]
+        
+        StateAdapters --> ReactAdapter["React Adapter"]
+        StateAdapters --> VanillaAdapter["Vanilla JS Adapter"]
     end
     
     subgraph "Templates & Generation"
@@ -50,37 +44,36 @@ graph TD
     
     subgraph "Utilities"
         UtilFunctions["Utility Functions"] --> Logger["Logging System"]
-        UtilFunctions --> Performance["Performance Monitor"]
         UtilFunctions --> ErrorHandling["Error Handling"]
         UtilFunctions --> Validation["Parameter Validation"]
     end
     
-    subgraph "I/O & Storage"
+    subgraph "Persistence"
         IOSystem["I/O System"] --> Serialization["Graph Serialization"]
-        IOSystem --> ResultsExport["Results Export"]
-        IOSystem --> Config["Configuration Management"]
+        IOSystem --> StateStorage["State Storage"]
+        StateStorage --> LocalStorage["Browser Storage"]
+        StateStorage --> FileSystem["File System"]
     end
     
     Core --> DiffusionModels
     Core --> Solvers
-    Core --> WFunctions
     Core --> AnalysisTools
-    DiffusionModels --> AnalysisTools
-    Core --> VizLayer
+    Core --> Adapters
     Core --> TemplateGen
     Core --> UtilFunctions
     Core --> IOSystem
+    EventEmitter --> Adapters
     
     subgraph "External Applications"
-        ReactApp["React Applications"]
+        ReactApp["React Applications"] --> ReduxStore["Redux Store"]
         VueApp["Vue Applications"]
         VanillaJS["Vanilla JS Applications"]
         NodeJS["Node.js Applications"]
     end
     
-    VizLayer --> ReactApp
-    VizLayer --> VueApp
-    VizLayer --> VanillaJS
-    AnalysisTools --> NodeJS
-    Engine --> NodeJS
+    ReactAdapter --> ReactApp
+    VizAdapters --> ReactApp
+    VizAdapters --> VueApp
+    VizAdapters --> VanillaJS
+    VanillaAdapter --> VanillaJS
 ```

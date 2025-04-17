@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 15, 2025 (21:30 IST)*
+*Last Updated: April 17, 2025 (14:30 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -11,10 +11,42 @@
 | T6 | Fix Database Service Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
 | T9 | Fix UI and Simulation TypeScript Errors | 🔄 IN PROGRESS | HIGH | 2025-04-15 | - | Deepak |
 | T10 | Standalone Test Page for Simulation Library | 🔄 IN PROGRESS | HIGH | 2025-04-15 | T1 | Deepak |
-| T12 | Fix Numerical Stability and Add Graph Config | 🔄 IN PROGRESS | HIGH | 2025-04-16 | T10 | Deepak |
+| T12 | Fix Numerical Stability and Add Graph Config | ⏸️ PAUSED | HIGH | 2025-04-16 | T10 | Deepak |
 | T13 | Standalone Library Feature Analysis | ✅ COMPLETE | HIGH | 2025-04-16 | T1 | Deepak |
+| T14 | State Management Architecture for Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-17 | T13, T1 | Deepak |
 
 ## Task Details
+
+### T14: State Management Architecture for Standalone Library
+**Description**: Design a comprehensive state management and event communication system for the standalone library to ensure complete separation from React/Redux dependencies. Update architecture diagram and enhancement plan to reflect the framework-agnostic approach.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 17, 2025
+**Last Active**: April 17, 2025 (14:30 IST)
+**Dependencies**: T13, T1
+**Completion Criteria**:
+- ✅ Analyze existing state management dependencies
+- ✅ Design framework-agnostic event communication system
+- ✅ Update architecture diagram with adapter layers for state management
+- ✅ Update enhancement plan to include state management approach
+- ✅ Create reference implementation for event system and adapters
+- ✅ Ensure no direct Redux dependencies in the library
+- ✅ Design persistence mechanism for saving/loading simulation state
+- ⬜ Apply design to existing implementation of the engine
+- ⬜ Implement event emitter in the core module
+- ⬜ Create adapter interface for framework integration
+- ⬜ Test with both React app and standalone environments
+
+**Related Files**:
+- `/memory-bank/implementation-details/standalone-lib/standalone-architecture.md`
+- `/memory-bank/implementation-details/standalone-lib/standalone-lib-enhancement-v2.md`
+- `/memory-bank/implementation-details/standalone-lib/state-management-implementation.ts`
+- `/lib/core/engineImplementation.ts`
+- `/lib/core/types.ts`
+- `/lib/utils/index.ts`
+
+**Notes**:
+This task is crucial for achieving the goal of separating UI logic from simulation logic. By implementing a proper event-based communication system and adapter pattern, the standalone library can be used with any frontend framework while maintaining rich functionality. The reference implementation provides patterns for actual implementation in the library code.
 
 ### T13: Standalone Library Feature Analysis
 **Description**: Perform comparative analysis of the React App, standalone library, standalone-test.js, and test-simulation.js to identify feature gaps and create a plan for implementing missing features in the standalone library.
@@ -405,7 +437,9 @@ graph TD
     T9[T9: Fix UI and Simulation TypeScript Errors]
     T10[T10: Standalone Test Page for Simulation Library]
     T11[T11: Fix Library Build Errors]
+    T12[T12: Fix Numerical Stability and Add Graph Config]
     T13[T13: Standalone Library Feature Analysis]
+    T14[T14: State Management Architecture]
     
     T0 --> T1
     T1 --> T2
@@ -413,6 +447,7 @@ graph TD
     T1 --> T10
     T1 --> T11
     T1 --> T13
+    T1 --> T14
     T4 --> T3
     T5 --> T2
     T6 --> T1
@@ -426,7 +461,9 @@ graph TD
     T9 -.-> T6
     T10 -.-> T5
     T10 --> T11
+    T10 --> T12
     T11 -.-> T1
+    T13 --> T14
     T13 -.-> T1
     T13 -.-> T10
 ```
