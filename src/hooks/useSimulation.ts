@@ -11,6 +11,8 @@ import {
 import { SpinNetworkSimulationEngineImpl } from '../simulation/core/engineImplementation';
 import { RootState } from '../store';
 import { simulationLogger } from '../simulation/core/simulationLogger';
+import { SpinNetworkGeometryCalculator } from '../simulation/analysis/geometricProps';
+import { SimulationAnalyzer } from '../simulation/analysis/statistics';
 
 // Define missing SimulationParameters type
 interface SimulationParameters {
@@ -164,13 +166,150 @@ export const useSimulation = () => {
         // Get conservation laws for logging
         const conservation = engineRef.current.getConservationLaws();
         
-        // Log simulation step with conservation data (only at interval points)
+        // Get current state for calculating additional observables
+        const currentState = engineRef.current.getCurrentState();
+        const graph = engineRef.current.getGraph ? engineRef.current.getGraph() : null;
+        
+        // Always include geometric data, even if it's zeros
+        let geometric = {
+          totalVolume: 0,
+          totalArea: 0,
+          effectiveDimension: 0,
+          volumeEntropy: 0
+        };
+        
+        // Try to calculate from current state if available
+        if (currentState) {
+          try {
+            // Get geometric property calculations using proper classes
+            const geometryCalculator = new SpinNetworkGeometryCalculator();
+            
+            // Calculate total volume and entropy (these only need the state)
+            geometric.totalVolume = geometryCalculator.calculateTotalVolume(currentState);
+            geometric.volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
+            
+            // Get graph for area and dimension calculations
+            const activeGraph = engineRef.current.getGraph ? engineRef.current.getGraph() : null;
+            
+            // Try to use the graph from engine, graphRef, or create a new one
+            const graphForCalculations = activeGraph || graphRef.current || getGraph();
+            
+            if (graphForCalculations && 
+                Array.isArray(graphForCalculations.edges) && 
+                graphForCalculations.edges.length > 0) {
+              // Calculate area using the graph
+              geometric.totalArea = geometryCalculator.calculateTotalArea(graphForCalculations);
+              
+              // Calculate effective dimension using both graph and state
+              geometric.effectiveDimension = geometryCalculator.calculateEffectiveDimension(
+                graphForCalculations, currentState
+              );
+            } else {
+              console.warn("Missing valid graph for area and dimension calculations");
+            }
+            
+            // Check if any geometric values were calculated
+            const anyGeometricData = Object.values(geometric).some(value => value > 0);
+            console.log("Calculated geometric data:", geometric, "Valid data:", anyGeometricData);
+            
+            // If we couldn't calculate any data, try again with more aggressive validation
+            if (!anyGeometricData && network && network.edges && network.edges.length > 0) {
+              try {
+                const tempGraph = createSimulationGraph(network);
+                if (tempGraph && Array.isArray(tempGraph.edges) && tempGraph.edges.length > 0) {
+                  // Try calculating again with the temporary graph
+                  geometric.totalArea = geometryCalculator.calculateTotalArea(tempGraph);
+                  geometric.effectiveDimension = geometryCalculator.calculateEffectiveDimension(
+                    tempGraph, currentState
+                  );
+                  console.log("Recalculated with temporary graph:", geometric);
+                }
+              } catch (tempError) {
+                console.warn("Failed creating temporary graph:", tempError);
+              }
+            }
+          } catch (error) {
+            console.warn("Error calculating geometric observables:", error);
+          }
+        }
+        
+        // If any values are still zero, try getting from Redux as fallback
+        if (geometric.totalVolume === 0 && geometric.totalArea === 0) {
+          try {
+            // Access the Redux store directly
+            const store = require('../store').store;
+            const state = store.getState();
+            if (state?.simulation?.geometricData) {
+              // Only copy non-zero values
+              Object.keys(state.simulation.geometricData).forEach(key => {
+                const value = state.simulation.geometricData[key];
+                if (value && value !== 0) {
+                  geometric[key] = value;
+                }
+              });
+              console.log("Using Redux geometric data:", geometric);
+            }
+          } catch (error) {
+            console.warn("Error getting geometric data from Redux:", error);
+          }
+        }
+        
+        // Always include statistics data with defaults
+        let statistics = {
+          mean: 0,
+          variance: 0,
+          skewness: 0,
+          kurtosis: 0
+        };
+        
+        // Try to calculate from current state if available
+        if (currentState) {
+          try {
+            // Use proper SimulationAnalyzer 
+            const stats = SimulationAnalyzer.calculateStatistics(currentState, simulationTime);
+            
+            statistics.mean = stats.mean;
+            statistics.variance = stats.variance;
+            
+            // Placeholder for advanced statistics (future implementation)
+            statistics.skewness = 0;
+            statistics.kurtosis = 0;
+            
+            console.log("Calculated statistics data:", statistics);
+          } catch (error) {
+            console.warn("Error calculating statistical observables:", error);
+          }
+        }
+        
+        // If values are still zero, get from Redux as fallback
+        if (statistics.mean === 0 && statistics.variance === 0) {
+          try {
+            const store = require('../store').store;
+            const state = store.getState();
+            if (state?.simulation?.statisticsData) {
+              // Only copy non-zero values
+              Object.keys(state.simulation.statisticsData).forEach(key => {
+                const value = state.simulation.statisticsData[key];
+                if (value && value !== 0) {
+                  statistics[key] = value;
+                }
+              });
+              console.log("Using Redux statistics data:", statistics);
+            }
+          } catch (error) {
+            console.warn("Error getting statistical data from Redux:", error);
+          }
+        }
+        
+        // Log simulation step with all data (only at interval points)
         simulationLogger.logResults(simulationTime, {
           conservation: {
             totalProbability: conservation.totalProbability || 0,
             normVariation: conservation.normVariation || 0,
             positivity: conservation.positivity || false
-          }
+          },
+          geometric,
+          statistics
         });
       }
       

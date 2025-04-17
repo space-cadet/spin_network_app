@@ -71,17 +71,45 @@ export const useReduxSimulation = () => {
         }
       }
       
-      // Calculate and update geometric data if we have state and graph
-      if (currentState && graph) {
+      // Calculate and update geometric data if we have a valid state
+      if (currentState) {
         try {
           const geometryCalculator = new SpinNetworkGeometryCalculator();
+          const geometricData = {
+            totalVolume: 0,
+            totalArea: 0,
+            effectiveDimension: 0,
+            volumeEntropy: 0
+          };
           
-          dispatch(updateGeometricData({
-            totalVolume: geometryCalculator.calculateTotalVolume(currentState),
-            totalArea: geometryCalculator.calculateTotalArea(graph),
-            effectiveDimension: geometryCalculator.calculateEffectiveDimension(graph, currentState),
-            volumeEntropy: geometryCalculator.calculateVolumeEntropy(currentState)
-          }));
+          // Volume and entropy only need the state
+          geometricData.totalVolume = geometryCalculator.calculateTotalVolume(currentState);
+          geometricData.volumeEntropy = geometryCalculator.calculateVolumeEntropy(currentState);
+          
+          // Area and dimension also need a valid graph
+          if (graph && graph.edges && graph.edges.length > 0) {
+            geometricData.totalArea = geometryCalculator.calculateTotalArea(graph);
+            geometricData.effectiveDimension = geometryCalculator.calculateEffectiveDimension(graph, currentState);
+          } else {
+            // Try to get a valid graph from network state as fallback
+            const networkState = (window as any).__REDUX_STATE__?.network || 
+              require('../store').store.getState().network;
+              
+            if (networkState?.currentNetwork?.edges?.length > 0) {
+              const tempGraph = require('../simulation').createSimulationGraph(networkState.currentNetwork);
+              if (tempGraph && tempGraph.edges && tempGraph.edges.length > 0) {
+                geometricData.totalArea = geometryCalculator.calculateTotalArea(tempGraph);
+                geometricData.effectiveDimension = geometryCalculator.calculateEffectiveDimension(
+                  tempGraph, currentState
+                );
+              }
+            }
+          }
+          
+          // Only update Redux if we have non-zero values
+          if (Object.values(geometricData).some(value => value > 0)) {
+            dispatch(updateGeometricData(geometricData));
+          }
         } catch (error) {
           console.error('Error calculating geometric data:', error);
         }

@@ -5,6 +5,8 @@
  * for debugging, history tracking, and analysis purposes.
  */
 
+// Remove the helpers import and use the original functions
+
 // Log entry type definitions
 export type LogLevel = 'info' | 'warning' | 'error' | 'debug';
 
@@ -307,7 +309,30 @@ export class SimulationLogger {
   }
   
   /**
-   * Export a session to JSON
+   * Export session parameters and network config to JSON (without results)
+   */
+  public exportSessionConfigToJson(sessionId: string): string {
+    const session = this.getSessionById(sessionId);
+    if (!session) {
+      throw new Error(`Session with ID ${sessionId} not found`);
+    }
+    
+    // Create a copy with only the config data, omitting results
+    const configOnly = {
+      id: session.id,
+      startTime: session.startTime,
+      endTime: session.endTime,
+      networkInfo: session.networkInfo,
+      parameters: session.parameters,
+      // Include parameter changes but not logs or results
+      paramChanges: session.paramChanges
+    };
+    
+    return JSON.stringify(configOnly, null, 2);
+  }
+
+  /**
+   * Export a full session to JSON (including all data)
    */
   public exportSessionToJson(sessionId: string): string {
     const session = this.getSessionById(sessionId);
@@ -315,6 +340,111 @@ export class SimulationLogger {
       throw new Error(`Session with ID ${sessionId} not found`);
     }
     return JSON.stringify(session, null, 2);
+  }
+
+  /**
+   * Export session results to CSV
+   */
+  public exportSessionResultsToCsv(sessionId: string): string {
+    const session = this.getSessionById(sessionId);
+    if (!session) {
+      throw new Error(`Session with ID ${sessionId} not found`);
+    }
+
+    if (session.results.length === 0) {
+      return "No results data available";
+    }
+
+    // Create headers based on available data
+    const headers: string[] = ['simTime', 'timestamp'];
+    
+    // Create a Set to track all headers
+    const allHeaders = new Set<string>();
+    
+    // Add standard headers for all common fields
+    // We need to ensure these headers are included even if they're not in the data
+    const standardHeaders = [
+      'totalProbability', 'normVariation', 'positivity',  // Conservation
+      'totalVolume', 'totalArea', 'effectiveDimension', 'volumeEntropy',  // Geometric
+      'mean', 'variance', 'skewness', 'kurtosis'  // Statistics
+    ];
+    
+    // Add all standard headers to ensure consistent columns across exports
+    standardHeaders.forEach(header => allHeaders.add(header));
+    
+    // Then also scan the actual data to catch any other fields that might exist
+    session.results.forEach(result => {
+      // Add any additional fields that might exist in the data
+      if (result.conservation) {
+        Object.keys(result.conservation).forEach(key => allHeaders.add(key));
+      }
+      
+      if (result.geometric) {
+        Object.keys(result.geometric).forEach(key => allHeaders.add(key));
+      }
+      
+      if (result.statistics) {
+        Object.keys(result.statistics).forEach(key => allHeaders.add(key));
+      }
+    });
+    
+    // Add all discovered headers to the header row
+    headers.push(...Array.from(allHeaders));
+    
+    // Create CSV header row
+    let csv = headers.join(',') + '\n';
+    
+    // Add data rows
+    session.results.forEach(result => {
+      // Start with guaranteed fields
+      const row: any[] = [
+        result.simTime,
+        result.timestamp
+      ];
+      
+      // Add conservation data
+      if (headers.includes('totalProbability')) {
+        row.push(result.conservation?.totalProbability ?? '');
+      }
+      if (headers.includes('normVariation')) {
+        row.push(result.conservation?.normVariation ?? '');
+      }
+      if (headers.includes('positivity')) {
+        row.push(result.conservation?.positivity ?? '');
+      }
+      
+      // Add geometric data - check each field individually
+      if (headers.includes('totalVolume')) {
+        row.push(result.geometric?.totalVolume ?? '');
+      }
+      if (headers.includes('totalArea')) {
+        row.push(result.geometric?.totalArea ?? '');
+      }
+      if (headers.includes('effectiveDimension')) {
+        row.push(result.geometric?.effectiveDimension ?? '');
+      }
+      if (headers.includes('volumeEntropy')) {
+        row.push(result.geometric?.volumeEntropy ?? '');
+      }
+      
+      // Add statistics data - check each field individually
+      if (headers.includes('mean')) {
+        row.push(result.statistics?.mean ?? '');
+      }
+      if (headers.includes('variance')) {
+        row.push(result.statistics?.variance ?? '');
+      }
+      if (headers.includes('skewness')) {
+        row.push(result.statistics?.skewness ?? '');
+      }
+      if (headers.includes('kurtosis')) {
+        row.push(result.statistics?.kurtosis ?? '');
+      }
+      
+      csv += row.join(',') + '\n';
+    });
+    
+    return csv;
   }
   
   /**

@@ -109,18 +109,44 @@ const SimulationLogsPanel: React.FC = () => {
   const [filterText, setFilterText] = useState('');
   const [filterLevel, setFilterLevel] = useState<'all' | LogLevel>('all');
   
-  // Load sessions
+  // Load sessions on mount and when running status changes
   useEffect(() => {
-    const allSessions = simulationLogger.getAllSessions();
-    const currentSession = simulationLogger.getCurrentSession();
+    const loadSessions = () => {
+      // Get all the sessions and current session
+      const allSessions = simulationLogger.getAllSessions();
+      const currentSession = simulationLogger.getCurrentSession();
+      
+      // Combine current and past sessions
+      const combinedSessions = [...(currentSession ? [currentSession] : []), ...allSessions];
+      
+      // Update the sessions list
+      setSessions(combinedSessions);
+      
+      // Select the current session if available, or keep the currently selected one
+      if (currentSession && !selectedSession) {
+        setCurrentSessionId(currentSession.id);
+        setSelectedSession(currentSession);
+      }
+    };
     
-    setSessions([...(currentSession ? [currentSession] : []), ...allSessions]);
+    // Load sessions initially and when running state changes
+    loadSessions();
     
-    if (currentSession && !selectedSession) {
-      setCurrentSessionId(currentSession.id);
-      setSelectedSession(currentSession);
-    }
-  }, [isRunning]);
+    // Also load sessions when the page becomes visible again
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadSessions();
+      }
+    };
+    
+    // Add event listener for visibility changes
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isRunning, selectedSession]);
   
   // Auto-refresh when running
   useEffect(() => {
@@ -172,25 +198,47 @@ const SimulationLogsPanel: React.FC = () => {
     setCurrentSessionId(session.id);
   };
   
-  // Handle log export
-  const handleExportLogs = () => {
+  // Handle exporting both configuration and results
+  const handleExportData = () => {
     if (!selectedSession) return;
     
     try {
-      const json = simulationLogger.exportSessionToJson(selectedSession.id);
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      // Get configuration JSON without results data
+      const configJson = simulationLogger.exportSessionConfigToJson(selectedSession.id);
+      const configBlob = new Blob([configJson], { type: 'application/json' });
+      const configUrl = URL.createObjectURL(configBlob);
       
-      // Create a temporary link and click it
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `simulation-log-${selectedSession.id}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Get results CSV
+      const resultsCSV = simulationLogger.exportSessionResultsToCsv(selectedSession.id);
+      const csvBlob = new Blob([resultsCSV], { type: 'text/csv' });
+      const csvUrl = URL.createObjectURL(csvBlob);
+      
+      // Create and click temporary links to download both files
+      const configLink = document.createElement('a');
+      configLink.href = configUrl;
+      configLink.download = `simulation-config-${selectedSession.id}.json`;
+      
+      const csvLink = document.createElement('a');
+      csvLink.href = csvUrl;
+      csvLink.download = `simulation-results-${selectedSession.id}.csv`;
+      
+      // Append temporarily to body, click, and remove
+      document.body.appendChild(configLink);
+      document.body.appendChild(csvLink);
+      
+      // Download both files
+      configLink.click();
+      setTimeout(() => csvLink.click(), 100); // Small delay to prevent browser issues
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(configLink);
+        document.body.removeChild(csvLink);
+        URL.revokeObjectURL(configUrl);
+        URL.revokeObjectURL(csvUrl);
+      }, 200);
     } catch (error) {
-      console.error('Error exporting logs:', error);
+      console.error(`Error exporting simulation data:`, error);
     }
   };
   
@@ -220,12 +268,12 @@ const SimulationLogsPanel: React.FC = () => {
         <div className="flex space-x-2">
           <button
             className="btn btn-sm btn-outline flex items-center space-x-1"
-            onClick={handleExportLogs}
+            onClick={handleExportData}
             disabled={!selectedSession}
-            title="Export logs as JSON"
+            title="Export configuration (JSON) and results (CSV)"
           >
             <FaDownload size={12} />
-            <span className="text-xs">Export</span>
+            <span className="text-xs">Export Data</span>
           </button>
           
           <button
@@ -347,9 +395,41 @@ const SimulationLogsPanel: React.FC = () => {
                           </div>
                         </div>
                         <div className="mt-1 text-xs">
-                          <p>Total Probability: {result.conservation.totalProbability.toFixed(6)}</p>
-                          <p>Variation: {result.conservation.normVariation.toFixed(6)}</p>
-                          <p>Positivity: {result.conservation.positivity ? 'Preserved' : 'Violated'}</p>
+                          {result.conservation ? (
+                            <>
+                              <p>Total Probability: {result.conservation.totalProbability.toFixed(6)}</p>
+                              <p>Variation: {result.conservation.normVariation.toFixed(6)}</p>
+                              <p>Positivity: {result.conservation.positivity ? 'Preserved' : 'Violated'}</p>
+                            </>
+                          ) : (
+                            <p>No conservation data available</p>
+                          )}
+                          {result.geometric && (
+                            <>
+                              <hr className="my-1 border-green-200" />
+                              {result.geometric.totalVolume !== undefined && 
+                                <p>Volume: {result.geometric.totalVolume.toFixed(6)}</p>}
+                              {result.geometric.totalArea !== undefined && 
+                                <p>Area: {result.geometric.totalArea.toFixed(6)}</p>}
+                              {result.geometric.effectiveDimension !== undefined && 
+                                <p>Effective Dimension: {result.geometric.effectiveDimension.toFixed(4)}</p>}
+                              {result.geometric.volumeEntropy !== undefined && 
+                                <p>Volume Entropy: {result.geometric.volumeEntropy.toFixed(6)}</p>}
+                            </>
+                          )}
+                          {result.statistics && (
+                            <>
+                              <hr className="my-1 border-green-200" />
+                              {result.statistics.mean !== undefined && 
+                                <p>Mean: {result.statistics.mean.toFixed(6)}</p>}
+                              {result.statistics.variance !== undefined && 
+                                <p>Variance: {result.statistics.variance.toFixed(6)}</p>}
+                              {result.statistics.skewness !== undefined && 
+                                <p>Skewness: {result.statistics.skewness.toFixed(6)}</p>}
+                              {result.statistics.kurtosis !== undefined && 
+                                <p>Kurtosis: {result.statistics.kurtosis.toFixed(6)}</p>}
+                            </>
+                          )}
                         </div>
                       </div>
                     ))}

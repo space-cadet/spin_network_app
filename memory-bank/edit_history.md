@@ -6,6 +6,16 @@
 
 ### April 17, 2025
 
+#### 17:30 - T15: Fix CSV Export and Simulation Data Issues
+
+- Modified `/Users/deepak/code/spin_network_app/src/simulation/core/simulationLogger.ts` - Updated exportSessionResultsToCsv method to include all metrics
+- Modified `/Users/deepak/code/spin_network_app/src/components/simulation/SimulationLogsPanel.tsx` - Enhanced export handling to produce both JSON and CSV files
+- Modified `/Users/deepak/code/spin_network_app/src/hooks/useSimulation.ts` - Fixed formatting in handleExportData for better error handling
+
+Fixed the issue with missing geometric variables (totalVolume, totalArea, effectiveDimension, volumeEntropy) in CSV exports. The CSV export now properly includes all metrics with consistent column headers. The export button functionality was also enhanced to produce both JSON (for configuration and parameters) and CSV (for time-series results data) files simultaneously. There remains an unresolved issue with session persistence between page reloads that will need further investigation.
+
+### April 17, 2025
+
 #### 15:45 - T15: UI Improvement for Network Visualization and Creation
 - Modified `/Users/deepak/code/spin_network_app/src/components/workspace/Workspace.tsx` - Fixed zoom controls visibility during scrolling
 - Modified `/Users/deepak/code/spin_network_app/src/components/tools/NetworkTools.tsx` - Redesigned network creation UI with unified interface

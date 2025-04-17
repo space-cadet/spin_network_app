@@ -1,5 +1,90 @@
 # Error Log
 
+## 2025-04-17 15:45 IST - T15: Missing Geometric Variables in CSV Export
+
+**File:** `/Users/deepak/code/spin_network_app/src/simulation/core/simulationLogger.ts`
+
+**Error Message:**
+No explicit error message, but geometric variables (totalVolume, totalArea, effectiveDimension, volumeEntropy) were showing as zero in the CSV export and Results Summary panel:
+
+```
+simTime	timestamp	totalProbability	normVariation	positivity	totalVolume	totalArea	effectiveDimension	volumeEntropy	mean	variance	skewness	kurtosis
+1.0000000000000007	1744867370561	1.0101004540741885	0.01010045407418847	false	0	0	0	0	0.06249999999999995	0.059862682957555126	0	0
+2.0049999999999795	1744867373911	1.0204580214476233	0.02045802144762332	false	0	0	0	0	0.06249999999999996	0.061177160846049884	0	0
+3.004999999999958	1744867377244	1.0309748782575079	0.030974878257507887	false	0	0	0	0	0.06249999999999991	0.0625255749748802	0	0
+```
+
+**Cause:**
+The CSV export function was not consistently handling the geometric variables in the export process. While the statistical data (mean, variance) was being correctly recorded and exported, the geometric data was not being properly calculated or included in the CSV export.
+
+**Fix:**
+Modified the `exportSessionResultsToCsv` method in `simulationLogger.ts` to ensure that all standard metrics, including geometric variables, are consistently included in the exported CSV.
+
+1. Added a standardized set of column headers to ensure that all metrics are included:
+```typescript
+const standardHeaders = [
+  'totalProbability', 'normVariation', 'positivity',  // Conservation
+  'totalVolume', 'totalArea', 'effectiveDimension', 'volumeEntropy',  // Geometric
+  'mean', 'variance', 'skewness', 'kurtosis'  // Statistics
+];
+```
+
+2. Modified the CSV generation logic to consistently handle all these fields in the export.
+
+3. Ensured that the data is properly structured in the exported CSV format, making it more suitable for analysis in other tools.
+
+**Affected Files:**
+- `/Users/deepak/code/spin_network_app/src/simulation/core/simulationLogger.ts`
+- `/Users/deepak/code/spin_network_app/src/components/simulation/SimulationLogsPanel.tsx`
+
+**Related Task:** T15: Enhance Simulation Data Export
+
+## 2025-04-17 16:30 IST - T15: Simulation Logs Not Persisting Between Page Reloads
+
+**File:** `/Users/deepak/code/spin_network_app/src/simulation/core/simulationLogger.ts`
+
+**Error Message:**
+No explicit error message. When the application page was reloaded, previously recorded simulation logs were not displayed in the Simulation Logs panel, indicating that the persistence mechanism for simulation sessions was not functioning properly.
+
+**Cause:**
+Attempted fixes for the CSV export issue inadvertently broke the session persistence functionality. Changes to the `saveSessionsToStorage` and `loadSessionsFromStorage` methods in the `SimulationLogger` class were causing issues with how the data was saved to and retrieved from localStorage.
+
+**Fix:**
+Reverted changes to the localStorage persistence functions to restore the original behavior:
+
+1. Restored the original `saveSessionsToStorage` method:
+```typescript
+private saveSessionsToStorage(): void {
+  try {
+    localStorage.setItem('simulationSessions', JSON.stringify(this.allSessions));
+  } catch (error) {
+    console.error('Error saving simulation sessions to storage:', error);
+  }
+}
+```
+
+2. Restored the original `loadSessionsFromStorage` method:
+```typescript
+private loadSessionsFromStorage(): void {
+  try {
+    const sessionsJson = localStorage.getItem('simulationSessions');
+    if (sessionsJson) {
+      this.allSessions = JSON.parse(sessionsJson);
+    }
+  } catch (error) {
+    console.error('Error loading simulation sessions from storage:', error);
+  }
+}
+```
+
+**Note:**
+Despite these changes, there may still be underlying issues with the persistence mechanism that need further investigation. The current solution preserves the CSV export improvements while restoring the original persistence behavior, but a more comprehensive fix may be needed in the future.
+
+**Affected Files:**
+- `/Users/deepak/code/spin_network_app/src/simulation/core/simulationLogger.ts`
+
+**Related Task:** T15: Enhance Simulation Data Export
+
 ## 2025-04-16 07:35 IST - T11: Library Build Error with Interface Export
 
 **File:** `/Users/deepak/code/spin_network_app/lib/analysis/index.ts`

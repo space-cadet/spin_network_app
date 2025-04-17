@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 17, 2025 (15:45 IST)*
+*Last Updated: April 17, 2025 (16:45 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -15,8 +15,37 @@
 | T13 | Standalone Library Feature Analysis | ✅ COMPLETE | HIGH | 2025-04-16 | T1 | Deepak |
 | T14 | State Management Architecture for Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-17 | T13, T1 | Deepak |
 | T15 | UI Improvement for Network Visualization and Creation | ✅ COMPLETE | MEDIUM | 2025-04-17 | - | Deepak |
+| T16 | Enhance Simulation Data Export and Visualization | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
 
 ## Task Details
+
+### T16: Enhance Simulation Data Export and Visualization
+**Description**: Improve the simulation data export functionality and visualization capabilities to make simulation results more accessible and useful for analysis.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 17, 2025
+**Last Active**: April 17, 2025 (16:45 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Fix CSV export to include all geometric variables (totalVolume, totalArea, etc.)
+- ✅ Fix simulation logs panel to display non-zero geometric values 
+- ⬜ Restore session persistence functionality between page reloads
+- ⬜ Implement proper data format for time-series data export
+- ⬜ Add basic visualization capabilities for simulation results
+- ⬜ Create interactive graphs for simulation data analysis
+- ⬜ Add ability to compare results between different simulation runs
+- ⬜ Support export of visualization as images
+- ⬜ Create tabular data view for detailed inspection
+
+**Related Files**:
+- `/src/simulation/core/simulationLogger.ts`
+- `/src/components/simulation/SimulationLogsPanel.tsx`
+- `/src/hooks/useSimulation.ts`
+- `/src/hooks/useReduxSimulation.ts`
+
+**Notes**:
+Part of this task has been completed by fixing the CSV export functionality to properly include geometric variables that were previously missing or showing as zero. The display of these variables in the simulation logs panel has also been fixed. However, there's still an issue with session persistence between page reloads that needs to be addressed, and the visualization capabilities still need to be developed.
+
 
 ### T15: UI Improvement for Network Visualization and Creation
 **Description**: Improve user experience by fixing zoom controls visibility during scrolling and redesigning the network creation interface to be more intuitive and streamlined.
@@ -477,6 +506,7 @@ graph TD
     T13[T13: Standalone Library Feature Analysis]
     T14[T14: State Management Architecture]
     T15[T15: UI Improvement for Network Visualization]
+    T16[T16: Enhance Simulation Data Export and Visualization]
     
     T0 --> T1
     T1 --> T2
@@ -503,4 +533,6 @@ graph TD
     T13 --> T14
     T13 -.-> T1
     T13 -.-> T10
+    T16 -.-> T2
+    T16 -.-> T5
 ```
