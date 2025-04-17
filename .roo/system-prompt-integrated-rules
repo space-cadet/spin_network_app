@@ -7,6 +7,7 @@
 ## File Locations
 
 - Memory Bank files (session_cache.md, edit_history.md, errorLog.md, tasks.md, etc.) should be located in the `/memory-bank/` directory
+- Memory bank should be updated only when users tell you to.
 - Template files for memory bank documents should be in the `/templates/` directory at the project root
 - Integrated Rules files remain in the project root
 - This structure ensures consistent organization and prevents confusion about file locations
