@@ -13,10 +13,16 @@ import { setInteractionMode } from '../../store/slices/uiSlice';
 import { selectInteractionMode } from '../../store/selectors';
 import CollapsibleSection from '../common/CollapsibleSection';
 
+// Network type options
+type NetworkType = 'empty' | 'lattice' | 'circular' | 'random';
+
 const NetworkTools: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'create' | 'templates'>('create');
   const dispatch = useAppDispatch();
   const interactionMode = useAppSelector(selectInteractionMode);
+  
+  // Common parameters
+  const [networkName, setNetworkName] = useState('My Network');
+  const [networkType, setNetworkType] = useState<NetworkType>('empty');
   
   // Network template parameters
   const [latticeParams, setLatticeParams] = useState({
@@ -41,20 +47,30 @@ const NetworkTools: React.FC = () => {
     defaultSpin: 0.5
   });
   
-  const handleCreateEmpty = () => {
-    dispatch(createEmpty('Empty Network'));
-  };
-  
-  const handleCreateLattice = () => {
-    dispatch(createLattice(latticeParams));
-  };
-  
-  const handleCreateCircular = () => {
-    dispatch(createCircular(circularParams));
-  };
-  
-  const handleCreateRandom = () => {
-    dispatch(createRandom(randomParams));
+  const handleCreateNetwork = () => {
+    switch(networkType) {
+      case 'empty':
+        dispatch(createEmpty(networkName));
+        break;
+      case 'lattice':
+        dispatch(createLattice({
+          ...latticeParams,
+          name: networkName
+        }));
+        break;
+      case 'circular':
+        dispatch(createCircular({
+          ...circularParams,
+          name: networkName
+        }));
+        break;
+      case 'random':
+        dispatch(createRandom({
+          ...randomParams,
+          name: networkName
+        }));
+        break;
+    }
   };
   
   // Toggle interaction modes
@@ -67,6 +83,22 @@ const NetworkTools: React.FC = () => {
     }
   };
 
+  // Network type icons
+  const networkTypeIcons = {
+    empty: <FaPlus className="text-primary" />,
+    lattice: <FaTable className="text-primary" />,
+    circular: <FaCircle className="text-primary" />,
+    random: <FaRandom className="text-primary" />
+  };
+
+  // Network type descriptions
+  const networkTypeDescriptions = {
+    empty: "Create a blank network",
+    lattice: "Regular grid pattern",
+    circular: "Nodes arranged in a circle",
+    random: "Randomly generated network"
+  };
+
   return (
     <CollapsibleSection
       title="Network Tools"
@@ -74,119 +106,46 @@ const NetworkTools: React.FC = () => {
       className="border-b border-gray-200"
       contentClassName="p-4"
     >
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-4">
-        <button
-          className={`px-4 py-2 ${
-            activeTab === 'create'
-              ? 'text-primary border-b-2 border-primary font-medium'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('create')}
-        >
-          Create
-        </button>
-        <button
-          className={`px-4 py-2 ${
-            activeTab === 'templates'
-              ? 'text-primary border-b-2 border-primary font-medium'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('templates')}
-        >
-          Templates
-        </button>
-      </div>
-      
-      {/* Create Tab Content */}
-      {activeTab === 'create' && (
-        <div className="space-y-4">
-          <CollapsibleSection title="Network Creation" defaultExpanded={true}>
-            <div className="card p-4 flex items-center space-x-4">
-              <div className="p-2 bg-gray-100 rounded-full">
-                <FaPlus className="text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium">Empty Network</h3>
-                <p className="text-sm text-gray-500">Create a blank network</p>
-              </div>
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={handleCreateEmpty}
-              >
-                Create
-              </button>
+      {/* Network Creation */}
+      <CollapsibleSection title="Network Creation" defaultExpanded={true}>
+        <div className="card p-4">
+          <div className="form-group mb-4">
+            <label className="form-label text-sm">Network Name</label>
+            <input
+              type="text"
+              value={networkName}
+              onChange={(e) => setNetworkName(e.target.value)}
+              placeholder="Enter network name"
+              className="form-input w-full"
+            />
+          </div>
+
+          <div className="form-group mb-4">
+            <label className="form-label text-sm">Network Type</label>
+            <div className="flex space-x-2 mb-2">
+              {(['empty', 'lattice', 'circular', 'random'] as NetworkType[]).map(type => (
+                <button
+                  key={type}
+                  className={`flex-1 py-2 px-3 rounded-md flex flex-col items-center justify-center ${
+                    networkType === type 
+                      ? 'bg-primary text-white' 
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                  onClick={() => setNetworkType(type)}
+                >
+                  <div className="p-2">
+                    {networkTypeIcons[type]}
+                  </div>
+                  <span className="text-xs font-medium capitalize">{type}</span>
+                </button>
+              ))}
             </div>
-          </CollapsibleSection>
+            <p className="text-sm text-gray-500">{networkTypeDescriptions[networkType]}</p>
+          </div>
           
-          <CollapsibleSection title="Element Operations" defaultExpanded={true}>
-            <div className="space-y-4">
-              <div className="card p-4 flex items-center space-x-4">
-                <div className="p-2 bg-gray-100 rounded-full">
-                  <FaPlus className="text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium">Add Node</h3>
-                  <p className="text-sm text-gray-500">Add a new node to the network</p>
-                </div>
-                <button 
-                  className={`btn btn-sm ${interactionMode === 'addNode' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => handleSetMode('addNode')}
-                >
-                  {interactionMode === 'addNode' ? 'Cancel' : 'Add'}
-                </button>
-              </div>
-              
-              <div className="card p-4 flex items-center space-x-4">
-                <div className="p-2 bg-gray-100 rounded-full">
-                  <FaPlus className="text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium">Add Edge</h3>
-                  <p className="text-sm text-gray-500">Connect nodes with an edge</p>
-                </div>
-                <button 
-                  className={`btn btn-sm ${interactionMode === 'addEdge' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => handleSetMode('addEdge')}
-                >
-                  {interactionMode === 'addEdge' ? 'Cancel' : 'Add'}
-                </button>
-              </div>
-              
-              <div className="card p-4 flex items-center space-x-4">
-                <div className="p-2 bg-gray-100 rounded-full">
-                  <FaTrash className="text-red-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium">Delete Elements</h3>
-                  <p className="text-sm text-gray-500">Remove nodes or edges</p>
-                </div>
-                <button 
-                  className={`btn btn-sm ${interactionMode === 'delete' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => handleSetMode('delete')}
-                >
-                  {interactionMode === 'delete' ? 'Cancel' : 'Delete'}
-                </button>
-              </div>
-            </div>
-          </CollapsibleSection>
-        </div>
-      )}
-      
-      {/* Templates Tab Content */}
-      {activeTab === 'templates' && (
-        <div className="space-y-4">
-          <CollapsibleSection title="Lattice Network" defaultExpanded={true}>
-            <div className="flex items-center space-x-4 mb-3">
-              <div className="p-2 bg-gray-100 rounded-full">
-                <FaTable className="text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-500">Regular grid pattern</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 mb-3">
+          {/* Lattice Parameters */}
+          {networkType === 'lattice' && (
+            <div className="grid grid-cols-2 gap-2 mb-4">
               <div className="form-group">
                 <label className="form-label text-sm">Rows</label>
                 <input
@@ -216,90 +175,62 @@ const NetworkTools: React.FC = () => {
                 />
               </div>
             </div>
-            
-            <button
-              className="btn btn-sm btn-primary w-full"
-              onClick={handleCreateLattice}
-            >
-              Create Lattice Network
-            </button>
-          </CollapsibleSection>
+          )}
           
-          <CollapsibleSection title="Circular Network" defaultExpanded={false}>
-            <div className="flex items-center space-x-4 mb-3">
-              <div className="p-2 bg-gray-100 rounded-full">
-                <FaCircle className="text-primary" />
+          {/* Circular Parameters */}
+          {networkType === 'circular' && (
+            <>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="form-group">
+                  <label className="form-label text-sm">Nodes</label>
+                  <input
+                    type="number"
+                    min="3"
+                    max="20"
+                    value={circularParams.nodes}
+                    onChange={(e) => setCircularParams({
+                      ...circularParams,
+                      nodes: parseInt(e.target.value) || 3
+                    })}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label text-sm">Radius</label>
+                  <input
+                    type="number"
+                    min="50"
+                    max="500"
+                    value={circularParams.radius}
+                    onChange={(e) => setCircularParams({
+                      ...circularParams,
+                      radius: parseInt(e.target.value) || 200
+                    })}
+                    className="form-input"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-500">Nodes arranged in a circle</p>
+              
+              <div className="form-group mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={circularParams.connectAll}
+                    onChange={(e) => setCircularParams({
+                      ...circularParams,
+                      connectAll: e.target.checked
+                    })}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Connect all nodes</span>
+                </label>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div className="form-group">
-                <label className="form-label text-sm">Nodes</label>
-                <input
-                  type="number"
-                  min="3"
-                  max="20"
-                  value={circularParams.nodes}
-                  onChange={(e) => setCircularParams({
-                    ...circularParams,
-                    nodes: parseInt(e.target.value) || 3
-                  })}
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label text-sm">Radius</label>
-                <input
-                  type="number"
-                  min="50"
-                  max="500"
-                  value={circularParams.radius}
-                  onChange={(e) => setCircularParams({
-                    ...circularParams,
-                    radius: parseInt(e.target.value) || 200
-                  })}
-                  className="form-input"
-                />
-              </div>
-            </div>
-            
-            <div className="form-group mb-3">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={circularParams.connectAll}
-                  onChange={(e) => setCircularParams({
-                    ...circularParams,
-                    connectAll: e.target.checked
-                  })}
-                  className="mr-2"
-                />
-                <span className="text-sm">Connect all nodes</span>
-              </label>
-            </div>
-            
-            <button
-              className="btn btn-sm btn-primary w-full"
-              onClick={handleCreateCircular}
-            >
-              Create Circular Network
-            </button>
-          </CollapsibleSection>
+            </>
+          )}
           
-          <CollapsibleSection title="Random Network" defaultExpanded={false}>
-            <div className="flex items-center space-x-4 mb-3">
-              <div className="p-2 bg-gray-100 rounded-full">
-                <FaRandom className="text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-500">Randomly generated network</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 mb-3">
+          {/* Random Parameters */}
+          {networkType === 'random' && (
+            <div className="grid grid-cols-2 gap-2 mb-4">
               <div className="form-group">
                 <label className="form-label text-sm">Nodes</label>
                 <input
@@ -330,16 +261,69 @@ const NetworkTools: React.FC = () => {
                 />
               </div>
             </div>
-            
-            <button
-              className="btn btn-sm btn-primary w-full"
-              onClick={handleCreateRandom}
-            >
-              Create Random Network
-            </button>
-          </CollapsibleSection>
+          )}
+          
+          <button
+            className="btn btn-sm btn-primary w-full"
+            onClick={handleCreateNetwork}
+          >
+            Create Network
+          </button>
         </div>
-      )}
+      </CollapsibleSection>
+      
+      {/* Element Operations */}
+      <CollapsibleSection title="Element Operations" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div className="card p-4 flex items-center space-x-4">
+            <div className="p-2 bg-gray-100 rounded-full">
+              <FaPlus className="text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium">Add Node</h3>
+              <p className="text-sm text-gray-500">Add a new node to the network</p>
+            </div>
+            <button 
+              className={`btn btn-sm ${interactionMode === 'addNode' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleSetMode('addNode')}
+            >
+              {interactionMode === 'addNode' ? 'Cancel' : 'Add'}
+            </button>
+          </div>
+          
+          <div className="card p-4 flex items-center space-x-4">
+            <div className="p-2 bg-gray-100 rounded-full">
+              <FaPlus className="text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium">Add Edge</h3>
+              <p className="text-sm text-gray-500">Connect nodes with an edge</p>
+            </div>
+            <button 
+              className={`btn btn-sm ${interactionMode === 'addEdge' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleSetMode('addEdge')}
+            >
+              {interactionMode === 'addEdge' ? 'Cancel' : 'Add'}
+            </button>
+          </div>
+          
+          <div className="card p-4 flex items-center space-x-4">
+            <div className="p-2 bg-gray-100 rounded-full">
+              <FaTrash className="text-red-500" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium">Delete Elements</h3>
+              <p className="text-sm text-gray-500">Remove nodes or edges</p>
+            </div>
+            <button 
+              className={`btn btn-sm ${interactionMode === 'delete' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleSetMode('delete')}
+            >
+              {interactionMode === 'delete' ? 'Cancel' : 'Delete'}
+            </button>
+          </div>
+        </div>
+      </CollapsibleSection>
       
       {/* File Operations */}
       <CollapsibleSection title="File Operations" defaultExpanded={true}>

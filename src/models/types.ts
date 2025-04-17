@@ -58,6 +58,7 @@ export interface NetworkMetadata {
  * Parameters for creating a lattice network
  */
 export interface LatticeNetworkParams {
+  name?: string; // Custom name for the network
   rows: number; // Number of rows
   columns: number; // Number of columns
   defaultIntertwiner?: number; // Default intertwiner value for all nodes
@@ -70,6 +71,7 @@ export interface LatticeNetworkParams {
  * Parameters for creating a circular network
  */
 export interface CircularNetworkParams {
+  name?: string; // Custom name for the network
   nodes: number; // Number of nodes in the circle
   radius?: number; // Circle radius
   defaultIntertwiner?: number; // Default intertwiner value for all nodes
@@ -83,6 +85,7 @@ export interface CircularNetworkParams {
  * Parameters for creating a random network
  */
 export interface RandomNetworkParams {
+  name?: string; // Custom name for the network
   nodes: number; // Number of nodes
   edgeProbability: number; // Probability of edge between any two nodes (0-1)
   defaultIntertwiner?: number; // Default intertwiner value for all nodes

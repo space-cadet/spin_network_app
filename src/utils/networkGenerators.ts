@@ -29,7 +29,7 @@ export function createLatticeNetwork(params: LatticeNetworkParams): SpinNetwork 
   } = params;
   
   // Create empty network with metadata
-  const network = createEmptyNetwork('Lattice Network');
+  const network = createEmptyNetwork(params.name || 'Lattice Network');
   network.metadata.type = 'lattice';
   network.metadata.properties = {
     rows,
@@ -110,7 +110,7 @@ export function createCircularNetwork(params: CircularNetworkParams): SpinNetwor
   } = params;
   
   // Create empty network with metadata
-  const network = createEmptyNetwork('Circular Network');
+  const network = createEmptyNetwork(params.name || 'Circular Network');
   network.metadata.type = 'circular';
   network.metadata.properties = {
     nodes: nodeCount,
@@ -209,7 +209,7 @@ export function createRandomNetwork(params: RandomNetworkParams): SpinNetwork {
   } = params;
   
   // Create empty network with metadata
-  const network = createEmptyNetwork('Random Network');
+  const network = createEmptyNetwork(params.name || 'Random Network');
   network.metadata.type = 'random';
   network.metadata.properties = {
     nodes: nodeCount,

@@ -263,52 +263,56 @@ const Workspace: React.FC = () => {
       />
       
       {/* Cytoscape container with visualizations */}
-      <div className="relative flex-1">
-        {/* Main Cytoscape visualization */}
-        <CytoscapeManager
-          network={network}
-          styles={networkStyles}
-          mode={mode}
-          onSelect={handleSelect}
-          onUnselect={handleUnselect}
-          onZoomChange={handleZoomChange}
-          onCytoscapeReady={setCy}
-        />
-        
-        {/* Network interaction manager - non-visual component */}
-        {cy && (
-          <NetworkInteractionManager
-            cy={cy}
+      <div className="relative flex-1 overflow-hidden">
+        {/* Create a container that can scroll while keeping zoom controls fixed */}
+        <div className="h-full overflow-auto relative">
+          {/* Main Cytoscape visualization */}
+          <CytoscapeManager
             network={network}
+            styles={networkStyles}
             mode={mode}
-            onAddNode={handleAddNode}
-            onAddEdge={handleAddEdge}
-            onDeleteNode={handleDeleteNode}
-            onDeleteEdge={handleDeleteEdge}
-            onClearSelection={() => dispatch(clearSelection())}
-            onConvertPlaceholder={handleConvertPlaceholder}
-            onEdgeSourceChange={setEdgeSourceId}
-            defaultNodeIntertwiner={defaultNodeIntertwiner}
-            defaultEdgeSpin={defaultEdgeSpin}
+            onSelect={handleSelect}
+            onUnselect={handleUnselect}
+            onZoomChange={handleZoomChange}
+            onCytoscapeReady={setCy}
           />
-        )}
+          
+          {/* Network interaction manager - non-visual component */}
+          {cy && (
+            <NetworkInteractionManager
+              cy={cy}
+              network={network}
+              mode={mode}
+              onAddNode={handleAddNode}
+              onAddEdge={handleAddEdge}
+              onDeleteNode={handleDeleteNode}
+              onDeleteEdge={handleDeleteEdge}
+              onClearSelection={() => dispatch(clearSelection())}
+              onConvertPlaceholder={handleConvertPlaceholder}
+              onEdgeSourceChange={setEdgeSourceId}
+              defaultNodeIntertwiner={defaultNodeIntertwiner}
+              defaultEdgeSpin={defaultEdgeSpin}
+            />
+          )}
+          
+          {/* Simulation visualization manager - non-visual component */}
+          {cy && (
+            <SimulationVisualizationManager
+              cy={cy}
+              simulation={simulation}
+              adapter={cytoscapeAdapter}
+            />
+          )}
+        </div>
         
-        {/* Simulation visualization manager - non-visual component */}
-        {cy && (
-          <SimulationVisualizationManager
-            cy={cy}
-            simulation={simulation}
-            adapter={cytoscapeAdapter}
-          />
-        )}
-        
-        {/* Zoom controls */}
-        <div className="absolute bottom-4 right-4 z-10">
+        {/* Zoom controls in separate layer to stay fixed */}
+        <div className="absolute bottom-4 right-4 z-10 pointer-events-auto">
           <ZoomControls
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
             onZoomFit={handleZoomFit}
             zoomLevel={zoomLevel}
+            className="bg-white bg-opacity-90 shadow-md"
           />
         </div>
       </div>

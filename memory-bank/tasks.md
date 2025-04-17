@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 17, 2025 (14:30 IST)*
+*Last Updated: April 17, 2025 (15:45 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -14,8 +14,43 @@
 | T12 | Fix Numerical Stability and Add Graph Config | ⏸️ PAUSED | HIGH | 2025-04-16 | T10 | Deepak |
 | T13 | Standalone Library Feature Analysis | ✅ COMPLETE | HIGH | 2025-04-16 | T1 | Deepak |
 | T14 | State Management Architecture for Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-17 | T13, T1 | Deepak |
+| T15 | UI Improvement for Network Visualization and Creation | ✅ COMPLETE | MEDIUM | 2025-04-17 | - | Deepak |
 
 ## Task Details
+
+### T15: UI Improvement for Network Visualization and Creation
+**Description**: Improve user experience by fixing zoom controls visibility during scrolling and redesigning the network creation interface to be more intuitive and streamlined.
+**Status**: ✅ COMPLETE
+**Priority**: MEDIUM
+**Started**: April 17, 2025
+**Last Active**: April 17, 2025 (15:45 IST)
+**Completed**: April 17, 2025 (15:45 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Fix zoom controls to remain visible when scrolling in the network visualization panel
+- ✅ Implement a streamlined network creation interface that unifies all network types
+- ✅ Implement a single network name field applicable to all network types
+- ✅ Create an intuitive network type selector with visual indicators
+- ✅ Show parameters conditionally based on the selected network type
+- ✅ Update model types to include name property for all network parameter interfaces
+- ✅ Modify network generator functions to use the provided custom names
+
+**Related Files**:
+- `/src/components/workspace/Workspace.tsx`
+- `/src/components/tools/NetworkTools.tsx`
+- `/src/models/types.ts`
+- `/src/utils/networkGenerators.ts`
+
+**Notes**:
+Successfully improved the UI by:
+1. Fixing zoom controls visibility during scrolling by restructuring the container to have a dedicated scrollable area while keeping controls fixed
+2. Completely redesigning the network creation interface to replace tabs with a unified, more intuitive approach
+3. Adding a single network name field that applies to all network types
+4. Creating a visual network type selector with icons and descriptions
+5. Implementing conditional parameter display based on the selected network type
+6. Updating model types and generator functions to properly support custom network naming
+
+These changes significantly improve the usability of the application, making it more intuitive for users to create and work with different types of networks.
 
 ### T14: State Management Architecture for Standalone Library
 **Description**: Design a comprehensive state management and event communication system for the standalone library to ensure complete separation from React/Redux dependencies. Update architecture diagram and enhancement plan to reflect the framework-agnostic approach.
@@ -398,6 +433,7 @@ The enhanced test pages will serve as educational resources to help users unders
 | T8 | Implement Edit History File Rotation | 2025-04-15 | - |
 | T11 | Fix Library Build Errors | 2025-04-16 | T10 |
 | T13 | Standalone Library Feature Analysis | 2025-04-16 | T1 |
+| T15 | UI Improvement for Network Visualization and Creation | 2025-04-17 | - |
 
 ### T4: Fix PrimeReact Dropdown Transparency
 **Description**: Fix transparency issue in PrimeReact dropdown components, particularly in the Application Logs panel's MultiSelect filter. Improve styling to match the application's design system.
@@ -440,6 +476,7 @@ graph TD
     T12[T12: Fix Numerical Stability and Add Graph Config]
     T13[T13: Standalone Library Feature Analysis]
     T14[T14: State Management Architecture]
+    T15[T15: UI Improvement for Network Visualization]
     
     T0 --> T1
     T1 --> T2
