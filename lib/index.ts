@@ -18,6 +18,9 @@ export * from './adapters';
 // Utilities
 export * from './utils';
 
+// Graph Templates
+export * from './templates';
+
 // Factory functions for easy instantiation
 import { SpinNetworkGraph } from './core/graph';
 import { SimulationStateVector } from './core/stateVector';
@@ -51,4 +54,49 @@ export function createGraph(): SimulationGraph {
  */
 export function createStateVector(nodeIds: string[]): SimulationStateVector {
   return new SimulationStateVector(nodeIds);
+}
+
+// Import template functionality
+import { 
+  createGraphTemplate,
+  LineGraphOptions,
+  RingGraphOptions,
+  GridGraphOptions,
+  RandomGraphOptions
+} from './templates';
+
+/**
+ * Creates a line graph with the specified configuration
+ * @param options Configuration options for the line graph
+ * @returns A new graph with a line structure
+ */
+export function createLineGraph(options: LineGraphOptions = {}): SimulationGraph {
+  return createGraphTemplate('line', createGraph(), options);
+}
+
+/**
+ * Creates a ring graph with the specified configuration
+ * @param options Configuration options for the ring graph
+ * @returns A new graph with a ring structure
+ */
+export function createRingGraph(options: RingGraphOptions = {}): SimulationGraph {
+  return createGraphTemplate('ring', createGraph(), options);
+}
+
+/**
+ * Creates a grid graph with the specified configuration
+ * @param options Configuration options for the grid graph
+ * @returns A new graph with a grid structure
+ */
+export function createGridGraph(options: GridGraphOptions = {}): SimulationGraph {
+  return createGraphTemplate('grid', createGraph(), options);
+}
+
+/**
+ * Creates a random graph with the specified configuration
+ * @param options Configuration options for the random graph
+ * @returns A new graph with a random structure
+ */
+export function createRandomGraph(options: RandomGraphOptions = {}): SimulationGraph {
+  return createGraphTemplate('random', createGraph(), options);
 }
