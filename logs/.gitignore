@@ -1,0 +1,12 @@
+# Ignore all files in logs directories
+*
+!*/
+!.gitignore
+!.gitkeep
+!README.md
+
+# Ignore specific file types in all subdirectories
+**/*.log
+**/*.json
+**/*.csv
+**/*.txt
