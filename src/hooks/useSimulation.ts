@@ -564,7 +564,6 @@ export const useSimulation = () => {
         historyInterval: 1
       };
       
-      // Initialize engine with enhanced parameters - properly cast to compatible type
       // Create a type-safe version by ensuring nodeId exists in initialStateParams
       const safeParameters = {
         ...enhancedParameters,
@@ -573,7 +572,10 @@ export const useSimulation = () => {
           nodeId: enhancedParameters.initialStateParams.nodeId || ''
         }
       };
-      engineRef.current.initialize(graphRef.current, safeParameters as import('../simulation/core/types').SimulationParameters);
+      
+      // Use type assertion with as unknown as intermediate step to avoid type mismatch
+      const compatibleParams = safeParameters as unknown as import('../simulation/core/types').SimulationParameters;
+      engineRef.current.initialize(graphRef.current, compatibleParams);
       
       // Verify initial state
       const initialState = engineRef.current.getCurrentState();

@@ -1,18 +1,51 @@
 # Error Log
 
-*Last Updated: April 17, 2025 (19:30 IST)*
+*Last Updated: 2025-04-17*
 
-<!-- 
-This file contains errors encountered during development, their causes, and resolutions.
-Each entry should include:
-1. Timestamp and task ID
-2. Affected file(s)
-3. Error message
-4. Cause analysis
-5. Resolution steps
-6. Code changes made
-7. Related task reference
--->
+## 2025-04-17: TypeScript Build Errors in lib/utils/simulationLogger.ts
+
+**File:** `/Users/deepak/code/spin_network_app/lib/utils/simulationLogger.ts`
+
+**Error Messages:**
+```
+lib/utils/simulationLogger.ts:822:51 - error TS2551: Property 'general' does not exist on type 'typeof LogCategory'. Did you mean 'GENERAL'?
+822     const prefix = `[${timestamp}] [${LogCategory[entry.category] || entry.category}]`;
+                                                    ~~~~~~~~~~~~~~
+
+lib/utils/simulationLogger.ts:927:13 - error TS18048: 'window.fs' is possibly 'undefined'.
+927             window.fs.mkdir(simulationPath, { recursive: true }, (err) => {
+                ~~~~~~~~~
+
+lib/utils/simulationLogger.ts:934:17 - error TS18048: 'window.fs' is possibly 'undefined'.
+934                 window.fs.mkdir(sessionsPath, { recursive: true }, (err) => {
+                    ~~~~~~~~~
+
+lib/utils/simulationLogger.ts:942:21 - error TS18048: 'window.fs' is possibly 'undefined'.
+942                     window.fs.writeFile(
+                        ~~~~~~~~~
+```
+
+**Cause:**
+1. The LogCategory enum was incorrectly referenced with a lowercase 'general' property that doesn't exist in the enum (which has uppercase 'GENERAL')
+2. Window.fs was being accessed without proper null checks, causing TypeScript to flag potential undefined references
+
+**Fix:**
+1. For the LogCategory reference error, added type checking to handle both string and enum types:
+   ```typescript
+   const prefix = `[${timestamp}] [${typeof entry.category === 'string' ? entry.category : LogCategory[entry.category]}]`;
+   ```
+
+2. For window.fs undefined errors, added null checking before each use:
+   ```typescript
+   if (window.fs) {
+     window.fs.mkdir(simulationPath, { recursive: true }, (err) => {
+       // ...
+     });
+   }
+   ```
+
+**Affected Files:**
+- `/Users/deepak/code/spin_network_app/lib/utils/simulationLogger.ts`
 
 ## 2025-04-17 19:30 IST: T17 - TypeScript Build Errors
 

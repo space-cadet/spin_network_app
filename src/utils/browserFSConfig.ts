@@ -10,31 +10,7 @@
 // This ensures BrowserFS is loaded into the global scope properly
 // We're not using import directly since BrowserFS wasn't designed for ESM
 
-// Type definitions for BrowserFS global objects
-interface BrowserFSModule {
-  configure: (config: any, callback: (err?: any) => void) => void;
-  BFSRequire: (module: string) => any;
-}
-
-// Node.js-like filesystem interface
-interface FileSystem {
-  readFile: any;
-  writeFile: any;
-  readFileSync: any;
-  writeFileSync: any;
-  mkdirSync: any;
-  existsSync: any;
-  [key: string]: any; // Allow any other methods
-}
-
-// Extend Window interface without conflicts
-declare global {
-  interface Window {
-    BrowserFS: BrowserFSModule; // Remove optional flag and use exact type
-    fs: FileSystem; // Use our FileSystem interface
-    path: any;
-  }
-}
+// No need to redefine types as they're now in global.d.ts
 
 /**
  * Initialize BrowserFS with IndexedDB backend
@@ -64,7 +40,7 @@ export function initializeBrowserFS(): Promise<void> {
 
 // Helper function to configure BrowserFS
 function configureFS(resolve: () => void, reject: (error: Error) => void): void {
-  if (!window.BrowserFS) {
+  if (!window || !window.BrowserFS) {
     return reject(new Error('BrowserFS not available. Library might not be loaded correctly.'));
   }
   
@@ -82,6 +58,11 @@ function configureFS(resolve: () => void, reject: (error: Error) => void): void 
     }
     
     // BrowserFS is initialized and ready to use
+    if (!window.BrowserFS) {
+      reject(new Error('BrowserFS disappeared after configuration. This should not happen.'));
+      return;
+    }
+    
     // Assign to window.fs for compatibility with existing code
     const fs = window.BrowserFS.BFSRequire('fs');
     const path = window.BrowserFS.BFSRequire('path');

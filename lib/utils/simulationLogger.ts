@@ -7,16 +7,12 @@
  */
 
 import { SimulationParameters } from '../core/types';
-import * as fs from 'fs';
-import * as path from 'path';
 
-// Add BrowserFS import if in browser environment
-declare global {
-  interface Window {
-    BrowserFS?: any;
-    fs?: any;
-  }
-}
+// Use type imports instead of value imports to avoid conflicts
+import type * as fsType from 'fs';
+import type * as pathType from 'path';
+
+// No need to redeclare global types as they're now in global.d.ts
 
 /**
  * Initialize BrowserFS for browser environments
@@ -45,6 +41,13 @@ export function initBrowserFileSystem(): Promise<boolean> {
       if (err) {
         console.error('Failed to initialize BrowserFS:', err);
         reject(err);
+        return;
+      }
+      
+      // Verify BrowserFS is still available after configuration
+      if (!window.BrowserFS) {
+        console.error('BrowserFS disappeared after configuration');
+        reject(new Error('BrowserFS disappeared after configuration'));
         return;
       }
       
@@ -295,6 +298,12 @@ export class SimulationLogger {
    */
   private _writeLogUsingBrowserFS(entry: LogEntry): void {
     try {
+      // Safety check
+      if (!window || !window.fs) {
+        console.error('Browser filesystem API not available.');
+        return;
+      }
+      
       const logType = this._getCategoryLogType(entry.category);
       const fileName = this._getLogFileName(entry.category);
       const logMessage = this._formatLogMessage(entry);
@@ -326,6 +335,18 @@ export class SimulationLogger {
    */
   private _writeLogUsingNodeFS(entry: LogEntry): void {
     try {
+      // Safety check
+      if (typeof fs === 'undefined' || !fs) {
+        console.error('Node.js filesystem API not available.');
+        return;
+      }
+      
+      // Safety check for path
+      if (typeof path === 'undefined' || !path) {
+        console.error('Node.js path module not available.');
+        return;
+      }
+      
       const logType = this._getCategoryLogType(entry.category);
       const fileName = this._getLogFileName(entry.category);
       const logMessage = this._formatLogMessage(entry);
@@ -349,6 +370,12 @@ export class SimulationLogger {
    */
   private _ensureDirectoryExists(logType: string): void {
     try {
+      // Safety check
+      if (!window || !window.fs) {
+        console.error('Browser filesystem API not available.');
+        return;
+      }
+      
       const fullPath = `${this._config.logsDirectory}/simulation/${logType}`;
       
       console.debug(`Ensuring directory exists: ${fullPath}`);
@@ -357,9 +384,10 @@ export class SimulationLogger {
       try {
         window.fs.mkdirSync(fullPath, { recursive: true });
         console.debug(`Created or confirmed directory: ${fullPath}`);
-      } catch (mkdirErr) {
+      } catch (mkdirErr: any) {
+        // Explicitly type mkdirErr as any to handle code property
         // Ignore if directory already exists
-        if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+        if (mkdirErr && typeof mkdirErr === 'object' && 'code' in mkdirErr && mkdirErr.code !== 'EEXIST') {
           console.error(`Error creating directory ${fullPath}:`, mkdirErr);
         }
       }
@@ -791,7 +819,7 @@ export class SimulationLogger {
    */
   private _outputToConsole(entry: LogEntry): void {
     const timestamp = new Date(entry.timestamp).toISOString();
-    const prefix = `[${timestamp}] [${LogCategory[entry.category] || entry.category}]`;
+    const prefix = `[${timestamp}] [${typeof entry.category === 'string' ? entry.category : LogCategory[entry.category]}]`;
     
     switch (entry.level) {
       case LogLevel.DEBUG:
@@ -889,46 +917,56 @@ export function testFileSystemAccess(): void {
         console.log(`- ${sessionsPath}`);
         
         // Create logs directory
-        window.fs.mkdir(logsPath, { recursive: true }, (err) => {
-          if (err && err.code !== 'EEXIST') {
-            console.error(`Failed to create logs directory: ${err.message}`);
-          } else {
-            console.log(`Created or verified logs directory: ${logsPath}`);
-            
-            // Create simulation directory
-            window.fs.mkdir(simulationPath, { recursive: true }, (err) => {
-              if (err && err.code !== 'EEXIST') {
-                console.error(`Failed to create simulation directory: ${err.message}`);
-              } else {
-                console.log(`Created or verified simulation directory: ${simulationPath}`);
-                
-                // Create sessions directory
-                window.fs.mkdir(sessionsPath, { recursive: true }, (err) => {
+        if (window.fs) {
+          window.fs.mkdir(logsPath, { recursive: true }, (err) => {
+            if (err && err.code !== 'EEXIST') {
+              console.error(`Failed to create logs directory: ${err.message}`);
+            } else {
+              console.log(`Created or verified logs directory: ${logsPath}`);
+              
+              // Create simulation directory
+              if (window.fs) {
+                window.fs.mkdir(simulationPath, { recursive: true }, (err) => {
                   if (err && err.code !== 'EEXIST') {
-                    console.error(`Failed to create sessions directory: ${err.message}`);
+                    console.error(`Failed to create simulation directory: ${err.message}`);
                   } else {
-                    console.log(`Created or verified sessions directory: ${sessionsPath}`);
+                    console.log(`Created or verified simulation directory: ${simulationPath}`);
                     
-                    // Try to write a test file
-                    const testPath = `${sessionsPath}/test-log-${Date.now()}.txt`;
-                    window.fs.writeFile(
-                      testPath,
-                      'File system test - ' + new Date().toISOString(),
-                      { encoding: 'utf8' },
-                      (err) => {
-                        if (err) {
-                          console.error(`Failed to write test file: ${err.message}`);
+                    // Create sessions directory
+                    if (window.fs) {
+                      window.fs.mkdir(sessionsPath, { recursive: true }, (err) => {
+                        if (err && err.code !== 'EEXIST') {
+                          console.error(`Failed to create sessions directory: ${err.message}`);
                         } else {
-                          console.log(`Successfully wrote test file to: ${testPath}`);
+                          console.log(`Created or verified sessions directory: ${sessionsPath}`);
+                          
+                          // Try to write a test file
+                          const testPath = `${sessionsPath}/test-log-${Date.now()}.txt`;
+                          if (window.fs) {
+                            window.fs.writeFile(
+                              testPath,
+                              'File system test - ' + new Date().toISOString(),
+                              { encoding: 'utf8' },
+                              (err) => {
+                                if (err) {
+                                  console.error(`Failed to write test file: ${err.message}`);
+                                } else {
+                                  console.log(`Successfully wrote test file to: ${testPath}`);
+                                }
+                              }
+                            );
+                          }
                         }
-                      }
-                    );
+                      });
+                    }
                   }
                 });
               }
-            });
-          }
-        });
+            }
+          });
+        } else {
+          console.error('window.fs is not available');
+        }
       } catch (error) {
         console.error('Error creating test directories or file:', error);
       }
