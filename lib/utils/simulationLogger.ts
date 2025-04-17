@@ -2,10 +2,59 @@
  * Simulation Logger
  * 
  * Provides structured logging for simulation events, with special handling
- * for numerical stability issues and performance tracking.
+ * for numerical stability issues and performance tracking. Also supports
+ * file-based logging for persistence and analysis.
  */
 
 import { SimulationParameters } from '../core/types';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Add BrowserFS import if in browser environment
+declare global {
+  interface Window {
+    BrowserFS?: any;
+    fs?: any;
+  }
+}
+
+/**
+ * Initialize BrowserFS for browser environments
+ * This must be called before attempting to use file logging in the browser
+ */
+export function initBrowserFileSystem(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    // Skip if we're not in a browser environment
+    if (typeof window === 'undefined') {
+      resolve(false);
+      return;
+    }
+    
+    // Check if BrowserFS is available
+    if (!window.BrowserFS) {
+      console.warn('BrowserFS library not loaded. File logging will be disabled.');
+      resolve(false);
+      return;
+    }
+    
+    // Initialize BrowserFS with an IndexedDB backend for persistence
+    window.BrowserFS.configure({
+      fs: "IndexedDB",
+      options: {}
+    }, (err: Error | null) => {
+      if (err) {
+        console.error('Failed to initialize BrowserFS:', err);
+        reject(err);
+        return;
+      }
+      
+      // Assign the BrowserFS file system to window.fs
+      window.fs = window.BrowserFS.BFSRequire('fs');
+      console.log('BrowserFS initialized successfully. File logging enabled.');
+      resolve(true);
+    });
+  });
+}
 
 /**
  * Log levels for simulation events
@@ -50,21 +99,78 @@ export interface SimulationLoggerConfig {
   throttleWarnings: boolean;
   throttleInterval: number;
   maxEntries: number;
+  enableFileLogging: boolean;
+  logsDirectory: string;
+}
+
+/**
+ * Simulation state enum for lifecycle events
+ */
+export enum SimulationState {
+  CREATED = 'created',
+  STARTED = 'started',
+  PAUSED = 'paused',
+  RESUMED = 'resumed',
+  STOPPED = 'stopped'
+}
+
+/**
+ * Graph data interface for logging graph information
+ */
+export interface GraphData {
+  id: string;
+  type: string;
+  nodeCount: number;
+  edgeCount: number;
+  parameters: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Simulation result data for logging
+ */
+export interface SimulationResultData {
+  time: number;
+  conservation?: {
+    totalProbability: number;
+    normVariation?: number;
+    positivity?: boolean;
+  };
+  geometric?: {
+    totalVolume?: number;
+    totalArea?: number;
+    effectiveDimension?: number;
+    volumeEntropy?: number;
+  };
+  statistics?: {
+    mean?: number;
+    variance?: number;
+    skewness?: number;
+    kurtosis?: number;
+  };
 }
 
 /**
  * SimulationLogger class
  */
 export class SimulationLogger {
-  private _config: SimulationLoggerConfig;
-  private _logs: LogEntry[] = [];
-  private _lastWarnings: Map<string, number> = new Map();
-  private _stabilityMetrics: {
+  // Changed to protected to allow access from test functions
+  protected _config: SimulationLoggerConfig;
+  protected _logs: LogEntry[] = [];
+  protected _lastWarnings: Map<string, number> = new Map();
+  protected _stabilityMetrics: {
     timestep: number;
     maxVolume: number;
     normalizations: number;
     lastNormalizationTime: number | null;
   };
+  protected _sessionId: string | null = null;
+  protected _graphId: string | null = null;
+  protected _simulationState: SimulationState | null = null;
+  protected _resultsCount: number = 0;
+  protected _lastResultsTime: number = 0;
+  protected _resultsLogInterval: number = 5000; // ms between results logs
+  protected _autoSaveResults: boolean = true;
 
   /**
    * Create a new SimulationLogger instance
@@ -77,6 +183,8 @@ export class SimulationLogger {
       throttleWarnings: true,
       throttleInterval: 1000, // ms
       maxEntries: 1000,
+      enableFileLogging: false,
+      logsDirectory: './logs',
       ...config
     };
 
@@ -87,6 +195,26 @@ export class SimulationLogger {
       normalizations: 0,
       lastNormalizationTime: null
     };
+
+    // Generate a session ID
+    this._generateSessionId();
+  }
+
+  /**
+   * Generate a unique session ID
+   */
+  private _generateSessionId(): void {
+    const timestamp = new Date();
+    const year = timestamp.getFullYear();
+    const month = String(timestamp.getMonth() + 1).padStart(2, '0');
+    const day = String(timestamp.getDate()).padStart(2, '0');
+    const hours = String(timestamp.getHours()).padStart(2, '0');
+    const minutes = String(timestamp.getMinutes()).padStart(2, '0');
+    const seconds = String(timestamp.getSeconds()).padStart(2, '0');
+    const ms = String(timestamp.getMilliseconds()).padStart(3, '0');
+    const randomStr = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    
+    this._sessionId = `sim-${year}${month}${day}-${hours}${minutes}${seconds}-${ms}-${randomStr}`;
   }
 
   /**
@@ -133,9 +261,173 @@ export class SimulationLogger {
       this._outputToConsole(entry);
     }
 
+    // Write to file if enabled
+    if (this._config.enableFileLogging) {
+      this._writeLogToFile(entry);
+    }
+
     // Update stability metrics if relevant
     if (category === LogCategory.STABILITY && data && typeof data.volume === 'number') {
       this._updateStabilityMetrics(data);
+    }
+  }
+
+  /**
+   * Write log entry to file
+   */
+  private _writeLogToFile(entry: LogEntry): void {
+    try {
+      // If browser environment, use window.fs
+      if (typeof window !== 'undefined' && window.fs) {
+        this._writeLogUsingBrowserFS(entry);
+      }
+      // If Node.js environment, use fs module
+      else if (typeof fs !== 'undefined' && fs.appendFileSync) {
+        this._writeLogUsingNodeFS(entry);
+      }
+    } catch (error) {
+      console.error('Error writing log to file:', error);
+    }
+  }
+
+  /**
+   * Write log using browser's window.fs API
+   */
+  private _writeLogUsingBrowserFS(entry: LogEntry): void {
+    try {
+      const logType = this._getCategoryLogType(entry.category);
+      const fileName = this._getLogFileName(entry.category);
+      const logMessage = this._formatLogMessage(entry);
+      
+      // Create directory if it doesn't exist
+      this._ensureDirectoryExists(logType);
+      
+      // Log the attempt to help with debugging
+      console.debug(`Attempting to write log to: ${this._config.logsDirectory}/simulation/${logType}/${fileName}`);
+      
+      // Append to log file
+      window.fs.appendFile(
+        `${this._config.logsDirectory}/simulation/${logType}/${fileName}`,
+        logMessage + '\n',
+        { encoding: 'utf8' },
+        (err) => {
+          if (err) {
+            console.error(`Error writing to log file: ${err.message}`);
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Error using browser FS:', error);
+    }
+  }
+
+  /**
+   * Write log using Node.js fs module
+   */
+  private _writeLogUsingNodeFS(entry: LogEntry): void {
+    try {
+      const logType = this._getCategoryLogType(entry.category);
+      const fileName = this._getLogFileName(entry.category);
+      const logMessage = this._formatLogMessage(entry);
+      const dirPath = path.join(this._config.logsDirectory, 'simulation', logType);
+      const filePath = path.join(dirPath, fileName);
+      
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+      
+      // Append to log file
+      fs.appendFileSync(filePath, logMessage + '\n', 'utf8');
+    } catch (error) {
+      console.error('Error using Node FS:', error);
+    }
+  }
+
+  /**
+   * Ensure directory exists (for browser FS)
+   */
+  private _ensureDirectoryExists(logType: string): void {
+    try {
+      const fullPath = `${this._config.logsDirectory}/simulation/${logType}`;
+      
+      console.debug(`Ensuring directory exists: ${fullPath}`);
+      
+      // Check if directory exists synchronously to avoid race conditions
+      try {
+        window.fs.mkdirSync(fullPath, { recursive: true });
+        console.debug(`Created or confirmed directory: ${fullPath}`);
+      } catch (mkdirErr) {
+        // Ignore if directory already exists
+        if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+          console.error(`Error creating directory ${fullPath}:`, mkdirErr);
+        }
+      }
+    } catch (error) {
+      console.error('Error ensuring directory exists:', error);
+    }
+  }
+
+  /**
+   * Get log file type based on category
+   */
+  private _getCategoryLogType(category: LogCategory): string {
+    switch (category) {
+      case LogCategory.STABILITY:
+        return 'stability';
+      case LogCategory.PERFORMANCE:
+        return 'performance';
+      case LogCategory.GRAPH:
+        return 'graphs';
+      case LogCategory.STATE:
+      case LogCategory.MODEL:
+      case LogCategory.SOLVER:
+      case LogCategory.GENERAL:
+      default:
+        return 'sessions';
+    }
+  }
+
+  /**
+   * Get log filename based on category
+   */
+  private _getLogFileName(category: LogCategory): string {
+    const date = new Date();
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    
+    switch (category) {
+      case LogCategory.STABILITY:
+        return `stability-${this._sessionId}.log`;
+      case LogCategory.PERFORMANCE:
+        return `performance-${this._sessionId}.log`;
+      case LogCategory.GRAPH:
+        return `graph-${this._graphId || 'unknown'}.json`;
+      default:
+        return `session-${this._sessionId}.log`;
+    }
+  }
+
+  /**
+   * Format log message for file output
+   */
+  private _formatLogMessage(entry: LogEntry): string {
+    const timestamp = new Date(entry.timestamp).toISOString();
+    const level = LogLevel[entry.level];
+    const category = entry.category;
+    
+    if (category === LogCategory.GRAPH) {
+      // For graph category, format as JSON
+      return JSON.stringify({
+        timestamp,
+        level,
+        message: entry.message,
+        data: entry.data,
+        sessionId: this._sessionId
+      }, null, 2);
+    } else {
+      // For other categories, format as log line
+      const dataStr = entry.data ? ` | ${JSON.stringify(entry.data)}` : '';
+      return `[${timestamp}] [${level}] [${category}] ${entry.message}${dataStr}`;
     }
   }
 
@@ -181,6 +473,221 @@ export class SimulationLogger {
     this._stabilityMetrics.normalizations++;
     this._stabilityMetrics.lastNormalizationTime = time;
     this.logStability('State normalized', volume, time);
+  }
+
+  /**
+   * Log graph creation
+   */
+  logGraphCreation(graphData: GraphData): string {
+    // Generate a unique graph ID if not provided
+    if (!graphData.id) {
+      const timestamp = new Date();
+      const dateTimeStr = timestamp.toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+      const randomStr = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      graphData.id = `graph-${dateTimeStr}-${randomStr}`;
+    }
+    
+    // Store graph ID for later use
+    this._graphId = graphData.id;
+    
+    // Log the graph creation
+    this.info(LogCategory.GRAPH, `Graph created: ${graphData.type} with ${graphData.nodeCount} nodes and ${graphData.edgeCount} edges`, graphData);
+    
+    // If file logging enabled, write graph data to file
+    if (this._config.enableFileLogging) {
+      this._writeGraphToFile(graphData);
+    }
+    
+    return graphData.id;
+  }
+
+  /**
+   * Write graph data to file
+   */
+  private _writeGraphToFile(graphData: GraphData): void {
+    try {
+      const graphFileName = `graph-${graphData.id}.json`;
+      const graphContent = JSON.stringify({
+        id: graphData.id,
+        timestamp: Date.now(),
+        sessionId: this._sessionId,
+        type: graphData.type,
+        nodeCount: graphData.nodeCount,
+        edgeCount: graphData.edgeCount,
+        parameters: graphData.parameters,
+        metadata: graphData.metadata || {}
+      }, null, 2);
+      
+      // If browser environment, use window.fs
+      if (typeof window !== 'undefined' && window.fs) {
+        // Ensure directory exists
+        this._ensureDirectoryExists('graphs');
+        
+        // Write graph data
+        window.fs.writeFile(
+          `${this._config.logsDirectory}/simulation/graphs/${graphFileName}`,
+          graphContent,
+          { encoding: 'utf8' }
+        );
+      }
+      // If Node.js environment, use fs module
+      else if (typeof fs !== 'undefined' && fs.writeFileSync) {
+        const dirPath = path.join(this._config.logsDirectory, 'simulation', 'graphs');
+        const filePath = path.join(dirPath, graphFileName);
+        
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+        }
+        
+        // Write graph data
+        fs.writeFileSync(filePath, graphContent, 'utf8');
+      }
+    } catch (error) {
+      console.error('Error writing graph to file:', error);
+    }
+  }
+
+  /**
+   * Log simulation state change
+   */
+  logSimulationState(state: SimulationState, data?: any): void {
+    this._simulationState = state;
+    
+    switch (state) {
+      case SimulationState.CREATED:
+        this.info(LogCategory.GENERAL, 'Simulation created', data);
+        break;
+      case SimulationState.STARTED:
+        this.info(LogCategory.GENERAL, 'Simulation started', data);
+        break;
+      case SimulationState.PAUSED:
+        this.info(LogCategory.GENERAL, 'Simulation paused', data);
+        break;
+      case SimulationState.RESUMED:
+        this.info(LogCategory.GENERAL, 'Simulation resumed', data);
+        break;
+      case SimulationState.STOPPED:
+        this.info(LogCategory.GENERAL, 'Simulation stopped', data);
+        break;
+    }
+  }
+
+  /**
+   * Log simulation results
+   */
+  logSimulationResults(results: SimulationResultData): void {
+    // Check if we should log this result (based on time interval)
+    const now = Date.now();
+    if (this._autoSaveResults && now - this._lastResultsTime < this._resultsLogInterval && this._resultsCount > 0) {
+      return; // Skip logging this result
+    }
+    
+    // Update last results time and increment counter
+    this._lastResultsTime = now;
+    this._resultsCount++;
+    
+    // Log the results
+    this.debug(
+      LogCategory.STATE, 
+      `Simulation results at t=${results.time.toFixed(4)}`, 
+      results
+    );
+    
+    // If file logging enabled, write results to file
+    if (this._config.enableFileLogging) {
+      this._writeResultsToFile(results);
+    }
+  }
+
+  /**
+   * Write simulation results to file
+   */
+  private _writeResultsToFile(results: SimulationResultData): void {
+    try {
+      const resultsFileName = `results-${this._sessionId}.csv`;
+      const now = Date.now();
+      
+      // Format as CSV row
+      let row = `${results.time},${now}`;
+      
+      // Add conservation data
+      row += `,${results.conservation?.totalProbability || ''}`;
+      row += `,${results.conservation?.normVariation || ''}`;
+      row += `,${results.conservation?.positivity || ''}`;
+      
+      // Add geometric data
+      row += `,${results.geometric?.totalVolume || ''}`;
+      row += `,${results.geometric?.totalArea || ''}`;
+      row += `,${results.geometric?.effectiveDimension || ''}`;
+      row += `,${results.geometric?.volumeEntropy || ''}`;
+      
+      // Add statistics data
+      row += `,${results.statistics?.mean || ''}`;
+      row += `,${results.statistics?.variance || ''}`;
+      row += `,${results.statistics?.skewness || ''}`;
+      row += `,${results.statistics?.kurtosis || ''}`;
+      
+      // If this is the first result, add header row
+      if (this._resultsCount === 1) {
+        const header = 'simTime,timestamp,totalProbability,normVariation,positivity,totalVolume,totalArea,effectiveDimension,volumeEntropy,mean,variance,skewness,kurtosis\n';
+        
+        // If browser environment, use window.fs
+        if (typeof window !== 'undefined' && window.fs) {
+          // Ensure directory exists
+          this._ensureDirectoryExists('exports');
+          
+          // Write header first
+          window.fs.writeFile(
+            `${this._config.logsDirectory}/simulation/exports/${resultsFileName}`,
+            header,
+            { encoding: 'utf8' }
+          );
+        }
+        // If Node.js environment, use fs module
+        else if (typeof fs !== 'undefined' && fs.writeFileSync) {
+          const dirPath = path.join(this._config.logsDirectory, 'simulation', 'exports');
+          const filePath = path.join(dirPath, resultsFileName);
+          
+          // Create directory if it doesn't exist
+          if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+          }
+          
+          // Write header first
+          fs.writeFileSync(filePath, header, 'utf8');
+        }
+      }
+      
+      // Append data row
+      if (typeof window !== 'undefined' && window.fs) {
+        window.fs.appendFile(
+          `${this._config.logsDirectory}/simulation/exports/${resultsFileName}`,
+          row + '\n',
+          { encoding: 'utf8' }
+        );
+      } else if (typeof fs !== 'undefined' && fs.appendFileSync) {
+        const dirPath = path.join(this._config.logsDirectory, 'simulation', 'exports');
+        const filePath = path.join(dirPath, resultsFileName);
+        fs.appendFileSync(filePath, row + '\n', 'utf8');
+      }
+    } catch (error) {
+      console.error('Error writing results to file:', error);
+    }
+  }
+
+  /**
+   * Set auto-save results flag
+   */
+  setAutoSaveResults(autoSave: boolean): void {
+    this._autoSaveResults = autoSave;
+  }
+
+  /**
+   * Set results log interval
+   */
+  setResultsLogInterval(intervalMs: number): void {
+    this._resultsLogInterval = intervalMs;
   }
 
   /**
@@ -237,6 +744,49 @@ export class SimulationLogger {
   }
 
   /**
+   * Enable file logging
+   */
+  enableFileLogging(directory: string = './logs'): void {
+    this._config.enableFileLogging = true;
+    this._config.logsDirectory = directory;
+  }
+
+  /**
+   * Disable file logging
+   */
+  disableFileLogging(): void {
+    this._config.enableFileLogging = false;
+  }
+
+  /**
+   * Get the current session ID
+   */
+  getSessionId(): string {
+    return this._sessionId || 'unknown-session';
+  }
+
+  /**
+   * Get the current graph ID
+   */
+  getGraphId(): string | null {
+    return this._graphId;
+  }
+
+  /**
+   * Get simulation state
+   */
+  getSimulationState(): SimulationState | null {
+    return this._simulationState;
+  }
+  
+  /**
+   * Get logs directory
+   */
+  getLogsDirectory(): string {
+    return this._config.logsDirectory;
+  }
+
+  /**
    * Output log entry to console
    */
   private _outputToConsole(entry: LogEntry): void {
@@ -275,7 +825,118 @@ export class SimulationLogger {
 /**
  * Default logger instance
  */
-export const defaultLogger = new SimulationLogger();
+export const defaultLogger = new SimulationLogger({
+  enableFileLogging: false, // Disabled by default but can be enabled
+  logsDirectory: '/Users/deepak/code/spin_network_app/logs' // Default path to logs directory
+});
+
+/**
+ * Enable file logging for the default logger with the project logs directory
+ */
+export function enableDefaultLoggerFileLogging(): void {
+  // Initialize BrowserFS first if in browser environment
+  if (typeof window !== 'undefined') {
+    initBrowserFileSystem()
+      .then(initialized => {
+        if (initialized) {
+          console.log('BrowserFS initialized successfully. Enabling file logging.');
+          defaultLogger.enableFileLogging('/Users/deepak/code/spin_network_app/logs');
+        } else {
+          console.warn('BrowserFS initialization failed. File logging will be disabled.');
+        }
+        // Test file system access after initialization attempt
+        testFileSystemAccess();
+      })
+      .catch(err => {
+        console.error('Error initializing BrowserFS:', err);
+        // Still test file system access to see what's available
+        testFileSystemAccess();
+      });
+  } else {
+    // In Node.js environment, enable file logging directly
+    defaultLogger.enableFileLogging('/Users/deepak/code/spin_network_app/logs');
+    testFileSystemAccess();
+  }
+}
+
+/**
+ * Test whether file system is accessible and log paths are correct
+ */
+export function testFileSystemAccess(): void {
+  console.log('Testing file system access...');
+  
+  // Test if we're in browser environment
+  const isBrowser = typeof window !== 'undefined';
+  console.log(`Environment: ${isBrowser ? 'Browser' : 'Node.js'}`);
+  
+  // Get logs directory path via getter
+  const logsPath = (defaultLogger as any).getLogsDirectory();
+  console.log(`Logs directory path: ${logsPath}`);
+  
+  // Test if window.fs exists in browser
+  if (isBrowser) {
+    if (window.fs) {
+      console.log('window.fs API is available.');
+      
+      // Try to create test directories
+      try {
+        const simulationPath = `${logsPath}/simulation`;
+        const sessionsPath = `${logsPath}/simulation/sessions`;
+        
+        console.log(`Trying to create/verify directories:`);
+        console.log(`- ${logsPath}`);
+        console.log(`- ${simulationPath}`);
+        console.log(`- ${sessionsPath}`);
+        
+        // Create logs directory
+        window.fs.mkdir(logsPath, { recursive: true }, (err) => {
+          if (err && err.code !== 'EEXIST') {
+            console.error(`Failed to create logs directory: ${err.message}`);
+          } else {
+            console.log(`Created or verified logs directory: ${logsPath}`);
+            
+            // Create simulation directory
+            window.fs.mkdir(simulationPath, { recursive: true }, (err) => {
+              if (err && err.code !== 'EEXIST') {
+                console.error(`Failed to create simulation directory: ${err.message}`);
+              } else {
+                console.log(`Created or verified simulation directory: ${simulationPath}`);
+                
+                // Create sessions directory
+                window.fs.mkdir(sessionsPath, { recursive: true }, (err) => {
+                  if (err && err.code !== 'EEXIST') {
+                    console.error(`Failed to create sessions directory: ${err.message}`);
+                  } else {
+                    console.log(`Created or verified sessions directory: ${sessionsPath}`);
+                    
+                    // Try to write a test file
+                    const testPath = `${sessionsPath}/test-log-${Date.now()}.txt`;
+                    window.fs.writeFile(
+                      testPath,
+                      'File system test - ' + new Date().toISOString(),
+                      { encoding: 'utf8' },
+                      (err) => {
+                        if (err) {
+                          console.error(`Failed to write test file: ${err.message}`);
+                        } else {
+                          console.log(`Successfully wrote test file to: ${testPath}`);
+                        }
+                      }
+                    );
+                  }
+                });
+              }
+            });
+          }
+        });
+      } catch (error) {
+        console.error('Error creating test directories or file:', error);
+      }
+    } else {
+      console.error('window.fs API is NOT available. File logging will not work in browser environment!');
+    }
+  }
+}
 
 /**
  * Utility function to monitor simulation stability

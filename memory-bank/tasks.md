@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 17, 2025 (19:30 IST)*
+*Last Updated: April 17, 2025 (20:15 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -17,8 +17,35 @@
 | T15 | UI Improvement for Network Visualization and Creation | ✅ COMPLETE | MEDIUM | 2025-04-17 | - | Deepak |
 | T16 | Enhance Simulation Data Export and Visualization | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
 | T17 | Fix TypeScript Build Errors | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
+| T18 | Create Logs Folder Structure | 🔄 IN PROGRESS | MEDIUM | 2025-04-17 | - | Deepak |
 
 ## Task Details
+
+### T18: Create Logs Folder Structure
+**Description**: Create a structured logs folder for storing application and simulation logs, with appropriate organization to separate different log types and establish a consistent format for log storage and retrieval.
+**Status**: 🔄 IN PROGRESS
+**Priority**: MEDIUM
+**Started**: April 17, 2025
+**Last Active**: April 17, 2025 (20:15 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Design appropriate folder structure for different log types
+- ⬜ Create the main logs directory and subdirectories
+- ⬜ Create .gitkeep files to ensure empty directories are tracked
+- ⬜ Create a .gitignore file to ignore log files but track directory structure
+- ⬜ Create a README.md with documentation about the log structure
+- ⬜ Update simulationLogger classes to use this directory structure
+- ⬜ Add rotation policies to manage log file sizes
+
+**Related Files**:
+- `/logs` (new directory to be created)
+- `/logs/README.md` (new file to be created)
+- `/logs/.gitignore` (new file to be created)
+- `/lib/utils/simulationLogger.ts`
+- `/src/simulation/core/simulationLogger.ts`
+
+**Notes**:
+This task will organize all application and simulation logs into a structured directory format, making it easier to find and manage logs. The structure will separate application logs from simulation logs, and further organize them by log type (error, performance, stability, etc.). This standardized approach will improve maintainability and make it easier to implement log rotation and cleanup policies.
 
 ### T17: Fix TypeScript Build Errors
 **Description**: Fix TypeScript build errors preventing the application from building successfully. Focus on type safety issues, null reference prevention, and proper type conversion to improve code robustness.
