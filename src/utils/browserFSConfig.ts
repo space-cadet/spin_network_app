@@ -88,28 +88,54 @@ export function testBrowserFS(): boolean {
     // Try a simple operation to verify it's working
     const fs = window.fs;
     
-    // Create logs directory without using recursive option
-    // Check if directory exists first to avoid errors
-    try {
-      if (!fs.existsSync('/logs')) {
-        fs.mkdirSync('/logs');
+    // Create necessary directories sequentially
+    const directories = ['/', '/logs', '/logs/simulation'];
+    
+    // Create directories one by one
+    for (const dir of directories) {
+      try {
+        if (!fs.existsSync(dir)) {
+          console.log(`Creating directory: ${dir}`);
+          fs.mkdirSync(dir);
+        } else {
+          console.log(`Directory already exists: ${dir}`);
+        }
+      } catch (dirErr) {
+        console.warn(`Could not create directory ${dir}:`, dirErr);
+        // Don't return here, try to continue with the test
       }
-    } catch (dirErr) {
-      console.warn('Could not create logs directory:', dirErr);
-      // Continue with test in root directory if logs creation fails
     }
     
-    // Write a test file - use both sync and async methods to verify
-    const testPath = '/logs/test.txt';
+    // Write a test file in the root directory to avoid path issues
+    const testPath = '/browserfs-test.txt';
     const testData = 'BrowserFS test successful at ' + new Date().toISOString();
     
-    fs.writeFileSync(testPath, testData);
-    
-    // Read the test file
-    const testContent = fs.readFileSync(testPath, { encoding: 'utf8' });
-    console.log('BrowserFS test successful:', testContent);
-    
-    return true;
+    try {
+      fs.writeFileSync(testPath, testData);
+      
+      // Read the test file
+      const testContent = fs.readFileSync(testPath, { encoding: 'utf8' });
+      console.log(`BrowserFS test successful: ${testContent}`);
+      
+      // Check what files exist in the root directory
+      const rootFiles = fs.readdirSync('/');
+      console.log('Files in root directory:', rootFiles);
+      
+      // Check what files exist in the logs directory if it exists
+      try {
+        if (fs.existsSync('/logs')) {
+          const logFiles = fs.readdirSync('/logs');
+          console.log('Files in /logs directory:', logFiles);
+        }
+      } catch (readErr) {
+        console.warn('Could not read /logs directory:', readErr);
+      }
+      
+      return true;
+    } catch (fileErr) {
+      console.error('File operation failed:', fileErr);
+      return false;
+    }
   } catch (err) {
     console.error('BrowserFS test failed:', err);
     return false;

@@ -18,8 +18,37 @@
 | T16 | Enhance Simulation Data Export and Visualization | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
 | T17 | Fix TypeScript Build Errors | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
 | T18 | Create Logs Folder Structure | 🔄 IN PROGRESS | MEDIUM | 2025-04-17 | - | Deepak |
+| T19 | Implement BrowserFS File Viewer | ⬜ NOT STARTED | MEDIUM | 2025-04-17 | T18 | Deepak |
 
 ## Task Details
+
+### T19: Implement BrowserFS File Viewer
+**Description**: Implement a file viewer component that allows browsing, viewing, and managing files stored in the BrowserFS virtual file system. This will enable users to access log files and other data stored in the browser's storage.
+**Status**: ⬜ NOT STARTED
+**Priority**: MEDIUM
+**Started**: April 17, 2025
+**Last Active**: April 17, 2025
+**Dependencies**: T18
+**Completion Criteria**:
+- ⬜ Evaluate and select appropriate library (react-browser-fs-tree or browserfs-explorer)
+- ⬜ Implement file system navigation with directory browsing
+- ⬜ Create file content viewer with format detection
+- ⬜ Add file operations (download, delete)
+- ⬜ Style the component to match application design
+- ⬜ Add integration with simulation logs panel
+- ⬜ Implement search functionality for finding files
+- ⬜ Add error handling for all file operations
+- ⬜ Create proper documentation and usage examples
+
+**Related Files**:
+- `/memory-bank/implementation-details/browserfs-file-viewer.md` (documentation)
+- `/src/components/logs/FileViewer.tsx` (to be created)
+- `/src/hooks/useBrowserFS.ts` (to be created)
+- `/src/utils/browserFSConfig.ts`
+- `/lib/utils/simulationLogger.ts`
+
+**Notes**:
+This component will make it easier to debug and manage log files by providing a direct interface to the virtual file system. It will help users access simulation logs and other data that is currently stored in BrowserFS but not easily accessible through the UI. The implementation will start with a basic viewer using an existing library, with additional features added incrementally.
 
 ### T18: Create Logs Folder Structure
 **Description**: Create a structured logs folder for storing application and simulation logs, with appropriate organization to separate different log types and establish a consistent format for log storage and retrieval.

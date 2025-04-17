@@ -22,6 +22,7 @@ export function initBrowserFileSystem(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     // Skip if we're not in a browser environment
     if (typeof window === 'undefined') {
+      console.log('Not in browser environment, skipping BrowserFS initialization');
       resolve(false);
       return;
     }
@@ -34,9 +35,12 @@ export function initBrowserFileSystem(): Promise<boolean> {
     }
     
     // Initialize BrowserFS with an IndexedDB backend for persistence
+    console.log('Configuring BrowserFS with IndexedDB backend...');
     window.BrowserFS.configure({
       fs: "IndexedDB",
-      options: {}
+      options: {
+        storeName: 'spin-network-fs' // Use the same DB name as in browserFSConfig.ts
+      }
     }, (err: Error | null) => {
       if (err) {
         console.error('Failed to initialize BrowserFS:', err);
@@ -53,7 +57,41 @@ export function initBrowserFileSystem(): Promise<boolean> {
       
       // Assign the BrowserFS file system to window.fs
       window.fs = window.BrowserFS.BFSRequire('fs');
+      window.path = window.BrowserFS.BFSRequire('path');
       console.log('BrowserFS initialized successfully. File logging enabled.');
+      
+      // Create basic directory structure
+      try {
+        const fs = window.fs;
+        
+        // Create root directories
+        const baseDirs = ['/', '/logs', '/logs/simulation'];
+        for (const dir of baseDirs) {
+          try {
+            if (!fs.existsSync(dir)) {
+              console.log(`Creating base directory: ${dir}`);
+              fs.mkdirSync(dir);
+            } else {
+              console.log(`Base directory already exists: ${dir}`);
+            }
+          } catch (dirErr) {
+            console.warn(`Failed to create directory ${dir}:`, dirErr);
+            // Continue with other directories
+          }
+        }
+        
+        // List files in the root to verify
+        try {
+          const rootFiles = fs.readdirSync('/');
+          console.log('Files in root directory:', rootFiles);
+        } catch (listErr) {
+          console.warn('Failed to list files in root directory:', listErr);
+        }
+      } catch (setupErr) {
+        console.warn('Error during initial directory setup:', setupErr);
+        // Still resolve as true since BrowserFS is initialized
+      }
+      
       resolve(true);
     });
   });
@@ -308,20 +346,59 @@ export class SimulationLogger {
       const fileName = this._getLogFileName(entry.category);
       const logMessage = this._formatLogMessage(entry);
       
-      // Create directory if it doesn't exist
-      this._ensureDirectoryExists(logType);
+      // First ensure the base logs directory exists
+      if (!window.fs.existsSync(this._config.logsDirectory)) {
+        try {
+          window.fs.mkdirSync(this._config.logsDirectory);
+          console.debug(`Created base logs directory: ${this._config.logsDirectory}`);
+        } catch (baseErr: any) {
+          if (baseErr && baseErr.code !== 'EEXIST') {
+            console.error(`Failed to create base logs directory: ${baseErr.message || baseErr}`);
+            return;
+          }
+        }
+      }
       
-      // Log the attempt to help with debugging
-      console.debug(`Attempting to write log to: ${this._config.logsDirectory}/simulation/${logType}/${fileName}`);
+      // Then ensure the simulation directory exists
+      const simDirPath = `${this._config.logsDirectory}/simulation`;
+      if (!window.fs.existsSync(simDirPath)) {
+        try {
+          window.fs.mkdirSync(simDirPath);
+          console.debug(`Created simulation directory: ${simDirPath}`);
+        } catch (simErr: any) {
+          if (simErr && simErr.code !== 'EEXIST') {
+            console.error(`Failed to create simulation directory: ${simErr.message || simErr}`);
+            return;
+          }
+        }
+      }
+      
+      // Finally ensure the log type directory exists
+      const logDirPath = `${this._config.logsDirectory}/simulation/${logType}`;
+      if (!window.fs.existsSync(logDirPath)) {
+        try {
+          window.fs.mkdirSync(logDirPath);
+          console.debug(`Created log type directory: ${logDirPath}`);
+        } catch (logErr: any) {
+          if (logErr && logErr.code !== 'EEXIST') {
+            console.error(`Failed to create log type directory: ${logErr.message || logErr}`);
+            return;
+          }
+        }
+      }
+      
+      // Now we can write to the file
+      const filePath = `${this._config.logsDirectory}/simulation/${logType}/${fileName}`;
+      console.debug(`Writing log to: ${filePath}`);
       
       // Append to log file
       window.fs.appendFile(
-        `${this._config.logsDirectory}/simulation/${logType}/${fileName}`,
+        filePath,
         logMessage + '\n',
         { encoding: 'utf8' },
-        (err) => {
+        (err: any) => {
           if (err) {
-            console.error(`Error writing to log file: ${err.message}`);
+            console.error(`Error writing to log file (${filePath}): ${err.message || err}`);
           }
         }
       );
@@ -368,32 +445,81 @@ export class SimulationLogger {
   /**
    * Ensure directory exists (for browser FS)
    */
-  private _ensureDirectoryExists(logType: string): void {
-    try {
-      // Safety check
-      if (!window || !window.fs) {
-        console.error('Browser filesystem API not available.');
-        return;
-      }
-      
-      const fullPath = `${this._config.logsDirectory}/simulation/${logType}`;
-      
-      console.debug(`Ensuring directory exists: ${fullPath}`);
-      
-      // Check if directory exists synchronously to avoid race conditions
+  private _ensureDirectoryExists(logType: string): Promise<boolean> {
+    return new Promise((resolve) => {
       try {
-        window.fs.mkdirSync(fullPath, { recursive: true });
-        console.debug(`Created or confirmed directory: ${fullPath}`);
-      } catch (mkdirErr: any) {
-        // Explicitly type mkdirErr as any to handle code property
-        // Ignore if directory already exists
-        if (mkdirErr && typeof mkdirErr === 'object' && 'code' in mkdirErr && mkdirErr.code !== 'EEXIST') {
-          console.error(`Error creating directory ${fullPath}:`, mkdirErr);
+        // Safety check
+        if (!window || !window.fs) {
+          console.error('Browser filesystem API not available.');
+          resolve(false);
+          return;
         }
+        
+        // Create directory path structure
+        const baseDir = this._config.logsDirectory;
+        const simulationDir = `${baseDir}/simulation`;
+        const typeDir = `${simulationDir}/${logType}`;
+        
+        console.debug(`Ensuring directory exists: ${typeDir}`);
+        
+        // Create directories in sequence: first baseDir, then simulationDir, then typeDir
+        // First check and create the base logs directory
+        this._createDirectoryIfNeeded(baseDir, (baseSuccess) => {
+          if (!baseSuccess) {
+            resolve(false);
+            return;
+          }
+          
+          // Then create the simulation subdirectory
+          this._createDirectoryIfNeeded(simulationDir, (simSuccess) => {
+            if (!simSuccess) {
+              resolve(false);
+              return;
+            }
+            
+            // Finally create the log type subdirectory
+            this._createDirectoryIfNeeded(typeDir, (typeSuccess) => {
+              resolve(typeSuccess);
+            });
+          });
+        });
+      } catch (error) {
+        console.error('Error in _ensureDirectoryExists:', error);
+        resolve(false);
       }
-    } catch (error) {
-      console.error('Error ensuring directory exists:', error);
+    });
+  }
+  
+  /**
+   * Helper method to create a directory if it doesn't exist
+   */
+  private _createDirectoryIfNeeded(dirPath: string, callback: (success: boolean) => void): void {
+    // Safety check for window.fs
+    if (!window || !window.fs) {
+      console.error('Browser filesystem API not available in _createDirectoryIfNeeded.');
+      callback(false);
+      return;
     }
+
+    // Check if directory exists first
+    window.fs.stat(dirPath, (statErr: any) => {
+      if (statErr) {
+        // Directory doesn't exist, create it
+        window.fs.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
+          if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+            console.error(`Failed to create directory ${dirPath}: ${mkdirErr.message || mkdirErr}`);
+            callback(false);
+          } else {
+            console.debug(`Created directory: ${dirPath}`);
+            callback(true);
+          }
+        });
+      } else {
+        // Directory already exists
+        console.debug(`Directory already exists: ${dirPath}`);
+        callback(true);
+      }
+    });
   }
 
   /**
@@ -855,7 +981,7 @@ export class SimulationLogger {
  */
 export const defaultLogger = new SimulationLogger({
   enableFileLogging: false, // Disabled by default but can be enabled
-  logsDirectory: '/Users/deepak/code/spin_network_app/logs' // Default path to logs directory
+  logsDirectory: '/logs' // Default path to logs directory (relative to BrowserFS root)
 });
 
 /**
@@ -868,7 +994,7 @@ export function enableDefaultLoggerFileLogging(): void {
       .then(initialized => {
         if (initialized) {
           console.log('BrowserFS initialized successfully. Enabling file logging.');
-          defaultLogger.enableFileLogging('/Users/deepak/code/spin_network_app/logs');
+          defaultLogger.enableFileLogging('/logs');
         } else {
           console.warn('BrowserFS initialization failed. File logging will be disabled.');
         }
@@ -882,7 +1008,7 @@ export function enableDefaultLoggerFileLogging(): void {
       });
   } else {
     // In Node.js environment, enable file logging directly
-    defaultLogger.enableFileLogging('/Users/deepak/code/spin_network_app/logs');
+    defaultLogger.enableFileLogging('/logs');
     testFileSystemAccess();
   }
 }
@@ -906,74 +1032,91 @@ export function testFileSystemAccess(): void {
     if (window.fs) {
       console.log('window.fs API is available.');
       
-      // Try to create test directories
-      try {
-        const simulationPath = `${logsPath}/simulation`;
-        const sessionsPath = `${logsPath}/simulation/sessions`;
-        
-        console.log(`Trying to create/verify directories:`);
-        console.log(`- ${logsPath}`);
-        console.log(`- ${simulationPath}`);
-        console.log(`- ${sessionsPath}`);
-        
-        // Create logs directory
-        if (window.fs) {
-          window.fs.mkdir(logsPath, { recursive: true }, (err) => {
-            if (err && err.code !== 'EEXIST') {
-              console.error(`Failed to create logs directory: ${err.message}`);
-            } else {
-              console.log(`Created or verified logs directory: ${logsPath}`);
-              
-              // Create simulation directory
-              if (window.fs) {
-                window.fs.mkdir(simulationPath, { recursive: true }, (err) => {
-                  if (err && err.code !== 'EEXIST') {
-                    console.error(`Failed to create simulation directory: ${err.message}`);
-                  } else {
-                    console.log(`Created or verified simulation directory: ${simulationPath}`);
-                    
-                    // Create sessions directory
-                    if (window.fs) {
-                      window.fs.mkdir(sessionsPath, { recursive: true }, (err) => {
-                        if (err && err.code !== 'EEXIST') {
-                          console.error(`Failed to create sessions directory: ${err.message}`);
-                        } else {
-                          console.log(`Created or verified sessions directory: ${sessionsPath}`);
-                          
-                          // Try to write a test file
-                          const testPath = `${sessionsPath}/test-log-${Date.now()}.txt`;
-                          if (window.fs) {
-                            window.fs.writeFile(
-                              testPath,
-                              'File system test - ' + new Date().toISOString(),
-                              { encoding: 'utf8' },
-                              (err) => {
-                                if (err) {
-                                  console.error(`Failed to write test file: ${err.message}`);
-                                } else {
-                                  console.log(`Successfully wrote test file to: ${testPath}`);
-                                }
-                              }
-                            );
-                          }
-                        }
-                      });
-                    }
-                  }
-                });
+      // Define the directory hierarchy to create
+      const directoriesToCreate = [
+        logsPath,                        // /logs
+        `${logsPath}/simulation`,        // /logs/simulation
+        `${logsPath}/simulation/sessions`,  // /logs/simulation/sessions
+        `${logsPath}/simulation/exports`,   // /logs/simulation/exports
+        `${logsPath}/simulation/graphs`,    // /logs/simulation/graphs
+        `${logsPath}/simulation/performance` // /logs/simulation/performance
+      ];
+      
+      console.log('Trying to create/verify directories:');
+      directoriesToCreate.forEach(dir => console.log(`- ${dir}`));
+      
+      // Create directories sequentially to ensure proper hierarchy
+      createDirectoriesSequentially(directoriesToCreate, 0, (success) => {
+        if (success) {
+          // All directories created successfully, now write a test file
+          const testPath = `${logsPath}/simulation/sessions/test-log-${Date.now()}.txt`;
+          console.log(`Writing test file to: ${testPath}`);
+          
+          window.fs.writeFile(
+            testPath,
+            'File system test - ' + new Date().toISOString(),
+            { encoding: 'utf8' },
+            (err) => {
+              if (err) {
+                console.error(`Failed to write test file: ${err.message || err}`);
+              } else {
+                console.log(`Successfully wrote test file to: ${testPath}`);
               }
             }
-          });
+          );
         } else {
-          console.error('window.fs is not available');
+          console.error('Failed to create some directories. See previous errors for details.');
         }
-      } catch (error) {
-        console.error('Error creating test directories or file:', error);
-      }
+      });
     } else {
       console.error('window.fs API is NOT available. File logging will not work in browser environment!');
     }
   }
+}
+
+// Helper function to create directories sequentially
+function createDirectoriesSequentially(
+  directories: string[], 
+  index: number, 
+  callback: (success: boolean) => void
+): void {
+  // Safety check
+  if (!window || !window.fs) {
+    console.error('Browser filesystem API not available in createDirectoriesSequentially.');
+    callback(false);
+    return;
+  }
+
+  // Base case: all directories created
+  if (index >= directories.length) {
+    callback(true);
+    return;
+  }
+  
+  const currentDir = directories[index];
+  console.log(`Creating directory (${index + 1}/${directories.length}): ${currentDir}`);
+  
+  // Check if directory exists first
+  window.fs.stat(currentDir, (statErr: any) => {
+    // Directory doesn't exist, create it
+    if (statErr) {
+      window.fs.mkdir(currentDir, { recursive: false }, (mkdirErr: any) => {
+        if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+          console.error(`Failed to create directory ${currentDir}: ${mkdirErr.message || mkdirErr}`);
+          callback(false);
+        } else {
+          console.log(`Created directory: ${currentDir}`);
+          // Move to next directory
+          createDirectoriesSequentially(directories, index + 1, callback);
+        }
+      });
+    } else {
+      // Directory already exists
+      console.log(`Directory already exists: ${currentDir}`);
+      // Move to next directory
+      createDirectoriesSequentially(directories, index + 1, callback);
+    }
+  });
 }
 
 /**
