@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 17, 2025 (16:45 IST)*
+*Last Updated: April 17, 2025 (19:30 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -16,8 +16,35 @@
 | T14 | State Management Architecture for Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-17 | T13, T1 | Deepak |
 | T15 | UI Improvement for Network Visualization and Creation | ✅ COMPLETE | MEDIUM | 2025-04-17 | - | Deepak |
 | T16 | Enhance Simulation Data Export and Visualization | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
+| T17 | Fix TypeScript Build Errors | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
 
 ## Task Details
+
+### T17: Fix TypeScript Build Errors
+**Description**: Fix TypeScript build errors preventing the application from building successfully. Focus on type safety issues, null reference prevention, and proper type conversion to improve code robustness.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 17, 2025
+**Last Active**: April 17, 2025 (19:30 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Add missing `getGraph` method to SpinNetworkSimulationEngineImpl
+- ✅ Fix boolean type conversions in the UI components
+- ✅ Add proper type indexing for geometric and statistics objects
+- ✅ Fix void vs number comparison in database services
+- ✅ Fix SimulationParameters type compatibility issues
+- ⬜ Fix remaining null safety issues in engineImplementation.ts
+- ⬜ Address other miscellaneous TypeScript errors
+- ⬜ Ensure successful builds with no TypeScript errors
+
+**Related Files**:
+- `/src/simulation/core/engineImplementation.ts`
+- `/src/hooks/useSimulation.ts`
+- `/src/components/simulation/SimulationResultsPanel.tsx`
+- `/src/database/services/simulationService.ts`
+
+**Notes**:
+Some of the most critical TypeScript build errors have been fixed, but several issues remain to be addressed. The most important fix was adding the missing `getGraph()` method to the SimulationEngineImpl class, which was being referenced in multiple places but didn't exist. Type safety has been improved for dynamic property access, void vs number comparisons, and SimulationParameters type compatibility. The remaining issues, particularly around null safety in engine implementation, will be addressed in future work.
 
 ### T16: Enhance Simulation Data Export and Visualization
 **Description**: Improve the simulation data export functionality and visualization capabilities to make simulation results more accessible and useful for analysis.
