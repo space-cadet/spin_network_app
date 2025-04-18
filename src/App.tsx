@@ -1,6 +1,8 @@
 import { useSelector } from 'react-redux'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
+import { LogExplorerPage } from './components/logs/explorer'
 import NetworkTools from './components/tools/NetworkTools'
 import { PropertiesPanel, TypeManagementPanel, SimulationControlPanel } from './components/panels'
 import { SimulationResultsPanel, SimulationLogsPanel, SimulationDebugPanel } from './components/simulation'
@@ -25,11 +27,18 @@ function App() {
   // State for bottom panel tabs
   const [bottomPanelTab, setBottomPanelTab] = useState<'results' | 'logs' | 'debug' | 'application'>('results');
   
+  // Get the current location
+  const location = useLocation();
+  const isExplorerPage = location.pathname === '/explorer';
+  
   return (
     <ThemeProvider>
       <MainLayout>
-        <div className="flex h-full">
-        <PersistenceStatus />
+        <Routes>
+          <Route path="/explorer" element={<LogExplorerPage />} />
+          <Route path="/" element={
+            <div className="flex h-full">
+              <PersistenceStatus />
           {/* Left Sidebar Toggle (Outside) */}
           {!leftSidebarVisible && (
             <div className="absolute left-0 top-1/2 -translate-y-1/2 z-20">
@@ -216,7 +225,9 @@ ${result.skippedDuplicates || 0} duplicate entries skipped`;
               <SidebarToggle side="right" isVisible={rightSidebarVisible} />
             </div>
           )}
-        </div>
+            </div>
+          } />
+        </Routes>
       </MainLayout>
     </ThemeProvider>
   )

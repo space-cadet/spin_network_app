@@ -1,5 +1,6 @@
 import React from 'react';
-import { FaNetworkWired, FaChartLine } from 'react-icons/fa';
+import { Link, useLocation } from 'react-router-dom';
+import { FaNetworkWired, FaChartLine, FaFolder } from 'react-icons/fa';
 import ResizablePanel from '../common/ResizablePanel';
 import { Settings } from '../settings';
 
@@ -8,6 +9,7 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const location = useLocation();
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
@@ -21,16 +23,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <nav>
             <ul className="flex space-x-6">
               <li className="flex items-center">
-                <a href="#" className="flex items-center hover:text-primary-100">
+                <Link to="/" className={`flex items-center hover:text-primary-100 ${location.pathname === '/' ? 'border-b-2 border-white' : ''}`}>
                   <FaNetworkWired className="text-white" />
                   <span className="text-white ml-1">Network</span>
-                </a>
+                </Link>
               </li>
               <li className="flex items-center">
                 <a href="#" className="flex items-center hover:text-primary-100">
                   <FaChartLine className="text-white" />
                   <span className="text-white ml-1">Simulation</span>
                 </a>
+              </li>
+              <li className="flex items-center">
+                <Link to="/explorer" className={`flex items-center hover:text-primary-100 ${location.pathname === '/explorer' ? 'border-b-2 border-white' : ''}`}>
+                  <FaFolder className="text-white" />
+                  <span className="text-white ml-1">Log Explorer</span>
+                </Link>
               </li>
               <li className="flex items-center">
                 <Settings />
