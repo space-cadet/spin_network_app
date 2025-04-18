@@ -366,7 +366,7 @@ These database service errors are preventing the application from building succe
 ### T1: Simulation Library Abstraction
 **Description**: Abstract the simulation functionality from the UI components to create standalone libraries that users can import into their code to run simulations on spin networks without UI dependencies. This will improve modularity and allow for more flexible usage of the simulation engine.
 **Status**: 🔄 IN PROGRESS
-**Last Active**: April 17, 2025 (22:30 IST)
+**Last Active**: April 18, 2025 (01:15 IST)
 **Completion Criteria**:
 - ✅ Create new modular library structure in `lib/` directory
 - ✅ Set up proper entry points and API
@@ -378,6 +378,7 @@ These database service errors are preventing the application from building succe
 - ✅ Implement OrdinaryDiffusionModel and TelegraphDiffusionModel
 - ✅ Implement numerical solvers (Euler, Midpoint, RK4)
 - ✅ Implement graph templates (line, ring, grid, random)
+- ✅ Implement I/O and serialization (export/import functionality)
 - ⬜ Implement weight functions
 - ⬜ Implement visualization adapters
 - ⬜ Add comprehensive documentation and usage examples
@@ -399,10 +400,17 @@ These database service errors are preventing the application from building succe
 - `/lib/templates/ringGraph.ts` - Ring graph generator
 - `/lib/templates/gridGraph.ts` - Grid graph generator
 - `/lib/templates/randomGraph.ts` - Random graph generator
+- `/lib/io/index.ts` - I/O module entry point
+- `/lib/io/types.ts` - I/O type definitions
+- `/lib/io/serialization.ts` - Serialization utilities
+- `/lib/io/storageAdapters.ts` - Storage adapters for different environments
+- `/lib/io/exporters.ts` - Export functionality
+- `/lib/io/importers.ts` - Import functionality
+- `/lib/io/simulationStorage.ts` - High-level simulation storage API
 - `/memory-bank/implementation-details/simulation-library-abstraction.md`
 
 **Notes**:
-Made significant progress by implementing graph template generators for common network topologies (line, ring, grid, random). The implementation follows the same patterns as the rest of the library with immutable operations, proper TypeScript typing, and comprehensive documentation. Factory functions for each graph type are now available in the main library API, making it easy to create different graph structures programmatically.
+Made significant progress by implementing comprehensive I/O and serialization components. The implementation includes serialization for simulation state, graph, and parameters; multiple storage adapters (memory, localStorage, IndexedDB, BrowserFS, NodeFS); export functionality in various formats (JSON, CSV, JSONL); import functionality with validation; and a high-level SimulationStorage API for managing simulations. These additions address one of the major gaps identified in the feature comparison with the React app.
 Made significant progress on the library implementation. Completed the core components including state vector, graph, simulation engine, diffusion models, and numerical solvers. The library is now in a usable state for basic simulations, with a functioning API that allows creating graphs, setting up initial conditions, choosing diffusion models and solvers, and running simulations. Still need to implement some advanced features like analysis tools, visualization adapters, and specialized weight functions, but the core functionality is in place.
 
 ### T2: Advanced Simulation Analysis

@@ -21,6 +21,9 @@ export * from './utils';
 // Graph Templates
 export * from './templates';
 
+// I/O and Serialization
+export * from './io';
+
 // Factory functions for easy instantiation
 import { SpinNetworkGraph } from './core/graph';
 import { SimulationStateVector } from './core/stateVector';
