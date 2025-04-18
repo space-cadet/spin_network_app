@@ -13,3 +13,13 @@ export {
   SpinNetworkSimulationEngine,
   SimulationHistoryImpl 
 } from './engineImplementation';
+
+// Export intertwiner space utilities
+export {
+  triangleInequality,
+  allowedIntermediateSpins,
+  intertwinerDimension,
+  getIntertwinerBasis,
+  getOptimizedIntertwinerBasis,
+  IntertwinerBasisState
+} from './intertwinerSpace';

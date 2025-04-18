@@ -19,8 +19,35 @@
 | T17 | Fix TypeScript Build Errors | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
 | T18 | Create Logs Folder Structure | 🔄 IN PROGRESS | MEDIUM | 2025-04-17 | - | Deepak |
 | T19 | Implement BrowserFS File Viewer | ⬜ NOT STARTED | MEDIUM | 2025-04-17 | T18 | Deepak |
+| T20 | Add Intertwiner Space Implementation | 🔄 IN PROGRESS | MEDIUM | 2025-04-18 | T1 | Deepak |
 
 ## Task Details
+
+### T20: Add Intertwiner Space Implementation
+**Description**: Implement functionality for calculating the dimension and basis states of intertwiner spaces for nodes in spin networks with arbitrary edge spin labels.
+**Status**: 🔄 IN PROGRESS
+**Priority**: MEDIUM
+**Started**: April 18, 2025
+**Last Active**: April 18, 2025
+**Dependencies**: T1
+**Completion Criteria**:
+- ✅ Document the mathematical theory of intertwiner spaces
+- ✅ Create intertwiner-spaces.md with comprehensive explanation
+- ✅ Add detailed tutorial for calculating intertwiner basis states
+- ✅ Implement intertwinerSpace.ts module with core functionality
+- ✅ Add to library exports in core/index.ts
+- ⬜ Create visualization component for intertwiner spaces
+- ⬜ Add comprehensive testing of intertwiner calculations
+- ⬜ Implement optimized precomputed values for common cases
+- ⬜ Add CG coefficient lookup tables for performance
+
+**Related Files**:
+- `/memory-bank/implementation-details/intertwiner-spaces.md`
+- `/lib/core/intertwinerSpace.ts`
+- `/lib/core/index.ts`
+
+**Notes**:
+Intertwiner spaces represent the SU(2)-invariant subspaces at nodes in spin networks. The dimension and basis of these spaces are crucial for quantum spin network calculations. The implementation supports arbitrary edge spin labels (j=1/2, 1, 3/2, etc.) and calculates both the dimension of the space and explicit basis states using recoupling theory and Clebsch-Gordan coefficients. The special case of a 4-valent node with all spin-1/2 edges has been optimized with pre-computed values.
 
 ### T19: Implement BrowserFS File Viewer
 **Description**: Implement a file viewer component that allows browsing, viewing, and managing files stored in the BrowserFS virtual file system. This will enable users to access log files and other data stored in the browser's storage.

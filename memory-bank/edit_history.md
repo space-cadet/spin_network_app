@@ -7,6 +7,16 @@
 
 ### April 18, 2025
 
+#### 02:30 - T20: Add Intertwiner Space Implementation
+
+- Created `/Users/deepak/code/spin_network_app/memory-bank/implementation-details/intertwiner-spaces.md` - Added comprehensive documentation on intertwiner space theory and calculations
+- Created `/Users/deepak/code/spin_network_app/lib/core/intertwinerSpace.ts` - Implemented TypeScript module for calculating intertwiner dimensions and basis states
+- Modified `/Users/deepak/code/spin_network_app/lib/core/index.ts` - Added exports for intertwiner space utilities
+- Updated `/Users/deepak/code/spin_network_app/memory-bank/tasks.md` - Added task T20 for intertwiner space implementation
+- Updated `/Users/deepak/code/spin_network_app/memory-bank/edit_history.md` - Added entry for implementation
+
+Implemented functionality for calculating the dimension and basis states of intertwiner spaces for nodes in spin networks with arbitrary edge spin labels. Created comprehensive documentation explaining the mathematical theory of intertwiner spaces, including a step-by-step tutorial for calculating basis states for the common case of four spin-1/2 edges. The implementation includes triangle inequality checking, intermediate spin calculation, dimension calculation, and basis vector construction using Clebsch-Gordan coefficients.
+
 #### 01:15 - T1: Simulation Library Abstraction - I/O and Serialization Implementation
 
 - Created `/Users/deepak/code/spin_network_app/lib/io/types.ts` - Added type definitions for I/O operations
