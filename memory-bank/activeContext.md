@@ -1,18 +1,23 @@
 # Active Context
 
-*Last Updated: April 16, 2025 (21:45 IST)*
+*Last Updated: April 18, 2025 (12:45 IST)*
 
 ## Current Focus
-**Primary Task:** T12: Fix Numerical Stability and Add Graph Configuration
-**Secondary Tasks:** T10: Standalone Test Page for Simulation Library, T1: Simulation Library Abstraction
+**Primary Task:** T18: Fix Logging File Paths and Structure (Completed)
+**Secondary Tasks:** T1: Simulation Library Abstraction, T20: Add Intertwiner Space Implementation
 
 ## Active Tasks
-- T12: Fixing numerical stability issues and adding graph configuration options - 🔄 IN PROGRESS
-- T10: Developing standalone test page for simulation library - 🔄 IN PROGRESS
 - T1: Creating a standalone simulation library separate from UI components - 🔄 IN PROGRESS
-- T9: Fixing UI and simulation TypeScript errors to enable successful build - 🔄 IN PROGRESS
-- T6: Fixing database service TypeScript errors to enable successful build - 🔄 IN PROGRESS
 - T5: Enhancing simulation test pages with randomized networks and physics explanations - 🔄 IN PROGRESS
+- T6: Fixing database service TypeScript errors to enable successful build - 🔄 IN PROGRESS
+- T9: Fixing UI and simulation TypeScript errors to enable successful build - 🔄 IN PROGRESS
+- T10: Developing standalone test page for simulation library - 🔄 IN PROGRESS
+- T12: Fixing numerical stability issues and adding graph configuration options - ⏸️ PAUSED
+- T14: State Management Architecture for Standalone Library - 🔄 IN PROGRESS
+- T16: Enhance Simulation Data Export and Visualization - 🔄 IN PROGRESS
+- T17: Fix TypeScript Build Errors - 🔄 IN PROGRESS
+- T18: Fix Logging File Paths and Structure - ✅ COMPLETE
+- T20: Add Intertwiner Space Implementation - 🔄 IN PROGRESS
 - T2: Adding more in-depth analysis and visualization of simulation results - ⏸️ PAUSED
 - T3: Breaking down large components into smaller, more maintainable units - ⏸️ PAUSED
 
@@ -20,6 +25,28 @@
 Currently focusing on fixing numerical stability issues in the standalone simulation test page (T12) and adding more configuration options for creating different network topologies and adjusting simulation parameters. The critical issues involve exponential growth of state values during simulation, which persists despite the implemented normalization. We're also enhancing the user interface to allow for more flexible testing of different network configurations and diffusion models.
 
 ## Task-Specific Context
+
+### Task T18: Fix Logging File Paths and Structure (Completed)
+We have successfully fixed the logging file paths to ensure logs are written to the correct locations:
+
+Key aspects of this work:
+- Updated the simulationLogger to properly route logs to the correct directories
+- Enhanced the SpinNetworkGraph class with direct graph logging capability
+- Added a dedicated saveTestLog method for test logs
+- Implemented appendResultsToFile method to continuously log simulation data to CSV
+- Improved the BrowserFS directory creation process
+- Enhanced the application initialization to verify all required directories exist
+
+The implementation now ensures that:
+- Graph creation events are properly logged to `/logs/simulation/graphs`
+- Simulation events are logged to `/logs/simulation/runs`
+- Test logs go to `/logs/simulation/tests` instead of sessions
+- Application logs go to the appropriate subdirectories of `/logs/application`
+
+Future improvements will include:
+- Adding .gitkeep files to ensure empty directories are tracked
+- Creating a comprehensive README.md for the log structure
+- Implementing log rotation policies to manage file sizes
 
 ### Task T12: Fix Numerical Stability and Add Graph Configuration
 We are addressing numerical instability issues in the standalone simulation test page and adding more configuration options:

@@ -273,49 +273,63 @@ Key findings and decisions:
 
 The next step is to select and implement the chosen file viewer component, starting with basic navigation and viewing capabilities.
 
-### T18: Fix TypeScript Build Errors in Core Library
-**Status:** 🔄 IN PROGRESS
-**Priority:** HIGH
+### T18: Fix Logging File Paths and Structure
+**Status:** ✅ COMPLETE
+**Priority:** MEDIUM
 **Started:** 2025-04-17
-**Last Active:** 2025-04-17 20:15 IST
+**Last Active:** 2025-04-18 12:45 IST
+**Completed:** 2025-04-18 12:45 IST
 **Dependencies:** -
 
 #### Context
-Addressing TypeScript build errors in the core library files that are preventing successful builds. Focusing on the lib/utils/simulationLogger.ts file which had several TypeScript errors related to LogCategory enum references and potentially undefined window.fs access.
+Fixed log file paths to ensure logs are written to the correct locations. Created virtual directories in BrowserFS and updated the simulationLogger classes to use the correct directory structure.
 
 #### Critical Files
-- `/Users/deepak/code/spin_network_app/lib/utils/simulationLogger.ts` - Fixed LogCategory property reference and window.fs null checks
-- `/Users/deepak/code/spin_network_app/memory-bank/errorLog.md` - Updated with details about fixed errors
-- `/Users/deepak/code/spin_network_app/memory-bank/edit_history.md` - Updated with recent file modifications
+- `/lib/utils/simulationLogger.ts` - Updated to route logs to correct directories
+- `/src/simulation/core/simulationLogger.ts` - Added methods to write logs to BrowserFS
+- `/src/simulation/core/graph.ts` - Enhanced with direct graph logging capability
+- `/src/utils/browserFSConfig.ts` - Improved directory creation process
+- `/src/main.tsx` - Updated initialization to create all required directories
+- `/logs/simulation/tests` - Directory for test logs
+- `/logs/simulation/runs` - Directory for simulation run logs and results
+- `/logs/simulation/graphs` - Directory for graph structure and metadata
 
 #### Implementation Progress
-1. ✅ Fixed LogCategory property reference error in simulationLogger.ts
-   - Changed from `LogCategory[entry.category]` to `typeof entry.category === 'string' ? entry.category : LogCategory[entry.category]`
-2. ✅ Fixed window.fs null check errors in simulationLogger.ts
-   - Added explicit null checks before each use of window.fs
-3. ✅ Updated memory bank files to document the fixes
-4. 🔄 Preparing to run another build to identify remaining errors
-5. ⬜ Address remaining errors in other files
-6. ⬜ Ensure successful builds with no TypeScript errors
+1. ✅ Evaluated current logging structure and folder organization
+2. ✅ Created missing /logs/simulation/tests directory for test logs
+3. ✅ Fixed simulationLogger.ts to use correct paths for different log types
+4. ✅ Ensured graph operations are logged to /logs/simulation/graphs
+5. ✅ Ensured test logs go to /logs/simulation/tests
+6. ✅ Fixed paths for simulation logs to go to /logs/simulation/runs
+7. ⬜ Creating .gitkeep files to ensure empty directories are tracked
+8. ⬜ Creating .gitignore file to ignore log files but track directory structure
+9. ⬜ Updating README.md with documentation about the log structure
+10. ⬜ Adding rotation policies to manage log file sizes
 
 #### Working State
-Fixed critical TypeScript errors in the simulationLogger.ts file:
+Successfully fixed the logging system to ensure all logs are written to the correct locations:
 
-1. **Fixed LogCategory Reference Issue**:
-   - The error was: "Property 'general' does not exist on type 'typeof LogCategory'. Did you mean 'GENERAL'?"
-   - Fixed by adding a type check to handle both string and enum types properly
-   - This ensures the logger works correctly with both enum values and string literals
+1. **Graph Creation Logging**:
+   - Modified the SpinNetworkGraph class to log graph creation events directly to `/logs/simulation/graphs/`
+   - Added a text description file in addition to the JSON data for better readability
+   - Ensured graph creation events are properly captured and logged
 
-2. **Fixed window.fs Null Safety Issues**:
-   - Added proper null checks for all window.fs operations
-   - Now code safely handles cases where window.fs might be undefined
-   - This prevents potential runtime errors in browser environments
+2. **Simulation Run Logging**:
+   - Updated the simulationLogger to write simulation start events to `/logs/simulation/runs/`
+   - Added CSV file creation for simulation results in the runs directory
+   - Implemented appendResultsToFile method to continuously log simulation data to CSV
 
-3. **Testing and Documentation**:
-   - Updated error log and edit history to document these fixes
-   - Preparing to run another build to verify the fixes and identify any remaining TypeScript errors
+3. **Directory Structure**:
+   - Updated the BrowserFS initialization to create all required directories at startup
+   - Enhanced the main.tsx initialization to verify critical directories exist
+   - Added extra logging and verification of the directory structure
 
-The next step is to run the build again to see if these fixes resolved the immediate issues and identify any remaining TypeScript errors that need attention.
+4. **Test Logging**:
+   - Added a dedicated saveTestLog method to direct test logs to `/logs/simulation/tests/`
+   - Created proper timestamp-based filenames for test logs
+   - Ensured directories exist before writing to files
+
+The implementation now properly handles logging for graph creation events and simulation runs, storing them in the appropriate directories in the BrowserFS virtual file system. Future improvements should include adding .gitkeep files, updating the README.md, and implementing log rotation policies.
 
 ### T17: Fix TypeScript Build Errors
 **Status:** 🔄 IN PROGRESS

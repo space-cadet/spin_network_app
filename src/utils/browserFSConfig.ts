@@ -76,7 +76,80 @@ function configureFS(resolve: () => void, reject: (error: Error) => void): void 
 }
 
 /**
- * Test if BrowserFS is properly initialized
+ * Create all required log directories
+ * This ensures the complete directory structure exists
+ */
+export function createLogDirectories(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined' || !window.fs) {
+      console.warn('BrowserFS not initialized: window.fs is undefined');
+      resolve(false);
+      return;
+    }
+    
+    const fs = window.fs;
+    
+    // Define the complete directory structure
+    const directories = [
+      '/',
+      '/logs',
+      '/logs/application',
+      '/logs/application/error',
+      '/logs/application/performance',
+      '/logs/application/user',
+      '/logs/simulation',
+      '/logs/simulation/tests',    // For test logs
+      '/logs/simulation/runs',     // For simulation run logs and results
+      '/logs/simulation/sessions', // For session logs
+      '/logs/simulation/exports',  // For exported data
+      '/logs/simulation/graphs',   // For graph structure and metadata
+      '/logs/simulation/performance', // For performance logs
+      '/logs/simulation/stability'    // For stability logs
+    ];
+    
+    console.log('Directory structure to be created:', directories);
+    
+    console.log('Creating log directories structure...');
+    
+    // Use a recursive function to create directories one by one
+    function createDirectoryAtIndex(index: number) {
+      if (index >= directories.length) {
+        // All directories created
+        console.log('Successfully created all log directories');
+        resolve(true);
+        return;
+      }
+      
+      const dir = directories[index];
+      
+      // Check if directory exists
+      fs.stat(dir, (statErr: any) => {
+        if (statErr) {
+          // Directory doesn't exist, create it
+          fs.mkdir(dir, (mkdirErr: any) => {
+            if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+              console.warn(`Could not create directory ${dir}:`, mkdirErr);
+            } else {
+              console.log(`Created directory: ${dir}`);
+            }
+            // Continue with next directory regardless of success
+            createDirectoryAtIndex(index + 1);
+          });
+        } else {
+          // Directory already exists
+          console.log(`Directory already exists: ${dir}`);
+          createDirectoryAtIndex(index + 1);
+        }
+      });
+    }
+    
+    // Start the process with the first directory
+    createDirectoryAtIndex(0);
+  });
+}
+
+/**
+ * Test if BrowserFS is properly initialized and create test directories
  */
 export function testBrowserFS(): boolean {
   if (typeof window === 'undefined' || !window.fs) {
@@ -88,11 +161,11 @@ export function testBrowserFS(): boolean {
     // Try a simple operation to verify it's working
     const fs = window.fs;
     
-    // Create necessary directories sequentially
-    const directories = ['/', '/logs', '/logs/simulation'];
+    // Create basic directories for testing
+    const testDirectories = ['/', '/logs', '/logs/simulation'];
     
     // Create directories one by one
-    for (const dir of directories) {
+    for (const dir of testDirectories) {
       try {
         if (!fs.existsSync(dir)) {
           console.log(`Creating directory: ${dir}`);
@@ -105,6 +178,11 @@ export function testBrowserFS(): boolean {
         // Don't return here, try to continue with the test
       }
     }
+    
+    // After basic test, trigger the complete directory structure creation
+    createLogDirectories().then(success => {
+      console.log(`Log directories creation ${success ? 'succeeded' : 'failed'}`);
+    });
     
     // Write a test file in the root directory to avoid path issues
     const testPath = '/browserfs-test.txt';

@@ -534,11 +534,15 @@ export class SimulationLogger {
       case LogCategory.GRAPH:
         return 'graphs';
       case LogCategory.STATE:
+        return 'runs';
       case LogCategory.MODEL:
+        return 'runs';
       case LogCategory.SOLVER:
+        return 'runs';
       case LogCategory.GENERAL:
+        return 'runs';
       default:
-        return 'sessions';
+        return 'runs';
     }
   }
 
@@ -672,6 +676,8 @@ export class SimulationLogger {
         metadata: graphData.metadata || {}
       }, null, 2);
       
+      console.log(`Writing graph data to file: ${graphFileName}`);
+      
       // If browser environment, use window.fs
       if (typeof window !== 'undefined' && window.fs) {
         // Ensure directory exists
@@ -681,7 +687,14 @@ export class SimulationLogger {
         window.fs.writeFile(
           `${this._config.logsDirectory}/simulation/graphs/${graphFileName}`,
           graphContent,
-          { encoding: 'utf8' }
+          { encoding: 'utf8' },
+          (err: any) => {
+            if (err) {
+              console.error(`Error writing graph data to file: ${err.message || err}`);
+            } else {
+              console.log(`Successfully wrote graph data to: ${this._config.logsDirectory}/simulation/graphs/${graphFileName}`);
+            }
+          }
         );
       }
       // If Node.js environment, use fs module
@@ -696,6 +709,7 @@ export class SimulationLogger {
         
         // Write graph data
         fs.writeFileSync(filePath, graphContent, 'utf8');
+        console.log(`Successfully wrote graph data to: ${filePath}`);
       }
     } catch (error) {
       console.error('Error writing graph to file:', error);
@@ -985,6 +999,43 @@ export const defaultLogger = new SimulationLogger({
 });
 
 /**
+ * Test logger instance - specifically for test logs
+ */
+export const testLogger = new SimulationLogger({
+  enableFileLogging: false, // Disabled by default but can be enabled
+  logsDirectory: '/logs', // Default path to logs directory (relative to BrowserFS root)
+  minLevel: LogLevel.DEBUG // Lower log level for tests to capture more details
+});
+
+// Function to enable test logging
+export function enableTestLogging(): void {
+  // Initialize BrowserFS first if in browser environment
+  if (typeof window !== 'undefined') {
+    initBrowserFileSystem()
+      .then(initialized => {
+        if (initialized) {
+          console.log('BrowserFS initialized successfully for test logging.');
+          testLogger.enableFileLogging('/logs');
+          // Override the category log type specifically for test logger
+          const originalGetCategoryLogType = testLogger['_getCategoryLogType'];
+          testLogger['_getCategoryLogType'] = function(category: LogCategory): string {
+            // Route all logs to the 'tests' directory for test logging
+            return 'simulation/tests';
+          };
+        } else {
+          console.warn('BrowserFS initialization failed for test logging.');
+        }
+      })
+      .catch(err => {
+        console.error('Error initializing BrowserFS for test logging:', err);
+      });
+  } else {
+    // In Node.js environment, enable file logging directly
+    testLogger.enableFileLogging('/logs');
+  }
+}
+
+/**
  * Enable file logging for the default logger with the project logs directory
  */
 export function enableDefaultLoggerFileLogging(): void {
@@ -1034,12 +1085,19 @@ export function testFileSystemAccess(): void {
       
       // Define the directory hierarchy to create
       const directoriesToCreate = [
-        logsPath,                        // /logs
-        `${logsPath}/simulation`,        // /logs/simulation
+        logsPath,                           // /logs
+        `${logsPath}/application`,          // /logs/application
+        `${logsPath}/application/error`,    // /logs/application/error
+        `${logsPath}/application/performance`, // /logs/application/performance
+        `${logsPath}/application/user`,     // /logs/application/user
+        `${logsPath}/simulation`,           // /logs/simulation
+        `${logsPath}/simulation/tests`,     // /logs/simulation/tests (NEW)
+        `${logsPath}/simulation/runs`,      // /logs/simulation/runs (NEW)
         `${logsPath}/simulation/sessions`,  // /logs/simulation/sessions
         `${logsPath}/simulation/exports`,   // /logs/simulation/exports
         `${logsPath}/simulation/graphs`,    // /logs/simulation/graphs
-        `${logsPath}/simulation/performance` // /logs/simulation/performance
+        `${logsPath}/simulation/performance`, // /logs/simulation/performance
+        `${logsPath}/simulation/stability`  // /logs/simulation/stability
       ];
       
       console.log('Trying to create/verify directories:');

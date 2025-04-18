@@ -1,15 +1,27 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-19*
-
-## File Modification Log
-
 *Last Updated: 2025-04-18*
 
 ## File Modification Log
 
 ### April 18, 2025
+
+#### 12:45 - T18: Fix Logging File Paths and Structure
+
+- Modified `/lib/utils/simulationLogger.ts` - Updated _getCategoryLogType method to route logs to correct directories
+- Modified `/lib/utils/simulationLogger.ts` - Added testLogger instance for test logs
+- Modified `/lib/utils/simulationLogger.ts` - Added enableTestLogging function
+- Modified `/src/simulation/core/simulationLogger.ts` - Added appendResultsToFile method to write simulation data to CSV
+- Modified `/src/simulation/core/simulationLogger.ts` - Updated logResults to log data to /logs/simulation/runs
+- Modified `/src/simulation/core/simulationLogger.ts` - Added saveTestLog method for test log files
+- Modified `/src/simulation/core/graph.ts` - Enhanced fromSpinNetwork with direct graph logging capability
+- Modified `/src/utils/browserFSConfig.ts` - Improved directory creation with detailed comments
+- Modified `/src/main.tsx` - Enhanced initialization to verify all required directories exist
+- Modified `/memory-bank/tasks.md` - Updated T18 with completed task details
+- Modified `/memory-bank/session_cache.md` - Updated T18 with implementation details
+
+Fixed log file paths to ensure that graph creation events are logged to /logs/simulation/graphs and simulation events are logged to /logs/simulation/runs. Updated the directory creation process in BrowserFS to ensure all required directories exist. Added direct logging capability to the SpinNetworkGraph class and enhanced the simulationLogger to use the correct paths.
 
 #### [11:30] - T22: Implement Log File Explorer
 

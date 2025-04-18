@@ -92,7 +92,129 @@ export class SpinNetworkGraph implements SimulationGraph {
    */
   static fromSpinNetwork(network: SpinNetwork): SimulationGraph {
     const instance = new SpinNetworkGraph();
-    return instance.fromSpinNetwork(network);
+    const graph = instance.fromSpinNetwork(network);
+    
+    // Log graph creation to BrowserFS if available
+    this.logGraphCreation(graph, network);
+    
+    return graph;
+  }
+  
+  /**
+   * Log graph creation to BrowserFS
+   */
+  private static logGraphCreation(graph: SimulationGraph, sourceNetwork: SpinNetwork): void {
+    try {
+      // Only proceed if we're in a browser environment with BrowserFS
+      if (typeof window !== 'undefined' && window.fs) {
+        // Create a unique graph ID
+        const graphId = `graph-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+        
+        // Create the graph data for logging
+        const graphData = {
+          id: graphId,
+          timestamp: Date.now(),
+          source: sourceNetwork.metadata?.id || 'unknown',
+          type: sourceNetwork.metadata?.type || 'custom',
+          name: sourceNetwork.metadata?.name || 'Untitled Graph',
+          nodeCount: graph.getNodeCount(),
+          edgeCount: graph.getEdgeCount(),
+          nodes: graph.nodes.map(node => ({
+            id: node.id,
+            intertwiner: node.intertwiner,
+            position: node.position
+          })),
+          edges: graph.edges.map(edge => ({
+            id: edge.id,
+            source: edge.sourceId,
+            target: edge.targetId,
+            spin: edge.spin
+          }))
+        };
+        
+        // Format timestamp for the filename
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `graph-${graphId}-${timestamp}.json`;
+        
+        // Ensure directories exist
+        this.ensureLogDirectoryExists('/logs', () => {
+          this.ensureLogDirectoryExists('/logs/simulation', () => {
+            this.ensureLogDirectoryExists('/logs/simulation/graphs', () => {
+              // Write graph data to JSON file
+              window.fs.writeFile(
+                `/logs/simulation/graphs/${filename}`,
+                JSON.stringify(graphData, null, 2),
+                { encoding: 'utf8' },
+                (err: any) => {
+                  if (err) {
+                    console.error(`Error writing graph creation log: ${err.message || err}`);
+                  } else {
+                    console.log(`Successfully logged graph creation to /logs/simulation/graphs/${filename}`);
+                  }
+                }
+              );
+              
+              // Also write a simple text description file as backup
+              const textDescription = 
+                `Graph Creation Log\n` +
+                `------------------\n` +
+                `ID: ${graphId}\n` +
+                `Created: ${new Date().toISOString()}\n` +
+                `Type: ${sourceNetwork.metadata?.type || 'custom'}\n` +
+                `Name: ${sourceNetwork.metadata?.name || 'Untitled Graph'}\n` +
+                `Nodes: ${graph.getNodeCount()}\n` +
+                `Edges: ${graph.getEdgeCount()}\n`;
+              
+              const textFilename = `graph-${graphId}-info.txt`;
+              window.fs.writeFile(
+                `/logs/simulation/graphs/${textFilename}`,
+                textDescription,
+                { encoding: 'utf8' },
+                (err: any) => {
+                  if (err) {
+                    console.error(`Error writing graph text description: ${err.message || err}`);
+                  } else {
+                    console.log(`Successfully wrote graph text description to /logs/simulation/graphs/${textFilename}`);
+                  }
+                }
+              );
+            });
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Error logging graph creation:', error);
+      // Continue normal operation even if logging fails
+    }
+  }
+  
+  /**
+   * Ensure directory exists for logging
+   */
+  private static ensureLogDirectoryExists(dirPath: string, callback: () => void): void {
+    if (typeof window === 'undefined' || !window.fs) {
+      callback();
+      return;
+    }
+    
+    window.fs.stat(dirPath, (statErr: any) => {
+      if (statErr) {
+        // Directory doesn't exist, create it
+        window.fs.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
+          if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+            console.error(`Failed to create directory ${dirPath}: ${mkdirErr.message || mkdirErr}`);
+            // Call callback anyway to continue with operation
+            callback();
+          } else {
+            console.log(`Created directory: ${dirPath}`);
+            callback();
+          }
+        });
+      } else {
+        // Directory already exists
+        callback();
+      }
+    });
   }
 
   /**

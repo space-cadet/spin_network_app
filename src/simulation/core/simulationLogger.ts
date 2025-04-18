@@ -113,8 +113,78 @@ export class SimulationLogger {
     // Log the session start
     this.log('info', 'Simulation session started', { parameters });
     
+    // Write simulation parameters to a file in the runs folder
+    this.writeSimulationStartToFile(sessionId, networkInfo, parameters);
+    
     // Return the session ID
     return sessionId;
+  }
+  
+  /**
+   * Write simulation start parameters to a file in the runs directory
+   */
+  private writeSimulationStartToFile(
+    sessionId: string, 
+    networkInfo: SimulationSessionLog['networkInfo'], 
+    parameters: Record<string, any>
+  ): void {
+    try {
+      // Only proceed if we're in a browser environment with BrowserFS
+      if (typeof window !== 'undefined' && window.fs) {
+        // Create the simulation config data
+        const simulationConfig = {
+          id: sessionId,
+          startTime: Date.now(),
+          networkInfo,
+          parameters,
+          paramChanges: []
+        };
+        
+        // Format the timestamp for the filename
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `simulation-config-${sessionId}.json`;
+        
+        // Ensure the directories exist
+        this.ensureDirectoryExists('/logs', () => {
+          this.ensureDirectoryExists('/logs/simulation', () => {
+            this.ensureDirectoryExists('/logs/simulation/runs', () => {
+              // Write the simulation config to a file
+              window.fs.writeFile(
+                `/logs/simulation/runs/${filename}`,
+                JSON.stringify(simulationConfig, null, 2),
+                { encoding: 'utf8' },
+                (err: any) => {
+                  if (err) {
+                    console.error(`Error writing simulation config to file: ${err.message || err}`);
+                  } else {
+                    console.log(`Successfully wrote simulation config to /logs/simulation/runs/${filename}`);
+                  }
+                }
+              );
+              
+              // Create an empty CSV file for the results
+              const csvFilename = `simulationresults${sessionId.replace(/-/g, '')}.csv`;
+              const csvHeader = 'simTime,timestamp,totalProbability,normVariation,positivity,totalVolume,totalArea,effectiveDimension,volumeEntropy,mean,variance,skewness,kurtosis\n';
+              
+              window.fs.writeFile(
+                `/logs/simulation/runs/${csvFilename}`,
+                csvHeader,
+                { encoding: 'utf8' },
+                (err: any) => {
+                  if (err) {
+                    console.error(`Error creating simulation results CSV file: ${err.message || err}`);
+                  } else {
+                    console.log(`Successfully created simulation results CSV file: /logs/simulation/runs/${csvFilename}`);
+                  }
+                }
+              );
+            });
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Error writing simulation start to file:', error);
+    }
   }
   
   /**
@@ -249,6 +319,63 @@ export class SimulationLogger {
     this.log('info', `Results recorded at t=${simTime.toFixed(2)}`, {
       conservation: results.conservation
     }, simTime);
+    
+    // Append the results to the CSV file in the runs directory
+    this.appendResultsToFile(this.currentSession.id, resultsLog);
+  }
+  
+  /**
+   * Append simulation results to the CSV file
+   */
+  private appendResultsToFile(sessionId: string, results: SimulationResultsLog): void {
+    try {
+      // Only proceed if we're in a browser environment with BrowserFS
+      if (typeof window !== 'undefined' && window.fs) {
+        // Format the results as a CSV row
+        let row = `${results.simTime},${results.timestamp}`;
+        
+        // Add conservation data
+        row += `,${results.conservation?.totalProbability ?? ''}`;
+        row += `,${results.conservation?.normVariation ?? ''}`;
+        row += `,${results.conservation?.positivity ?? ''}`;
+        
+        // Add geometric data
+        row += `,${results.geometric?.totalVolume ?? ''}`;
+        row += `,${results.geometric?.totalArea ?? ''}`;
+        row += `,${results.geometric?.effectiveDimension ?? ''}`;
+        row += `,${results.geometric?.volumeEntropy ?? ''}`;
+        
+        // Add statistics data
+        row += `,${results.statistics?.mean ?? ''}`;
+        row += `,${results.statistics?.variance ?? ''}`;
+        row += `,${results.statistics?.skewness ?? ''}`;
+        row += `,${results.statistics?.kurtosis ?? ''}`;
+        
+        // Create the filename with no hyphens (per existing format)
+        const csvFilename = `simulationresults${sessionId.replace(/-/g, '')}.csv`;
+        
+        // Ensure directories exist
+        this.ensureDirectoryExists('/logs', () => {
+          this.ensureDirectoryExists('/logs/simulation', () => {
+            this.ensureDirectoryExists('/logs/simulation/runs', () => {
+              // Append to the CSV file
+              window.fs.appendFile(
+                `/logs/simulation/runs/${csvFilename}`,
+                row + '\n',
+                { encoding: 'utf8' },
+                (err: any) => {
+                  if (err) {
+                    console.error(`Error appending to simulation results CSV file: ${err.message || err}`);
+                  }
+                }
+              );
+            });
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Error appending results to file:', error);
+    }
   }
   
   /**
@@ -444,7 +571,100 @@ export class SimulationLogger {
       csv += row.join(',') + '\n';
     });
     
+    // Also save the CSV to a file in the BrowserFS if available
+    this.saveResultsToFile(sessionId, csv);
+    
     return csv;
+  }
+  
+  /**
+   * Save results to file in the BrowserFS
+   */
+  private saveResultsToFile(sessionId: string, csvContent: string): void {
+    try {
+      // Check if we're in a browser environment with BrowserFS
+      if (typeof window !== 'undefined' && window.fs) {
+        const logsDir = '/logs';
+        const simulationDir = `${logsDir}/simulation`;
+        const runsDir = `${simulationDir}/runs`;
+        
+        // Ensure the directories exist
+        this.ensureDirectoryExists(logsDir, () => {
+          this.ensureDirectoryExists(simulationDir, () => {
+            this.ensureDirectoryExists(runsDir, () => {
+              // Write the file
+              const filePath = `${runsDir}/simulation-results-${sessionId}.csv`;
+              console.log(`Writing simulation results to file: ${filePath}`);
+              
+              window.fs.writeFile(filePath, csvContent, { encoding: 'utf8' }, (err: any) => {
+                if (err) {
+                  console.error(`Error writing results to file: ${err.message || err}`);
+                } else {
+                  console.log(`Successfully wrote results to file: ${filePath}`);
+                }
+              });
+            });
+          });
+        });
+        
+        // Also save graph data if it exists
+        const session = this.getSessionById(sessionId);
+        if (session && session.networkInfo) {
+          const graphsDir = `${simulationDir}/graphs`;
+          this.ensureDirectoryExists(graphsDir, () => {
+            const graphData = {
+              id: sessionId,
+              timestamp: Date.now(),
+              type: session.networkInfo.type || 'unknown',
+              nodeCount: session.networkInfo.nodeCount,
+              edgeCount: session.networkInfo.edgeCount,
+              name: session.networkInfo.name || 'Untitled Graph',
+              parameters: session.parameters
+            };
+            
+            const graphContent = JSON.stringify(graphData, null, 2);
+            const graphPath = `${graphsDir}/graph-${sessionId}.json`;
+            
+            window.fs.writeFile(graphPath, graphContent, { encoding: 'utf8' }, (err: any) => {
+              if (err) {
+                console.error(`Error writing graph data to file: ${err.message || err}`);
+              } else {
+                console.log(`Successfully wrote graph data to file: ${graphPath}`);
+              }
+            });
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error saving results to file:', error);
+    }
+  }
+  
+  /**
+   * Ensure directory exists
+   */
+  private ensureDirectoryExists(dirPath: string, callback: () => void): void {
+    if (!window || !window.fs) {
+      callback();
+      return;
+    }
+    
+    window.fs.stat(dirPath, (statErr: any) => {
+      if (statErr) {
+        // Directory doesn't exist, create it
+        window.fs.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
+          if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+            console.error(`Failed to create directory ${dirPath}: ${mkdirErr.message || mkdirErr}`);
+          } else {
+            console.log(`Created directory: ${dirPath}`);
+            callback();
+          }
+        });
+      } else {
+        // Directory already exists
+        callback();
+      }
+    });
   }
   
   /**
@@ -452,6 +672,47 @@ export class SimulationLogger {
    */
   public exportAllSessionsToJson(): string {
     return JSON.stringify(this.allSessions, null, 2);
+  }
+  
+  /**
+   * Save test log to the correct directory
+   * This method is specifically for test logs that should go to /logs/simulation/tests/
+   */
+  public saveTestLog(testName: string, content: string): void {
+    try {
+      // Check if we're in a browser environment with BrowserFS
+      if (typeof window !== 'undefined' && window.fs) {
+        const logsDir = '/logs';
+        const simulationDir = `${logsDir}/simulation`;
+        const testsDir = `${simulationDir}/tests`;
+        
+        // Ensure the directories exist
+        this.ensureDirectoryExists(logsDir, () => {
+          this.ensureDirectoryExists(simulationDir, () => {
+            this.ensureDirectoryExists(testsDir, () => {
+              // Create a timestamp for the filename
+              const timestamp = new Date();
+              const dateStr = timestamp.toISOString().replace(/[:.]/g, '-').split('T')[0];
+              const timeStr = timestamp.toISOString().replace(/[:.]/g, '-').split('T')[1].split('Z')[0];
+              
+              // Write the file
+              const filePath = `${testsDir}/test-${testName}-${dateStr}-${timeStr}.log`;
+              console.log(`Writing test log to file: ${filePath}`);
+              
+              window.fs.writeFile(filePath, content, { encoding: 'utf8' }, (err: any) => {
+                if (err) {
+                  console.error(`Error writing test log to file: ${err.message || err}`);
+                } else {
+                  console.log(`Successfully wrote test log to file: ${filePath}`);
+                }
+              });
+            });
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Error saving test log to file:', error);
+    }
   }
 }
 

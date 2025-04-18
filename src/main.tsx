@@ -24,10 +24,59 @@ async function initializeApp() {
   // Initialize file system in browser environment
   if (typeof window !== 'undefined') {
     try {
+      // Initialize BrowserFS
       await initializeBrowserFS();
-      testBrowserFS(); // Verify BrowserFS is working correctly
-      console.log('File system initialized. Enabling simulation logger file logging.');
-      enableDefaultLoggerFileLogging();
+      
+      // Verify BrowserFS is working
+      const fsWorking = testBrowserFS();
+      console.log(`BrowserFS initialization ${fsWorking ? 'succeeded' : 'failed'}`);
+      
+      if (fsWorking) {
+        try {
+          // Import createLogDirectories function dynamically to avoid circular dependencies
+          const { createLogDirectories } = await import('./utils/browserFSConfig');
+          
+          // Create the complete log directory structure
+          const directoriesCreated = await createLogDirectories();
+          console.log(`Log directories creation ${directoriesCreated ? 'succeeded' : 'failed'}`);
+          
+          // Additionally verify the critical directories exist
+          if (window.fs) {
+            const criticalDirs = [
+              '/logs/simulation/graphs',
+              '/logs/simulation/runs',
+              '/logs/simulation/tests'
+            ];
+            
+            console.log('Verifying critical directories...');
+            
+            for (const dir of criticalDirs) {
+              try {
+                const exists = window.fs.existsSync(dir);
+                console.log(`Directory ${dir} exists: ${exists}`);
+                
+                if (!exists) {
+                  console.log(`Creating missing critical directory: ${dir}`);
+                  window.fs.mkdirSync(dir, { recursive: true });
+                }
+                
+                // Write a test file to verify write permissions
+                const testFilePath = `${dir}/directory-test-${Date.now()}.txt`;
+                window.fs.writeFileSync(testFilePath, `Directory test file created at ${new Date().toISOString()}`);
+                console.log(`Successfully wrote test file to ${testFilePath}`);
+              } catch (err) {
+                console.error(`Error verifying directory ${dir}:`, err);
+              }
+            }
+          }
+          
+          console.log('File system initialized. Enabling simulation logger file logging.');
+          enableDefaultLoggerFileLogging();
+        } catch (err) {
+          console.error('Error during log directory creation:', err);
+          enableDefaultLoggerFileLogging(); // Still try to enable logging
+        }
+      }
     } catch (err) {
       console.error('Failed to initialize file system:', err);
       // Continue app initialization even if file system fails

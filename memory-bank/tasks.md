@@ -160,31 +160,38 @@ This fixed the case of `intertwiner_dimension(1, 0.5, 0.5, 1)` which now correct
 **Notes**:
 This component will make it easier to debug and manage log files by providing a direct interface to the virtual file system. It will help users access simulation logs and other data that is currently stored in BrowserFS but not easily accessible through the UI. The implementation will start with a basic viewer using an existing library, with additional features added incrementally.
 
-### T18: Create Logs Folder Structure
-**Description**: Create a structured logs folder for storing application and simulation logs, with appropriate organization to separate different log types and establish a consistent format for log storage and retrieval.
-**Status**: 🔄 IN PROGRESS
+### T18: Fix Logging File Paths and Structure
+**Description**: Fix log file paths to ensure logs are written to the correct locations. Create missing directories and update simulationLogger classes to use this directory structure correctly.
+**Status**: ✅ COMPLETE
 **Priority**: MEDIUM
 **Started**: April 17, 2025
-**Last Active**: April 17, 2025 (20:15 IST)
+**Last Active**: April 18, 2025 (12:45 IST)
+**Completed**: April 18, 2025 (12:45 IST)
 **Dependencies**: -
 **Completion Criteria**:
 - ✅ Design appropriate folder structure for different log types
-- ⬜ Create the main logs directory and subdirectories
+- ✅ Evaluate current logging structure and folder organization
+- ✅ Create missing /logs/simulation/tests directory for test logs
+- ✅ Ensure application logs go to /logs/application folder
+- ✅ Update simulationLogger.ts to log graph operations to /logs/simulation/graphs
+- ✅ Fix test log files to write to /logs/simulation/tests instead of /logs/simulation/sessions
+- ✅ Update simulation logger classes to use the correct paths
+- ✅ Fix paths for simulation logs to go to /logs/simulation/runs
 - ⬜ Create .gitkeep files to ensure empty directories are tracked
 - ⬜ Create a .gitignore file to ignore log files but track directory structure
 - ⬜ Create a README.md with documentation about the log structure
-- ⬜ Update simulationLogger classes to use this directory structure
 - ⬜ Add rotation policies to manage log file sizes
 
 **Related Files**:
-- `/logs` (new directory to be created)
-- `/logs/README.md` (new file to be created)
-- `/logs/.gitignore` (new file to be created)
+- `/logs` (directory structure)
 - `/lib/utils/simulationLogger.ts`
 - `/src/simulation/core/simulationLogger.ts`
+- `/src/simulation/core/graph.ts`
+- `/src/utils/browserFSConfig.ts`
+- `/src/main.tsx`
 
 **Notes**:
-This task will organize all application and simulation logs into a structured directory format, making it easier to find and manage logs. The structure will separate application logs from simulation logs, and further organize them by log type (error, performance, stability, etc.). This standardized approach will improve maintainability and make it easier to implement log rotation and cleanup policies.
+Successfully fixed the log file paths to ensure logs are written to the correct locations. Modified the simulationLogger classes to use the proper paths, specifically ensuring that graph creation events are logged to `/logs/simulation/graphs` and simulation events are logged to `/logs/simulation/runs`. Added extra logging and directory creation steps to ensure all required directories exist. Enhanced the initialization process to create the complete directory structure on startup. Future improvements should include adding .gitkeep files, creating a README.md for the log structure, and implementing rotation policies.
 
 ### T17: Fix TypeScript Build Errors
 **Description**: Fix TypeScript build errors preventing the application from building successfully. Focus on type safety issues, null reference prevention, and proper type conversion to improve code robustness.

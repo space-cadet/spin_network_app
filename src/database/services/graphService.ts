@@ -23,11 +23,108 @@ export class GraphService {
       
       // Add to database
       const id = await db.graphs.add(record as GraphRecord);
+      
+      // Log to BrowserFS if available
+      try {
+        if (typeof window !== 'undefined' && window.fs) {
+          // Create the log file path
+          const graphData = {
+            id: id.toString(),
+            timestamp: record.timestamp,
+            networkId: record.networkId,
+            type: record.type,
+            nodes: record.nodes,
+            edges: record.edges,
+            name: record.name || 'Untitled Graph',
+            description: record.description,
+            properties: record.properties ? JSON.parse(record.properties) : null,
+            metadata: record.metadata ? JSON.parse(record.metadata) : null
+          };
+          
+          // Create a unique filename
+          const timestamp = new Date(record.timestamp).toISOString().replace(/[:.]/g, '-');
+          const filename = `graph-${id}-${timestamp}.json`;
+          
+          // Ensure the directories exist
+          this.ensureLogDirectoryExists('/logs/simulation/graphs', () => {
+            // Write the graph data to file
+            window.fs.writeFile(
+              `/logs/simulation/graphs/${filename}`,
+              JSON.stringify(graphData, null, 2),
+              { encoding: 'utf8' },
+              (err: any) => {
+                if (err) {
+                  console.error(`Error writing graph log to file: ${err.message || err}`);
+                } else {
+                  console.log(`Successfully wrote graph log to /logs/simulation/graphs/${filename}`);
+                }
+              }
+            );
+          });
+        }
+      } catch (logError) {
+        console.error('Error logging graph creation to BrowserFS:', logError);
+        // Continue with normal operation even if logging fails
+      }
+      
       return id;
     } catch (error) {
       console.error('Failed to create graph record:', error);
       throw error;
     }
+  }
+  
+  /**
+   * Helper method to ensure a directory exists
+   * @param dirPath Directory path to create
+   * @param callback Callback function to execute after directory is created
+   */
+  private static ensureLogDirectoryExists(dirPath: string, callback: () => void): void {
+    if (typeof window === 'undefined' || !window.fs) {
+      callback();
+      return;
+    }
+    
+    // Split path into segments
+    const segments = dirPath.split('/').filter(Boolean);
+    
+    // Start with root directory
+    let currentPath = '/';
+    
+    // Create each segment sequentially
+    const createNextSegment = (index: number) => {
+      if (index >= segments.length) {
+        // All segments created, execute callback
+        callback();
+        return;
+      }
+      
+      // Add next segment to path
+      currentPath += segments[index] + '/';
+      
+      // Check if directory exists
+      window.fs.stat(currentPath, (statErr: any) => {
+        if (statErr) {
+          // Directory doesn't exist, create it
+          window.fs.mkdir(currentPath, (mkdirErr: any) => {
+            if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+              console.error(`Failed to create directory ${currentPath}: ${mkdirErr.message || mkdirErr}`);
+              // Continue with next segment even if this one failed
+            } else {
+              console.log(`Created directory: ${currentPath}`);
+            }
+            // Process next segment
+            createNextSegment(index + 1);
+          });
+        } else {
+          // Directory already exists, move to next segment
+          createNextSegment(index + 1);
+        }
+      });
+    };
+    
+    // Start the process
+    createNextSegment(0);
   }
   
   /**
