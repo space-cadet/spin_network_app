@@ -30,14 +30,15 @@
 **Status:** 🔄 IN PROGRESS
 **Priority:** MEDIUM
 **Started:** 2025-04-18
-**Last Active:** 2025-04-18 02:45 IST
+**Last Active:** 2025-04-18 14:30 IST
 **Dependencies:** T1
 
 #### Context
-Implementation of functionality for calculating the dimension and basis states of intertwiner spaces for nodes in spin networks with arbitrary edge spin labels.
+Implementation of functionality for calculating the dimension and basis states of intertwiner spaces for nodes in spin networks with arbitrary edge spin labels, with particular focus on addressing the order-dependence issue in intertwiner dimension calculations.
 
 #### Critical Files
 - `/memory-bank/implementation-details/intertwiner-spaces.md` - Documentation of intertwiner space theory and calculations
+- `/python/intertwiner-spaces.py` - Python implementation with permutation-invariant functions
 - `/lib/core/intertwinerSpace.ts` - TypeScript implementation of intertwiner calculations
 - `/lib/core/index.ts` - Updated to export intertwiner space functionality
 
@@ -50,38 +51,42 @@ Implementation of functionality for calculating the dimension and basis states o
 6. ✅ Implement basis vector construction using Clebsch-Gordan coefficients
 7. ✅ Create optimized implementation for common cases (four spin-1/2 edges)
 8. ✅ Add exports to core library
-9. ⬜ Create visualization component for intertwiner spaces
-10. ⬜ Implement comprehensive testing
-11. ⬜ Add CG coefficient lookup tables for performance
+9. ✅ Document recoupling scheme dependence and physical meaning
+10. ✅ Add permutation-invariant calculation functions to Python code
+11. ✅ Reorganize documentation with logical flow and table of contents
+12. ⬜ Create visualization component for intertwiner spaces
+13. ⬜ Implement comprehensive testing
+14. ⬜ Add CG coefficient lookup tables for performance
 
 #### Working State
-Successfully implemented intertwiner space calculations with the following functionality:
+Enhanced intertwiner space implementation with significant improvements:
 
-1. **Dimension Calculation**:
-   - Determines the dimension of intertwiner spaces for arbitrary spin labels
-   - Uses recoupling theory to count paths to j=0 total angular momentum
-   - Handles both integer and half-integer spins correctly
-   - Includes proper triangle inequality checking
+1. **Order Dependence Documentation**:
+   - Added comprehensive explanation of why different orderings of the same spins can yield different dimensions
+   - Documented the mathematical theory behind recoupling schemes and their physical meaning
+   - Provided detailed examples showing how different permutations affect the calculation
+   - Created clear diagrams and equations to explain the phenomenon
+   - Added recommendations for handling this issue in practical calculations
 
-2. **Basis Vector Construction**:
-   - Constructs explicit basis vectors using Clebsch-Gordan coefficients
-   - Implements recoupling scheme with intermediate angular momentum
-   - Creates orthonormal basis for the intertwiner space
-   - Handles general case for arbitrary spins
+2. **Permutation-Invariant Functions**:
+   - Added `permutation_invariant_intertwiner_dimension` function that sorts spins before calculation
+   - Added `max_intertwiner_dimension` function that calculates the maximum dimension across all recoupling schemes
+   - Added `all_recoupling_dimensions` function that returns dimensions for all possible pairings
+   - Implemented testing code to compare results across different input orderings
 
-3. **Optimizations**:
-   - Special handling for common case of four spin-1/2 edges
-   - Precomputed values for better performance in frequent cases
-   - Numerical robustness with floating-point tolerance checks
-   - Orthonormalization via Gram-Schmidt process
+3. **Documentation Reorganization**:
+   - Created a comprehensive table of contents for easier navigation
+   - Restructured content to flow logically from basic concepts to advanced implementation
+   - Unified notation and terminology throughout the document
+   - Added more explicit examples and mathematical formulations
+   - Enhanced explanations of physical interpretations
+   
+4. **Python Implementation Testing**:
+   - Added verification code to demonstrate the order dependence issue
+   - Created example calculations to compare different approaches
+   - Added detailed logging of intermediate values to aid in understanding
 
-4. **Documentation**:
-   - Comprehensive explanation of intertwiner space theory
-   - Step-by-step tutorial for calculating basis states
-   - Visualizations of intertwiner dimensions for various spin combinations
-   - Clear mathematical notation using LaTeX
-
-The implementation provides a solid foundation for working with intertwiner spaces in spin networks. It can be used to explore quantum states at nodes and is crucial for more advanced calculations in loop quantum gravity simulations.
+The enhanced implementation now properly addresses the subtle but important issue that different recoupling schemes can yield different intertwiner dimensions even for the same set of spins, and provides multiple approaches to handle this in calculations.
 
 ### T1: Simulation Library Abstraction - I/O and Serialization Implementation
 **Status:** 🔄 IN PROGRESS

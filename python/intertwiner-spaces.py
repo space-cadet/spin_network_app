@@ -245,7 +245,105 @@ if __name__ == "__main__":
     orthonormal_basis = orthonormalize_basis(basis)
     print(f"Basis states correspond to intermediate j values: {[j for j, _ in orthonormal_basis]}")
     
+    j_list = set()
+    
+    j_values = [0.5, 1]
+    
+    for j_1, j_2, j_3, j_4 in sorted(product(j_values, j_values, j_values, j_values)):
+        print(j_1, j_2, j_3, j_4, intertwiner_dimension(j_1, j_2, j_3, j_4))
+        
+    print(intertwiner_dimension(1, 0.5, 0.5, 1))
+    print(intertwiner_dimension(1,1,0.5,0.5))
+    
+    # Demonstrate the order dependence issue
+    print("\nDemonstrating Order Dependence Issue:")
+    print("Case 1: intertwiner_dimension(1, 0.5, 0.5, 1) =", intertwiner_dimension(1, 0.5, 0.5, 1))
+    print("Case 2: intertwiner_dimension(1, 1, 0.5, 0.5) =", intertwiner_dimension(1, 1, 0.5, 0.5))
+    
     # Visualize intertwiner dimensions
-    print("\nGenerating visualizations of intertwiner dimensions...")
-    visualize_intertwiner_dimension(max_j=3)
-    visualize_3d_intertwiner_dimension(max_j=2)
+    # print("\nGenerating visualizations of intertwiner dimensions...")
+    # visualize_intertwiner_dimension(max_j=3)
+    # visualize_3d_intertwiner_dimension(max_j=2)
+
+def permutation_invariant_intertwiner_dimension(j1, j2, j3, j4):
+    """
+    Calculate the dimension of the intertwiner space for a 4-valent node
+    with edges labeled j1, j2, j3, j4, invariant under permutation of the spins.
+    
+    This function ensures the same result regardless of how the spins are ordered
+    by sorting them before calculation.
+    """
+    # Sort the spins to ensure permutation invariance
+    spins = sorted([float(j1), float(j2), float(j3), float(j4)])
+    
+    # We can use any consistent ordering once we've sorted them
+    # Using first two spins and last two spins for coupling
+    j1, j2, j3, j4 = spins
+    
+    # Get allowed intermediate spins
+    j12_values = allowed_intermediate_spins(j1, j2)
+    j34_values = allowed_intermediate_spins(j3, j4)
+    
+    # Count overlapping values that can couple to j=0
+    dimension = 0
+    for j in j12_values:
+        if any(abs(j - j_val) < 1e-10 for j_val in j34_values):
+            dimension += 1
+    
+    return dimension
+
+def max_intertwiner_dimension(j1, j2, j3, j4):
+    """
+    Calculate the maximum possible dimension of the intertwiner space for a 4-valent node
+    by considering all possible recoupling schemes (pairings of the 4 spins).
+    
+    This is useful if you want to know the maximum number of basis states possible
+    when considering all recoupling schemes.
+    """
+    # Convert inputs to float for calculation
+    spins = [float(j1), float(j2), float(j3), float(j4)]
+    
+    # Check all three possible pairings
+    # (j1,j2)(j3,j4)
+    dim1 = intertwiner_dimension(spins[0], spins[1], spins[2], spins[3])
+    
+    # (j1,j3)(j2,j4)
+    dim2 = intertwiner_dimension(spins[0], spins[2], spins[1], spins[3])
+    
+    # (j1,j4)(j2,j3)
+    dim3 = intertwiner_dimension(spins[0], spins[3], spins[1], spins[2])
+    
+    return max(dim1, dim2, dim3)
+
+def all_recoupling_dimensions(j1, j2, j3, j4):
+    """
+    Return the intertwiner dimensions for all possible recoupling schemes.
+    This helps understand how different recoupling schemes affect the dimension.
+    """
+    # Convert inputs to float for calculation
+    spins = [float(j1), float(j2), float(j3), float(j4)]
+    
+    # Calculate dimensions for all three possible pairings
+    results = {
+        "(j1,j2)(j3,j4)": intertwiner_dimension(spins[0], spins[1], spins[2], spins[3]),
+        "(j1,j3)(j2,j4)": intertwiner_dimension(spins[0], spins[2], spins[1], spins[3]),
+        "(j1,j4)(j2,j3)": intertwiner_dimension(spins[0], spins[3], spins[1], spins[2])
+    }
+    
+    return results
+
+# Example of using the permutation-invariant functions
+if __name__ == "__main__":
+    print("\nUsing permutation-invariant functions:")
+    print("permutation_invariant_intertwiner_dimension(1, 0.5, 0.5, 1) =", 
+          permutation_invariant_intertwiner_dimension(1, 0.5, 0.5, 1))
+    print("permutation_invariant_intertwiner_dimension(1, 1, 0.5, 0.5) =", 
+          permutation_invariant_intertwiner_dimension(1, 1, 0.5, 0.5))
+    
+    print("\nMax dimension across all recoupling schemes:")
+    print("max_intertwiner_dimension(1, 0.5, 0.5, 1) =", max_intertwiner_dimension(1, 0.5, 0.5, 1))
+    
+    print("\nAll recoupling scheme dimensions for (1, 0.5, 0.5, 1):")
+    all_dims = all_recoupling_dimensions(1, 0.5, 0.5, 1)
+    for scheme, dim in all_dims.items():
+        print(f"  {scheme}: {dim}")

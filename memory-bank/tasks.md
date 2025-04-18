@@ -28,7 +28,7 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: MEDIUM
 **Started**: April 18, 2025
-**Last Active**: April 18, 2025
+**Last Active**: April 18, 2025 (14:30 IST)
 **Dependencies**: T1
 **Completion Criteria**:
 - ✅ Document the mathematical theory of intertwiner spaces
@@ -36,6 +36,9 @@
 - ✅ Add detailed tutorial for calculating intertwiner basis states
 - ✅ Implement intertwinerSpace.ts module with core functionality
 - ✅ Add to library exports in core/index.ts
+- ✅ Enhance documentation with explanation of recoupling schemes
+- ✅ Add permutation-invariant calculation functions to Python code
+- ✅ Reorganize documentation with logical flow and table of contents
 - ⬜ Create visualization component for intertwiner spaces
 - ⬜ Add comprehensive testing of intertwiner calculations
 - ⬜ Implement optimized precomputed values for common cases
@@ -43,11 +46,21 @@
 
 **Related Files**:
 - `/memory-bank/implementation-details/intertwiner-spaces.md`
+- `/python/intertwiner-spaces.py`
 - `/lib/core/intertwinerSpace.ts`
 - `/lib/core/index.ts`
 
 **Notes**:
-Intertwiner spaces represent the SU(2)-invariant subspaces at nodes in spin networks. The dimension and basis of these spaces are crucial for quantum spin network calculations. The implementation supports arbitrary edge spin labels (j=1/2, 1, 3/2, etc.) and calculates both the dimension of the space and explicit basis states using recoupling theory and Clebsch-Gordan coefficients. The special case of a 4-valent node with all spin-1/2 edges has been optimized with pre-computed values.
+Intertwiner spaces represent the SU(2)-invariant subspaces at nodes in spin networks. The dimension and basis of these spaces are crucial for quantum spin network calculations. 
+
+Made significant progress with:
+1. Comprehensive documentation explaining the order dependence in intertwiner calculations
+2. Mathematical formulation of different recoupling schemes and their physical meaning
+3. Detailed examples showing how different orderings of the same spins can yield different dimensions
+4. Implementation of permutation-invariant functions in Python to ensure consistent results
+5. Complete reorganization of the documentation with a logical flow and table of contents
+
+The implementation now addresses the subtle but important issue that different recoupling schemes can yield different intertwiner dimensions even for the same set of spins, and provides multiple approaches to handle this in calculations.
 
 ### T19: Implement BrowserFS File Viewer
 **Description**: Implement a file viewer component that allows browsing, viewing, and managing files stored in the BrowserFS virtual file system. This will enable users to access log files and other data stored in the browser's storage.
