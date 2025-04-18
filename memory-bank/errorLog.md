@@ -1,6 +1,69 @@
 # Error Log
 
-*Last Updated: 2025-04-17*
+*Last Updated: 2025-04-18*
+
+## 2025-04-18 15:30 IST: T20 - Incorrect Intertwiner Dimension Calculation
+
+**File:** `/Users/deepak/code/spin_network_app/python/intertwiner-spaces.py`
+
+**Error Message:**
+When calculating intertwiner dimensions for specific spin combinations, incorrect results were returned:
+```
+Case 1: intertwiner_dimension(1, 0.5, 0.5, 1) = 3  # Should be 2
+Case 2: intertwiner_dimension(1, 1, 0.5, 0.5) = 2
+```
+
+**Cause:**
+Bug in the `allowed_intermediate_spins()` function that incorrectly determined which intermediate spin values are allowed when coupling two angular momenta. The function was using a step size of 0.5 for non-integer sums, but failing to enforce proper quantum mechanical selection rules for coupling angular momenta.
+
+**Fix:**
+Reimplemented the function to correctly apply quantum angular momentum coupling rules:
+```python
+def allowed_intermediate_spins(j1, j2):
+    """
+    Calculate allowed intermediate spins when coupling j1 and j2.
+    Returns a list of possible j values following quantum angular momentum coupling rules.
+    """
+    j_min = abs(j1 - j2)
+    j_max = j1 + j2
+    
+    # Determine if j1 and j2 are integers or half-integers
+    j1_is_integer = abs(j1 - round(j1)) < 1e-10
+    j2_is_integer = abs(j2 - round(j2)) < 1e-10
+    
+    # Determine if j should be integer or half-integer
+    j_must_be_integer = (j1_is_integer and j2_is_integer) or (not j1_is_integer and not j2_is_integer)
+    
+    result = []
+    
+    # Start at j_min and increment by 1 until we reach j_max
+    j = j_min
+    while j <= j_max + 1e-10:
+        j_is_integer = abs(j - round(j)) < 1e-10
+        
+        # Add to results if j has the correct "integer-ness"
+        if (j_must_be_integer and j_is_integer) or (not j_must_be_integer and not j_is_integer):
+            result.append(j)
+        
+        j += 1
+    
+    return result
+```
+
+The key fix was enforcing the rule that:
+1. When coupling two integer spins, allowed intermediate spins must be integers
+2. When coupling two half-integer spins, allowed intermediate spins must be integers
+3. When coupling an integer spin and a half-integer spin, allowed intermediate spins must be half-integers
+
+With this correction, for the case of j1=1 and j2=0.5, the function now properly returns only [0.5, 1.5] instead of [0.5, 1.0, 1.5], which ensures the intertwiner dimension calculation is correct.
+
+**Affected Files:**
+- `/Users/deepak/code/spin_network_app/python/intertwiner-spaces.py`
+
+**Related Task:** T20: Add Intertwiner Space Implementation
+
+**Physical Significance:**
+This error had physical significance because the incorrect calculation was allowing coupling schemes that are not permitted by quantum angular momentum coupling rules. The fix properly enforces SU(2) recoupling theory, ensuring that the intertwiner space calculations correctly reflect the physics of quantum spin networks.
 
 ## 2025-04-17: TypeScript Build Errors in lib/utils/simulationLogger.ts
 

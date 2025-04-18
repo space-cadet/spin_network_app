@@ -4,6 +4,7 @@ from sympy import S
 from itertools import product
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from tabulate import tabulate
 
 def triangle_inequality(j1, j2, j3):
     """
@@ -14,18 +15,32 @@ def triangle_inequality(j1, j2, j3):
 def allowed_intermediate_spins(j1, j2):
     """
     Calculate allowed intermediate spins when coupling j1 and j2.
-    Returns a list of possible j values.
+    Returns a list of possible j values following quantum angular momentum coupling rules.
     """
     j_min = abs(j1 - j2)
     j_max = j1 + j2
     
-    # Check if j1 + j2 is an integer
-    sum_j = float(j1 + j2)
-    is_integer_sum = (sum_j == int(sum_j))
+    # Determine if j1 and j2 are integers or half-integers
+    j1_is_integer = abs(j1 - round(j1)) < 1e-10
+    j2_is_integer = abs(j2 - round(j2)) < 1e-10
     
-    # Generate all possible intermediate j values (integers or half-integers)
-    step = 1 if is_integer_sum else 0.5
-    return [j for j in np.arange(float(j_min), float(j_max) + step, step)]
+    # Determine if j should be integer or half-integer
+    j_must_be_integer = (j1_is_integer and j2_is_integer) or (not j1_is_integer and not j2_is_integer)
+    
+    result = []
+    
+    # Start at j_min and increment by 1 until we reach j_max
+    j = j_min
+    while j <= j_max + 1e-10:
+        j_is_integer = abs(j - round(j)) < 1e-10
+        
+        # Add to results if j has the correct "integer-ness"
+        if (j_must_be_integer and j_is_integer) or (not j_must_be_integer and not j_is_integer):
+            result.append(j)
+        
+        j += 1
+    
+    return result
 
 def intertwiner_dimension(j1, j2, j3, j4):
     """
@@ -226,7 +241,7 @@ if __name__ == "__main__":
     print(f"Basis states correspond to intermediate j values: {[j for j, _ in orthonormal_basis]}")
     
     # Example 2: Two spin-1/2 and two spin-1
-    print("\nExample 2: Two spin-1/2 and two spin-1")
+    print("Example 2: Two spin-1/2 and two spin-1")
     j_values = [0.5, 0.5, 1, 1]
     dim = intertwiner_dimension(*j_values)
     print(f"Intertwiner dimension: {dim}")
@@ -236,7 +251,7 @@ if __name__ == "__main__":
     print(f"Basis states correspond to intermediate j values: {[j for j, _ in orthonormal_basis]}")
     
     # Example 3: All different spins
-    print("\nExample 3: Different spins (0.5, 1, 1.5, 2)")
+    print("Example 3: Different spins (0.5, 1, 1.5, 2)")
     j_values = [0.5, 1, 1.5, 2]
     dim = intertwiner_dimension(*j_values)
     print(f"Intertwiner dimension: {dim}")
@@ -245,23 +260,29 @@ if __name__ == "__main__":
     orthonormal_basis = orthonormalize_basis(basis)
     print(f"Basis states correspond to intermediate j values: {[j for j, _ in orthonormal_basis]}")
     
-    j_list = set()
-    
-    j_values = [0.5, 1]
-    
+    # Collect data into a list of rows
+    j_values = [0.5,1.0]
+    data = []
     for j_1, j_2, j_3, j_4 in sorted(product(j_values, j_values, j_values, j_values)):
-        print(j_1, j_2, j_3, j_4, intertwiner_dimension(j_1, j_2, j_3, j_4))
+        dimension = intertwiner_dimension(j_1, j_2, j_3, j_4)
+        data.append([j_1, j_2, j_3, j_4, dimension])
+
+    # Define headers for the table
+    headers = ["j1", "j2", "j3", "j4", "Intertwiner Dimension"]
+
+    # Print the table
+    print(tabulate(data, headers=headers, tablefmt="grid"))
         
     print(intertwiner_dimension(1, 0.5, 0.5, 1))
     print(intertwiner_dimension(1,1,0.5,0.5))
     
     # Demonstrate the order dependence issue
-    print("\nDemonstrating Order Dependence Issue:")
+    print("Demonstrating Order Dependence Issue:")
     print("Case 1: intertwiner_dimension(1, 0.5, 0.5, 1) =", intertwiner_dimension(1, 0.5, 0.5, 1))
     print("Case 2: intertwiner_dimension(1, 1, 0.5, 0.5) =", intertwiner_dimension(1, 1, 0.5, 0.5))
     
     # Visualize intertwiner dimensions
-    # print("\nGenerating visualizations of intertwiner dimensions...")
+    # print("Generating visualizations of intertwiner dimensions...")
     # visualize_intertwiner_dimension(max_j=3)
     # visualize_3d_intertwiner_dimension(max_j=2)
 
@@ -334,16 +355,16 @@ def all_recoupling_dimensions(j1, j2, j3, j4):
 
 # Example of using the permutation-invariant functions
 if __name__ == "__main__":
-    print("\nUsing permutation-invariant functions:")
+    print("Using permutation-invariant functions:")
     print("permutation_invariant_intertwiner_dimension(1, 0.5, 0.5, 1) =", 
           permutation_invariant_intertwiner_dimension(1, 0.5, 0.5, 1))
     print("permutation_invariant_intertwiner_dimension(1, 1, 0.5, 0.5) =", 
           permutation_invariant_intertwiner_dimension(1, 1, 0.5, 0.5))
     
-    print("\nMax dimension across all recoupling schemes:")
+    print("Max dimension across all recoupling schemes:")
     print("max_intertwiner_dimension(1, 0.5, 0.5, 1) =", max_intertwiner_dimension(1, 0.5, 0.5, 1))
     
-    print("\nAll recoupling scheme dimensions for (1, 0.5, 0.5, 1):")
+    print("All recoupling scheme dimensions for (1, 0.5, 0.5, 1):")
     all_dims = all_recoupling_dimensions(1, 0.5, 0.5, 1)
     for scheme, dim in all_dims.items():
         print(f"  {scheme}: {dim}")

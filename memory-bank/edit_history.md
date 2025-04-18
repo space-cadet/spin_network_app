@@ -7,6 +7,14 @@
 
 ### April 18, 2025
 
+#### 15:30 - T20: Fixed Intertwiner Dimension Calculation Bug
+
+- Modified `/Users/deepak/code/spin_network_app/python/intertwiner-spaces.py` - Fixed bug in allowed_intermediate_spins() function that was causing incorrect dimension calculations
+- Updated `/Users/deepak/code/spin_network_app/memory-bank/errorLog.md` - Added error log entry for the intertwiner dimension calculation bug
+- Updated `/Users/deepak/code/spin_network_app/memory-bank/edit_history.md` - Documented the bug fix
+
+Fixed a critical bug in the intertwiner dimension calculation that was incorrectly determining allowed intermediate spins when coupling angular momenta. The issue was in the `allowed_intermediate_spins()` function which wasn't properly enforcing quantum mechanical selection rules. The fix correctly applies the rule that when coupling integer and half-integer spins, the resulting intermediate spins must follow specific patterns, ensuring that physical constraints of angular momentum coupling are preserved. This corrects the calculation for `intertwiner_dimension(1, 0.5, 0.5, 1)` which now properly returns 2 instead of 3.
+
 #### 14:30 - Intertwiner Space Documentation and Implementation
 
 - Modified `/Users/deepak/code/spin_network_app/memory-bank/implementation-details/intertwiner-spaces.md` - Reorganized and enhanced the documentation for better coherence and readability

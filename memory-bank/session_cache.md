@@ -1,6 +1,6 @@
 # Session Cache
 
-*Last Updated: April 18, 2025 (02:45 IST)*
+*Last Updated: April 18, 2025 (15:30 IST)*
 
 ## Overview
 - Active Tasks: 10
@@ -30,7 +30,7 @@
 **Status:** 🔄 IN PROGRESS
 **Priority:** MEDIUM
 **Started:** 2025-04-18
-**Last Active:** 2025-04-18 14:30 IST
+**Last Active:** 2025-04-18 15:30 IST
 **Dependencies:** T1
 
 #### Context
@@ -54,12 +54,13 @@ Implementation of functionality for calculating the dimension and basis states o
 9. ✅ Document recoupling scheme dependence and physical meaning
 10. ✅ Add permutation-invariant calculation functions to Python code
 11. ✅ Reorganize documentation with logical flow and table of contents
-12. ⬜ Create visualization component for intertwiner spaces
-13. ⬜ Implement comprehensive testing
-14. ⬜ Add CG coefficient lookup tables for performance
+12. ✅ Fix bug in intertwiner dimension calculation function
+13. ⬜ Create visualization component for intertwiner spaces
+14. ⬜ Implement comprehensive testing
+15. ⬜ Add CG coefficient lookup tables for performance
 
 #### Working State
-Enhanced intertwiner space implementation with significant improvements:
+Enhanced intertwiner space implementation with significant improvements and bug fixes:
 
 1. **Order Dependence Documentation**:
    - Added comprehensive explanation of why different orderings of the same spins can yield different dimensions
@@ -81,12 +82,21 @@ Enhanced intertwiner space implementation with significant improvements:
    - Added more explicit examples and mathematical formulations
    - Enhanced explanations of physical interpretations
    
-4. **Python Implementation Testing**:
+4. **Python Implementation Testing and Bug Fixing**:
    - Added verification code to demonstrate the order dependence issue
    - Created example calculations to compare different approaches
    - Added detailed logging of intermediate values to aid in understanding
+   - Fixed critical bug in `allowed_intermediate_spins()` function that was incorrectly calculating intermediate spins
+   - Fixed intertwiner dimension calculation to properly enforce angular momentum selection rules
 
-The enhanced implementation now properly addresses the subtle but important issue that different recoupling schemes can yield different intertwiner dimensions even for the same set of spins, and provides multiple approaches to handle this in calculations.
+5. **Quantum Angular Momentum Rules**:
+   - Corrected the implementation to enforce proper quantum mechanical selection rules:
+     - When coupling two integer spins, intermediate spins must be integers
+     - When coupling two half-integer spins, intermediate spins must be integers
+     - When coupling an integer and half-integer spin, intermediate spins must be half-integers
+   - This fixed the case of `intertwiner_dimension(1, 0.5, 0.5, 1)` which now correctly returns 2 instead of 3
+
+The enhanced implementation now properly addresses the subtle but important issue that different recoupling schemes can yield different intertwiner dimensions even for the same set of spins, and provides multiple approaches to handle this in calculations. The bug fix ensures that all dimension calculations follow proper angular momentum physics.
 
 ### T1: Simulation Library Abstraction - I/O and Serialization Implementation
 **Status:** 🔄 IN PROGRESS

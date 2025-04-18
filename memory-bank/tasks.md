@@ -28,7 +28,7 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: MEDIUM
 **Started**: April 18, 2025
-**Last Active**: April 18, 2025 (14:30 IST)
+**Last Active**: April 18, 2025 (15:30 IST)
 **Dependencies**: T1
 **Completion Criteria**:
 - ✅ Document the mathematical theory of intertwiner spaces
@@ -39,6 +39,7 @@
 - ✅ Enhance documentation with explanation of recoupling schemes
 - ✅ Add permutation-invariant calculation functions to Python code
 - ✅ Reorganize documentation with logical flow and table of contents
+- ✅ Fix bug in intertwiner dimension calculation
 - ⬜ Create visualization component for intertwiner spaces
 - ⬜ Add comprehensive testing of intertwiner calculations
 - ⬜ Implement optimized precomputed values for common cases
@@ -59,8 +60,14 @@ Made significant progress with:
 3. Detailed examples showing how different orderings of the same spins can yield different dimensions
 4. Implementation of permutation-invariant functions in Python to ensure consistent results
 5. Complete reorganization of the documentation with a logical flow and table of contents
+6. Fixed critical bug in the `allowed_intermediate_spins()` function that was causing incorrect dimension calculations
 
-The implementation now addresses the subtle but important issue that different recoupling schemes can yield different intertwiner dimensions even for the same set of spins, and provides multiple approaches to handle this in calculations.
+The bug fix ensures that the implementation properly enforces the quantum mechanical selection rules for angular momentum coupling:
+- When coupling two integer spins, intermediate spins must be integers
+- When coupling two half-integer spins, intermediate spins must be integers
+- When coupling an integer and half-integer spin, intermediate spins must be half-integers
+
+This fixed the case of `intertwiner_dimension(1, 0.5, 0.5, 1)` which now correctly returns 2 instead of 3, ensuring that all dimension calculations follow proper angular momentum physics.
 
 ### T19: Implement BrowserFS File Viewer
 **Description**: Implement a file viewer component that allows browsing, viewing, and managing files stored in the BrowserFS virtual file system. This will enable users to access log files and other data stored in the browser's storage.
