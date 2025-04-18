@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   FaPlay, 
   FaPause, 
-  FaStepForward, 
+  FaStepForward,
+  FaStop,
   FaUndo, 
   FaCog,
   FaChartLine,
@@ -308,6 +309,7 @@ const SimulationControlPanel: React.FC = () => {
     isPanelExpanded,
     startSimulation,
     pauseSimulation,
+    stopSimulation,
     stepSimulation,
     resetSimulation,
     jumpToTime,
@@ -369,15 +371,49 @@ const SimulationControlPanel: React.FC = () => {
           
           {/* Play Controls */}
           <div className="flex space-x-2 mb-4">
+            {isRunning ? (
+              // Pause button when simulation is running
+              <button
+                className="btn flex-1 flex items-center justify-center space-x-2"
+                onClick={pauseSimulation}
+                disabled={!hasNetwork}
+              >
+                <FaPause className="text-sm" />
+                <span>Pause</span>
+              </button>
+            ) : hasHistory ? (
+              // Play button when simulation is paused but has history (for resuming)
+              <button
+                className="btn flex-1 flex items-center justify-center space-x-2"
+                onClick={startSimulation}
+                disabled={!hasNetwork}
+              >
+                <FaPlay className="text-sm" />
+                <span>Resume</span>
+              </button>
+            ) : (
+              // Start button for new simulation
+              <button
+                className="btn flex-1 flex items-center justify-center space-x-2"
+                onClick={startSimulation}
+                disabled={!hasNetwork}
+              >
+                <FaPlay className="text-sm" />
+                <span>Start</span>
+              </button>
+            )}
+            
+            {/* Stop button (to finalize the simulation) */}
             <button
-              className="btn flex-1 flex items-center justify-center space-x-2"
-              onClick={isRunning ? pauseSimulation : startSimulation}
-              disabled={!hasNetwork}
+              className="btn flex items-center justify-center px-4"
+              onClick={stopSimulation}
+              disabled={!hasNetwork || (!isRunning && !hasHistory)}
+              title="Stop simulation"
             >
-              {isRunning ? <FaPause className="text-sm" /> : <FaPlay className="text-sm" />}
-              <span>{isRunning ? 'Pause' : 'Start'}</span>
+              <FaStop className="text-sm" />
             </button>
             
+            {/* Step button */}
             <button
               className="btn flex items-center justify-center px-4"
               onClick={stepSimulation}
@@ -387,6 +423,7 @@ const SimulationControlPanel: React.FC = () => {
               <FaStepForward className="text-sm" />
             </button>
             
+            {/* Reset button */}
             <button
               className="btn flex items-center justify-center px-4"
               onClick={resetSimulation}
@@ -396,6 +433,7 @@ const SimulationControlPanel: React.FC = () => {
               <FaUndo className="text-sm" />
             </button>
             
+            {/* Stable Reset button */}
             <button
               className="btn btn-sm px-3 text-xs"
               onClick={() => {

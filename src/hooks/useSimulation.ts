@@ -469,6 +469,27 @@ export const useSimulation = () => {
     }
   }, []);
   
+  // Stop simulation (finalize current run)
+  const stopSimulation = useCallback(() => {
+    // Pause first if running
+    if (isRunning) {
+      pauseSimulation();
+    }
+    
+    // End the current simulation session and prepare for a new one
+    simulationLogger.log('info', 'Simulation stopped', {
+      time: currentTime
+    });
+    simulationLogger.endSession();
+    
+    // Reset time to 0 but keep parameters
+    setCurrentTime(0);
+    setHasHistory(false);
+    
+    // We don't reset the engine because that would reinitialize parameters
+    // Instead, we'll re-initialize on the next start
+  }, [isRunning, pauseSimulation, currentTime]);
+  
   // Step simulation (single step)
   const stepSimulation = useCallback(() => {
     if (engineRef.current && graphRef.current) {
@@ -524,7 +545,7 @@ export const useSimulation = () => {
   }, []);
 
   // Enhanced start simulation with better error handling and state validation
-  const startSimulation = useCallback(() => {
+  const startSimulation = useCallback((shouldResume = false) => {
     if (!engineRef.current || !graphRef.current) {
       console.error("Cannot start simulation: engine or graph is null");
       return;
@@ -538,7 +559,21 @@ export const useSimulation = () => {
         return;
       }
       
-      // Validate nodeId
+      // If we're resuming and we have history, just resume from current state
+      if (shouldResume && hasHistory) {
+        console.log("Resuming simulation from current state");
+        
+        // Start the engine without reinitializing
+        engineRef.current.resume();
+        
+        // Update React state
+        setIsRunning(true);
+        
+        // Start animation loop (will be triggered by isRunning effect)
+        return;
+      }
+      
+      // For new simulations, validate nodeId
       const nodeIdValidation = validateNodeId(network, parameters);
       
       if (nodeIdValidation !== true) {
@@ -548,7 +583,7 @@ export const useSimulation = () => {
 
           // Defer simulation start to avoid race conditions
           setTimeout(() => {
-            startSimulation();
+            startSimulation(shouldResume);
           }, 50);
           return;
         } else {
@@ -609,7 +644,7 @@ export const useSimulation = () => {
       // Make sure we reset running state on error
       setIsRunning(false);
     }
-  }, [parameters, network, validateNodeId]);
+  }, [parameters, network, validateNodeId, hasHistory]);
   
   // Track if we've already initialized for this network
   const initializedNetworkRef = useRef<string | null>(null);

@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 17, 2025 (20:15 IST)*
+*Last Updated: April 19, 2025 (11:55 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -22,8 +22,35 @@
 | T20 | Add Intertwiner Space Implementation | 🔄 IN PROGRESS | MEDIUM | 2025-04-18 | T1 | Deepak |
 | T21 | Improve Spin Network Documentation | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
 | T22 | Implement Log File Explorer | ✅ COMPLETE | MEDIUM | 2025-04-18 | - | Deepak |
+| T23 | Implement Separate Simulation Controls | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T23: Implement Separate Simulation Controls
+**Description**: Improve the simulation controls UI and functionality to properly handle play, pause, stop, resume, and reset operations with correct logging behavior.
+**Status**: ✅ COMPLETE
+**Priority**: MEDIUM
+**Started**: April 19, 2025
+**Last Active**: April 19, 2025 (11:45 IST)
+**Completed**: April 19, 2025 (11:55 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Add separate buttons for play, pause, stop, step, and reset functions
+- ✅ Fix issue where resuming a paused simulation starts a new run
+- ✅ Ensure unpausing resumes simulation from where it was paused
+- ✅ Implement stop functionality to finalize current simulation for new run
+- ✅ Ensure simulation logs continue in the same file when resuming
+- ✅ Improve button labels to reflect current simulation state
+- ✅ Improve button states (enabled/disabled) based on simulation context
+- ✅ Fix visual issues and ensure proper display
+
+**Related Files**:
+- `/src/components/panels/SimulationControlPanel.tsx`
+- `/src/hooks/useReduxSimulation.ts`
+- `/src/hooks/useSimulation.ts`
+
+**Notes**:
+Successfully implemented separate simulation controls with correct pause/resume behavior. The UI now shows distinct buttons for play, pause, stop, step, and reset operations, with button labels and states that change based on the current simulation state. Fixed the key issue where unpausing would restart the simulation instead of resuming from the paused state. Added proper stop functionality that finalizes the current simulation session so that pressing play starts a new run. Ensured that simulation logs continue in the same file when a simulation is paused and resumed, maintaining data continuity. These changes provide a more intuitive and predictable simulation control experience.
 
 ### T22: Implement Log File Explorer
 **Description**: Create a file explorer component to browse, view, and manage log files stored in BrowserFS. Implement a dedicated page for the file explorer accessible from the main navigation.
@@ -722,14 +749,21 @@ graph TD
     T14[T14: State Management Architecture]
     T15[T15: UI Improvement for Network Visualization]
     T16[T16: Enhance Simulation Data Export and Visualization]
+    T19[T19: Implement BrowserFS File Viewer]
+    T20[T20: Add Intertwiner Space Implementation]
+    T21[T21: Improve Spin Network Documentation]
+    T22[T22: Implement Log File Explorer]
+    T23[T23: Implement Separate Simulation Controls]
     
     T0 --> T1
+    T0 --> T23
     T1 --> T2
     T1 --> T3
     T1 --> T10
     T1 --> T11
     T1 --> T13
     T1 --> T14
+    T1 --> T20
     T4 --> T3
     T5 --> T2
     T6 --> T1
@@ -750,4 +784,7 @@ graph TD
     T13 -.-> T10
     T16 -.-> T2
     T16 -.-> T5
+    T18 --> T19
+    T18 --> T22
+    T23 -.-> T0
 ```

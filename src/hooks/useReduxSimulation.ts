@@ -173,8 +173,11 @@ export const useReduxSimulation = () => {
 
   // Start simulation with Redux integration
   const startSimulation = useCallback(() => {
-    // Call the original startSimulation
-    simulation.startSimulation();
+    // Don't reset time if we have history (resuming from pause)
+    const shouldResume = simulation.hasHistory;
+    
+    // Call the original startSimulation with resume flag
+    simulation.startSimulation(shouldResume);
     
     // Update Redux state
     dispatch(setSimulationRunning(true));
@@ -353,6 +356,22 @@ export const useReduxSimulation = () => {
   }, [simulationState.parameters, simulation]);
   
   // Return combined interface with Redux and original simulation functions
+  // Stop simulation with Redux integration
+  const stopSimulation = useCallback(() => {
+    // Pause first if running
+    if (simulation.isRunning) {
+      simulation.pauseSimulation();
+    }
+    
+    // Update Redux state
+    dispatch(setSimulationRunning(false));
+    dispatch(setCurrentTime(0));
+    dispatch(setHasHistory(false));
+    
+    // Force one final sync
+    syncSimulationDataToRedux();
+  }, [simulation, dispatch, syncSimulationDataToRedux]);
+
   return {
     // Redux state
     ...simulationState,
@@ -360,6 +379,7 @@ export const useReduxSimulation = () => {
     // Enhanced methods that update both simulation engine and Redux
     startSimulation,
     pauseSimulation,
+    stopSimulation,  // Add the new stop method
     resetSimulation,
     stepSimulation,
     jumpToTime,

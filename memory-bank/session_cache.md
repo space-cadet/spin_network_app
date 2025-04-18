@@ -1,12 +1,12 @@
 # Session Cache
 
-*Last Updated: April 19, 2025 (10:15 IST)*
+*Last Updated: April 19, 2025 (11:55 IST)*
 
 ## Overview
 - Active Tasks: 10
 - Paused Tasks: 3
-- Last Task Focus: T21
-- Completed Tasks: 8
+- Last Task Focus: T23
+- Completed Tasks: 9
 
 ## Task Registry
 - T1: Simulation Library Abstraction - 🔄 IN PROGRESS
@@ -24,8 +24,62 @@
 - T19: Implement BrowserFS File Viewer - ⬜ NOT STARTED
 - T20: Add Intertwiner Space Implementation - 🔄 IN PROGRESS
 - T21: Improve Spin Network Documentation - ✅ COMPLETE
+- T23: Implement Separate Simulation Controls - ✅ COMPLETE
 
 ## Active Tasks
+
+### T23: Implement Separate Simulation Controls
+**Status:** ✅ COMPLETE
+**Priority:** MEDIUM
+**Started:** 2025-04-19
+**Last Active:** 2025-04-19 11:55 IST
+**Completed:** 2025-04-19 11:55 IST
+**Dependencies:** -
+
+#### Context
+Improving the simulation controls UI and functionality to properly handle play, pause, stop, resume, and reset operations with correct logging behavior.
+
+#### Critical Files
+- `/src/components/panels/SimulationControlPanel.tsx`
+- `/src/hooks/useReduxSimulation.ts`
+- `/src/hooks/useSimulation.ts`
+
+#### Implementation Progress
+1. ✅ Add separate buttons for play, pause, stop, step, and reset functions
+2. ✅ Fix issue where resuming a paused simulation starts a new run
+3. ✅ Ensure unpausing resumes simulation from where it was paused
+4. ✅ Implement stop functionality to finalize current simulation for new run
+5. ✅ Ensure simulation logs continue in the same file when resuming
+6. ✅ Improve button labels to reflect current simulation state
+7. ✅ Improve button states (enabled/disabled) based on simulation context
+8. ✅ Fix visual issues and ensure proper display
+
+#### Working State
+Successfully implemented separate simulation controls with correct pause/resume behavior:
+
+1. **UI Enhancements**:
+   - Replaced combined play/pause button with context-aware buttons
+   - Added dedicated stop button for finalizing the current simulation
+   - Improved button states based on simulation context
+   - Fixed rendering issue with FaStop icon import
+
+2. **Simulation Flow Improvements**:
+   - Modified startSimulation to support resuming from paused state
+   - Added stopSimulation method to properly finalize simulations
+   - Ensured that unpausing continues from where simulation was paused
+   - Made sure logs continue in the same file when resuming a paused simulation
+
+3. **User Experience Enhancements**:
+   - Made button labels change based on context (Start/Resume)
+   - Disabled buttons that aren't applicable in current state
+   - Maintained proper simulation state tracking
+
+These changes provide a more intuitive and predictable control experience. The user can now:
+1. Start a new simulation with the play button
+2. Pause an ongoing simulation
+3. Resume from exactly where it was paused
+4. Stop to finalize the current simulation (new simulation on next play)
+5. Reset to start over with the same parameters
 
 ### T21: Improve Spin Network Documentation
 **Status:** ✅ COMPLETE

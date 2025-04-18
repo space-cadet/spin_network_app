@@ -1,9 +1,22 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-18*
+*Last Updated: 2025-04-19*
 
 ## File Modification Log
+
+### April 19, 2025
+
+#### [11:45] - T23: Implement Separate Simulation Controls with Correct Pause/Resume Behavior
+
+- Modified `/src/components/panels/SimulationControlPanel.tsx` - Added distinct play/pause/stop/step/reset buttons
+- Modified `/src/hooks/useReduxSimulation.ts` - Added stopSimulation method to properly finalize simulations
+- Modified `/src/hooks/useReduxSimulation.ts` - Updated startSimulation to accept shouldResume parameter
+- Modified `/src/hooks/useSimulation.ts` - Modified startSimulation to support resuming from paused state
+- Modified `/src/hooks/useSimulation.ts` - Added stopSimulation method to finalize the current simulation
+- Fixed import of FaStop icon from react-icons/fa to resolve rendering error
+
+Fixed the simulation controls to properly handle the different states of the simulation lifecycle. Separated the combined Play/Pause button into distinct buttons based on context. Added a dedicated Stop button that finalizes the current simulation so that when Play is pressed again, a new simulation is started. Modified the resume functionality to continue from the paused state without resetting the time or creating a new session. These changes ensure that unpausing resumes the simulation from where it was paused and uses the same log session.
 
 ### April 18, 2025
 
