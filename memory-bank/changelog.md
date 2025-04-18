@@ -2,6 +2,17 @@
 
 This document tracks key decisions, major milestones, and pivots in the project's development.
 
+## [2025-04-18] Intertwiner Space Implementation and Physics Documentation
+
+- Added comprehensive implementation of intertwiner space calculations for spin networks
+- Created dedicated section on intertwiner spaces in physics-notebook.html with mathematical explanations
+- Fixed critical bug in intermediate spin calculations that affected intertwiner dimension results
+- Enhanced documentation with explanations of recoupling scheme dependence and physical meaning
+- Implemented permutation-invariant functions to handle order dependence in calculations
+- Reorganized physics documentation to better explain quantum angular momentum coupling rules
+- Began restructuring spin-net-telegraph-unified.md for better organization and clarity
+- Added proper enforcement of quantum selection rules for coupling integer and half-integer spins
+
 ## [2025-04-16] Numerical Stability Fixes and Graph Configuration
 
 - Implemented simulationLogger.ts utility for structured logging with stability monitoring

@@ -28,7 +28,7 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: MEDIUM
 **Started**: April 18, 2025
-**Last Active**: April 18, 2025 (15:30 IST)
+**Last Active**: April 18, 2025 (16:45 IST)
 **Dependencies**: T1
 **Completion Criteria**:
 - ✅ Document the mathematical theory of intertwiner spaces
@@ -40,6 +40,7 @@
 - ✅ Add permutation-invariant calculation functions to Python code
 - ✅ Reorganize documentation with logical flow and table of contents
 - ✅ Fix bug in intertwiner dimension calculation
+- ✅ Add intertwiner spaces section to physics-notebook.html
 - ⬜ Create visualization component for intertwiner spaces
 - ⬜ Add comprehensive testing of intertwiner calculations
 - ⬜ Implement optimized precomputed values for common cases
@@ -50,6 +51,7 @@
 - `/python/intertwiner-spaces.py`
 - `/lib/core/intertwinerSpace.ts`
 - `/lib/core/index.ts`
+- `/public/physics-notebook.html`
 
 **Notes**:
 Intertwiner spaces represent the SU(2)-invariant subspaces at nodes in spin networks. The dimension and basis of these spaces are crucial for quantum spin network calculations. 
@@ -61,6 +63,8 @@ Made significant progress with:
 4. Implementation of permutation-invariant functions in Python to ensure consistent results
 5. Complete reorganization of the documentation with a logical flow and table of contents
 6. Fixed critical bug in the `allowed_intermediate_spins()` function that was causing incorrect dimension calculations
+7. Added detailed intertwiner spaces section to physics-notebook.html with proper mathematical notation
+8. Incorporated information from error log about the bug fix into documentation
 
 The bug fix ensures that the implementation properly enforces the quantum mechanical selection rules for angular momentum coupling:
 - When coupling two integer spins, intermediate spins must be integers

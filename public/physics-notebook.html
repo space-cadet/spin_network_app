@@ -485,10 +485,215 @@ toLaplacianMatrix(weightFunction?: WeightFunction): math.Matrix {
     <p>By randomizing our network structure in the test simulation, we can observe how these topological features affect the geometric properties and statistics we calculate.</p>
   </div>
   
-  <!-- SECTION 3: State Vector Representation -->
+  <!-- SECTION 3: Intertwiner Spaces -->
   <div class="notebook-section" id="section-3">
     <div class="notebook-section-header">
-      <h2>3. State Vector Representation</h2>
+      <h2>3. Intertwiner Spaces</h2>
+    </div>
+    
+    <p>Intertwiner spaces are a fundamental concept in spin networks that provide the mathematical structure for how edges meet at nodes while preserving gauge invariance. This section explores the theory and calculation of intertwiner spaces with a focus on four-valent nodes.</p>
+    
+    <h3>3.1 Basic Concepts</h3>
+    
+    <p>In a spin network, each edge is labeled by a spin value \(j\) (typically \(\frac{1}{2}\), 1, \(\frac{3}{2}\), etc.). When representing this as a quantum state, each edge corresponds to a Hilbert space of dimension \(2j+1\).</p>
+    
+    <p>An <strong>intertwiner</strong> is an SU(2)-invariant tensor that maps between the tensor product of the edge Hilbert spaces connected to a node. In physical terms, intertwiners represent the "glue" that connects the angular momentum carriers (edges) in a way that satisfies the quantum mechanical rules for coupling angular momenta.</p>
+    
+    <p>In simple terms, an intertwiner at a node ensures that the total angular momentum is conserved, maintaining gauge invariance under SU(2) transformations. The space of all possible intertwiners at a node is called the <strong>intertwiner space</strong>.</p>
+    
+    <div class="note">
+      <p><strong>Physical Significance:</strong> In loop quantum gravity, intertwiners represent quantum states of volume, while the spins on edges represent quantum states of area. The intertwiner space dimension tells us how many independent quantum states of volume are possible for a given configuration of areas.</p>
+    </div>
+    
+    <h3>3.2 Four-Valent Nodes and Intertwiner Dimension</h3>
+    
+    <p>For a node with four edges labeled \(j_1\), \(j_2\), \(j_3\), \(j_4\), the intertwiner space dimension equals the number of independent ways to couple these four representations to obtain a scalar (j=0) representation.</p>
+    
+    <p class="equation">
+      \(\dim(\text{Inv}(j_1 \otimes j_2 \otimes j_3 \otimes j_4)) = \sum_j N_{j_1,j_2}^j \cdot N_{j_3,j_4}^j\)
+    </p>
+    
+    <p>Where \(N_{a,b}^c\) counts how many times spin \(c\) appears in the tensor product of spins \(a\) and \(b\).</p>
+    
+    <p>In practical terms, this dimension can be calculated by:</p>
+    <ol>
+      <li>Finding allowed intermediate spins when coupling \(j_1\) and \(j_2\) (yielding \(j_{12}\) values)</li>
+      <li>Finding allowed intermediate spins when coupling \(j_3\) and \(j_4\) (yielding \(j_{34}\) values)</li>
+      <li>Counting overlapping values between these two sets</li>
+    </ol>
+    
+    <div class="implementation-note">
+      <h4>Important Implementation Detail:</h4>
+      <p>When determining the allowed intermediate spin values, we must correctly apply quantum angular momentum coupling rules:</p>
+      <ul>
+        <li>The intermediate spin \(j\) must satisfy the triangle inequalities: \(|j_1 - j_2| \leq j \leq j_1 + j_2\)</li>
+        <li>When coupling two integer spins, the intermediate spins must be integers</li>
+        <li>When coupling two half-integer spins, the intermediate spins must be integers</li>
+        <li>When coupling an integer spin and a half-integer spin, the intermediate spins must be half-integers</li>
+      </ul>
+      <p>A common error in implementations is failing to enforce the correct "integer-ness" rules, which can lead to incorrect dimension calculations.</p>
+    </div>
+    
+    <p>For example, when calculating intertwiner dimensions for specific spin combinations:</p>
+    <ul>
+      <li>For spins (1, 0.5, 0.5, 1):
+        <ul>
+          <li>\(j_1=1, j_2=0.5 \Rightarrow j_{12} \in \{0.5, 1.5\}\) (since we couple integer and half-integer)</li>
+          <li>\(j_3=0.5, j_4=1 \Rightarrow j_{34} \in \{0.5, 1.5\}\) (since we couple integer and half-integer)</li>
+          <li>Overlapping values: 0.5, 1.5 → dimension = 2</li>
+        </ul>
+      </li>
+      <li>For spins (1, 1, 0.5, 0.5):
+        <ul>
+          <li>\(j_1=1, j_2=1 \Rightarrow j_{12} \in \{0, 1, 2\}\) (since we couple two integers)</li>
+          <li>\(j_3=0.5, j_4=0.5 \Rightarrow j_{34} \in \{0, 1\}\) (since we couple two half-integers)</li>
+          <li>Overlapping values: 0, 1 → dimension = 2</li>
+        </ul>
+      </li>
+    </ul>
+    
+    <h3>3.3 Order Dependence in Intertwiner Space Calculations</h3>
+    
+    <p>An important subtlety in intertwiner calculations is that the dimension can depend on the specific recoupling scheme used, which means that different orderings of the same set of spins can yield different results.</p>
+    
+    <p>For example, consider these permutations of the same spins (two spin-1 and two spin-1/2 values):</p>
+    <ul>
+      <li>Dimension of intertwiner space for (1, 0.5, 0.5, 1) = 2</li>
+      <li>Dimension of intertwiner space for (1, 1, 0.5, 0.5) = 2</li>
+      <li>Dimension of intertwiner space for (1, 0.5, 1, 0.5) = 2</li>
+    </ul>
+    
+    <p>The dimensions are consistent in this example, but this is not always the case. The order matters because it determines the recoupling scheme - which spins are coupled first to produce intermediate values.</p>
+    
+    <h3>3.4 Recoupling Schemes and Physical Meaning</h3>
+    
+    <p>The dependence of intertwiner dimensions on the recoupling scheme has profound physical meaning in quantum angular momentum theory.</p>
+    
+    <p>Different recoupling schemes represent different bases for the same physical space. The standard approach involves:</p>
+    
+    <p class="equation">
+      \( (j_1 \otimes j_2) \otimes (j_3 \otimes j_4) \rightarrow j = 0 \)
+    </p>
+    
+    <p>But we could equally well have chosen different pairings:</p>
+    <p class="equation">
+      \( (j_1 \otimes j_3) \otimes (j_2 \otimes j_4) \rightarrow j = 0 \)
+    </p>
+    <p class="equation">
+      \( (j_1 \otimes j_4) \otimes (j_2 \otimes j_3) \rightarrow j = 0 \)
+    </p>
+    
+    <p>The relationship between different coupling schemes is governed by recoupling theory, which uses mathematical objects called 6j symbols:</p>
+    
+    <p class="equation">
+      \(\begin{Bmatrix} j_1 & j_2 & j_{12} \\ j_3 & j_4 & j_{34} \end{Bmatrix}\)
+    </p>
+    
+    <p>These symbols give the transformation coefficients between different coupling schemes.</p>
+    
+    <div class="note">
+      <p><strong>Physical Interpretation:</strong> In quantum mechanics, the order in which we couple angular momenta matters. Each recoupling scheme represents a different "history" of how intermediate quantum states are formed before reaching the final state. Different coupling histories may provide different orthogonal basis states for the same physical system.</p>
+    </div>
+    
+    <h3>3.5 Computing Intertwiner Basis States</h3>
+    
+    <p>For a concrete example, let's examine the basis states for a 4-valent node with all edges labeled j=1/2:</p>
+    
+    <p>When all four edges have spin-1/2, we have exactly two independent basis states for the intertwiner space:</p>
+    
+    <ol>
+      <li>First basis state (pairing 1-2 and 3-4):
+        <p class="equation">
+          \(|\Psi_1\rangle = \frac{1}{\sqrt{2}}(|\uparrow\downarrow\rangle - |\downarrow\uparrow\rangle)_{12} \otimes \frac{1}{\sqrt{2}}(|\uparrow\downarrow\rangle - |\downarrow\uparrow\rangle)_{34}\)
+        </p>
+        <p>This represents coupling spins 1-2 into a singlet and spins 3-4 into another singlet.</p>
+      </li>
+      
+      <li>Second basis state (using triplet coupling):
+        <p class="equation">
+          \(|\Psi_2\rangle = \frac{1}{\sqrt{3}}(|\uparrow\uparrow\downarrow\downarrow\rangle + |\downarrow\downarrow\uparrow\uparrow\rangle - \frac{1}{2}(|\uparrow\downarrow\uparrow\downarrow\rangle + |\uparrow\downarrow\downarrow\uparrow\rangle + |\downarrow\uparrow\uparrow\downarrow\rangle + |\downarrow\uparrow\downarrow\uparrow\rangle))\)
+        </p>
+        <p>This represents coupling spins 1-2 into a triplet state and spins 3-4 into another triplet, which are then coupled to give a total spin zero.</p>
+      </li>
+    </ol>
+    
+    <p>These basis states are orthogonal to each other and represent different ways of ensuring the total angular momentum is zero.</p>
+    
+    <h3>3.6 Implementation Strategies</h3>
+    
+    <p>When implementing intertwiner space calculations, several approaches are possible:</p>
+    
+    <ol>
+      <li><strong>Standard Convention</strong>: Always use the same recoupling scheme
+        <ul>
+          <li>Choose a specific ordering convention</li>
+          <li>Reorder input spins to match this convention</li>
+          <li>Apply the standard calculation method</li>
+        </ul>
+      </li>
+      
+      <li><strong>Permutation-Invariant Approach</strong>: Ensure consistent results regardless of input order
+        <ul>
+          <li>Sort spins before calculation</li>
+          <li>Use a consistent coupling scheme on the sorted spins</li>
+        </ul>
+      </li>
+      
+      <li><strong>Maximum Dimension Approach</strong>: Calculate all possible dimensions and take the maximum
+        <ul>
+          <li>Compute dimensions for all distinct recoupling schemes</li>
+          <li>Use the maximum value as the "true" dimension</li>
+          <li>This ensures a complete basis</li>
+        </ul>
+      </li>
+    </ol>
+    
+    <div class="implementation-note">
+      <h4>Code Example:</h4>
+      <p>A robust implementation of the allowed intermediate spins calculation might look like:</p>
+      
+      <div class="notebook-cell-code">
+<pre><code>function allowedIntermediateSpins(j1, j2) {
+  // Minimum and maximum allowed j values by triangle inequalities
+  const j_min = Math.abs(j1 - j2);
+  const j_max = j1 + j2;
+  
+  // Determine if j1 and j2 are integers or half-integers
+  const j1_is_integer = Math.abs(j1 - Math.round(j1)) < 1e-10;
+  const j2_is_integer = Math.abs(j2 - Math.round(j2)) < 1e-10;
+  
+  // Determine if j should be integer or half-integer
+  const j_must_be_integer = (j1_is_integer && j2_is_integer) || 
+                           (!j1_is_integer && !j2_is_integer);
+  
+  const result = [];
+  
+  // Start at j_min and increment by 1 until we reach j_max
+  let j = j_min;
+  while (j <= j_max + 1e-10) {
+    const j_is_integer = Math.abs(j - Math.round(j)) < 1e-10;
+    
+    // Add to results if j has the correct "integer-ness"
+    if ((j_must_be_integer && j_is_integer) || 
+        (!j_must_be_integer && !j_is_integer)) {
+      result.push(j);
+    }
+    
+    j += 1;
+  }
+  
+  return result;
+}</code></pre>
+      </div>
+    </div>
+    
+    <p>This implementation correctly enforces the quantum mechanical rules for angular momentum coupling, avoiding the error of including physically impossible intermediate spin values.</p>
+  </div>
+  
+  <!-- SECTION 4: State Vector Representation -->
+  <div class="notebook-section" id="section-4">
+    <div class="notebook-section-header">
+      <h2>4. State Vector Representation</h2>
     </div>
     
     <p>The state of our quantum system is represented by a vector \(\psi\) where each component \(\psi_i\) corresponds to the amplitude at node \(i\).</p>
@@ -574,10 +779,10 @@ if (initialStateType === 'delta') {
     <p>These operations allow us to implement the numerical methods needed to solve the diffusion equations that govern the state's evolution.</p>
   </div>
   
-  <!-- SECTION 4: Diffusion Models -->
-  <div class="notebook-section" id="section-4">
+  <!-- SECTION 5: Diffusion Models -->
+  <div class="notebook-section" id="section-5">
     <div class="notebook-section-header">
-      <h2>4. Diffusion Models</h2>
+      <h2>5. Diffusion Models</h2>
     </div>
     
     <p>Our simulation implements two main diffusion models that govern how the quantum state evolves over time. These models represent different physical processes that could occur in a quantum geometric setting.</p>
@@ -688,10 +893,10 @@ const newStateArray = this.mathAdapter.add(stateMinusPrev, wavetermScaled);</cod
     <p>In a quantum gravity context, the telegraph equation might better represent reality since it respects the finite speed of information propagation, consistent with relativity.</p>
   </div>
   
-  <!-- SECTION 5: Geometric Properties Calculation -->
-  <div class="notebook-section" id="section-5">
+  <!-- SECTION 6: Geometric Properties Calculation -->
+  <div class="notebook-section" id="section-6">
     <div class="notebook-section-header">
-      <h2>5. Geometric Properties Calculation</h2>
+      <h2>6. Geometric Properties Calculation</h2>
     </div>
     
     <p>Our simulation calculates several geometric properties of the evolving quantum state on the spin network. These properties help us understand the quantum geometric interpretation of the system.</p>
@@ -890,10 +1095,10 @@ calculateVolumeEntropy(state: StateVector): number {
     </div>
   </div>
   
-  <!-- SECTION 6: Statistical Analysis -->
-  <div class="notebook-section" id="section-6">
+  <!-- SECTION 7: Statistical Analysis -->
+  <div class="notebook-section" id="section-7">
     <div class="notebook-section-header">
-      <h2>6. Statistical Analysis</h2>
+      <h2>7. Statistical Analysis</h2>
     </div>
     
     <p>In addition to the geometric properties, we also calculate statistical measures of the state vector to understand its distribution properties. These statistics help characterize the behavior of the quantum state as it evolves.</p>
@@ -1010,10 +1215,10 @@ static calculateStatistics(state: StateVector, time: number): SimulationStatisti
     <p>By tracking these statistics over time, we can gain insights into the dynamics of the quantum state on the spin network.</p>
   </div>
   
-  <!-- SECTION 7: Conservation Laws -->
-  <div class="notebook-section" id="section-7">
+  <!-- SECTION 8: Conservation Laws -->
+  <div class="notebook-section" id="section-8">
     <div class="notebook-section-header">
-      <h2>7. Conservation Laws</h2>
+      <h2>8. Conservation Laws</h2>
     </div>
     
     <p>Our simulation checks several conservation laws to ensure the numerical evolution is stable and physically meaningful. In quantum mechanics, certain quantities should be conserved during evolution, and violations can indicate numerical instabilities or physical inconsistencies.</p>
@@ -1102,10 +1307,10 @@ getConservationLaws() {
     <p>In particular, norm conservation (through the <code>normVariation</code> value) provides a key indicator of how well our numerical methods are preserving fundamental quantum mechanical principles during the simulation.</p>
   </div>
   
-  <!-- SECTION 8: Simulation Steps and Execution Flow -->
-  <div class="notebook-section" id="section-8">
+  <!-- SECTION 9: Simulation Steps and Execution Flow -->
+  <div class="notebook-section" id="section-9">
     <div class="notebook-section-header">
-      <h2>8. Simulation Steps and Execution Flow</h2>
+      <h2>9. Simulation Steps and Execution Flow</h2>
     </div>
     
     <p>Now that we've explored the underlying physics and calculations, let's examine how the simulation actually executes in the code. This section breaks down the step-by-step process of the simulation.</p>
@@ -1227,10 +1432,10 @@ for (let i = 0; i < 10; i++) {
     <p>This visualization is automatically updated when the simulation runs or when a new random network is generated using the "Generate New Random Network" button.</p>
   </div>
   
-  <!-- SECTION 9: Comparing Different Parameters -->
-  <div class="notebook-section" id="section-9">
+  <!-- SECTION 10: Comparing Different Parameters -->
+  <div class="notebook-section" id="section-10">
     <div class="notebook-section-header">
-      <h2>9. Comparing Different Initial States and Parameters</h2>
+      <h2>10. Comparing Different Initial States and Parameters</h2>
     </div>
     
     <p>The simulation behavior can vary dramatically depending on the initial state and parameters. Here's how different choices affect the results, and what physical insights we can gain from these comparisons.</p>
@@ -1350,10 +1555,10 @@ for (let i = 0; i < 10; i++) {
     <p>By varying parameters and initial conditions with each run, these patterns can be verified and explored in the test simulation.</p>
   </div>
   
-  <!-- SECTION 10: Conclusion and Further Exploration -->
-  <div class="notebook-section" id="section-10">
+  <!-- SECTION 11: Conclusion and Further Exploration -->
+  <div class="notebook-section" id="section-11">
     <div class="notebook-section-header">
-      <h2>10. Conclusion and Further Exploration</h2>
+      <h2>11. Conclusion and Further Exploration</h2>
     </div>
     
     <p>This notebook has provided an overview of the physics behind the spin network simulation, explaining how the network is represented, how states evolve over time, and how various geometric and statistical properties are calculated.</p>

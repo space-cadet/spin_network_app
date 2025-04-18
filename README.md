@@ -54,6 +54,8 @@ The Spin Network Visualization and Diffusion App enables users to:
 - ✅ Performance optimizations: reduced re-renders, improved memoization, throttling
 - ✅ Debug tools: dedicated debug panel, raw data display, enhanced logging
 - ✅ Refactored large components for maintainability
+- ✅ Intertwiner space calculations and comprehensive mathematical documentation
+- ✅ Physics notebook with detailed explanations of mathematical foundations
 - 🔄 Ongoing: Advanced simulation analysis, component refactoring, database/log management
 
 ## Technology Stack
@@ -127,6 +129,13 @@ Key features:
 ## Simulation Features
 
 The application includes a powerful simulation engine for modeling diffusion processes on spin networks:
+
+- **Quantum Geometry Foundations**:
+  - Comprehensive implementation of intertwiner space calculations
+  - Support for arbitrary spin networks with various edge spin values
+  - Proper handling of quantum angular momentum coupling rules
+  - Mathematically rigorous computation of intertwiner dimensions and basis states
+  - Educational physics notebook with detailed explanations of mathematical concepts
 
 - **Multiple Diffusion Models**:
   - Ordinary diffusion (heat equation model) for traditional diffusion processes
@@ -203,12 +212,14 @@ spin_network_app/
 
 ### Technical Documentation
 
-For more detailed technical information, see the files in the `resources/` directory:
+For more detailed technical information, see the files in the `resources/` and `public/` directories:
 
 - `architecture.md` - System architecture and components
 - `data_structures.md` - Core data structures and algorithms
 - `documentation.md` - User-oriented documentation
-- `spin-net-telegraph.md` - Mathematical background
+- `spin-net-telegraph.md` - Mathematical background for telegraph diffusion
+- `public/physics-notebook.html` - Comprehensive mathematical explanations of the simulation physics
+- `memory-bank/implementation-details/intertwiner-spaces.md` - Detailed documentation of intertwiner space theory
 
 ## Technologies Used
 

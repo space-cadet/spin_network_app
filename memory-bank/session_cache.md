@@ -1,6 +1,6 @@
 # Session Cache
 
-*Last Updated: April 18, 2025 (15:30 IST)*
+*Last Updated: April 18, 2025 (16:45 IST)*
 
 ## Overview
 - Active Tasks: 10
@@ -30,7 +30,7 @@
 **Status:** 🔄 IN PROGRESS
 **Priority:** MEDIUM
 **Started:** 2025-04-18
-**Last Active:** 2025-04-18 15:30 IST
+**Last Active:** 2025-04-18 16:45 IST
 **Dependencies:** T1
 
 #### Context
@@ -41,6 +41,7 @@ Implementation of functionality for calculating the dimension and basis states o
 - `/python/intertwiner-spaces.py` - Python implementation with permutation-invariant functions
 - `/lib/core/intertwinerSpace.ts` - TypeScript implementation of intertwiner calculations
 - `/lib/core/index.ts` - Updated to export intertwiner space functionality
+- `/public/physics-notebook.html` - Added intertwiner spaces section with detailed explanations
 
 #### Implementation Progress
 1. ✅ Create comprehensive documentation of intertwiner space theory
@@ -55,12 +56,13 @@ Implementation of functionality for calculating the dimension and basis states o
 10. ✅ Add permutation-invariant calculation functions to Python code
 11. ✅ Reorganize documentation with logical flow and table of contents
 12. ✅ Fix bug in intertwiner dimension calculation function
-13. ⬜ Create visualization component for intertwiner spaces
-14. ⬜ Implement comprehensive testing
-15. ⬜ Add CG coefficient lookup tables for performance
+13. ✅ Add intertwiner spaces section to physics-notebook.html
+14. ⬜ Create visualization component for intertwiner spaces
+15. ⬜ Implement comprehensive testing
+16. ⬜ Add CG coefficient lookup tables for performance
 
 #### Working State
-Enhanced intertwiner space implementation with significant improvements and bug fixes:
+Enhanced intertwiner space implementation with significant improvements and made educational content more accessible:
 
 1. **Order Dependence Documentation**:
    - Added comprehensive explanation of why different orderings of the same spins can yield different dimensions
@@ -95,6 +97,14 @@ Enhanced intertwiner space implementation with significant improvements and bug 
      - When coupling two half-integer spins, intermediate spins must be integers
      - When coupling an integer and half-integer spin, intermediate spins must be half-integers
    - This fixed the case of `intertwiner_dimension(1, 0.5, 0.5, 1)` which now correctly returns 2 instead of 3
+   
+6. **Physics Notebook Integration**:
+   - Added a new section on intertwiner spaces to the physics-notebook.html file
+   - Included proper mathematical notation using KaTeX
+   - Structured the content into logical subsections (basic concepts, dimension calculation, etc.)
+   - Added implementation notes including the bug fix information from the error log
+   - Ensured proper integration with the notebook's TOC and navigation system
+   - Updated all subsequent section numbers to maintain proper sequence
 
 The enhanced implementation now properly addresses the subtle but important issue that different recoupling schemes can yield different intertwiner dimensions even for the same set of spins, and provides multiple approaches to handle this in calculations. The bug fix ensures that all dimension calculations follow proper angular momentum physics.
 
