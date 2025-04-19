@@ -1,30 +1,20 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { CytoscapeAdapter } from '../simulation/visualization/cytoscapeAdapter';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateInitialStateParams, updateParameters } from '../store/slices/simulationSlice';
-import { 
+import {
   createSimulationEngine,
   createSimulationGraph,
-  SimulationGraph
+  SimulationGraph,
+  SimulationParameters // Import the type
 } from '../simulation';
 // Import the engine implementation directly
 import { SpinNetworkSimulationEngineImpl } from '../simulation/core/engineImplementation';
-import { RootState } from '../store';
+import { RootState, store } from '../store'; // Import store directly
 import { simulationLogger } from '../simulation/core/simulationLogger';
 import { SpinNetworkGeometryCalculator } from '../simulation/analysis/geometricProps';
 import { SimulationAnalyzer } from '../simulation/analysis/statistics';
-
-// Define missing SimulationParameters type
-interface SimulationParameters {
-  initialStateParams: {
-    nodeId: string;
-    [key: string]: any;
-  };
-  timeStep?: number;
-  recordHistory?: boolean;
-  historyInterval?: number;
-  [key: string]: any;
-}
+import { StateVector, SimulationHistory as SimulationHistoryType } from '../simulation/core/types'; // Import StateVector and SimulationHistory types
+import { CytoscapeVisualizationState, CytoscapeAdapter } from '../simulation/visualization/cytoscapeAdapter'; // Import Cytoscape types
 
 // Extend function interfaces with static properties
 interface GetGraphFunction {
@@ -33,12 +23,12 @@ interface GetGraphFunction {
 }
 
 interface GetCurrentStateFunction {
-  (): any;
+  (): StateVector | null; // More specific return type
   hasWarnedNull?: boolean;
 }
 
 interface GetHistoryFunction {
-  (): any;
+  (): SimulationHistoryType; // Use imported type
   hasWarnedNull?: boolean;
 }
 
@@ -874,8 +864,8 @@ export const useSimulation = () => {
     // Return a dummy history object if real one is unavailable
     return {
       getTimes: () => [],
-      getStateAtTime: () => null,
-      getClosestState: () => null,
+      getStateAtTime: (): StateVector | undefined => undefined, // Return undefined instead of null
+      getClosestState: (): { time: number; state: StateVector } | undefined => undefined, // Return undefined instead of null
       addState: () => {},
       clear: () => {},
       getDuration: (): number => 0

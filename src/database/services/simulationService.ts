@@ -75,10 +75,10 @@ export class SimulationService {
     try {
       // Handle the result properly
       const result = await db.simulations.update(id, updates);
-      // Dexie returns a number indicating affected records or undefined
-      // Convert the result to a number safely
-      const count = result !== undefined && typeof result === 'number' ? result : 0;
-      return count > 0;
+      if (result === undefined) {
+        return false;
+      }
+      return true;
     } catch (error) {
       console.error('Failed to update simulation record:', error);
       throw error;
@@ -97,10 +97,10 @@ export class SimulationService {
   ): Promise<boolean> {
     try {
       const result = await db.simulations.update(id, { status });
-      // Dexie returns a number indicating affected records or undefined
-      // Convert the result to a number safely
-      const count = result !== undefined && typeof result === 'number' ? result : 0;
-      return count > 0;
+      if (typeof result === 'number' && result !== 0) {
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error('Failed to update simulation status:', error);
       throw error;
@@ -116,14 +116,17 @@ export class SimulationService {
     try {
       // Start a transaction to ensure atomicity
       await db.transaction('rw', [db.simulations, db.simulationResults], async () => {
-        // Delete all results for this simulation
-        await db.simulationResults.where('simulationId').equals(id).delete();
-        
-        // Delete the simulation record
-        const count = await db.simulations.delete(id);
-        if (count === 0) {
+        // Check if simulation exists before attempting deletion
+        const simulationExists = await db.simulations.get(id);
+        if (!simulationExists) {
           throw new Error(`Simulation with ID ${id} not found`);
         }
+
+        // Delete all results for this simulation
+        await db.simulationResults.where('simulationId').equals(id).delete();
+
+        // Delete the simulation record (we know it exists now)
+        await db.simulations.delete(id);
       });
       
       return true;

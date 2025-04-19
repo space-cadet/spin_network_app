@@ -618,9 +618,8 @@ const FileExplorer: React.FC = () => {
                       base0A: '#8b5cf6'  // booleans (violet-500)
                     }}
                     invertTheme={false}
-                    shouldExpandNode={() => true} // Auto expand all nodes
                   />
-                ) : 
+                ) :
                 /* CSV Formatter */
                 getFileType(selectedFile) === 'csv' ? (
                   <div className="overflow-x-auto">

@@ -130,7 +130,7 @@ export class SimulationLogger {
   ): void {
     try {
       // Only proceed if we're in a browser environment with BrowserFS
-      if (typeof window !== 'undefined' && window.fs) {
+      if (typeof window !== 'undefined' && typeof window.fs !== 'undefined') {
         // Create the simulation config data
         const simulationConfig = {
           id: sessionId,
@@ -149,7 +149,7 @@ export class SimulationLogger {
           this.ensureDirectoryExists('/logs/simulation', () => {
             this.ensureDirectoryExists('/logs/simulation/runs', () => {
               // Write the simulation config to a file
-              window.fs.writeFile(
+              window.fs!.writeFile(
                 `/logs/simulation/runs/${filename}`,
                 JSON.stringify(simulationConfig, null, 2),
                 { encoding: 'utf8' },
@@ -166,7 +166,7 @@ export class SimulationLogger {
               const csvFilename = `simulationresults${sessionId.replace(/-/g, '')}.csv`;
               const csvHeader = 'simTime,timestamp,totalProbability,normVariation,positivity,totalVolume,totalArea,effectiveDimension,volumeEntropy,mean,variance,skewness,kurtosis\n';
               
-              window.fs.writeFile(
+              window.fs!.writeFile(
                 `/logs/simulation/runs/${csvFilename}`,
                 csvHeader,
                 { encoding: 'utf8' },
@@ -330,7 +330,7 @@ export class SimulationLogger {
   private appendResultsToFile(sessionId: string, results: SimulationResultsLog): void {
     try {
       // Only proceed if we're in a browser environment with BrowserFS
-      if (typeof window !== 'undefined' && window.fs) {
+      if (typeof window !== 'undefined' && typeof window.fs !== 'undefined') {
         // Format the results as a CSV row
         let row = `${results.simTime},${results.timestamp}`;
         
@@ -359,7 +359,7 @@ export class SimulationLogger {
           this.ensureDirectoryExists('/logs/simulation', () => {
             this.ensureDirectoryExists('/logs/simulation/runs', () => {
               // Append to the CSV file
-              window.fs.appendFile(
+              window.fs!.appendFile(
                 `/logs/simulation/runs/${csvFilename}`,
                 row + '\n',
                 { encoding: 'utf8' },
@@ -583,7 +583,7 @@ export class SimulationLogger {
   private saveResultsToFile(sessionId: string, csvContent: string): void {
     try {
       // Check if we're in a browser environment with BrowserFS
-      if (typeof window !== 'undefined' && window.fs) {
+      if (typeof window !== 'undefined' && typeof window.fs !== 'undefined') {
         const logsDir = '/logs';
         const simulationDir = `${logsDir}/simulation`;
         const runsDir = `${simulationDir}/runs`;
@@ -596,7 +596,7 @@ export class SimulationLogger {
               const filePath = `${runsDir}/simulation-results-${sessionId}.csv`;
               console.log(`Writing simulation results to file: ${filePath}`);
               
-              window.fs.writeFile(filePath, csvContent, { encoding: 'utf8' }, (err: any) => {
+              window.fs!.writeFile(filePath, csvContent, { encoding: 'utf8' }, (err: any) => {
                 if (err) {
                   console.error(`Error writing results to file: ${err.message || err}`);
                 } else {
@@ -625,7 +625,7 @@ export class SimulationLogger {
             const graphContent = JSON.stringify(graphData, null, 2);
             const graphPath = `${graphsDir}/graph-${sessionId}.json`;
             
-            window.fs.writeFile(graphPath, graphContent, { encoding: 'utf8' }, (err: any) => {
+            window.fs!.writeFile(graphPath, graphContent, { encoding: 'utf8' }, (err: any) => {
               if (err) {
                 console.error(`Error writing graph data to file: ${err.message || err}`);
               } else {
@@ -644,15 +644,15 @@ export class SimulationLogger {
    * Ensure directory exists
    */
   private ensureDirectoryExists(dirPath: string, callback: () => void): void {
-    if (!window || !window.fs) {
+    if (!window || typeof window.fs === 'undefined') {
       callback();
       return;
     }
     
-    window.fs.stat(dirPath, (statErr: any) => {
+    window.fs!.stat(dirPath, (statErr: any) => {
       if (statErr) {
         // Directory doesn't exist, create it
-        window.fs.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
+        window.fs!.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
           if (mkdirErr && mkdirErr.code !== 'EEXIST') {
             console.error(`Failed to create directory ${dirPath}: ${mkdirErr.message || mkdirErr}`);
           } else {
@@ -681,7 +681,7 @@ export class SimulationLogger {
   public saveTestLog(testName: string, content: string): void {
     try {
       // Check if we're in a browser environment with BrowserFS
-      if (typeof window !== 'undefined' && window.fs) {
+      if (typeof window !== 'undefined' && typeof window.fs !== 'undefined') {
         const logsDir = '/logs';
         const simulationDir = `${logsDir}/simulation`;
         const testsDir = `${simulationDir}/tests`;
@@ -699,7 +699,7 @@ export class SimulationLogger {
               const filePath = `${testsDir}/test-${testName}-${dateStr}-${timeStr}.log`;
               console.log(`Writing test log to file: ${filePath}`);
               
-              window.fs.writeFile(filePath, content, { encoding: 'utf8' }, (err: any) => {
+              window.fs!.writeFile(filePath, content, { encoding: 'utf8' }, (err: any) => {
                 if (err) {
                   console.error(`Error writing test log to file: ${err.message || err}`);
                 } else {

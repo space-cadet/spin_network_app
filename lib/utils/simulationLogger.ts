@@ -63,29 +63,33 @@ export function initBrowserFileSystem(): Promise<boolean> {
       // Create basic directory structure
       try {
         const fs = window.fs;
-        
-        // Create root directories
-        const baseDirs = ['/', '/logs', '/logs/simulation'];
-        for (const dir of baseDirs) {
-          try {
-            if (!fs.existsSync(dir)) {
-              console.log(`Creating base directory: ${dir}`);
-              fs.mkdirSync(dir);
-            } else {
-              console.log(`Base directory already exists: ${dir}`);
+        // Add check for fs existence
+        if (fs) {
+          // Create root directories
+          const baseDirs = ['/', '/logs', '/logs/simulation'];
+          for (const dir of baseDirs) {
+            try {
+              if (!fs.existsSync(dir)) {
+                console.log(`Creating base directory: ${dir}`);
+                fs.mkdirSync(dir);
+              } else {
+                console.log(`Base directory already exists: ${dir}`);
+              }
+            } catch (dirErr) {
+              console.warn(`Failed to create directory ${dir}:`, dirErr);
+              // Continue with other directories
             }
-          } catch (dirErr) {
-            console.warn(`Failed to create directory ${dir}:`, dirErr);
-            // Continue with other directories
           }
-        }
-        
-        // List files in the root to verify
-        try {
-          const rootFiles = fs.readdirSync('/');
-          console.log('Files in root directory:', rootFiles);
-        } catch (listErr) {
-          console.warn('Failed to list files in root directory:', listErr);
+          
+          // List files in the root to verify
+          try {
+            const rootFiles = fs.readdirSync('/');
+            console.log('Files in root directory:', rootFiles);
+          } catch (listErr) {
+            console.warn('Failed to list files in root directory:', listErr);
+          }
+        } else {
+          console.warn('window.fs not available for initial directory setup.');
         }
       } catch (setupErr) {
         console.warn('Error during initial directory setup:', setupErr);
@@ -323,7 +327,8 @@ export class SimulationLogger {
         this._writeLogUsingBrowserFS(entry);
       }
       // If Node.js environment, use fs module
-      else if (typeof fs !== 'undefined' && fs.appendFileSync) {
+      // Add check for fs existence
+      else if (typeof fs !== 'undefined' && fs && fs.appendFileSync) {
         this._writeLogUsingNodeFS(entry);
       }
     } catch (error) {
@@ -347,7 +352,8 @@ export class SimulationLogger {
       const logMessage = this._formatLogMessage(entry);
       
       // First ensure the base logs directory exists
-      if (!window.fs.existsSync(this._config.logsDirectory)) {
+      // Add check for window.fs existence
+      if (window.fs && !window.fs.existsSync(this._config.logsDirectory)) {
         try {
           window.fs.mkdirSync(this._config.logsDirectory);
           console.debug(`Created base logs directory: ${this._config.logsDirectory}`);
@@ -361,7 +367,8 @@ export class SimulationLogger {
       
       // Then ensure the simulation directory exists
       const simDirPath = `${this._config.logsDirectory}/simulation`;
-      if (!window.fs.existsSync(simDirPath)) {
+      // Add check for window.fs existence
+      if (window.fs && !window.fs.existsSync(simDirPath)) {
         try {
           window.fs.mkdirSync(simDirPath);
           console.debug(`Created simulation directory: ${simDirPath}`);
@@ -375,7 +382,8 @@ export class SimulationLogger {
       
       // Finally ensure the log type directory exists
       const logDirPath = `${this._config.logsDirectory}/simulation/${logType}`;
-      if (!window.fs.existsSync(logDirPath)) {
+      // Add check for window.fs existence
+      if (window.fs && !window.fs.existsSync(logDirPath)) {
         try {
           window.fs.mkdirSync(logDirPath);
           console.debug(`Created log type directory: ${logDirPath}`);
@@ -392,16 +400,21 @@ export class SimulationLogger {
       console.debug(`Writing log to: ${filePath}`);
       
       // Append to log file
-      window.fs.appendFile(
-        filePath,
-        logMessage + '\n',
-        { encoding: 'utf8' },
-        (err: any) => {
-          if (err) {
-            console.error(`Error writing to log file (${filePath}): ${err.message || err}`);
+      // Add check for window.fs existence
+      if (window.fs) {
+        window.fs.appendFile(
+          filePath,
+          logMessage + '\n',
+          { encoding: 'utf8' },
+          (err: any) => {
+            if (err) {
+              console.error(`Error writing to log file (${filePath}): ${err.message || err}`);
+            }
           }
-        }
-      );
+        );
+      } else {
+        console.error('window.fs not available for appendFile');
+      }
     } catch (error) {
       console.error('Error using browser FS:', error);
     }
@@ -431,12 +444,18 @@ export class SimulationLogger {
       const filePath = path.join(dirPath, fileName);
       
       // Create directory if it doesn't exist
-      if (!fs.existsSync(dirPath)) {
+      // Add check for fs existence
+      if (fs && !fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
       }
       
       // Append to log file
-      fs.appendFileSync(filePath, logMessage + '\n', 'utf8');
+      // Add check for fs existence
+      if (fs) {
+        fs.appendFileSync(filePath, logMessage + '\n', 'utf8');
+      } else {
+         console.error('Node.js fs not available for appendFileSync');
+      }
     } catch (error) {
       console.error('Error using Node FS:', error);
     }
@@ -502,24 +521,36 @@ export class SimulationLogger {
     }
 
     // Check if directory exists first
-    window.fs.stat(dirPath, (statErr: any) => {
-      if (statErr) {
-        // Directory doesn't exist, create it
-        window.fs.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
-          if (mkdirErr && mkdirErr.code !== 'EEXIST') {
-            console.error(`Failed to create directory ${dirPath}: ${mkdirErr.message || mkdirErr}`);
-            callback(false);
+    // Add check for window.fs existence
+    if (window.fs) {
+      window.fs.stat(dirPath, (statErr: any) => {
+        if (statErr) {
+          // Directory doesn't exist, create it
+          // Add check for window.fs existence
+          if (window.fs) {
+            window.fs.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
+              if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+                console.error(`Failed to create directory ${dirPath}: ${mkdirErr.message || mkdirErr}`);
+                callback(false);
+              } else {
+                console.debug(`Created directory: ${dirPath}`);
+                callback(true);
+              }
+            });
           } else {
-            console.debug(`Created directory: ${dirPath}`);
-            callback(true);
+             console.error('window.fs not available for mkdir');
+             callback(false);
           }
-        });
-      } else {
-        // Directory already exists
-        console.debug(`Directory already exists: ${dirPath}`);
-        callback(true);
-      }
-    });
+        } else {
+          // Directory already exists
+          console.debug(`Directory already exists: ${dirPath}`);
+          callback(true);
+        }
+      });
+    } else {
+      console.error('Browser filesystem API not available in _createDirectoryIfNeeded.');
+      callback(false);
+    }
   }
 
   /**
@@ -681,34 +712,46 @@ export class SimulationLogger {
       // If browser environment, use window.fs
       if (typeof window !== 'undefined' && window.fs) {
         // Ensure directory exists
-        this._ensureDirectoryExists('graphs');
-        
-        // Write graph data
-        window.fs.writeFile(
-          `${this._config.logsDirectory}/simulation/graphs/${graphFileName}`,
-          graphContent,
-          { encoding: 'utf8' },
-          (err: any) => {
-            if (err) {
-              console.error(`Error writing graph data to file: ${err.message || err}`);
-            } else {
-              console.log(`Successfully wrote graph data to: ${this._config.logsDirectory}/simulation/graphs/${graphFileName}`);
-            }
+        this._ensureDirectoryExists('graphs').then(dirExists => {
+          // Add check for window.fs existence
+          if (dirExists && window.fs) {
+            // Write graph data
+            window.fs.writeFile(
+              `${this._config.logsDirectory}/simulation/graphs/${graphFileName}`,
+              graphContent,
+              { encoding: 'utf8' },
+              (err: any) => {
+                if (err) {
+                  console.error(`Error writing graph data to file: ${err.message || err}`);
+                } else {
+                  console.log(`Successfully wrote graph data to: ${this._config.logsDirectory}/simulation/graphs/${graphFileName}`);
+                }
+              }
+            );
+          } else {
+            console.error('Graph directory could not be ensured or window.fs not available.');
           }
-        );
+        });
       }
       // If Node.js environment, use fs module
-      else if (typeof fs !== 'undefined' && fs.writeFileSync) {
+      // Add check for fs existence
+      else if (typeof fs !== 'undefined' && fs && fs.writeFileSync) {
         const dirPath = path.join(this._config.logsDirectory, 'simulation', 'graphs');
         const filePath = path.join(dirPath, graphFileName);
         
         // Create directory if it doesn't exist
-        if (!fs.existsSync(dirPath)) {
+        // Add check for fs existence
+        if (fs && !fs.existsSync(dirPath)) {
           fs.mkdirSync(dirPath, { recursive: true });
         }
         
         // Write graph data
-        fs.writeFileSync(filePath, graphContent, 'utf8');
+        // Add check for fs existence
+        if (fs) {
+          fs.writeFileSync(filePath, graphContent, 'utf8');
+        } else {
+          console.error('Node.js fs not available for writeFileSync');
+        }
         console.log(`Successfully wrote graph data to: ${filePath}`);
       }
     } catch (error) {
@@ -803,41 +846,60 @@ export class SimulationLogger {
         // If browser environment, use window.fs
         if (typeof window !== 'undefined' && window.fs) {
           // Ensure directory exists
-          this._ensureDirectoryExists('exports');
-          
-          // Write header first
-          window.fs.writeFile(
-            `${this._config.logsDirectory}/simulation/exports/${resultsFileName}`,
-            header,
-            { encoding: 'utf8' }
-          );
+          this._ensureDirectoryExists('exports').then(dirExists => {
+            // Add check for window.fs existence
+            if (dirExists && window.fs) {
+              // Write header first
+              window.fs.writeFile(
+                `${this._config.logsDirectory}/simulation/exports/${resultsFileName}`,
+                header,
+                { encoding: 'utf8' }
+              );
+            } else {
+              console.error('Exports directory could not be ensured or window.fs not available.');
+            }
+          });
         }
         // If Node.js environment, use fs module
-        else if (typeof fs !== 'undefined' && fs.writeFileSync) {
+        // Add check for fs existence
+        else if (typeof fs !== 'undefined' && fs && fs.writeFileSync) {
           const dirPath = path.join(this._config.logsDirectory, 'simulation', 'exports');
           const filePath = path.join(dirPath, resultsFileName);
           
           // Create directory if it doesn't exist
-          if (!fs.existsSync(dirPath)) {
+          // Add check for fs existence
+          if (fs && !fs.existsSync(dirPath)) {
             fs.mkdirSync(dirPath, { recursive: true });
           }
           
           // Write header first
-          fs.writeFileSync(filePath, header, 'utf8');
+          // Add check for fs existence
+          if (fs) {
+            fs.writeFileSync(filePath, header, 'utf8');
+          } else {
+            console.error('Node.js fs not available for writeFileSync');
+          }
         }
       }
       
       // Append data row
+      // Add check for window.fs existence
       if (typeof window !== 'undefined' && window.fs) {
         window.fs.appendFile(
           `${this._config.logsDirectory}/simulation/exports/${resultsFileName}`,
           row + '\n',
           { encoding: 'utf8' }
         );
-      } else if (typeof fs !== 'undefined' && fs.appendFileSync) {
+      // Add check for fs existence
+      } else if (typeof fs !== 'undefined' && fs && fs.appendFileSync) {
         const dirPath = path.join(this._config.logsDirectory, 'simulation', 'exports');
         const filePath = path.join(dirPath, resultsFileName);
-        fs.appendFileSync(filePath, row + '\n', 'utf8');
+        // Add check for fs existence
+        if (fs) {
+          fs.appendFileSync(filePath, row + '\n', 'utf8');
+        } else {
+          console.error('Node.js fs not available for appendFileSync');
+        }
       }
     } catch (error) {
       console.error('Error writing results to file:', error);
@@ -1080,6 +1142,7 @@ export function testFileSystemAccess(): void {
   
   // Test if window.fs exists in browser
   if (isBrowser) {
+    // Add check for window.fs existence
     if (window.fs) {
       console.log('window.fs API is available.');
       
@@ -1110,18 +1173,23 @@ export function testFileSystemAccess(): void {
           const testPath = `${logsPath}/simulation/sessions/test-log-${Date.now()}.txt`;
           console.log(`Writing test file to: ${testPath}`);
           
-          window.fs.writeFile(
-            testPath,
-            'File system test - ' + new Date().toISOString(),
-            { encoding: 'utf8' },
-            (err) => {
-              if (err) {
-                console.error(`Failed to write test file: ${err.message || err}`);
-              } else {
-                console.log(`Successfully wrote test file to: ${testPath}`);
+          // Add check for window.fs existence
+          if (window.fs) {
+            window.fs.writeFile(
+              testPath,
+              'File system test - ' + new Date().toISOString(),
+              { encoding: 'utf8' },
+              (err) => {
+                if (err) {
+                  console.error(`Failed to write test file: ${err.message || err}`);
+                } else {
+                  console.log(`Successfully wrote test file to: ${testPath}`);
+                }
               }
-            }
-          );
+            );
+          } else {
+            console.error('window.fs not available for writeFile');
+          }
         } else {
           console.error('Failed to create some directories. See previous errors for details.');
         }
@@ -1155,26 +1223,38 @@ function createDirectoriesSequentially(
   console.log(`Creating directory (${index + 1}/${directories.length}): ${currentDir}`);
   
   // Check if directory exists first
-  window.fs.stat(currentDir, (statErr: any) => {
-    // Directory doesn't exist, create it
-    if (statErr) {
-      window.fs.mkdir(currentDir, { recursive: false }, (mkdirErr: any) => {
-        if (mkdirErr && mkdirErr.code !== 'EEXIST') {
-          console.error(`Failed to create directory ${currentDir}: ${mkdirErr.message || mkdirErr}`);
-          callback(false);
+  // Add check for window.fs existence
+  if (window.fs) {
+    window.fs.stat(currentDir, (statErr: any) => {
+      // Directory doesn't exist, create it
+      if (statErr) {
+        // Add check for window.fs existence
+        if (window.fs) {
+          window.fs.mkdir(currentDir, { recursive: false }, (mkdirErr: any) => {
+            if (mkdirErr && mkdirErr.code !== 'EEXIST') {
+              console.error(`Failed to create directory ${currentDir}: ${mkdirErr.message || mkdirErr}`);
+              callback(false);
+            } else {
+              console.log(`Created directory: ${currentDir}`);
+              // Move to next directory
+              createDirectoriesSequentially(directories, index + 1, callback);
+            }
+          });
         } else {
-          console.log(`Created directory: ${currentDir}`);
-          // Move to next directory
-          createDirectoriesSequentially(directories, index + 1, callback);
+          console.error('window.fs not available for mkdir');
+          callback(false);
         }
-      });
-    } else {
-      // Directory already exists
-      console.log(`Directory already exists: ${currentDir}`);
-      // Move to next directory
-      createDirectoriesSequentially(directories, index + 1, callback);
-    }
-  });
+      } else {
+        // Directory already exists
+        console.log(`Directory already exists: ${currentDir}`);
+        // Move to next directory
+        createDirectoriesSequentially(directories, index + 1, callback);
+      }
+    });
+  } else {
+    console.error('Browser filesystem API not available in createDirectoriesSequentially.');
+    callback(false);
+  }
 }
 
 /**

@@ -126,7 +126,7 @@ export function createLogDirectories(): Promise<boolean> {
       fs.stat(dir, (statErr: any) => {
         if (statErr) {
           // Directory doesn't exist, create it
-          fs.mkdir(dir, (mkdirErr: any) => {
+          fs.mkdir(dir, { recursive: true }, (mkdirErr: any) => {
             if (mkdirErr && mkdirErr.code !== 'EEXIST') {
               console.warn(`Could not create directory ${dir}:`, mkdirErr);
             } else {

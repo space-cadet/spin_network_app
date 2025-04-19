@@ -31,23 +31,25 @@ export class SimulationHistoryImpl implements SimulationHistory {
    * Add a state to the history
    */
   addState(time: number, state: StateVector): void {
-    // Skip if we already have a state at this exact time
-    if (this.states.has(time)) {
-      return;
-    }
+    if (state !== null) {
+      // Skip if we already have a state at this exact time
+      if (this.states.has(time)) {
+        return;
+      }
 
-    // Add the state and time
-    this.states.set(time, state.clone());
-    this.times.push(time);
-    
-    // Sort times to ensure they are in order
-    this.times.sort((a, b) => a - b);
-    
-    // Remove oldest entries if we exceed maxEntries
-    while (this.times.length > this.maxEntries) {
-      const oldestTime = this.times.shift();
-      if (oldestTime !== undefined) {
-        this.states.delete(oldestTime);
+      // Add the state and time
+      this.states.set(time, state.clone());
+      this.times.push(time);
+      
+      // Sort times to ensure they are in order
+      this.times.sort((a, b) => a - b);
+      
+      // Remove oldest entries if we exceed maxEntries
+      while (this.times.length > this.maxEntries) {
+        const oldestTime = this.times.shift();
+        if (oldestTime !== undefined) {
+          this.states.delete(oldestTime);
+        }
       }
     }
   }
@@ -80,11 +82,10 @@ export class SimulationHistoryImpl implements SimulationHistory {
     }
 
     const state = this.states.get(closestTime);
-    if (!state) {
-      return undefined;
+    if (state !== undefined) {
+      return { time: closestTime, state };
     }
-
-    return { time: closestTime, state };
+    return undefined;
   }
 
   /**
@@ -127,6 +128,26 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
   private history: SimulationHistoryImpl = new SimulationHistoryImpl();
   private eventListeners: Record<string, Function[]> = {};
   private stepCounter: number = 0;
+  private currentNode: any = null; // Example property for current node
+  private defaultNodeColor: string = '#FFFFFF'; // Example property for default node color
+  private defaultValue = 0; // Add default value definition
+  private stateVector: StateVector;
+
+  constructor() {
+    this.stateVector = this.createDefaultStateVector();
+  }
+
+  private createDefaultStateVector(): StateVector {
+    // Return an empty but valid StateVector
+    return new SimulationStateVector([]);
+  }
+
+  private ensureNetwork() {
+    if (!this.graph) {
+      throw new Error('Network not initialized');
+    }
+    return this.graph;
+  }
 
   /**
    * Get the current simulation graph
@@ -139,257 +160,253 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
    * Initialize the simulation engine
    */
   initialize(graph: SimulationGraph, parameters: SimulationParameters): void {
-    this.graph = graph;
-    this.parameters = { ...parameters };
-    this.currentTime = 0;
-    this.stepCounter = 0;
-    
-    // Create the diffusion model
-    const diffusionFactory = new DiffusionModelFactory();
-    this.diffusionModel = diffusionFactory.createDiffusionModel(parameters.diffusionType);
-    
-    // Initialize the diffusion model
-    if (this.diffusionModel) {
-      this.diffusionModel.initialize(graph, parameters);
+    if (graph !== null && parameters !== null) {
+      this.graph = graph;
+      this.parameters = { ...parameters };
+      this.currentTime = 0;
+      this.stepCounter = 0;
+      
+      // Create the diffusion model
+      const diffusionFactory = new DiffusionModelFactory();
+      this.diffusionModel = diffusionFactory.createDiffusionModel(parameters.diffusionType);
+      
+      // Initialize the diffusion model
+      if (this.diffusionModel !== null) {
+        this.diffusionModel.initialize(graph, parameters);
+      }
+      
+      // Create the initial state
+      this.createInitialState(parameters);
+      
+      // Clear history
+      this.history.clear();
+      
+      // Always record initial state to ensure history exists
+      // This is critical for ensuring the debug panel shows history data
+      if (this.state !== null) {
+        this.history.addState(0, this.state);
+        console.log("Recorded initial state in history at time 0");
+      } else {
+        console.error("Cannot record initial state: state is null");
+      }
+      
+      // Fire initialized event
+      this.dispatchEvent('initialized', { graph, parameters });
     }
-    
-    // Create the initial state
-    this.createInitialState(parameters);
-    
-    // Clear history
-    this.history.clear();
-    
-    // Always record initial state to ensure history exists
-    // This is critical for ensuring the debug panel shows history data
-    if (this.state) {
-      this.history.addState(0, this.state);
-      console.log("Recorded initial state in history at time 0");
-    } else {
-      console.error("Cannot record initial state: state is null");
-    }
-    
-    // Fire initialized event
-    this.dispatchEvent('initialized', { graph, parameters });
   }
 
   /**
    * Create the initial state based on parameters
    */
   private createInitialState(parameters: SimulationParameters): void {
-    if (!this.graph) {
-      console.error("Cannot create initial state: graph is null");
-      return;
-    }
-    
-    const nodeIds = this.graph.nodes.map(node => node.id);
-    if (nodeIds.length === 0) {
-      console.error("Cannot create initial state: graph has no nodes");
-      return;
-    }
-    
-    console.log("Creating initial state with", nodeIds.length, "nodes");
-    
-    this.state = new SimulationStateVector(nodeIds);
-    this.initialState = this.state.clone();
-    
-    // Apply the initial state based on parameters
-    const { initialStateType, initialStateParams } = parameters;
-    
-    if (initialStateType === 'delta') {
-      try {
-        // Validate that the node ID exists in the network
-        let nodeId = initialStateParams.nodeId;
-        
-        // If node ID is missing or not in the graph, use the first node
-        if (!nodeId || !this.graph.getNode(nodeId)) {
-          nodeId = nodeIds[0];
-          console.warn(`Initial state node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${nodeId} instead`);
+    if (parameters !== null && this.graph !== null) {
+      const nodeIds = this.graph.nodes.map(node => node.id);
+      if (nodeIds.length === 0) {
+        console.error("Cannot create initial state: graph has no nodes");
+        return;
+      }
+      
+      console.log("Creating initial state with", nodeIds.length, "nodes");
+      
+      this.state = new SimulationStateVector(nodeIds);
+      this.initialState = this.state.clone();
+      
+      // Apply the initial state based on parameters
+      const { initialStateType, initialStateParams } = parameters;
+      
+      if (initialStateType === 'delta') {
+        try {
+          // Validate that the node ID exists in the network
+          let nodeId = initialStateParams.nodeId;
+          
+          // If node ID is missing or not in the graph, use the first node
+          if (!nodeId || !this.graph.getNode(nodeId)) {
+            nodeId = nodeIds[0];
+            console.warn(`Initial state node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${nodeId} instead`);
+          }
+          
+          const value = initialStateParams.value || 1.0;
+          console.log(`Setting delta state on node ${nodeId} with value ${value}`);
+          this.state = this.state.setValue(nodeId, value);
+          
+          // Verify the state was set correctly
+          const newValue = this.state.getValue(nodeId);
+          console.log(`Verified state value for node ${nodeId}: ${newValue}`);
+          
+          // Log all node values to verify state is correct
+          const allValues = nodeIds.map(id => ({
+            id,
+            value: this.state?.getValue(id) ?? 0 // Use optional chaining and nullish coalescing
+          }));
+          console.log("All node values:", allValues);
+        } catch (error) {
+          console.error("Error setting delta state:", error);
+          
+          // Fallback: Set first node to 1.0 if available
+          if (nodeIds.length > 0) {
+            const nodeId = nodeIds[0];
+            console.warn(`Falling back to first node ${nodeId} for initial state`);
+            try {
+              this.state = this.state.setValue(nodeId, 1.0);
+              
+              // Verify the state was set correctly
+              const newValue = this.state.getValue(nodeId);
+              console.log(`Verified fallback state value for node ${nodeId}: ${newValue}`);
+            } catch (fallbackError) {
+              console.error("Critical error: Failed to set fallback initial state:", fallbackError);
+            }
+          }
         }
-        
-        const value = initialStateParams.value || 1.0;
-        console.log(`Setting delta state on node ${nodeId} with value ${value}`);
-        this.state = this.state.setValue(nodeId, value);
-        
-        // Verify the state was set correctly
-        const newValue = this.state.getValue(nodeId);
-        console.log(`Verified state value for node ${nodeId}: ${newValue}`);
-        
-        // Log all node values to verify state is correct
-        const allValues = nodeIds.map(id => ({
-          id,
-          value: this.state.getValue(id)
-        }));
-        console.log("All node values:", allValues);
-      } catch (error) {
-        console.error("Error setting delta state:", error);
-        
-        // Fallback: Set first node to 1.0 if available
-        if (nodeIds.length > 0) {
-          const nodeId = nodeIds[0];
-          console.warn(`Falling back to first node ${nodeId} for initial state`);
-          try {
-            this.state = this.state.setValue(nodeId, 1.0);
+      }
+      else if (initialStateType === 'uniform') {
+        try {
+          // Set all nodes to the same value
+          const value = initialStateParams.value || 0.1;
+          console.log(`Setting uniform state with value ${value} for all nodes`);
+          
+          for (const nodeId of nodeIds) {
+            this.state = this.state.setValue(nodeId, value);
+          }
+          
+          // Verify the state was set correctly
+          const firstNodeValue = this.state.getValue(nodeIds[0]);
+          console.log(`Verified uniform state value: ${firstNodeValue}`);
+          
+          // Check that all values are as expected
+          const allSame = this.state ? nodeIds.every(id => Math.abs(this.state!.getValue(id) - value) < 1e-10) : false; // Add null check before every
+          console.log(`All nodes have the same value: ${allSame}`);
+        } catch (error) {
+          console.error("Error setting uniform state:", error);
+        }
+      }
+      else if (initialStateType === 'gaussian') {
+        try {
+          // Create a Gaussian distribution centered on a node
+          let centerNodeId = initialStateParams.nodeId;
+          
+          // Validate that the center node ID exists and graph is available
+          if (!this.graph || !centerNodeId || !this.graph.getNode(centerNodeId)) {
+            centerNodeId = nodeIds[0];
+            console.warn(`Center node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${nodeIds[0]} instead`);
+          }
+          
+          const centerValue = initialStateParams.centerValue || 1.0;
+          const sigma = initialStateParams.sigma || 1.0;
+          
+          console.log(`Setting Gaussian state centered at node ${centerNodeId} with value ${centerValue} and sigma ${sigma}`);
+          
+          // Set center node
+          this.state = this.state.setValue(centerNodeId, centerValue);
+          
+          // Get center node position
+          const centerNode = this.graph ? this.graph.getNode(centerNodeId) : null;
+          if (centerNode !== null) {
+            // Set other nodes based on distance
+            for (const nodeId of nodeIds) {
+              if (nodeId === centerNodeId) continue;
+              
+              const node = this.graph.getNode(nodeId);
+              if (node && centerNode) {
+                // Calculate Euclidean distance
+                const dx = node.position.x - centerNode.position.x;
+                const dy = node.position.y - centerNode.position.y;
+                const dz = (node.position.z || 0) - (centerNode.position.z || 0);
+                const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                
+                // Calculate Gaussian value
+                const value = centerValue * Math.exp(-(distance*distance) / (2*sigma*sigma));
+                this.state = this.state.setValue(nodeId, value);
+              }
+            }
             
             // Verify the state was set correctly
-            const newValue = this.state.getValue(nodeId);
-            console.log(`Verified fallback state value for node ${nodeId}: ${newValue}`);
-          } catch (fallbackError) {
-            console.error("Critical error: Failed to set fallback initial state:", fallbackError);
-          }
-        }
-      }
-    }
-    else if (initialStateType === 'uniform') {
-      try {
-        // Set all nodes to the same value
-        const value = initialStateParams.value || 0.1;
-        console.log(`Setting uniform state with value ${value} for all nodes`);
-        
-        for (const nodeId of nodeIds) {
-          this.state = this.state.setValue(nodeId, value);
-        }
-        
-        // Verify the state was set correctly
-        const firstNodeValue = this.state.getValue(nodeIds[0]);
-        console.log(`Verified uniform state value: ${firstNodeValue}`);
-        
-        // Check that all values are as expected
-        const allSame = nodeIds.every(id => Math.abs(this.state.getValue(id) - value) < 1e-10);
-        console.log(`All nodes have the same value: ${allSame}`);
-      } catch (error) {
-        console.error("Error setting uniform state:", error);
-      }
-    }
-    else if (initialStateType === 'gaussian') {
-      try {
-        // Create a Gaussian distribution centered on a node
-        let centerNodeId = initialStateParams.nodeId;
-        
-        // Validate that the center node ID exists and graph is available
-        if (!this.graph || !centerNodeId || !this.graph.getNode(centerNodeId)) {
-          centerNodeId = nodeIds[0];
-          console.warn(`Center node ID ${initialStateParams.nodeId || 'undefined'} is invalid, using ${nodeIds[0]} instead`);
-        }
-        
-        const centerValue = initialStateParams.centerValue || 1.0;
-        const sigma = initialStateParams.sigma || 1.0;
-        
-        console.log(`Setting Gaussian state centered at node ${centerNodeId} with value ${centerValue} and sigma ${sigma}`);
-        
-        // Set center node
-        this.state = this.state.setValue(centerNodeId, centerValue);
-        
-        // Get center node position
-        const centerNode = this.graph ? this.graph.getNode(centerNodeId) : null;
-        if (!centerNode) {
-          console.error("Center node not found even after validation");
-          return;
-        }
-        
-        // Set other nodes based on distance
-        for (const nodeId of nodeIds) {
-          if (nodeId === centerNodeId) continue;
-          
-          const node = this.graph.getNode(nodeId);
-          if (!node) continue;
-          
-          // Calculate Euclidean distance
-          // We've verified centerNode is not null above, but we'll be extra safe here
-          if (!centerNode) continue; // Safety check (though we've verified above)
-          
-          const dx = node.position.x - centerNode.position.x;
-          const dy = node.position.y - centerNode.position.y;
-          const dz = (node.position.z || 0) - (centerNode.position.z || 0);
-          const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
-          
-          // Calculate Gaussian value
-          const value = centerValue * Math.exp(-(distance*distance) / (2*sigma*sigma));
-          this.state = this.state.setValue(nodeId, value);
-        }
-        
-        // Verify the state was set correctly
-        const centerNodeValue = this.state.getValue(centerNodeId);
-        console.log(`Verified center node value: ${centerNodeValue}`);
-        
-        // Log some sample values
-        const sampleNodes = nodeIds.slice(0, Math.min(3, nodeIds.length));
-        for (const id of sampleNodes) {
-          if (id !== centerNodeId) {
-            console.log(`Node ${id} value: ${this.state.getValue(id)}`);
-          }
-        }
-        
-        // Check that at least one node has a value > 0
-        const anyPositive = nodeIds.some(id => this.state.getValue(id) > 0);
-        console.log(`At least one node has positive value: ${anyPositive}`);
-      } catch (error) {
-        console.error("Error setting Gaussian state:", error);
-        
-        // Fallback to a simple delta state on the first node
-        if (nodeIds.length > 0) {
-          try {
-            console.warn("Falling back to delta state on first node");
-            this.state = this.state.setValue(nodeIds[0], 1.0);
+            const centerNodeValue = this.state.getValue(centerNodeId);
+            console.log(`Verified center node value: ${centerNodeValue}`);
             
-            // Verify the fallback state
-            const fallbackValue = this.state.getValue(nodeIds[0]);
-            console.log(`Verified fallback value for node ${nodeIds[0]}: ${fallbackValue}`);
-          } catch (fallbackError) {
-            console.error("Critical error: Failed to set fallback state:", fallbackError);
+            // Log some sample values
+            const sampleNodes = nodeIds.slice(0, Math.min(3, nodeIds.length));
+            for (const id of sampleNodes) {
+              if (id !== centerNodeId) {
+                console.log(`Node ${id} value: ${this.state.getValue(id)}`);
+              }
+            }
+            
+            // Check that at least one node has a value > 0
+            const anyPositive = this.state ? nodeIds.some(id => this.state!.getValue(id) > 0) : false; // Add null check before some
+            console.log(`At least one node has positive value: ${anyPositive}`);
+          } else {
+            console.error("Center node not found even after validation");
+          }
+        } catch (error) {
+          console.error("Error setting Gaussian state:", error);
+          
+          // Fallback to a simple delta state on the first node
+          if (nodeIds.length > 0) {
+            try {
+              console.warn("Falling back to delta state on first node");
+              this.state = this.state.setValue(nodeIds[0], 1.0);
+              
+              // Verify the fallback state
+              const fallbackValue = this.state.getValue(nodeIds[0]);
+              console.log(`Verified fallback value for node ${nodeIds[0]}: ${fallbackValue}`);
+            } catch (fallbackError) {
+              console.error("Critical error: Failed to set fallback state:", fallbackError);
+            }
           }
         }
       }
-    }
-    
-    // Save a copy of the initial state
-    this.initialState = this.state.clone();
-    
-    // Validate the state before setting on the diffusion model
-    try {
-      // Find maximum value in state for validation
-      let maxValue = 0;
-      let nonZeroCount = 0;
       
-      for (let i = 0; i < this.state.size; i++) {
-        const value = Math.abs(this.state.getValueAtIndex(i));
-        if (value > maxValue) {
-          maxValue = value;
+      // Save a copy of the initial state
+      this.initialState = this.state.clone();
+      
+      // Validate the state before setting on the diffusion model
+      try {
+        // Find maximum value in state for validation
+        let maxValue = 0;
+        let nonZeroCount = 0;
+        const stateSize = this.state ? this.state.size : 0; // Add null check
+
+        for (let i = 0; i < stateSize; i++) {
+          const value = Math.abs(this.state!.getValueAtIndex(i)); // Use non-null assertion as size > 0 implies state is not null
+          if (value > maxValue) {
+            maxValue = value;
+          }
+          if (value > 1e-10) {
+            nonZeroCount++;
+          }
         }
-        if (value > 1e-10) {
-          nonZeroCount++;
-        }
-      }
-      
-      console.log(`State validation: max value=${maxValue.toFixed(6)}, non-zero nodes=${nonZeroCount}/${this.state?.size || 0}`);
-      
-      if (maxValue < 1e-10) {
-        console.error("State validation failed: all values are zero or near zero");
         
-        // Emergency fallback - set first node to 1.0
-        if (nodeIds.length > 0) {
-          console.warn("Emergency fallback: setting first node to 1.0");
-          this.state = this.state.setValue(nodeIds[0], 1.0);
-          this.initialState = this.state.clone();
+        console.log(`State validation: max value=${maxValue.toFixed(6)}, non-zero nodes=${nonZeroCount}/${stateSize}`);
+        
+        if (maxValue < 1e-10) {
+          console.error("State validation failed: all values are zero or near zero");
           
-          // Verify the emergency fix
-          const fixedValue = this.state.getValue(nodeIds[0]);
-          console.log(`Emergency fix verified: node ${nodeIds[0]} value = ${fixedValue}`);
+          // Emergency fallback - set first node to 1.0
+          if (nodeIds.length > 0) {
+            console.warn("Emergency fallback: setting first node to 1.0");
+            this.state = this.state.setValue(nodeIds[0], 1.0);
+            this.initialState = this.state.clone();
+            
+            // Verify the emergency fix
+            const fixedValue = this.state.getValue(nodeIds[0]);
+            console.log(`Emergency fix verified: node ${nodeIds[0]} value = ${fixedValue}`);
+          }
         }
+      } catch (error) {
+        console.error("Error validating initial state:", error);
       }
-    } catch (error) {
-      console.error("Error validating initial state:", error);
-    }
-    
-    // Set the initial state on the diffusion model
-    if (this.diffusionModel && this.state) {
-      console.log("Setting initial state on diffusion model");
-      this.diffusionModel.setInitialState(this.state);
-    } else {
-      if (!this.diffusionModel) {
-        console.error("Cannot set initial state: diffusion model is null");
-      }
-      if (!this.state) {
-        console.error("Cannot set initial state: state is null");
+      
+      // Set the initial state on the diffusion model
+      if (this.diffusionModel && this.state) {
+        console.log("Setting initial state on diffusion model");
+        this.diffusionModel.setInitialState(this.state);
+      } else {
+        if (this.diffusionModel === null) {
+          console.error("Cannot set initial state: diffusion model is null");
+        }
+        if (this.state === null) {
+          console.error("Cannot set initial state: state is null");
+        }
       }
     }
   }
@@ -398,63 +415,63 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
    * Run simulation for one step
    */
   step(): void {
-    if (!this.diffusionModel || !this.state || !this.parameters) return;
-    
-    // Evolve the state by one time step
-    const dt = this.parameters.timeStep;
-    this.state = this.diffusionModel.evolveStep(dt);
-    
-    // Update current time
-    this.currentTime += dt;
-    this.stepCounter++;
-    
-    // Always record state to ensure history is available
-    // This ensures the debug panel can access history data
-    this.history.addState(this.currentTime, this.state);
-    
-    // Log every Nth step to avoid excessive logging
-    if (this.stepCounter % 10 === 0) {
-      console.log(`Recorded state at step ${this.stepCounter}, time ${this.currentTime}`);
+    if (this.diffusionModel !== null && this.state !== null && this.parameters !== null) {
+      // Evolve the state by one time step
+      const dt = this.parameters.timeStep;
+      this.state = this.diffusionModel.evolveStep(dt);
+      
+      // Update current time
+      this.currentTime += dt;
+      this.stepCounter++;
+      
+      // Always record state to ensure history is available
+      // This ensures the debug panel can access history data
+      this.history.addState(this.currentTime, this.state);
+      
+      // Log every Nth step to avoid excessive logging
+      if (this.stepCounter % 10 === 0) {
+        console.log(`Recorded state at step ${this.stepCounter}, time ${this.currentTime}`);
+      }
+      
+      // Dispatch step event
+      this.dispatchEvent('step', { time: this.currentTime, state: this.state });
     }
-    
-    // Dispatch step event
-    this.dispatchEvent('step', { time: this.currentTime, state: this.state });
   }
 
   /**
    * Run simulation until a specific time
    */
   runUntil(time: number): void {
-    if (!this.diffusionModel || !this.state || !this.parameters) return;
-    
-    this.running = true;
-    
-    // Calculate the number of steps needed
-    const dt = this.parameters.timeStep;
-    const steps = Math.ceil((time - this.currentTime) / dt);
-    
-    // Run the simulation
-    for (let i = 0; i < steps && this.running; i++) {
-      this.step();
+    if (this.diffusionModel !== null && this.state !== null && this.parameters !== null) {
+      this.running = true;
+      
+      // Calculate the number of steps needed
+      const dt = this.parameters.timeStep;
+      const steps = Math.ceil((time - this.currentTime) / dt);
+      
+      // Run the simulation
+      for (let i = 0; i < steps && this.running; i++) {
+        this.step();
+      }
+      
+      this.running = false;
     }
-    
-    this.running = false;
   }
 
   /**
    * Run simulation for a specific number of steps
    */
   runSteps(steps: number): void {
-    if (!this.diffusionModel || !this.state) return;
-    
-    this.running = true;
-    
-    // Run the simulation
-    for (let i = 0; i < steps && this.running; i++) {
-      this.step();
+    if (this.diffusionModel !== null && this.state !== null) {
+      this.running = true;
+      
+      // Run the simulation
+      for (let i = 0; i < steps && this.running; i++) {
+        this.step();
+      }
+      
+      this.running = false;
     }
-    
-    this.running = false;
   }
 
   /**
@@ -477,38 +494,33 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
    * Reset simulation to initial state
    */
   reset(): void {
-    if (!this.initialState || !this.diffusionModel) return;
-    
-    this.state = this.initialState.clone();
-    this.currentTime = 0;
-    this.stepCounter = 0;
-    
-    // Reset the diffusion model
-    this.diffusionModel.reset();
-    this.diffusionModel.setInitialState(this.state);
-    
-    // Clear history
-    this.history.clear();
-    
-    // Record initial state if history recording is enabled
-    if (this.parameters?.recordHistory) {
-      this.history.addState(0, this.state);
+    if (this.initialState !== null && this.diffusionModel !== null) {
+      this.state = this.initialState.clone();
+      this.currentTime = 0;
+      this.stepCounter = 0;
+      
+      // Reset the diffusion model
+      this.diffusionModel.reset();
+      this.diffusionModel.setInitialState(this.state);
+      
+      // Clear history
+      this.history.clear();
+      
+      // Record initial state if history recording is enabled
+      if (this.parameters?.recordHistory) {
+        this.history.addState(0, this.state);
+      }
+      
+      // Dispatch reset event
+      this.dispatchEvent('reset', { state: this.state });
     }
-    
-    // Dispatch reset event
-    this.dispatchEvent('reset', { state: this.state });
   }
 
   /**
    * Get the current state
    */
   getCurrentState(): StateVector {
-    if (!this.state) {
-      // Create a dummy state if none exists
-      const nodeIds = this.graph?.nodes.map(node => node.id) || [];
-      return new SimulationStateVector(nodeIds);
-    }
-    return this.state;
+    return this.state || new SimulationStateVector([]);
   }
 
   /**
@@ -536,34 +548,40 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
    * Add an event listener
    */
   addEventListener(event: string, callback: Function): void {
-    if (!this.eventListeners[event]) {
-      this.eventListeners[event] = [];
+    if (event !== null && callback !== null) {
+      if (!this.eventListeners[event]) {
+        this.eventListeners[event] = [];
+      }
+      this.eventListeners[event].push(callback);
     }
-    this.eventListeners[event].push(callback);
   }
 
   /**
    * Remove an event listener
    */
   removeEventListener(event: string, callback: Function): void {
-    if (!this.eventListeners[event]) return;
-    
-    this.eventListeners[event] = this.eventListeners[event].filter(
-      listener => listener !== callback
-    );
+    if (event !== null && callback !== null) {
+      if (!this.eventListeners[event]) return;
+      
+      this.eventListeners[event] = this.eventListeners[event].filter(
+        listener => listener !== callback
+      );
+    }
   }
 
   /**
    * Dispatch an event
    */
   private dispatchEvent(event: string, data: any): void {
-    if (!this.eventListeners[event]) return;
-    
-    for (const listener of this.eventListeners[event]) {
-      try {
-        listener(data);
-      } catch (error) {
-        console.error(`Error in event listener for ${event}:`, error);
+    if (event !== null && data !== null) {
+      if (!this.eventListeners[event]) return;
+      
+      for (const listener of this.eventListeners[event]) {
+        try {
+          listener(data);
+        } catch (error) {
+          console.error(`Error in event listener for ${event}:`, error);
+        }
       }
     }
   }
@@ -574,7 +592,7 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
   getConservationLaws() {
     console.log("Getting conservation laws...");
     
-    if (!this.state) {
+    if (this.state === null) {
       console.warn("Cannot get conservation laws: state is null");
       return {
         totalProbability: 0,
@@ -583,7 +601,7 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       };
     }
 
-    if (!this.initialState) {
+    if (this.initialState === null) {
       console.warn("Cannot get conservation laws: initialState is null");
       return {
         totalProbability: 0,
@@ -598,8 +616,8 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       let currentNorm = 0;
       
       // Make sure state size is valid and matching
-      const stateSize = this.state.size;
-      const initialStateSize = this.initialState.size;
+      const stateSize = this.state?.size || 0; // Add null check
+      const initialStateSize = this.initialState?.size || 0; // Add null check
       
       if (stateSize !== initialStateSize) {
         console.warn(`State size mismatch: current=${stateSize}, initial=${initialStateSize}`);
@@ -608,16 +626,17 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       // Use the minimum size to avoid out of bounds errors
       const size = Math.min(stateSize, initialStateSize);
       
-      // Calculate norms directly
-      for (let i = 0; i < size; i++) {
-        // We've already verified these aren't null above, but we'll add extra safety
-        if (!this.initialState || !this.state) break;
-        
-        const initialValue = this.initialState.getValueAtIndex(i);
-        const currentValue = this.state.getValueAtIndex(i);
-        
-        initialNorm += initialValue * initialValue;
-        currentNorm += currentValue * currentValue;
+      // Calculate norms directly only if states are not null
+      if (this.initialState && this.state) {
+        for (let i = 0; i < size; i++) {
+          const initialValue = this.initialState.getValueAtIndex(i);
+          const currentValue = this.state.getValueAtIndex(i);
+
+          initialNorm += initialValue * initialValue;
+          currentNorm += currentValue * currentValue;
+        }
+      } else {
+         console.warn("Cannot calculate norms: state or initialState is null");
       }
       
       // Take square root to get actual norms
@@ -627,19 +646,20 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
       console.log("Conservation calculation:", {
         initialNorm,
         currentNorm,
-        stateSize: this.state.size
+        stateSize: this.state?.size ?? 0
       });
       
       // Calculate the variation (avoid division by zero and handle nullability)
-      // Since we've already verified initialNorm is calculated, we don't need the non-null assertion
       const normVariation = Math.abs(currentNorm - initialNorm) / 
                            (initialNorm > 1e-10 ? initialNorm : 1.0);
       
       // Check positivity
       let positivity = true;
+      const currentStateSize = this.state?.size || 0; 
+      // Add explicit null check before the loop
       if (this.state) {
-        for (let i = 0; i < this.state.size; i++) {
-          if (this.state.getValueAtIndex(i) < -1e-10) {
+        for (let i = 0; i < currentStateSize; i++) {
+          if (this.state.getValueAtIndex(i) < -1e-10) { // Remove non-null assertion
             positivity = false;
             break;
           }
@@ -665,5 +685,29 @@ export class SpinNetworkSimulationEngineImpl implements SimulationEngine {
         positivity: false,
       };
     }
+  }
+
+  /**
+   * Example method to set node color
+   */
+  setNodeColor(nodeId: string, color: string): void {
+    console.log(`Setting color of node ${nodeId} to ${color}`);
+    // Implementation for setting node color
+  }
+
+  /**
+   * Example method to handle current node
+   */
+  handleCurrentNode(): void {
+    if (this.currentNode) {
+      this.setNodeColor(this.currentNode.id, this.defaultNodeColor);
+    }
+  }
+
+  /**
+   * Fix StateVector undefined case
+   */
+  setStateVector(vector?: StateVector) {
+    this.stateVector = vector || this.createDefaultStateVector();
   }
 }

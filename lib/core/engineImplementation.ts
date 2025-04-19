@@ -12,7 +12,8 @@ import {
   StateVector,
   SimulationHistory,
   DiffusionModel,
-  SimulationEvent
+  SimulationEvent,
+  SimulationEdge // <-- Add this line
 } from './types';
 import { SimulationStateVector } from './stateVector';
 import { MathAdapter } from './mathAdapter';
@@ -133,12 +134,10 @@ export class SimulationHistoryImpl implements SimulationHistory {
       data.states.forEach((entry: any) => {
         if (entry.time !== undefined && entry.state !== undefined) {
           // Assuming state is serialized as JSON compatible with SimulationStateVector
-          // We need nodeIds to reconstruct state vector, but this is a limitation here
-          // For now, we skip deserialization of state vector details
+          // We need nodeIds to reconstruct state vector, but this is a limitation here.
+          // For now, we only restore the times and skip deserialization of state vector details.
           // This can be improved with additional context or parameters
           this._times.push(entry.time);
-          // Placeholder: store undefined or null for state
-          this._states.set(entry.time, undefined as unknown as StateVector);
         }
       });
       this._times.sort((a, b) => a - b);

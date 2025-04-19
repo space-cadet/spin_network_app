@@ -95,7 +95,9 @@ export class SpinNetworkGraph implements SimulationGraph {
     const graph = instance.fromSpinNetwork(network);
     
     // Log graph creation to BrowserFS if available
-    this.logGraphCreation(graph, network);
+    if (typeof window !== 'undefined' && window.fs) {
+      this.logGraphCreation(graph, network);
+    }
     
     return graph;
   }
@@ -141,7 +143,7 @@ export class SpinNetworkGraph implements SimulationGraph {
           this.ensureLogDirectoryExists('/logs/simulation', () => {
             this.ensureLogDirectoryExists('/logs/simulation/graphs', () => {
               // Write graph data to JSON file
-              window.fs.writeFile(
+              window.fs?.writeFile(
                 `/logs/simulation/graphs/${filename}`,
                 JSON.stringify(graphData, null, 2),
                 { encoding: 'utf8' },
@@ -166,7 +168,7 @@ export class SpinNetworkGraph implements SimulationGraph {
                 `Edges: ${graph.getEdgeCount()}\n`;
               
               const textFilename = `graph-${graphId}-info.txt`;
-              window.fs.writeFile(
+              window.fs?.writeFile(
                 `/logs/simulation/graphs/${textFilename}`,
                 textDescription,
                 { encoding: 'utf8' },
@@ -197,10 +199,10 @@ export class SpinNetworkGraph implements SimulationGraph {
       return;
     }
     
-    window.fs.stat(dirPath, (statErr: any) => {
+    window.fs?.stat(dirPath, (statErr: any) => {
       if (statErr) {
         // Directory doesn't exist, create it
-        window.fs.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
+        window.fs?.mkdir(dirPath, { recursive: false }, (mkdirErr: any) => {
           if (mkdirErr && mkdirErr.code !== 'EEXIST') {
             console.error(`Failed to create directory ${dirPath}: ${mkdirErr.message || mkdirErr}`);
             // Call callback anyway to continue with operation

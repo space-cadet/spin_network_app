@@ -2,6 +2,69 @@
 
 *Last Updated: 2025-04-19*
 
+## 2025-04-19 20:36 IST: T24 - General Stability and Type Safety Fixes (TypeScript & BrowserFS)
+
+**Files:** 
+- `lib/core/engineImplementation.ts`
+- `lib/utils/simulationLogger.ts`
+- `src/database/services/graphService.ts`
+- `src/database/services/simulationService.ts`
+- `src/hooks/useSimulation.ts`
+- `src/simulation/core/engineImplementation.ts`
+- `src/simulation/core/graph.ts`
+- `src/simulation/core/simulationLogger.ts`
+- `src/utils/browserFSConfig.ts`
+- `package.json`
+- `pnpm-lock.yaml`
+
+**Error Message/Cause:**
+Multiple potential runtime errors and TypeScript build errors caused by:
+1.  **Undefined Access:** Accessing potentially undefined objects without proper checks, most notably `window.fs` (BrowserFS API) across multiple logging/service files, and core simulation objects (`this.state`, `this.initialState`, `this.diffusionModel`, `graph`, `parameters`) within the simulation engine and related hooks/services.
+2.  **TypeScript Type Errors:** Various issues including incorrect handling of Dexie's `update` method return values (which can be `undefined`), state vector management problems (e.g., cloning/accessing potentially null states, incorrect history restoration), incorrect function return type definitions (e.g., in `useSimulation`), missing/incorrect type imports (`SimulationParameters`, `SimulationEdge`), and improper use of non-null assertions (`!`).
+3.  **Dependency Issue:** Missing type definitions for `papaparse`.
+
+**Fix:**
+1.  **Null/Undefined Checks:** Implemented comprehensive checks before accessing potentially undefined objects. This involved using `if (obj)`, `typeof obj !== 'undefined'`, optional chaining (`?.`), and nullish coalescing (`??`), particularly for `window.fs` and core simulation state objects (`state`, `initialState`, etc.).
+2.  **Type Corrections:**
+    - Correctly handled Dexie `update` results by checking for `undefined`.
+    - Improved `StateVector` handling in `engineImplementation`: added null checks in `addState`, corrected return types/logic in `getClosestState`, `getCurrentState`, added default state vector creation, ensured state validation handles nulls.
+    - Corrected function return types in `useSimulation` hook (e.g., `StateVector | null`, `SimulationHistoryType`).
+    - Imported necessary types (`SimulationParameters`, `SimulationEdge`).
+    - Replaced some non-null assertions (`!`) with explicit checks where appropriate (e.g., in `src/simulation/core/simulationLogger.ts`).
+3.  **Dependency:** Added `@types/papaparse` to `devDependencies`.
+4.  **Other:** Added `recursive: true` to `fs.mkdir` in `browserFSConfig.ts` for robustness.
+
+**Key Code Changes:**
+```typescript
+// Example null check for window.fs (in simulationLogger, graphService, etc.)
+if (typeof window !== 'undefined' && typeof window.fs !== 'undefined' && window.fs) {
+  window.fs.writeFile(/* ... */); 
+} else {
+  console.error('window.fs not available...');
+}
+
+// Example null check for simulation state (in engineImplementation)
+if (this.state !== null) {
+  // ... access state properties safely
+  this.history.addState(this.currentTime, this.state); 
+} else {
+   console.error("Cannot record state: state is null");
+}
+
+// Example optional chaining and nullish coalescing (in engineImplementation)
+const stateSize = this.state?.size ?? 0; 
+
+// Correct Dexie update result handling (in simulationService)
+const result = await db.simulations.update(id, updates);
+if (result === undefined) { // Dexie update returns undefined if no record found
+  return false; 
+}
+return true; // Update successful (result is number of affected rows)
+
+// Corrected Type Import (in useSimulation.ts)
+import { SimulationParameters, StateVector, SimulationHistory as SimulationHistoryType } from '../simulation/core/types';
+```
+
 ## 2025-04-19 14:45 IST: T24 - React DOM Nesting Warning in FileExplorer
 
 **File:** `/src/components/logs/explorer/FileExplorer.tsx`
