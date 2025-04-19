@@ -23,8 +23,40 @@
 | T21 | Improve Spin Network Documentation | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
 | T22 | Implement Log File Explorer | ✅ COMPLETE | MEDIUM | 2025-04-18 | - | Deepak |
 | T23 | Implement Separate Simulation Controls | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
+| T24 | Enhance Log Explorer with State Persistence and Sorting | ⬜ NOT STARTED | MEDIUM | 2025-04-19 | T22 | Deepak |
 
 ## Task Details
+
+### T24: Enhance Log Explorer with State Persistence and Sorting
+**Description**: Enhance the log explorer component to persist state between page reloads and navigation events, and add advanced file display options including detailed file information and sorting capabilities.
+**Status**: ⬜ NOT STARTED
+**Priority**: MEDIUM
+**Started**: April 19, 2025
+**Last Active**: April 19, 2025
+**Dependencies**: T22
+**Completion Criteria**:
+- ⬜ Create Redux slice for log explorer state persistence
+- ⬜ Persist current directory path between page reloads
+- ⬜ Persist selected file between page reloads
+- ⬜ Persist panel split position between page reloads
+- ⬜ Add detailed file information view mode
+- ⬜ Implement sorting by filename (ascending/descending)
+- ⬜ Implement sorting by file size (ascending/descending)
+- ⬜ Implement sorting by creation date (newest/oldest)
+- ⬜ Implement sorting by modification date (newest/oldest)
+- ⬜ Add column headers with sort indicators
+- ⬜ Store sort preferences in persisted state
+- ⬜ Enhance file metadata collection in the FileExplorer component
+- ⬜ Improve UI for switching between content and details views
+
+**Related Files**:
+- `/src/components/logs/explorer/FileExplorer.tsx`
+- `/src/components/logs/explorer/LogExplorerPage.tsx`
+- `/src/store/slices/` (new logExplorerSlice.ts to be created)
+- `/src/store/index.ts` (for redux-persist configuration)
+
+**Notes**:
+This enhancement will improve the user experience by maintaining the log explorer state across page reloads and navigation events. Users will be able to return to the same folder and file they were previously viewing. The addition of detailed file information and sorting capabilities will make it easier to manage and navigate log files, particularly as the number of log files grows. This builds upon the existing log explorer implementation (T22) to provide a more complete and user-friendly file management experience.
 
 ### T23: Implement Separate Simulation Controls
 **Description**: Improve the simulation controls UI and functionality to properly handle play, pause, stop, resume, and reset operations with correct logging behavior.
@@ -754,6 +786,7 @@ graph TD
     T21[T21: Improve Spin Network Documentation]
     T22[T22: Implement Log File Explorer]
     T23[T23: Implement Separate Simulation Controls]
+    T24[T24: Enhance Log Explorer with State Persistence]
     
     T0 --> T1
     T0 --> T23
@@ -786,5 +819,6 @@ graph TD
     T16 -.-> T5
     T18 --> T19
     T18 --> T22
+    T22 --> T24
     T23 -.-> T0
 ```

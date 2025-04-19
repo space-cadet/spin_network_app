@@ -59,14 +59,21 @@ This document tracks both accomplished objectives and planned tasks for the proj
 
 ## Current Focus
 
-### 1. Simulation Logs Panel Fix
+### 1. Enhance Log Explorer Component
+- [ ] Implement state persistence between page reloads
+- [ ] Add detailed file information view
+- [ ] Implement sortable file list with multiple sort options
+- [ ] Enhance the UI with column headers and sort indicators
+- [ ] Add view mode toggle between content and details view
+
+### 2. Simulation Logs Panel Fix
 - [ ] Fix null values in geometric and statistics tabs
 - [ ] Update SpinNetworkGeometryCalculator to handle edge cases
 - [ ] Improve error handling in test-simulation.html
 - [ ] Enhance data flow from simulation engine to results panel
 - [ ] Add validation for all calculated values
 
-### 2. Component Refactoring
+### 3. Component Refactoring
 - [ ] Break down SimulationResultsPanel.tsx (941 lines) into smaller components
 - [ ] Refactor SimulationControlPanel.tsx (633 lines) into modular components
 - [ ] Create reusable hooks for simulation data access

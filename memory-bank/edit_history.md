@@ -7,6 +7,20 @@
 
 ### April 19, 2025
 
+#### [12:25] - T24: Enhance Log Explorer with State Persistence and Sorting
+
+- Created `/memory-bank/implementation-details/log-explorer-enhancement-plan.md` - Comprehensive implementation plan for log explorer enhancements
+- Updated `/memory-bank/tasks.md` - Added task T24 for log explorer state persistence and sorting features
+- Updated `/memory-bank/session_cache.md` - Added T24 task details and context
+- Updated `/memory-bank/TODO.md` - Added log explorer enhancement to current focus
+- Updated task relationships in tasks.md to show dependency between T22 and T24
+
+Created a new task to enhance the log explorer component with two major features:
+1. State persistence between page reloads and navigation using Redux and localStorage
+2. Enhanced file display with detailed information and sorting capabilities
+
+The implementation plan outlines a comprehensive approach for adding these features, including Redux state management, sorting functionality, and UI enhancements. This builds upon the existing log explorer implementation (T22) to create a more robust and user-friendly file management experience.
+
 #### [11:45] - T23: Implement Separate Simulation Controls with Correct Pause/Resume Behavior
 
 - Modified `/src/components/panels/SimulationControlPanel.tsx` - Added distinct play/pause/stop/step/reset buttons

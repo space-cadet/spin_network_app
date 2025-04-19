@@ -1,11 +1,11 @@
 # Session Cache
 
-*Last Updated: April 19, 2025 (11:55 IST)*
+*Last Updated: April 19, 2025 (12:25 IST)*
 
 ## Overview
-- Active Tasks: 10
+- Active Tasks: 11
 - Paused Tasks: 3
-- Last Task Focus: T23
+- Last Task Focus: T24
 - Completed Tasks: 9
 
 ## Task Registry
@@ -25,8 +25,66 @@
 - T20: Add Intertwiner Space Implementation - 🔄 IN PROGRESS
 - T21: Improve Spin Network Documentation - ✅ COMPLETE
 - T23: Implement Separate Simulation Controls - ✅ COMPLETE
+- T24: Enhance Log Explorer with State Persistence and Sorting - ⬜ NOT STARTED
 
 ## Active Tasks
+
+### T24: Enhance Log Explorer with State Persistence and Sorting
+**Status:** ⬜ NOT STARTED
+**Priority:** MEDIUM
+**Started:** 2025-04-19
+**Last Active:** 2025-04-19 12:25 IST
+**Dependencies:** T22
+
+#### Context
+Enhancing the log explorer component to persist state between page reloads and navigation events, and adding advanced file display options including detailed file information and sorting capabilities.
+
+#### Critical Files
+- `/src/components/logs/explorer/FileExplorer.tsx` - Main component to be updated
+- `/src/components/logs/explorer/LogExplorerPage.tsx` - Page component to be updated
+- `/src/store/slices/` - Need to create new logExplorerSlice.ts
+- `/src/store/index.ts` - For redux-persist configuration
+
+#### Implementation Progress
+1. ⬜ Create Redux slice for log explorer state persistence
+2. ⬜ Persist current directory path between page reloads
+3. ⬜ Persist selected file between page reloads
+4. ⬜ Persist panel split position between page reloads
+5. ⬜ Add detailed file information view mode
+6. ⬜ Implement sorting by filename (ascending/descending)
+7. ⬜ Implement sorting by file size (ascending/descending)
+8. ⬜ Implement sorting by creation date (newest/oldest)
+9. ⬜ Implement sorting by modification date (newest/oldest)
+10. ⬜ Add column headers with sort indicators
+11. ⬜ Store sort preferences in persisted state
+12. ⬜ Enhance file metadata collection in the FileExplorer component
+13. ⬜ Improve UI for switching between content and details views
+
+#### Working State
+Created implementation plan with comprehensive approach for enhancing the log explorer:
+
+1. **State Persistence with Redux**:
+   - Need to create a Redux slice for log explorer state
+   - Will use redux-persist to store state in localStorage
+   - Must persist current path, selected file, split position, and view preferences
+
+2. **Enhanced File Display**:
+   - Will expand FileItem interface to include additional metadata
+   - Need to update file loading to collect creation time and other properties
+   - Will implement a toggle between content view and details view
+
+3. **Sorting Functionality**:
+   - Will implement sorting by filename, size, creation date, and modification date
+   - Need to add column headers that are clickable for sorting
+   - Will store sorting preferences in Redux state
+   - Must ensure directories are always sorted first regardless of sort criteria
+
+4. **UI Improvements**:
+   - Will add visual indicators for current sort field and direction
+   - Need to improve layout to show more file metadata
+   - Will implement smooth transitions between view modes
+
+Next steps will be to begin implementing the Redux slice for state persistence, then update the component to use Redux state instead of local state.
 
 ### T23: Implement Separate Simulation Controls
 **Status:** ✅ COMPLETE
