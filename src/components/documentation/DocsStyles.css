@@ -1,0 +1,129 @@
+/* Documentation custom styles */
+
+/* Override default GitHub markdown styles */
+.markdown-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: #24292e;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* Improve heading styles */
+.markdown-body h1 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #eaecef;
+  margin-top: 1.5em;
+}
+
+.markdown-body h2 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #eaecef;
+  margin-top: 1.5em;
+}
+
+/* Code blocks */
+.markdown-body pre {
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
+}
+
+.markdown-body code {
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 85%;
+  padding: 0.2em 0.4em;
+}
+
+/* Table styles */
+.markdown-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid #dfe2e5;
+  padding: 6px 13px;
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: #f6f8fa;
+}
+
+/* Math formula styles */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1em 0;
+}
+
+/* HTML content styles */
+.html-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: #24292e;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.html-content h1,
+.html-content h2,
+.html-content h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #24292e;
+}
+
+.html-content pre,
+.html-content code {
+  background-color: #f6f8fa;
+  border-radius: 3px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 85%;
+  padding: 0.2em 0.4em;
+}
+
+.html-content pre {
+  padding: 1em;
+  overflow: auto;
+}
+
+/* Sidebar TOC styles */
+.toc-list {
+  font-size: 0.9em;
+  border-left: 1px solid #e1e4e8;
+}
+
+.toc-item {
+  padding: 4px 0 4px 15px;
+  transition: all 0.2s ease;
+}
+
+.toc-item:hover {
+  background-color: #f6f8fa;
+}
+
+.toc-item-h1 {
+  margin-left: 0px;
+}
+
+.toc-item-h2 {
+  margin-left: 12px;
+}
+
+.toc-item-h3 {
+  margin-left: 24px;
+  font-size: 0.85em;
+}
+
+/* Active TOC item */
+.toc-active {
+  color: #0366d6;
+  background-color: #f1f8ff;
+  border-left: 2px solid #0366d6;
+}

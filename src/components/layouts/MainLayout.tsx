@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaNetworkWired, FaChartLine, FaFolder } from 'react-icons/fa';
+import { FaNetworkWired, FaChartLine, FaFolder, FaBook } from 'react-icons/fa';
 import ResizablePanel from '../common/ResizablePanel';
 import { Settings } from '../settings';
 
@@ -38,6 +38,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <Link to="/explorer" className={`flex items-center hover:text-primary-100 ${location.pathname === '/explorer' ? 'border-b-2 border-white' : ''}`}>
                   <FaFolder className="text-white" />
                   <span className="text-white ml-1">Log Explorer</span>
+                </Link>
+              </li>
+              <li className="flex items-center">
+                <Link to="/docs" className={`flex items-center hover:text-primary-100 ${location.pathname.startsWith('/docs') ? 'border-b-2 border-white' : ''}`}>
+                  <FaBook className="text-white" />
+                  <span className="text-white ml-1">Documentation</span>
                 </Link>
               </li>
               <li className="flex items-center">

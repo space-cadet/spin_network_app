@@ -3,6 +3,11 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import MainLayout from './components/layouts/MainLayout'
 import Workspace from './components/workspace/Workspace'
 import { LogExplorerPage } from './components/logs/explorer'
+import { 
+  DocsLayout, 
+  DocumentationHome, 
+  DocsViewer 
+} from './components/documentation'
 import NetworkTools from './components/tools/NetworkTools'
 import { PropertiesPanel, TypeManagementPanel, SimulationControlPanel } from './components/panels'
 import { SimulationResultsPanel, SimulationLogsPanel, SimulationDebugPanel } from './components/simulation'
@@ -36,6 +41,14 @@ function App() {
       <MainLayout>
         <Routes>
           <Route path="/explorer" element={<LogExplorerPage />} />
+          
+          {/* Documentation Routes */}
+          <Route path="/docs" element={<DocsLayout />}>
+            <Route index element={<DocumentationHome />} />
+            <Route path="physics/:docId" element={<DocsViewer type="physics" />} />
+            <Route path="implementation/:docId" element={<DocsViewer type="implementation" />} />
+          </Route>
+          
           <Route path="/" element={
             <div className="flex h-full">
               <PersistenceStatus />

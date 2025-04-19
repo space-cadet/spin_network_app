@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulation Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #2563eb;
+    }
+    button.reset {
+      background-color: #64748b;
+      margin-left: 8px;
+    }
+    button.reset:hover {
+      background-color: #475569;
+    }
+    pre {
+      background-color: #f1f5f9;
+      padding: 15px;
+      border-radius: 5px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+    .output {
+      margin-top: 20px;
+    }
+    h1 {
+      color: #1e3a8a;
+    }
+    h2 {
+      color: #2563eb;
+      margin-top: 30px;
+    }
+    .error-value {
+      color: #dc2626 !important;
+    }
+    .warning-value {
+      color: #d97706 !important;
+    }
+    .success-value {
+      color: #059669 !important;
+    }
+    .results-panel {
+      transition: opacity 0.3s ease;
+    }
+    #geometric-results div, #statistics-results div {
+      padding: 4px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    #geometric-results span, #statistics-results span {
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .error-message {
+      background-color: #fee2e2;
+      border: 1px solid #ef4444;
+      color: #b91c1c;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .debug-info {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <h1>Spin Network Simulation Test</h1>
+  
+  <p>This page runs a simple test of the simulation engine to verify that it's working correctly. For detailed explanations of the physics and calculations, see the <a href="physics-notebook.html" style="font-weight: bold; color: #2563eb;">Physics Notebook</a>.</p>
+  
+  <button id="run-test">Run Simulation Test</button>
+  <button id="regenerate" class="reset">Generate New Random Network</button>
+  
+  <div class="results-panel" style="margin-top: 20px; display: none;">
+    <h2>Simulation Results:</h2>
+    
+    <div style="display: flex; gap: 20px; margin-top: 10px;">
+      <div style="flex: 1; padding: 15px; background-color: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0;">
+        <h3 style="margin-top: 0; color: #1e40af;">Geometric Properties</h3>
+        <div id="geometric-results">
+          <div>Total Volume: <span id="total-volume">0.0000</span></div>
+          <div>Total Area: <span id="total-area">0.0000</span></div>
+          <div>Effective Dimension: <span id="effective-dimension">0.0000</span></div>
+          <div>Volume Entropy: <span id="volume-entropy">0.0000</span></div>
+        </div>
+      </div>
+      
+      <div style="flex: 1; padding: 15px; background-color: #f8fafc; border-radius: 5px; border: 1px solid #e2e8f0;">
+        <h3 style="margin-top: 0; color: #1e40af;">Distribution Statistics</h3>
+        <div id="statistics-results">
+          <div>Mean: <span id="mean">0.0000</span></div>
+          <div>Variance: <span id="variance">0.0000</span></div>
+          <div>Skewness: <span id="skewness">0.0000</span></div>
+          <div>Kurtosis: <span id="kurtosis">0.0000</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="output">
+    <h2>Console Output:</h2>
+    <pre id="console-output"></pre>
+  </div>
+  
+  <script type="module">
+    console.log('Starting script execution');
+    
+    // Try importing with error handling
+    let runSimulationTest, SpinNetworkGeometryCalculator, SimulationAnalyzer;
+    
+    try {
+      const testSimulation = await import('../src/test-simulation.js');
+      runSimulationTest = testSimulation.runSimulationTest;
+      console.log('Successfully imported runSimulationTest');
+    } catch (error) {
+      console.error('Error importing test-simulation.js:', error);
+    }
+    
+    try {
+      const simulation = await import('../src/simulation/index.js');
+      SpinNetworkGeometryCalculator = simulation.SpinNetworkGeometryCalculator;
+      SimulationAnalyzer = simulation.SimulationAnalyzer;
+      console.log('Successfully imported simulation components');
+      console.log('SpinNetworkGeometryCalculator available:', typeof SpinNetworkGeometryCalculator !== 'undefined');
+      console.log('SimulationAnalyzer available:', typeof SimulationAnalyzer !== 'undefined');
+    } catch (error) {
+      console.error('Error importing simulation/index.js:', error);
+    }
+    
+    // DOM elements
+    const consoleOutput = document.getElementById('console-output');
+    const resultsPanel = document.querySelector('.results-panel');
+    
+    // Geometric property elements
+    const totalVolumeElem = document.getElementById('total-volume');
+    const totalAreaElem = document.getElementById('total-area');
+    const effectiveDimensionElem = document.getElementById('effective-dimension');
+    const volumeEntropyElem = document.getElementById('volume-entropy');
+    
+    // Statistics elements
+    const meanElem = document.getElementById('mean');
+    const varianceElem = document.getElementById('variance');
+    const skewnessElem = document.getElementById('skewness');
+    const kurtosisElem = document.getElementById('kurtosis');
+    
+    // Store current engine and graph for accessing from console
+    window.currentEngine = null;
+    window.currentGraph = null;
+    
+    // Function to update the results panel with current data
+    function updateResultsPanel() {
+      console.log("updateResultsPanel called");
+      
+      // Default values to display when data isn't available
+      const defaultGeometric = {
+        totalVolume: 0,
+        totalArea: 0,
+        effectiveDimension: 0,
+        volumeEntropy: 0
+      };
+      
+      const defaultStats = {
+        mean: 0,
+        variance: 0,
+        standardDeviation: 0,
+        min: 0,
+        max: 0
+      };
+      
+      // Always show the results panel, even with default values
+      resultsPanel.style.display = 'block';
+      
+      // Function to format numbers safely
+      function safeFormat(value, decimals = 4) {
+        if (value === null || value === undefined || !Number.isFinite(value)) {
+          return "0.0000";
+        }
+        return value.toFixed(decimals);
+      }
+      
+      // Function to check if data is valid and non-zero
+      function isValidData(value) {
+        return value !== null && value !== undefined && Number.isFinite(value) && value !== 0;
+      }
+      
+      // Clear previous error styling
+      document.querySelectorAll('#geometric-results span, #statistics-results span').forEach(span => {
+        span.style.color = ''; // Reset to default color
+      });
+      
+      if (!window.currentEngine || !window.currentGraph) {
+        console.warn("Cannot update results: engine or graph is null");
+        // Show more detailed diagnostic info
+        console.warn("currentEngine:", window.currentEngine);
+        console.warn("currentGraph:", window.currentGraph);
+        
+        // Update UI with default values and error state
+        totalVolumeElem.textContent = "0.0000";
+        totalAreaElem.textContent = "0.0000";
+        effectiveDimensionElem.textContent = "0.0000";
+        volumeEntropyElem.textContent = "0.0000";
+        
+        meanElem.textContent = "0.0000";
+        varianceElem.textContent = "0.0000";
+        skewnessElem.textContent = "0.0000";
+        kurtosisElem.textContent = "0.0000";
+        
+        // Add error styling
+        document.querySelectorAll('#geometric-results span, #statistics-results span').forEach(span => {
+          span.style.color = '#dc2626'; // Red color for error
+        });
+        
+        return {
+          geometric: defaultGeometric,
+          statistics: defaultStats,
+          error: "Missing engine or graph"
+        };
+      }
+      
+      try {
+        // Get state with error handling
+        console.log("Getting current state from engine");
+        let state;
+        try {
+          state = window.currentEngine.getCurrentState();
+          console.log("Current state obtained:", state ? "Available" : "Not available");
+        } catch (stateError) {
+          console.error("Error getting current state:", stateError);
+          state = null;
+        }
+        
+        // Initialize result objects
+        const geometric = { ...defaultGeometric };
+        const stats = { ...defaultStats };
+        let hasValidData = false;
+        
+        // Try to get time even if other operations fail
+        let currentTime = 0;
+        try {
+          currentTime = window.currentEngine.getCurrentTime() || 0;
+        } catch (timeError) {
+          console.error("Error getting current time:", timeError);
+        }
+        
+        // Log diagnostics even if state is missing
+        console.log("Engine diagnostic info:", {
+          hasCurrentState: !!state,
+          hasGetCurrentState: typeof window.currentEngine.getCurrentState === 'function',
+          hasGraph: !!window.currentGraph,
+          currentTime: currentTime
+        });
+        
+        // If state is available, calculate properties
+        if (state) {
+          // Log detailed state info for debugging
+          console.log("State properties:", {
+            size: state.size,
+            nodeIds: state.nodeIds ? state.nodeIds.length : "undefined",
+            hasGetValue: typeof state.getValue === 'function',
+            hasGetValueAtIndex: typeof state.getValueAtIndex === 'function'
+          });
+          
+          console.log("Graph properties:", {
+            nodes: window.currentGraph.nodes.length,
+            edges: window.currentGraph.edges.length,
+            hasToLaplacianMatrix: typeof window.currentGraph.toLaplacianMatrix === 'function'
+          });
+          
+          try {
+            console.log("Creating geometry calculator");
+            const geometryCalculator = new SpinNetworkGeometryCalculator();
+            
+            // Calculate geometric properties with enhanced error handling
+            console.log("Calculating total volume...");
+            try {
+              geometric.totalVolume = geometryCalculator.calculateTotalVolume(state);
+              console.log("Total volume calculated:", geometric.totalVolume);
+              if (isValidData(geometric.totalVolume)) hasValidData = true;
+            } catch (volumeError) {
+              console.error("Error calculating total volume:", volumeError);
+              geometric.totalVolume = 0;
+            }
+            
+            console.log("Calculating total area...");
+            try {
+              geometric.totalArea = geometryCalculator.calculateTotalArea(window.currentGraph);
+              console.log("Total area calculated:", geometric.totalArea);
+              if (isValidData(geometric.totalArea)) hasValidData = true;
+            } catch (areaError) {
+              console.error("Error calculating total area:", areaError);
+              geometric.totalArea = 0;
+            }
+            
+            console.log("Calculating effective dimension...");
+            try {
+              geometric.effectiveDimension = geometryCalculator.calculateEffectiveDimension(
+                window.currentGraph, state
+              );
+              console.log("Effective dimension calculated:", geometric.effectiveDimension);
+              if (isValidData(geometric.effectiveDimension)) hasValidData = true;
+            } catch (dimensionError) {
+              console.error("Error calculating effective dimension:", dimensionError);
+              geometric.effectiveDimension = 0;
+            }
+            
+            console.log("Calculating volume entropy...");
+            try {
+              geometric.volumeEntropy = geometryCalculator.calculateVolumeEntropy(state);
+              console.log("Volume entropy calculated:", geometric.volumeEntropy);
+              if (isValidData(geometric.volumeEntropy)) hasValidData = true;
+            } catch (entropyError) {
+              console.error("Error calculating volume entropy:", entropyError);
+              geometric.volumeEntropy = 0;
+            }
+            
+            // Calculate statistics
+            console.log("Calculating simulation statistics...");
+            try {
+              const calculatedStats = SimulationAnalyzer.calculateStatistics(
+                state, currentTime
+              );
+              console.log("Statistics calculated:", calculatedStats);
+              
+              // Copy valid properties to our stats object
+              if (calculatedStats) {
+                stats.mean = calculatedStats.mean || 0;
+                stats.variance = calculatedStats.variance || 0;
+                stats.standardDeviation = calculatedStats.standardDeviation || 0;
+                stats.min = calculatedStats.min || 0;
+                stats.max = calculatedStats.max || 0;
+                
+                // Check if we have valid statistical data
+                if (isValidData(stats.mean) || isValidData(stats.variance)) hasValidData = true;
+              }
+            } catch (statsError) {
+              console.error("Error calculating statistics:", statsError);
+            }
+          } catch (calculatorError) {
+            console.error("Error creating calculators:", calculatorError);
+          }
+        } else {
+          console.warn("State is missing, using default values");
+        }
+        
+        // Update UI with calculated or default values
+        totalVolumeElem.textContent = safeFormat(geometric.totalVolume);
+        totalAreaElem.textContent = safeFormat(geometric.totalArea);
+        effectiveDimensionElem.textContent = safeFormat(geometric.effectiveDimension);
+        volumeEntropyElem.textContent = safeFormat(geometric.volumeEntropy);
+        
+        meanElem.textContent = safeFormat(stats.mean);
+        varianceElem.textContent = safeFormat(stats.variance);
+        skewnessElem.textContent = "0.0000"; // Placeholder for now
+        kurtosisElem.textContent = "0.0000"; // Placeholder for now
+        
+        // Add error styling for zero values
+        if (!isValidData(geometric.totalVolume)) totalVolumeElem.style.color = '#dc2626';
+        if (!isValidData(geometric.totalArea)) totalAreaElem.style.color = '#dc2626';
+        if (!isValidData(geometric.effectiveDimension)) effectiveDimensionElem.style.color = '#dc2626';
+        if (!isValidData(geometric.volumeEntropy)) volumeEntropyElem.style.color = '#dc2626';
+        
+        if (!isValidData(stats.mean)) meanElem.style.color = '#dc2626';
+        if (!isValidData(stats.variance)) varianceElem.style.color = '#dc2626';
+        
+        console.log("Results panel updated with " + (hasValidData ? "valid data" : "default values"));
+        
+        return {
+          geometric,
+          statistics: stats,
+          hasValidData
+        };
+      } catch (error) {
+        console.error("Unhandled error updating results panel:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack trace:", error.stack);
+        
+        // Update UI with default values in case of error
+        totalVolumeElem.textContent = "0.0000";
+        totalAreaElem.textContent = "0.0000";
+        effectiveDimensionElem.textContent = "0.0000";
+        volumeEntropyElem.textContent = "0.0000";
+        
+        meanElem.textContent = "0.0000";
+        varianceElem.textContent = "0.0000";
+        skewnessElem.textContent = "0.0000";
+        kurtosisElem.textContent = "0.0000";
+        
+        // Add error styling
+        document.querySelectorAll('#geometric-results span, #statistics-results span').forEach(span => {
+          span.style.color = '#dc2626'; // Red color for error
+        });
+        
+        return {
+          geometric: defaultGeometric,
+          statistics: defaultStats,
+          error: error.message
+        };
+      }
+    }
+    
+    // Make the function globally available
+    window.updateResultsPanel = updateResultsPanel;
+    
+    // Capture console.log output
+    const originalLog = console.log;
+    const originalError = console.error;
+    
+    console.log = function() {
+      // Call original console.log
+      originalLog.apply(console, arguments);
+      
+      // Add to our output
+      const args = Array.from(arguments);
+      const line = args.map(arg => {
+        if (typeof arg === 'object') {
+          return JSON.stringify(arg, null, 2);
+        }
+        return String(arg);
+      }).join(' ');
+      
+      consoleOutput.textContent += line + '\n';
+    };
+    
+    console.error = function() {
+      // Call original console.error
+      originalError.apply(console, arguments);
+      
+      // Add to our output with error formatting
+      const args = Array.from(arguments);
+      const line = args.map(arg => {
+        if (typeof arg === 'object') {
+          return JSON.stringify(arg, null, 2);
+        }
+        return String(arg);
+      }).join(' ');
+      
+      consoleOutput.textContent += '❌ ERROR: ' + line + '\n';
+    };
+    
+    // Modify runSimulationTest to update our UI and capture references
+    const originalRunTest = runSimulationTest;
+    window.runSimulationTest = async function() {
+      try {
+        console.log("Starting enhanced runSimulationTest...");
+        
+        // Run the original test
+        console.log("Calling original runSimulationTest function...");
+        const result = await originalRunTest();
+        console.log("Original runSimulationTest completed with result:", result);
+        
+        // Debug log for engine and graph references
+        console.log("Checking references - engine:", window.currentEngine ? "Available" : "Not available");
+        console.log("Checking references - graph:", window.currentGraph ? "Available" : "Not available");
+        
+        if (window.currentEngine) {
+          console.log("Engine state check:", window.currentEngine.getCurrentState() ? "State present" : "No state");
+        }
+        
+        // Attempt to update the results panel after a short delay
+        console.log("Setting timeout to update results panel...");
+        setTimeout(() => {
+          // If we have engine and graph references, update the panel
+          if (window.currentEngine && window.currentGraph) {
+            console.log("Updating results panel with simulation data...");
+            try {
+              const updateResult = updateResultsPanel();
+              console.log("Results panel update completed:", updateResult);
+            } catch (updateError) {
+              console.error("Error during updateResultsPanel:", updateError);
+              console.error("Error details:", updateError.message);
+              console.error("Stack trace:", updateError.stack);
+            }
+          } else {
+            console.warn("Engine or graph reference not available for results panel update");
+            if (!window.currentEngine) console.warn("Missing engine reference");
+            if (!window.currentGraph) console.warn("Missing graph reference");
+          }
+        }, 1000); // Increased timeout to give more time for references to be set
+        
+        return result;
+      } catch (error) {
+        console.error("Error in enhanced runSimulationTest:", error);
+        console.error("Error details:", error.message);
+        console.error("Stack trace:", error.stack);
+        return false;
+      }
+    };
+    
+    // Set up the test button
+    document.getElementById('run-test').addEventListener('click', () => {
+      consoleOutput.textContent = ''; // Clear previous output
+      console.log('Starting simulation test...');
+      
+      try {
+        // Run the test
+        window.runSimulationTest();
+      } catch (error) {
+        console.error('Test failed with error:', error);
+      }
+    });
+    
+    // Set up the regenerate button
+    document.getElementById('regenerate').addEventListener('click', () => {
+      consoleOutput.textContent = ''; // Clear previous output
+      console.log('Generating new random network...');
+      
+      try {
+        // Import necessary functions with error handling
+        const regenerateFunction = async () => {
+          try {
+            // Generate a new random network
+            const testSimulation = await import('../src/test-simulation.js');
+            
+            // Call generateRandomNetwork with random parameters
+            const numNodes = 3 + Math.floor(Math.random() * 5); // 3-7 nodes
+            const connectivity = 0.3 + Math.random() * 0.5; // 0.3-0.8 connectivity
+            
+            const newNetwork = testSimulation.generateRandomNetwork(numNodes, connectivity);
+            console.log(`Generated new network with ${newNetwork.nodes.length} nodes and ${newNetwork.edges.length} edges`);
+            console.log('Nodes:', newNetwork.nodes.map(n => n.id).join(', '));
+            console.log('Edges:', newNetwork.edges.map(e => `${e.source}->${e.target} (spin=${e.spin})`).join(', '));
+            
+            // Run the test with the new network
+            if (typeof testSimulation.runSimulationTest === 'function') {
+              console.log('Running simulation with new network...');
+              await testSimulation.runSimulationTest();
+            } else {
+              console.error('runSimulationTest function not found');
+            }
+          } catch (error) {
+            console.error('Error regenerating network:', error);
+          }
+        };
+        
+        regenerateFunction();
+      } catch (error) {
+        console.error('Failed to regenerate network:', error);
+      }
+    });
+  </script>
+</body>
+</html>

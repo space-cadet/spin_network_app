@@ -24,31 +24,33 @@
 | T22 | Implement Log File Explorer | ✅ COMPLETE | MEDIUM | 2025-04-18 | - | Deepak |
 | T23 | Implement Separate Simulation Controls | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
 | T24 | Enhance Log Explorer with State Persistence and Sorting | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | T22 | Deepak |
-| T25 | Implement Documentation System | ⬜ NOT STARTED | MEDIUM | 2025-04-19 | - | Deepak |
+| T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
 
 ### T25: Implement Documentation System
 **Description**: Implement a unified documentation system for the spin network app by organizing existing documentation into a structured hierarchy and making it accessible through the UI.
-**Status**: ⬜ NOT STARTED
+**Status**: 🔄 IN PROGRESS
 **Priority**: MEDIUM
 **Started**: April 19, 2025
-**Last Active**: April 19, 2025 (18:30 IST)
+**Last Active**: April 19, 2025 (21:45 IST)
 **Dependencies**: -
 **Completion Criteria**:
-- ⬜ Create `/public/docs/` directory structure for organized documentation
-- ⬜ Move physics-notebook.html to `/public/docs/physics/`
-- ⬜ Convert mathematical-roadmap.md to HTML and move to `/public/docs/physics/`
-- ⬜ Convert intertwiner-spaces.md to HTML and move to `/public/docs/physics/`
-- ⬜ Convert spin-net-telegraph-unified.md to HTML and move to `/public/docs/physics/`
-- ⬜ Modify standalone-test.html and move to `/public/docs/implementation/`
-- ⬜ Modify test-simulation.html and move to `/public/docs/implementation/`
-- ⬜ Create index.html as the documentation landing page
-- ⬜ Create React components for documentation UI (DocsLayout, DocsSidebar, DocsViewer)
-- ⬜ Add Documentation link to MainLayout.tsx header
-- ⬜ Implement routing for documentation section
-- ⬜ Create styling for documentation pages
-- ⬜ Add table of contents for all documentation pages
+- ✅ Create `/public/docs/` directory structure for organized documentation
+- ✅ Move physics-notebook.html to `/public/docs/physics/`
+- ✅ Move mathematical-roadmap.md to `/public/docs/physics/`
+- ✅ Move intertwiner-spaces.md to `/public/docs/physics/`
+- ✅ Rename and move spin-net-telegraph-unified.md to `/public/docs/physics/unified-dynamics.md`
+- ✅ Rename and move standalone-test.html to `/public/docs/implementation/standalone-guide.html`
+- ✅ Rename and move test-simulation.html to `/public/docs/implementation/simulation-test.html`
+- ✅ Create index.html as the documentation landing page
+- ✅ Create React components for documentation UI (DocsLayout, DocsSidebar, DocsViewer, DocumentationHome)
+- ✅ Add Documentation link to MainLayout.tsx header
+- ✅ Implement routing for documentation section
+- ✅ Create styling for documentation pages
+- 🔄 Fix HTML content rendering issues 
+- 🔄 Add LaTeX math rendering support
+- 🔄 Implement collapsible table of contents in sidebar
 - ⬜ Ensure responsive design for all screen sizes
 
 **Related Files**:
