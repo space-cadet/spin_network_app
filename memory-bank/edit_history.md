@@ -7,6 +7,28 @@
 
 ### April 19, 2025
 
+#### [19:30] - T24: Add View Mode Toggle and Formatted Content Display
+
+- Modified `/src/components/logs/explorer/FileExplorer.tsx`:
+  - Added view mode toggle with "Detailed" and "Simple" view buttons
+  - Positioned toggle buttons above the file list on the left side
+  - Updated file list rendering to show different views based on selected mode
+  - Added file type detection based on extension
+  - Implemented formatted content display for CSV files using PapaParse
+  - Implemented formatted content display for JSON files using react-json-tree
+  - Added conditional rendering based on file type
+  - Fixed initially missing `setViewMode` import error
+- Updated `/memory-bank/tasks.md` - Updated T24 completion criteria
+- Updated `/memory-bank/session_cache.md` - Updated T24 context and implementation details
+
+Added two major enhancements to the FileExplorer:
+1. View mode toggle with "Detailed" and "Simple" view options to switch between a comprehensive table view and a more compact list view
+2. Formatted content display that automatically detects and formats CSV and JSON files with appropriate visualization (tables for CSV, collapsible tree view for JSON)
+
+These changes significantly improve the usability of the log explorer by providing more flexible viewing options and making file contents more readable through proper formatting.
+
+### April 19, 2025
+
 #### [14:46] - T24: Implement Sortable Table View in Log Explorer
 
 - Modified `/src/components/logs/explorer/FileExplorer.tsx`:

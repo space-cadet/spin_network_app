@@ -32,7 +32,7 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: MEDIUM
 **Started**: April 19, 2025
-**Last Active**: April 19, 2025 (14:49 IST) 
+**Last Active**: April 19, 2025 (19:30 IST) 
 **Dependencies**: T22
 **Completion Criteria**:
 - ✅ Create Redux slice for log explorer state persistence (`logExplorerSlice.ts`)
@@ -46,8 +46,10 @@
 - ✅ Add sorting UI (clickable headers, indicators)
 - ✅ Fix TypeScript errors related to sorting and `fs.readFile` signature
 - ✅ Fix DOM nesting warning related to `<tbody>` whitespace
-- ⬜ Add Details/Content view toggle UI and logic
-- ⬜ Update file list rendering based on `viewMode` 
+- ✅ Add Details/Content view toggle UI and logic
+- ✅ Update file list rendering based on `viewMode`
+- ✅ Add formatted content display for CSV files using PapaParse
+- ✅ Add formatted content display for JSON files using react-json-tree
 - ⬜ Implement state persistence using Redux Persist
 
 **Related Files**:

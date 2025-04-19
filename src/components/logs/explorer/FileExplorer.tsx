@@ -1,17 +1,20 @@
 // src/components/logs/explorer/FileExplorer.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { FaFolder, FaFile, FaArrowLeft, FaDownload, FaTrash } from 'react-icons/fa';
+import { FaFolder, FaFile, FaArrowLeft, FaDownload, FaTrash, FaList, FaThLarge } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux'; // Import Redux hooks
 import { RootState, AppDispatch } from '../../../store'; // Import store types
+import Papa from 'papaparse';
+import { JSONTree } from 'react-json-tree';
+
 import {
   setCurrentPath as setReduxCurrentPath,
   setSelectedFile as setReduxSelectedFile,
   setSplitPosition as setReduxSplitPosition,
-  setSortField, // Add missing action
-  toggleSortDirection, // Add missing action
-  toggleViewMode, // Add missing action
-  SortField, // Import type
-  ViewMode, // Import type
+  setSortField,
+  toggleSortDirection,
+  setViewMode, // Import setViewMode instead of toggleViewMode
+  SortField,
+  ViewMode,
 } from '../../../store/slices/logExplorerSlice';
 
 // Interface for file/directory items
@@ -348,6 +351,22 @@ const FileExplorer: React.FC = () => {
     return date.toLocaleString();
   };
   
+  // Determine file type from path
+  const getFileType = (path: string): string => {
+    const extension = path.split('.').pop()?.toLowerCase() || '';
+    return extension;
+  };
+  
+  // Check if string is valid JSON
+  const isValidJSON = (str: string): boolean => {
+    try {
+      JSON.parse(str);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+  
   // Handle resizing panels
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -397,7 +416,7 @@ const FileExplorer: React.FC = () => {
         
         <button
           onClick={() => loadFiles(currentPath)}
-          className="ml-2 p-1 rounded text-blue-600 hover:bg-blue-100"
+          className="ml-auto p-1 rounded text-blue-600 hover:bg-blue-100"
         >
           Refresh
         </button>
@@ -409,6 +428,31 @@ const FileExplorer: React.FC = () => {
         </div>
       )}
       
+      <div className="flex mb-2 px-2">
+        <button
+          onClick={() => dispatch(setViewMode('details'))}
+          className={`px-3 py-1 rounded mr-2 flex items-center ${
+            viewMode === 'details' 
+              ? 'bg-blue-100 text-blue-700 font-medium' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+          title="Show detailed view"
+        >
+          <FaList className="mr-1" /> Detailed
+        </button>
+        <button
+          onClick={() => dispatch(setViewMode('content'))}
+          className={`px-3 py-1 rounded flex items-center ${
+            viewMode === 'content' 
+              ? 'bg-blue-100 text-blue-700 font-medium' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+          title="Show simplified view"
+        >
+          <FaThLarge className="mr-1" /> Simple
+        </button>
+      </div>
+      
       <div className="flex flex-1 overflow-hidden" ref={containerRef}>
         {/* File list */}
         <div 
@@ -419,30 +463,31 @@ const FileExplorer: React.FC = () => {
             <div className="p-4 text-center text-gray-500">Loading...</div>
           ) : files.length === 0 ? (
             <div className="p-4 text-center text-gray-500">No files found</div>
-          ) : (
-            <table className="w-full text-sm text-left table-fixed"> {/* Added table-fixed */}
+          ) : viewMode === 'details' ? (
+            // Detailed view (table with all columns)
+            <table className="w-full text-sm text-left table-fixed">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th scope="col" className="px-4 py-3 w-1/2 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('name')}> {/* Use lowercase 'name' */}
-                    Name {sortField === 'name' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'name' and 'asc' */}
+                  <th scope="col" className="px-4 py-3 w-1/2 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('name')}>
+                    Name {sortField === 'name' && (sortDirection === 'asc' ? '▲' : '▼')}
                   </th>
-                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('size')}> {/* Use lowercase 'size' */}
-                    Size {sortField === 'size' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'size' and 'asc' */}
+                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('size')}>
+                    Size {sortField === 'size' && (sortDirection === 'asc' ? '▲' : '▼')}
                   </th>
-                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('modified')}> {/* Use lowercase 'modified' */}
-                    Modified {sortField === 'modified' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'modified' and 'asc' */}
+                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('modified')}>
+                    Modified {sortField === 'modified' && (sortDirection === 'asc' ? '▲' : '▼')}
                   </th>
-                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created')}> {/* Use lowercase 'created' */}
-                    Created {sortField === 'created' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'created' and 'asc' */}
+                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created')}>
+                    Created {sortField === 'created' && (sortDirection === 'asc' ? '▲' : '▼')}
                   </th>
-                  <th scope="col" className="px-4 py-3 w-auto"> {/* Actions column */}
+                  <th scope="col" className="px-4 py-3 w-auto">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody>{/* Add tbody, remove newline before map */}
+              <tbody>
               {files.map((file) => (
-                <tr // Replace div with tr
+                <tr
                   key={file.path}
                   onClick={() => viewFile(file)}
                   className={`border-b hover:bg-gray-100 cursor-pointer ${
@@ -484,7 +529,7 @@ const FileExplorer: React.FC = () => {
                         className="p-1 text-blue-600 hover:bg-blue-100 rounded"
                         title="Download"
                       >
-                        <FaDownload size="0.8em" /> {/* Slightly smaller icon */}
+                        <FaDownload size="0.8em" />
                       </button>
                     )}
                     <button
@@ -492,13 +537,55 @@ const FileExplorer: React.FC = () => {
                       className="p-1 text-red-600 hover:bg-red-100 rounded"
                       title="Delete"
                     >
-                      <FaTrash size="0.8em" /> {/* Slightly smaller icon */}
+                      <FaTrash size="0.8em" />
                     </button>
                   </td>
                 </tr>
               ))}
-              </tbody> {/* Add closing tbody */}
-            </table> 
+              </tbody>
+            </table>
+          ) : (
+            // Content view (simplified list)
+            <div className="space-y-1">
+              {files.map((file) => (
+                <div
+                  key={file.path}
+                  onClick={() => viewFile(file)}
+                  className={`p-2 rounded flex items-center justify-between hover:bg-gray-100 cursor-pointer ${
+                    selectedFile === file.path ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <div className="mr-2">
+                      {file.isDirectory ? (
+                        <FaFolder className="text-yellow-500" />
+                      ) : (
+                        <FaFile className="text-gray-500" />
+                      )}
+                    </div>
+                    <span className="truncate font-medium">{file.name}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    {!file.isDirectory && (
+                      <button
+                        onClick={(e) => downloadFile(file, e)}
+                        className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                        title="Download"
+                      >
+                        <FaDownload size="0.8em" />
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => deleteFile(file, e)}
+                      className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      title="Delete"
+                    >
+                      <FaTrash size="0.8em" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
         
@@ -517,9 +604,70 @@ const FileExplorer: React.FC = () => {
             fileContent === null ? (
               <div className="p-4 text-center text-gray-500">Loading file...</div>
             ) : (
-              <pre className="p-4 whitespace-pre-wrap break-words text-sm font-mono bg-gray-50 h-full overflow-auto">
-                {fileContent}
-              </pre>
+              <div className="p-4 bg-gray-50 h-full overflow-auto">
+                {/* JSON Formatter */}
+                {getFileType(selectedFile) === 'json' && isValidJSON(fileContent) ? (
+                  <JSONTree 
+                    data={JSON.parse(fileContent)} 
+                    theme={{
+                      base00: '#f9fafb', // background (gray-50)
+                      base0D: '#3b82f6', // keys (blue-500)
+                      base0B: '#10b981', // strings (emerald-500)
+                      base09: '#f59e0b', // numbers (amber-500)
+                      base08: '#ef4444', // null, undefined (red-500)
+                      base0A: '#8b5cf6'  // booleans (violet-500)
+                    }}
+                    invertTheme={false}
+                    shouldExpandNode={() => true} // Auto expand all nodes
+                  />
+                ) : 
+                /* CSV Formatter */
+                getFileType(selectedFile) === 'csv' ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 border">
+                      {(() => {
+                        const results = Papa.parse(fileContent, {
+                          header: true,
+                          skipEmptyLines: true
+                        });
+                        
+                        return (
+                          <>
+                            <thead className="bg-gray-100">
+                              <tr>
+                                {results.meta.fields?.map((field, i) => (
+                                  <th 
+                                    key={i} 
+                                    className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    {field}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {results.data.map((row: any, i: number) => (
+                                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                  {results.meta.fields?.map((field, j) => (
+                                    <td key={j} className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                      {row[field]}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </>
+                        );
+                      })()}
+                    </table>
+                  </div>
+                ) : (
+                  /* Plain text default view */
+                  <pre className="whitespace-pre-wrap break-words text-sm font-mono">
+                    {fileContent}
+                  </pre>
+                )}
+              </div>
             )
           ) : (
             <div className="p-4 text-center text-gray-500">

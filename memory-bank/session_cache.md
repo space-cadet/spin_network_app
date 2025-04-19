@@ -1,6 +1,6 @@
 # Session Cache
 
-*Last Updated: April 19, 2025 (12:25 IST)*
+*Last Updated: April 19, 2025 (19:30 IST)*
 
 ## Overview
 - Active Tasks: 11
@@ -33,17 +33,17 @@
 **Status:** 🔄 IN PROGRESS 
 **Priority:** MEDIUM
 **Started:** 2025-04-19
-**Last Active:** 2025-04-19 14:49 IST 
+**Last Active:** 2025-04-19 19:30 IST 
 **Dependencies:** T22
 
 #### Context
-Enhancing the log explorer component to persist state between page reloads and navigation events, and adding advanced file display options including detailed file information and sorting capabilities. Implemented sortable table view UI. Redux integration for state persistence is partially done.
+Enhancing the log explorer component to persist state between page reloads and navigation events, and adding advanced file display options including detailed file information and sorting capabilities. Implemented sortable table view UI, view mode toggle, and formatted content display for CSV and JSON files.
 
 #### Critical Files
-- `/src/components/logs/explorer/FileExplorer.tsx` - Main component to be updated
-- `/src/components/logs/explorer/LogExplorerPage.tsx` - Page component to be updated
-- `/src/store/slices/` - Need to create new logExplorerSlice.ts
-- `/src/store/index.ts` - For redux-persist configuration
+- `/src/components/logs/explorer/FileExplorer.tsx` - Main component updated
+- `/src/components/logs/explorer/LogExplorerPage.tsx` - Page component
+- `/src/store/slices/logExplorerSlice.ts` - Redux slice for state management
+- `/src/store/index.ts` - Redux-persist configuration
 
 #### Implementation Progress
 1. ✅ Create Redux slice for log explorer state persistence (`logExplorerSlice.ts`)
@@ -57,35 +57,37 @@ Enhancing the log explorer component to persist state between page reloads and n
 9. ✅ Add sorting UI (clickable headers, indicators)
 10. ✅ Fix TypeScript errors related to sorting and `fs.readFile` signature
 11. ✅ Fix DOM nesting warning related to `<tbody>` whitespace
-12. ⬜ Add Details/Content view toggle UI and logic
-13. ⬜ Update file list rendering based on `viewMode` 
-14. ⬜ Implement state persistence using Redux Persist
+12. ✅ Add Details/Content view toggle UI and logic
+13. ✅ Update file list rendering based on `viewMode`
+14. ✅ Add formatted content display for CSV files using PapaParse
+15. ✅ Add formatted content display for JSON files using react-json-tree
+16. ⬜ Implement state persistence using Redux Persist
 
 #### Working State
-Implemented the sortable table view UI in `FileExplorer.tsx`. This includes replacing the div structure with a proper table, adding clickable headers with sort indicators, implementing the `handleSort` function to dispatch Redux actions, and fixing related TypeScript errors and a DOM nesting warning. Redux integration for state persistence is partially done.
+Significantly enhanced the FileExplorer component with new capabilities:
 
-1. **State Persistence with Redux**:
-   - Need to create a Redux slice for log explorer state
-   - Will use redux-persist to store state in localStorage
-   - Must persist current path, selected file, split position, and view preferences
+1. **View Mode Toggle**:
+   - Implemented separate "Detailed" and "Simple" view buttons
+   - Positioned toggle controls above the file list on the left side
+   - Added visual highlighting to indicate active view mode
+   - Updated file list rendering to change based on selected view mode
 
-2. **Enhanced File Display**:
-   - Will expand FileItem interface to include additional metadata
-   - Need to update file loading to collect creation time and other properties
-   - Will implement a toggle between content view and details view
+2. **Formatted Content Display**:
+   - Added file type detection based on file extension
+   - Implemented JSON validation and formatted display using react-json-tree
+   - Added CSV parsing and table display using PapaParse
+   - Created a conditional rendering system that automatically selects the appropriate 
+     display format based on file type
+   - Applied appropriate styling for both JSON and CSV formatted views
 
-3. **Sorting Functionality**:
-   - Will implement sorting by filename, size, creation date, and modification date
-   - Need to add column headers that are clickable for sorting
-   - Will store sorting preferences in Redux state
-   - Must ensure directories are always sorted first regardless of sort criteria
+3. **Sorting and State Management**:
+   - Completed sortable table with headers for all metadata columns
+   - Implemented Redux state management for all UI preferences
+   - Added sort indicators to show current sort field and direction
 
-4. **UI Improvements**:
-   - Will add visual indicators for current sort field and direction
-   - Need to improve layout to show more file metadata
-   - Will implement smooth transitions between view modes
+The component now provides a much richer user experience with tailored content display based on file type and flexible viewing options. The remaining task is to fully implement state persistence using Redux Persist to maintain the user's preferences across page reloads.
 
-Next steps will be to begin implementing the Redux slice for state persistence, then update the component to use Redux state instead of local state.
+Next steps will focus on completing and testing the state persistence implementation.
 
 ### T23: Implement Separate Simulation Controls
 **Status:** ✅ COMPLETE
