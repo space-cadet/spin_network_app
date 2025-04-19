@@ -24,8 +24,47 @@
 | T22 | Implement Log File Explorer | ✅ COMPLETE | MEDIUM | 2025-04-18 | - | Deepak |
 | T23 | Implement Separate Simulation Controls | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
 | T24 | Enhance Log Explorer with State Persistence and Sorting | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | T22 | Deepak |
+| T25 | Implement Documentation System | ⬜ NOT STARTED | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T25: Implement Documentation System
+**Description**: Implement a unified documentation system for the spin network app by organizing existing documentation into a structured hierarchy and making it accessible through the UI.
+**Status**: ⬜ NOT STARTED
+**Priority**: MEDIUM
+**Started**: April 19, 2025
+**Last Active**: April 19, 2025 (18:30 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ⬜ Create `/public/docs/` directory structure for organized documentation
+- ⬜ Move physics-notebook.html to `/public/docs/physics/`
+- ⬜ Convert mathematical-roadmap.md to HTML and move to `/public/docs/physics/`
+- ⬜ Convert intertwiner-spaces.md to HTML and move to `/public/docs/physics/`
+- ⬜ Convert spin-net-telegraph-unified.md to HTML and move to `/public/docs/physics/`
+- ⬜ Modify standalone-test.html and move to `/public/docs/implementation/`
+- ⬜ Modify test-simulation.html and move to `/public/docs/implementation/`
+- ⬜ Create index.html as the documentation landing page
+- ⬜ Create React components for documentation UI (DocsLayout, DocsSidebar, DocsViewer)
+- ⬜ Add Documentation link to MainLayout.tsx header
+- ⬜ Implement routing for documentation section
+- ⬜ Create styling for documentation pages
+- ⬜ Add table of contents for all documentation pages
+- ⬜ Ensure responsive design for all screen sizes
+
+**Related Files**:
+- `/public/physics-notebook.html`
+- `/public/standalone-test.html`
+- `/public/test-simulation.html`
+- `/memory-bank/implementation-details/mathematical-roadmap.md`
+- `/memory-bank/implementation-details/intertwiner-spaces.md`
+- `/memory-bank/implementation-details/spin-net-telegraph-unified.md`
+- `/memory-bank/implementation-details/docs-implementation.md`
+- `/src/components/layouts/MainLayout.tsx`
+- `/src/components/documentation/*` (to be created)
+- `/src/main.tsx` (for router configuration)
+
+**Notes**:
+This task implements the documentation organization plan documented in `/memory-bank/implementation-details/docs-implementation.md`. The goal is to create a centralized, accessible documentation system that organizes all existing documentation files in a structured way and makes them available from within the app interface. This will improve the usability of the app by providing direct access to documentation about the physics, mathematics, and implementation details of the spin network simulation.
 
 ### T24: Enhance Log Explorer with State Persistence and Sorting
 **Description**: Enhance the log explorer component to persist state between page reloads and navigation events, and add advanced file display options including detailed file information and sorting capabilities.
@@ -790,6 +829,7 @@ graph TD
     T22[T22: Implement Log File Explorer]
     T23[T23: Implement Separate Simulation Controls]
     T24[T24: Enhance Log Explorer with State Persistence]
+    T25[T25: Implement Documentation System]
     
     T0 --> T1
     T0 --> T23
@@ -822,6 +862,9 @@ graph TD
     T16 -.-> T5
     T18 --> T19
     T18 --> T22
+    T20 -.-> T25
+    T21 -.-> T25
     T22 --> T24
     T23 -.-> T0
+    T25 -.-> T21
 ```

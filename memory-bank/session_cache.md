@@ -1,11 +1,11 @@
 # Session Cache
 
-*Last Updated: April 19, 2025 (19:30 IST)*
+*Last Updated: April 19, 2025 (20:45 IST)*
 
 ## Overview
-- Active Tasks: 11
+- Active Tasks: 12
 - Paused Tasks: 3
-- Last Task Focus: T24
+- Last Task Focus: T25
 - Completed Tasks: 9
 
 ## Task Registry
@@ -26,8 +26,70 @@
 - T21: Improve Spin Network Documentation - ✅ COMPLETE
 - T23: Implement Separate Simulation Controls - ✅ COMPLETE
 - T24: Enhance Log Explorer with State Persistence and Sorting - 🔄 IN PROGRESS
+- T25: Implement Documentation System - ⬜ NOT STARTED
 
 ## Active Tasks
+
+### T25: Implement Documentation System
+**Status:** ⬜ NOT STARTED
+**Priority:** MEDIUM
+**Started:** 2025-04-19
+**Last Active:** 2025-04-19 20:45 IST
+**Dependencies:** -
+
+#### Context
+Creating a unified documentation system for the spin network app by organizing existing documentation files in a structured hierarchy and making them accessible from the app's interface via a new Documentation section.
+
+#### Critical Files
+- `/public/docs/` (new directory structure)
+- `/public/docs/physics/` (directory for physics documentation)
+- `/public/docs/implementation/` (directory for implementation documentation)
+- `/public/docs/index.html` (new documentation landing page)
+- `/public/physics-notebook.html` (to be moved to /docs/physics/)
+- `/public/standalone-test.html` (to be adapted for /docs/implementation/)
+- `/public/test-simulation.html` (to be adapted for /docs/implementation/)
+- `/memory-bank/implementation-details/docs-implementation.md` (implementation plan)
+- `/src/components/documentation/` (new directory for React components)
+- `/src/components/layouts/MainLayout.tsx` (to be updated with Documentation link)
+
+#### Implementation Progress
+1. ⬜ Create `/public/docs/` directory structure for organized documentation
+2. ⬜ Move physics-notebook.html to `/public/docs/physics/`
+3. ⬜ Convert mathematical-roadmap.md to HTML and move to `/public/docs/physics/`
+4. ⬜ Convert intertwiner-spaces.md to HTML and move to `/public/docs/physics/`
+5. ⬜ Convert spin-net-telegraph-unified.md to HTML and move to `/public/docs/physics/`
+6. ⬜ Modify standalone-test.html and move to `/public/docs/implementation/`
+7. ⬜ Modify test-simulation.html and move to `/public/docs/implementation/`
+8. ⬜ Create index.html as the documentation landing page
+9. ⬜ Create React components for documentation UI
+10. ⬜ Add Documentation link to MainLayout.tsx header
+11. ⬜ Implement routing for documentation section
+
+#### Working State
+Created comprehensive implementation plan in `/memory-bank/implementation-details/docs-implementation.md` that outlines:
+
+1. **Directory Structure**
+   - Organized hierarchical structure for documentation files
+   - Physics category for theoretical content
+   - Implementation category for code examples and tests
+
+2. **Content Organization**
+   - Plan for converting Markdown files to HTML where needed
+   - Structure for cross-linking related documentation
+   - Approach for maintaining a consistent documentation style
+
+3. **React Component Structure**
+   - Design for DocsLayout component to handle documentation pages
+   - DocsSidebar for navigation between documentation files
+   - DocsViewer for displaying content with Markdown/HTML support
+   - DocumentationHome for the landing page
+
+4. **Integration with App**
+   - Updated MainLayout.tsx header menu design to include Documentation link
+   - Routing system for documentation section
+   - Responsive design approach for documentation UI
+
+The implementation plan provides a clear roadmap for creating a centralized, accessible documentation system that will significantly improve the usability of the app by providing easy access to the physics background, mathematical foundations, and implementation details of the spin network simulation.
 
 ### T24: Enhance Log Explorer with State Persistence and Sorting
 **Status:** 🔄 IN PROGRESS 
