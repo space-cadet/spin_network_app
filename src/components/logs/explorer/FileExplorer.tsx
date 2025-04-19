@@ -58,16 +58,74 @@ const FileExplorer: React.FC = () => {
     };
   }, [currentPath, dispatch]); // Add dispatch dependency
 
+  // Handle sorting when a header is clicked
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // If clicking the same field, toggle direction
+      dispatch(toggleSortDirection());
+    } else {
+      // If clicking a new field, set it and default to Asc
+      dispatch(setSortField(field));
+      // Optionally reset direction to Asc when changing field, or keep current direction
+      // dispatch(setSortDirection('Asc')); // Uncomment if you want to reset to Asc
+    }
+    // Reload files to apply the new sort order (or re-sort locally if preferred)
+    // Note: loadFiles already sorts based on Redux state, so calling it works.
+    // If you want instant local sorting without re-fetching, you'd sort `files` state here.
+    loadFiles(currentPath); 
+  };
+
   // Function to sort files based on Redux state
   const sortFiles = (items: FileItem[], field: SortField, direction: string): FileItem[] => {
-    // Implementation pending
-    console.log("Sorting by:", field, direction); // Placeholder
-    // Basic sort for now to avoid breaking things, will be replaced
-    return items.sort((a, b) => {
-       if (a.isDirectory && !b.isDirectory) return -1;
-       if (!a.isDirectory && b.isDirectory) return 1;
-       return a.name.localeCompare(b.name);
+    const sortedItems = [...items].sort((a, b) => {
+      // Always keep directories grouped together, typically at the top when sorting by name ASC
+      // Adjust logic slightly: directories first only if sorting by name asc, otherwise sort normally
+      if (field === 'name' && direction === 'asc') { // Use lowercase 'name' and 'asc'
+        if (a.isDirectory && !b.isDirectory) return -1;
+        if (!a.isDirectory && b.isDirectory) return 1;
+      } else if (field === 'name' && direction === 'desc') { // Use lowercase 'name' and 'desc'
+        // Files first when sorting name desc
+        if (a.isDirectory && !b.isDirectory) return 1;
+        if (!a.isDirectory && b.isDirectory) return -1;
+      }
+      // For other fields or if both are files/dirs, sort by field
+
+      let compareResult = 0;
+
+      switch (field) {
+        case 'name': // Use lowercase 'name'
+          compareResult = a.name.localeCompare(b.name);
+          break;
+        case 'size': // Use lowercase 'size'
+          // Handle undefined sizes (directories or errors)
+          // Directories typically don't show size, sort them based on preference (e.g., 0 or -1)
+          // Let's treat directory size as 0 for comparison purposes
+          const sizeA = a.isDirectory ? 0 : a.size ?? 0;
+          const sizeB = b.isDirectory ? 0 : b.size ?? 0;
+          compareResult = sizeA - sizeB;
+          break;
+        case 'created': // Use lowercase 'created'
+          // Handle undefined dates - treat as earliest possible time (0)
+          const dateA_Created = a.createdAt?.getTime() ?? 0;
+          const dateB_Created = b.createdAt?.getTime() ?? 0;
+          compareResult = dateA_Created - dateB_Created;
+          break;
+        case 'modified': // Use lowercase 'modified'
+          // Handle undefined dates - treat as earliest possible time (0)
+          const dateA_Modified = a.lastModified?.getTime() ?? 0;
+          const dateB_Modified = b.lastModified?.getTime() ?? 0;
+          compareResult = dateA_Modified - dateB_Modified;
+          break;
+        default:
+          // Should not happen with SortField type, but good practice
+          compareResult = 0;
+      }
+
+      // Apply direction
+      return direction === 'asc' ? compareResult : -compareResult; // Use lowercase 'asc'
     });
+
+    return sortedItems;
   };
 
 
@@ -255,12 +313,12 @@ const FileExplorer: React.FC = () => {
      if (!window.fs) {
        setError('File system not initialized');
        return;
-     }
+      }
 
-    // Use Buffer type for data
-    window.fs.readFile(file.path, (err: NodeJS.ErrnoException | null, data: Buffer | string) => { 
-      if (err) {
-        console.error(`Error reading file ${file.path}:`, err);
+     // Use Buffer type for data, explicitly pass undefined for options
+     window.fs.readFile(file.path, undefined, (err: NodeJS.ErrnoException | null, data: Buffer | string) => { 
+       if (err) {
+         console.error(`Error reading file ${file.path}:`, err);
         setError(`Error downloading file: ${err.message}`);
         return;
       }
@@ -362,55 +420,85 @@ const FileExplorer: React.FC = () => {
           ) : files.length === 0 ? (
             <div className="p-4 text-center text-gray-500">No files found</div>
           ) : (
-            <div className="divide-y">
+            <table className="w-full text-sm text-left table-fixed"> {/* Added table-fixed */}
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  <th scope="col" className="px-4 py-3 w-1/2 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('name')}> {/* Use lowercase 'name' */}
+                    Name {sortField === 'name' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'name' and 'asc' */}
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('size')}> {/* Use lowercase 'size' */}
+                    Size {sortField === 'size' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'size' and 'asc' */}
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('modified')}> {/* Use lowercase 'modified' */}
+                    Modified {sortField === 'modified' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'modified' and 'asc' */}
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-1/6 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created')}> {/* Use lowercase 'created' */}
+                    Created {sortField === 'created' && (sortDirection === 'asc' ? '▲' : '▼')} {/* Use lowercase 'created' and 'asc' */}
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-auto"> {/* Actions column */}
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>{/* Add tbody, remove newline before map */}
               {files.map((file) => (
-                <div
+                <tr // Replace div with tr
                   key={file.path}
                   onClick={() => viewFile(file)}
-                  className={`p-2 hover:bg-gray-100 cursor-pointer flex items-center ${
+                  className={`border-b hover:bg-gray-100 cursor-pointer ${
                     selectedFile === file.path ? 'bg-blue-50' : ''
                   }`}
                 >
-                  <div className="mr-2">
-                    {file.isDirectory ? (
-                      <FaFolder className="text-yellow-500" />
-                    ) : (
-                      <FaFile className="text-gray-500" />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-medium">{file.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {file.isDirectory
-                        ? 'Directory'
-                        : file.size !== undefined
-                        ? formatFileSize(file.size)
-                        : 'Unknown size'}
-                      {file.lastModified && ` • ${formatDate(file.lastModified)}`}
+                  {/* Name Column */}
+                  <td className="px-4 py-2 font-medium text-gray-900 whitespace-nowrap flex items-center">
+                    <div className="mr-2">
+                      {file.isDirectory ? (
+                        <FaFolder className="text-yellow-500" />
+                      ) : (
+                        <FaFile className="text-gray-500" />
+                      )}
                     </div>
-                  </div>
-                  
-                  {!file.isDirectory && (
+                    <span className="truncate">{file.name}</span>
+                  </td>
+                  {/* Size Column */}
+                  <td className="px-4 py-2">
+                    {file.isDirectory
+                      ? '-' // Display dash for directory size
+                      : file.size !== undefined
+                      ? formatFileSize(file.size)
+                      : 'N/A'}
+                  </td>
+                  {/* Modified Column */}
+                  <td className="px-4 py-2">
+                    {file.lastModified ? formatDate(file.lastModified) : 'N/A'}
+                  </td>
+                  {/* Created Column */}
+                  <td className="px-4 py-2">
+                    {file.createdAt ? formatDate(file.createdAt) : 'N/A'}
+                  </td>
+                  {/* Actions Column */}
+                  <td className="px-4 py-2 flex items-center space-x-1">
+                    {!file.isDirectory && (
+                      <button
+                        onClick={(e) => downloadFile(file, e)}
+                        className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                        title="Download"
+                      >
+                        <FaDownload size="0.8em" /> {/* Slightly smaller icon */}
+                      </button>
+                    )}
                     <button
-                      onClick={(e) => downloadFile(file, e)}
-                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                      title="Download"
+                      onClick={(e) => deleteFile(file, e)}
+                      className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      title="Delete"
                     >
-                      <FaDownload />
+                      <FaTrash size="0.8em" /> {/* Slightly smaller icon */}
                     </button>
-                  )}
-                  
-                  <button
-                    onClick={(e) => deleteFile(file, e)}
-                    className="p-1 text-red-600 hover:bg-red-100 rounded ml-1"
-                    title="Delete"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
+                  </td>
+                </tr>
               ))}
-            </div>
+              </tbody> {/* Add closing tbody */}
+            </table> 
           )}
         </div>
         

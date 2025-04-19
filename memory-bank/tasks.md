@@ -32,7 +32,7 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: MEDIUM
 **Started**: April 19, 2025
-**Last Active**: April 19, 2025 (14:26 IST)
+**Last Active**: April 19, 2025 (14:49 IST) 
 **Dependencies**: T22
 **Completion Criteria**:
 - ✅ Create Redux slice for log explorer state persistence (`logExplorerSlice.ts`)
@@ -41,12 +41,14 @@
 - ✅ Update event handlers in `FileExplorer.tsx` to dispatch Redux actions
 - ✅ Enhance `FileItem` interface with `createdAt` and `type`
 - ✅ Update `loadFiles` to populate `createdAt` and `type`
-- ✅ Update `loadFiles` to call `sortFiles` (placeholder implemented)
-- ⬜ Implement full sorting logic in `sortFiles` function
-- ⬜ Add sorting UI (clickable headers, indicators)
+- ✅ Update `loadFiles` to call `sortFiles` 
+- ✅ Implement full sorting logic in `sortFiles` function (using Redux state)
+- ✅ Add sorting UI (clickable headers, indicators)
+- ✅ Fix TypeScript errors related to sorting and `fs.readFile` signature
+- ✅ Fix DOM nesting warning related to `<tbody>` whitespace
 - ⬜ Add Details/Content view toggle UI and logic
-- ⬜ Update file list rendering based on `viewMode` and sorting
-- ⬜ Fix remaining TypeScript errors in `FileExplorer.tsx`
+- ⬜ Update file list rendering based on `viewMode` 
+- ⬜ Implement state persistence using Redux Persist
 
 **Related Files**:
 - `/src/components/logs/explorer/FileExplorer.tsx`

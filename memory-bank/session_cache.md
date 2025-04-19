@@ -30,14 +30,14 @@
 ## Active Tasks
 
 ### T24: Enhance Log Explorer with State Persistence and Sorting
-**Status:** 🔄 IN PROGRESS
+**Status:** 🔄 IN PROGRESS 
 **Priority:** MEDIUM
 **Started:** 2025-04-19
-**Last Active:** 2025-04-19 14:27 IST
+**Last Active:** 2025-04-19 14:49 IST 
 **Dependencies:** T22
 
 #### Context
-Enhancing the log explorer component to persist state between page reloads and navigation events, and adding advanced file display options including detailed file information and sorting capabilities. Partially implemented Redux integration for state persistence.
+Enhancing the log explorer component to persist state between page reloads and navigation events, and adding advanced file display options including detailed file information and sorting capabilities. Implemented sortable table view UI. Redux integration for state persistence is partially done.
 
 #### Critical Files
 - `/src/components/logs/explorer/FileExplorer.tsx` - Main component to be updated
@@ -52,15 +52,17 @@ Enhancing the log explorer component to persist state between page reloads and n
 4. ✅ Update event handlers in `FileExplorer.tsx` to dispatch Redux actions
 5. ✅ Enhance `FileItem` interface with `createdAt` and `type`
 6. ✅ Update `loadFiles` to populate `createdAt` and `type`
-7. ✅ Update `loadFiles` to call `sortFiles` (placeholder implemented)
-8. ⬜ Implement full sorting logic in `sortFiles` function
-9. ⬜ Add sorting UI (clickable headers, indicators)
-10. ⬜ Add Details/Content view toggle UI and logic
-11. ⬜ Update file list rendering based on `viewMode` and sorting
-12. ⬜ Fix remaining TypeScript errors in `FileExplorer.tsx`
+7. ✅ Update `loadFiles` to call `sortFiles` 
+8. ✅ Implement full sorting logic in `sortFiles` function (using Redux state)
+9. ✅ Add sorting UI (clickable headers, indicators)
+10. ✅ Fix TypeScript errors related to sorting and `fs.readFile` signature
+11. ✅ Fix DOM nesting warning related to `<tbody>` whitespace
+12. ⬜ Add Details/Content view toggle UI and logic
+13. ⬜ Update file list rendering based on `viewMode` 
+14. ⬜ Implement state persistence using Redux Persist
 
 #### Working State
-Partially implemented the Redux integration for state persistence in the Log Explorer (`FileExplorer.tsx`). Replaced local state management for path, selection, and split position with Redux state and actions. Updated file loading logic to include creation time and file type, and added a placeholder for the sorting function. Added necessary type annotations to address some TypeScript errors, but others remain.
+Implemented the sortable table view UI in `FileExplorer.tsx`. This includes replacing the div structure with a proper table, adding clickable headers with sort indicators, implementing the `handleSort` function to dispatch Redux actions, and fixing related TypeScript errors and a DOM nesting warning. Redux integration for state persistence is partially done.
 
 1. **State Persistence with Redux**:
    - Need to create a Redux slice for log explorer state

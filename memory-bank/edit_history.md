@@ -7,6 +7,20 @@
 
 ### April 19, 2025
 
+#### [14:46] - T24: Implement Sortable Table View in Log Explorer
+
+- Modified `/src/components/logs/explorer/FileExplorer.tsx`:
+    - Replaced `div`-based file list with `<table>`, `<thead>`, `<tbody>`, `<tr>`, and `<td>` elements.
+    - Added clickable `<th>` headers for Name, Size, Modified, Created columns.
+    - Implemented `handleSort` function to dispatch Redux actions (`setSortField`, `toggleSortDirection`).
+    - Added sort direction indicators (▲/▼) to table headers based on Redux state (`sortField`, `sortDirection`).
+    - Fixed TypeScript errors by using correct lowercase string literals ('name', 'size', 'modified', 'created', 'asc', 'desc') for `SortField` and `SortDirection` comparisons in `sortFiles` and `<thead>`.
+    - Fixed `fs.readFile` signature error in `downloadFile` function.
+    - Removed whitespace between `<tbody>` and `{files.map(...)}` to resolve DOM nesting warning.
+
+Implemented the sortable table view UI for the file list in the Log Explorer. This includes the table structure, clickable headers with sort indicators, integration with Redux for sort state management, and fixes for related TypeScript errors and a console warning.
+
+
 #### [14:26] - T24: Enhance Log Explorer with State Persistence and Sorting (Partial Implementation)
 
 - Modified `/src/components/logs/explorer/FileExplorer.tsx`:

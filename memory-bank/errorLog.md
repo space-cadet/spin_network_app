@@ -1,6 +1,99 @@
 # Error Log
 
-*Last Updated: 2025-04-18*
+*Last Updated: 2025-04-19*
+
+## 2025-04-19 14:45 IST: T24 - React DOM Nesting Warning in FileExplorer
+
+**File:** `/src/components/logs/explorer/FileExplorer.tsx`
+
+**Warning Message:**
+```
+Warning: validateDOMNesting(...): Whitespace text nodes cannot appear as a child of <tbody>. Make sure you don't have any extra whitespace between tags on each line of your source code.
+```
+
+**Cause:**
+Extra whitespace (newline) existed between the opening `<tbody>` tag and the start of the `{files.map(...)}` JavaScript expression within the JSX.
+
+**Fix:**
+Removed the newline character between the `<tbody>` tag and the `{files.map(...)}` expression.
+```jsx
+<tbody>{/* Add tbody, remove newline before map */}
+{files.map((file) => (
+  // ... rest of the row rendering
+))}
+</tbody>
+```
+
+**Affected Files:**
+- `/src/components/logs/explorer/FileExplorer.tsx`
+
+**Related Task:** T24: Implement Sortable Table View in Log Explorer
+
+## 2025-04-19 14:39 IST: T24 - TypeScript Signature Error in fs.readFile
+
+**File:** `/src/components/logs/explorer/FileExplorer.tsx`
+
+**Error Message:**
+```
+Argument of type '(err: NodeJS.ErrnoException | null, data: Buffer | string) => void' is not assignable to parameter of type 'string | { encoding?: string | undefined; } | undefined'.
+```
+
+**Cause:**
+The `window.fs.readFile` function was called with the callback function directly as the second argument in the `downloadFile` helper. The correct signature requires an optional options object (or `undefined`) as the second argument, followed by the callback.
+
+**Fix:**
+Explicitly passed `undefined` as the second argument to `window.fs.readFile` before the callback function.
+```typescript
+window.fs.readFile(file.path, undefined, (err: NodeJS.ErrnoException | null, data: Buffer | string) => { 
+  // ... rest of the callback
+});
+```
+
+**Affected Files:**
+- `/src/components/logs/explorer/FileExplorer.tsx`
+
+**Related Task:** T24: Implement Sortable Table View in Log Explorer
+
+## 2025-04-19 14:32 IST: T24 - TypeScript Comparison Errors for SortField/SortDirection
+
+**File:** `/src/components/logs/explorer/FileExplorer.tsx`
+
+**Error Messages (Examples):**
+```
+Line 83: This comparison appears to be unintentional because the types 'SortField' and '"Name"' have no overlap.
+Line 96: Type '"Name"' is not comparable to type 'SortField'.
+Line 427: This comparison appears to be unintentional because the types 'SortDirection' and '"Asc"' have no overlap.
+Line 426: Argument of type '"Name"' is not assignable to parameter of type 'SortField'.
+```
+
+**Cause:**
+The `SortField` and `SortDirection` types imported from `logExplorerSlice.ts` were defined as string literal unions (e.g., `'name' | 'size'`, `'asc' | 'desc'). However, the code in `FileExplorer.tsx` was comparing these types against capitalized string literals (e.g., `'Name'`, `'Asc'`) in both the `sortFiles` function and the `thead` rendering logic.
+
+**Fix:**
+Replaced all capitalized string literals used in comparisons and function calls related to `sortField` and `sortDirection` with their corresponding lowercase string literals as defined in the types.
+```typescript
+// Example in sortFiles:
+if (field === 'name' && direction === 'asc') { /* ... */ }
+// ...
+switch (field) {
+  case 'name': /* ... */ break;
+  case 'size': /* ... */ break;
+  // ...
+}
+// ...
+return direction === 'asc' ? compareResult : -compareResult;
+
+// Example in thead:
+<th onClick={() => handleSort('name')}>
+  Name {sortField === 'name' && (sortDirection === 'asc' ? '▲' : '▼')}
+</th>
+```
+
+**Affected Files:**
+- `/src/components/logs/explorer/FileExplorer.tsx`
+
+**Related Task:** T24: Implement Sortable Table View in Log Explorer
+
 
 ## 2025-04-18 15:30 IST: T20 - Incorrect Intertwiner Dimension Calculation
 
