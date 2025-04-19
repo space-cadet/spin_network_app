@@ -7,6 +7,22 @@
 
 ### April 19, 2025
 
+#### [14:26] - T24: Enhance Log Explorer with State Persistence and Sorting (Partial Implementation)
+
+- Modified `/src/components/logs/explorer/FileExplorer.tsx`:
+    - Added Redux imports (`useSelector`, `useDispatch`, actions, types).
+    - Replaced `useState` for `currentPath`, `selectedFile`, `splitPosition` with `useSelector`.
+    - Initialized `useDispatch`.
+    - Updated `navigateToDirectory`, `navigateUp`, `viewFile`, `handleMouseMove`, `handleMouseUp` to dispatch Redux actions.
+    - Enhanced `FileItem` interface with `createdAt` and `type`.
+    - Updated `loadFiles` to populate `createdAt` and `type` from `fs.stat`.
+    - Updated `loadFiles` to call a placeholder `sortFiles` function.
+    - Added type annotations to `fs` callbacks and checks for `window.fs` existence.
+    - Updated `deleteFile` to dispatch Redux action for clearing selected file.
+- Modified `/memory-bank/tasks.md`: Updated status and completion criteria for T24.
+
+Partially implemented the Redux integration for state persistence in the Log Explorer. Replaced local state management for path, selection, and split position with Redux state and actions. Updated file loading logic to include creation time and file type, and added a placeholder for the sorting function.
+
 #### [12:25] - T24: Enhance Log Explorer with State Persistence and Sorting
 
 - Created `/memory-bank/implementation-details/log-explorer-enhancement-plan.md` - Comprehensive implementation plan for log explorer enhancements
@@ -473,4 +489,3 @@ These changes address the "Maximum update depth exceeded" errors by breaking cir
 # Edit History
 
 This file tracks specific file and folder changes in the project.
-

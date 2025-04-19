@@ -1,24 +1,49 @@
 // src/components/logs/explorer/FileExplorer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { FaFolder, FaFile, FaArrowLeft, FaDownload, FaTrash } from 'react-icons/fa';
+import { useSelector, useDispatch } from 'react-redux'; // Import Redux hooks
+import { RootState, AppDispatch } from '../../../store'; // Import store types
+import {
+  setCurrentPath as setReduxCurrentPath,
+  setSelectedFile as setReduxSelectedFile,
+  setSplitPosition as setReduxSplitPosition,
+  setSortField, // Add missing action
+  toggleSortDirection, // Add missing action
+  toggleViewMode, // Add missing action
+  SortField, // Import type
+  ViewMode, // Import type
+} from '../../../store/slices/logExplorerSlice';
 
 // Interface for file/directory items
+// Enhance FileItem Interface (Step 2)
 interface FileItem {
   name: string;
   path: string;
   isDirectory: boolean;
   size?: number;
   lastModified?: Date;
+  createdAt?: Date; // Add createdAt
+  type: string; // Add type
 }
 
 const FileExplorer: React.FC = () => {
-  const [currentPath, setCurrentPath] = useState<string>('/');
+  // --- Redux State ---
+  const dispatch: AppDispatch = useDispatch();
+  const currentPath = useSelector((state: RootState) => state.logExplorer.currentPath);
+  const selectedFile = useSelector((state: RootState) => state.logExplorer.selectedFile);
+  const splitPosition = useSelector((state: RootState) => state.logExplorer.splitPosition);
+  const sortField = useSelector((state: RootState) => state.logExplorer.sortField);
+  const sortDirection = useSelector((state: RootState) => state.logExplorer.sortDirection);
+  const viewMode = useSelector((state: RootState) => state.logExplorer.viewMode);
+
+  // --- Local Component State ---
+  // const [currentPath, setCurrentPath] = useState<string>('/'); // Removed
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  // const [selectedFile, setSelectedFile] = useState<string | null>(null); // Removed
   const [fileContent, setFileContent] = useState<string | null>(null);
-  const [splitPosition, setSplitPosition] = useState<number>(50); // Default 50%
+  // const [splitPosition, setSplitPosition] = useState<number>(50); // Removed
   const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef<boolean>(false);
 
@@ -31,14 +56,27 @@ const FileExplorer: React.FC = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [currentPath]);
+  }, [currentPath, dispatch]); // Add dispatch dependency
+
+  // Function to sort files based on Redux state
+  const sortFiles = (items: FileItem[], field: SortField, direction: string): FileItem[] => {
+    // Implementation pending
+    console.log("Sorting by:", field, direction); // Placeholder
+    // Basic sort for now to avoid breaking things, will be replaced
+    return items.sort((a, b) => {
+       if (a.isDirectory && !b.isDirectory) return -1;
+       if (!a.isDirectory && b.isDirectory) return 1;
+       return a.name.localeCompare(b.name);
+    });
+  };
+
 
   // Function to load files from BrowserFS
   const loadFiles = async (path: string) => {
     setLoading(true);
     setError(null);
     setFileContent(null);
-    setSelectedFile(null);
+    dispatch(setReduxSelectedFile(null)); // Use Redux action
     
     try {
       // Ensure window.fs is available
@@ -47,7 +85,7 @@ const FileExplorer: React.FC = () => {
       }
       
       // Read directory contents
-      window.fs.readdir(path, (err, items) => {
+      window.fs.readdir(path, (err: NodeJS.ErrnoException | null, items: string[]) => {
         if (err) {
           console.error('Error reading directory:', err);
           setError(`Error loading files: ${err.message}`);
@@ -65,19 +103,41 @@ const FileExplorer: React.FC = () => {
           return;
         }
         
-        items.forEach((name) => {
-          const itemPath = `${path}/${name}`.replace(/\/+/g, '/');
+        items.forEach((name: string) => {
+          const itemPath = `${path === '/' ? '' : path}/${name}`.replace(/\/+/g, '/'); // Fix path joining for root
           
-          window.fs.stat(itemPath, (statErr, stats) => {
+          // Ensure window.fs exists before using it
+          if (!window.fs) {
+             setError('File system not initialized during stat');
+             pendingItems--; // Decrement counter even on error
+             if (pendingItems === 0) setLoading(false); // Ensure loading stops
+             return;
+          }
+
+          window.fs.stat(itemPath, (statErr: NodeJS.ErrnoException | null, stats: any) => { // Use 'any' for stats temporarily if fs types aren't fully available/imported
             pendingItems--;
             
-            if (!statErr) {
+            if (!statErr && stats) {
+              // Determine file type
+              let fileType = 'file'; // Default to file
+              if (stats.isDirectory()) {
+                fileType = 'directory';
+              } else {
+                // Extract extension for type, handle no extension
+                const extension = name.includes('.') ? name.split('.').pop()?.toLowerCase() : 'unknown';
+                 if (extension) {
+                   fileType = extension;
+                 }
+              }
+
               fileItems.push({
                 name,
                 path: itemPath,
                 isDirectory: stats.isDirectory(),
                 size: stats.isFile() ? stats.size : undefined,
                 lastModified: stats.mtime ? new Date(stats.mtime) : undefined,
+                createdAt: stats.birthtime ? new Date(stats.birthtime) : undefined, // Add createdAt
+                type: fileType, // Add type
               });
             } else {
               console.warn(`Couldn't get stats for ${itemPath}:`, statErr);
@@ -85,14 +145,12 @@ const FileExplorer: React.FC = () => {
             
             // If all items processed, update state
             if (pendingItems === 0) {
-              // Sort: directories first, then files alphabetically
-              fileItems.sort((a, b) => {
-                if (a.isDirectory && !b.isDirectory) return -1;
-                if (!a.isDirectory && b.isDirectory) return 1;
-                return a.name.localeCompare(b.name);
-              });
+              // Remove old sorting logic here
               
-              setFiles(fileItems);
+              // Call the new sort function using Redux state
+              const sortedFiles = sortFiles(fileItems, sortField, sortDirection); 
+              
+              setFiles(sortedFiles); // Update local state with sorted files
               setLoading(false);
             }
           });
@@ -107,7 +165,7 @@ const FileExplorer: React.FC = () => {
 
   // Navigate to a directory
   const navigateToDirectory = (path: string) => {
-    setCurrentPath(path);
+    dispatch(setReduxCurrentPath(path));
   };
 
   // Navigate to parent directory
@@ -121,21 +179,30 @@ const FileExplorer: React.FC = () => {
   // View file content
   const viewFile = (file: FileItem) => {
     if (file.isDirectory) {
-      navigateToDirectory(file.path);
+      navigateToDirectory(file.path); // Still uses the updated navigateToDirectory
       return;
     }
     
-    setSelectedFile(file.path);
+    dispatch(setReduxSelectedFile(file.path)); // Dispatch Redux action
     setFileContent(null); // Clear content while loading
     
-    window.fs.readFile(file.path, { encoding: 'utf8' }, (err, data) => {
+    // Ensure window.fs exists before using it
+    if (!window.fs) {
+      setError('File system not initialized');
+      return;
+    }
+    
+    // Use Buffer type for data as readFile can return it
+    window.fs.readFile(file.path, { encoding: 'utf8' }, (err: NodeJS.ErrnoException | null, data: string | Buffer) => {
       if (err) {
         console.error(`Error reading file ${file.path}:`, err);
         setError(`Error reading file: ${err.message}`);
+        setFileContent(null); // Clear content on error
         return;
       }
       
-      setFileContent(data);
+      // Handle potential Buffer data
+      setFileContent(typeof data === 'string' ? data : data.toString('utf8'));
     });
   };
 
@@ -144,30 +211,37 @@ const FileExplorer: React.FC = () => {
     event.stopPropagation();
     
     if (window.confirm(`Are you sure you want to delete ${file.path}?`)) {
+       // Ensure window.fs exists before using it
+       if (!window.fs) {
+         setError('File system not initialized');
+         return;
+       }
+
       if (file.isDirectory) {
-        window.fs.rmdir(file.path, (err) => {
+        window.fs.rmdir(file.path, (err: NodeJS.ErrnoException | null) => {
           if (err) {
             console.error(`Error deleting directory ${file.path}:`, err);
             setError(`Error deleting directory: ${err.message}`);
             return;
           }
           
-          loadFiles(currentPath);
+          loadFiles(currentPath); // Reload files after deletion
         });
       } else {
-        window.fs.unlink(file.path, (err) => {
+        window.fs.unlink(file.path, (err: NodeJS.ErrnoException | null) => {
           if (err) {
             console.error(`Error deleting file ${file.path}:`, err);
             setError(`Error deleting file: ${err.message}`);
             return;
           }
           
+          // If the deleted file was selected, clear selection in Redux
           if (selectedFile === file.path) {
-            setSelectedFile(null);
+            dispatch(setReduxSelectedFile(null)); 
             setFileContent(null);
           }
           
-          loadFiles(currentPath);
+          loadFiles(currentPath); // Reload files after deletion
         });
       }
     }
@@ -177,7 +251,14 @@ const FileExplorer: React.FC = () => {
   const downloadFile = (file: FileItem, event: React.MouseEvent) => {
     event.stopPropagation();
     
-    window.fs.readFile(file.path, (err, data) => {
+     // Ensure window.fs exists before using it
+     if (!window.fs) {
+       setError('File system not initialized');
+       return;
+     }
+
+    // Use Buffer type for data
+    window.fs.readFile(file.path, (err: NodeJS.ErrnoException | null, data: Buffer | string) => { 
       if (err) {
         console.error(`Error reading file ${file.path}:`, err);
         setError(`Error downloading file: ${err.message}`);
@@ -230,7 +311,7 @@ const FileExplorer: React.FC = () => {
     // Constrain between 20% and 80%
     newPosition = Math.max(20, Math.min(80, newPosition));
     
-    setSplitPosition(newPosition);
+    dispatch(setReduxSplitPosition(newPosition)); // Dispatch Redux action
   };
   
   const handleMouseUp = () => {

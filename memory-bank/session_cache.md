@@ -25,19 +25,19 @@
 - T20: Add Intertwiner Space Implementation - 🔄 IN PROGRESS
 - T21: Improve Spin Network Documentation - ✅ COMPLETE
 - T23: Implement Separate Simulation Controls - ✅ COMPLETE
-- T24: Enhance Log Explorer with State Persistence and Sorting - ⬜ NOT STARTED
+- T24: Enhance Log Explorer with State Persistence and Sorting - 🔄 IN PROGRESS
 
 ## Active Tasks
 
 ### T24: Enhance Log Explorer with State Persistence and Sorting
-**Status:** ⬜ NOT STARTED
+**Status:** 🔄 IN PROGRESS
 **Priority:** MEDIUM
 **Started:** 2025-04-19
-**Last Active:** 2025-04-19 12:25 IST
+**Last Active:** 2025-04-19 14:27 IST
 **Dependencies:** T22
 
 #### Context
-Enhancing the log explorer component to persist state between page reloads and navigation events, and adding advanced file display options including detailed file information and sorting capabilities.
+Enhancing the log explorer component to persist state between page reloads and navigation events, and adding advanced file display options including detailed file information and sorting capabilities. Partially implemented Redux integration for state persistence.
 
 #### Critical Files
 - `/src/components/logs/explorer/FileExplorer.tsx` - Main component to be updated
@@ -46,22 +46,21 @@ Enhancing the log explorer component to persist state between page reloads and n
 - `/src/store/index.ts` - For redux-persist configuration
 
 #### Implementation Progress
-1. ⬜ Create Redux slice for log explorer state persistence
-2. ⬜ Persist current directory path between page reloads
-3. ⬜ Persist selected file between page reloads
-4. ⬜ Persist panel split position between page reloads
-5. ⬜ Add detailed file information view mode
-6. ⬜ Implement sorting by filename (ascending/descending)
-7. ⬜ Implement sorting by file size (ascending/descending)
-8. ⬜ Implement sorting by creation date (newest/oldest)
-9. ⬜ Implement sorting by modification date (newest/oldest)
-10. ⬜ Add column headers with sort indicators
-11. ⬜ Store sort preferences in persisted state
-12. ⬜ Enhance file metadata collection in the FileExplorer component
-13. ⬜ Improve UI for switching between content and details views
+1. ✅ Create Redux slice for log explorer state persistence (`logExplorerSlice.ts`)
+2. ✅ Integrate slice into main store with persistence (`store/index.ts`)
+3. ✅ Replace `useState` with Redux for `currentPath`, `selectedFile`, `splitPosition` in `FileExplorer.tsx`
+4. ✅ Update event handlers in `FileExplorer.tsx` to dispatch Redux actions
+5. ✅ Enhance `FileItem` interface with `createdAt` and `type`
+6. ✅ Update `loadFiles` to populate `createdAt` and `type`
+7. ✅ Update `loadFiles` to call `sortFiles` (placeholder implemented)
+8. ⬜ Implement full sorting logic in `sortFiles` function
+9. ⬜ Add sorting UI (clickable headers, indicators)
+10. ⬜ Add Details/Content view toggle UI and logic
+11. ⬜ Update file list rendering based on `viewMode` and sorting
+12. ⬜ Fix remaining TypeScript errors in `FileExplorer.tsx`
 
 #### Working State
-Created implementation plan with comprehensive approach for enhancing the log explorer:
+Partially implemented the Redux integration for state persistence in the Log Explorer (`FileExplorer.tsx`). Replaced local state management for path, selection, and split position with Redux state and actions. Updated file loading logic to include creation time and file type, and added a placeholder for the sorting function. Added necessary type annotations to address some TypeScript errors, but others remain.
 
 1. **State Persistence with Redux**:
    - Need to create a Redux slice for log explorer state

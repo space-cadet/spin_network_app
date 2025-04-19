@@ -18,6 +18,7 @@ import recentNetworksReducer from './slices/recentNetworksSlice';
 import typeReducer from './slices/typeSlice';
 import simulationReducer from './slices/simulationSlice';
 import logsReducer from './slices/logsSlice';
+import logExplorerReducer from './slices/logExplorerSlice'; // Import the new slice reducer
 import typeUsageMiddleware from './middleware/typeUsageMiddleware';
 import { migrationFunction } from '../utils/migrations';
 
@@ -91,8 +92,19 @@ const logsPersistConfig = {
   whitelist: ['queryOptions']
 };
 
+// Configure log explorer persist options
+const logExplorerPersistConfig = {
+  key: 'logExplorer',
+  version: 1, // Initial version
+  storage: localforage,
+  migrate: migrationFunction,
+  // Persist UI state for the log explorer
+  whitelist: ['currentPath', 'selectedFile', 'splitPosition', 'sortField', 'sortDirection', 'viewMode']
+};
+
 // Create persisted reducers
 const persistedLogsReducer = persistReducer(logsPersistConfig, logsReducer);
+const persistedLogExplorerReducer = persistReducer(logExplorerPersistConfig, logExplorerReducer);
 
 /**
  * Configure the Redux store with persisted reducers
@@ -105,6 +117,7 @@ const store = configureStore({
     types: persistedTypeReducer,
     simulation: persistedSimulationReducer,
     logs: persistedLogsReducer,
+    logExplorer: persistedLogExplorerReducer, // Add the persisted log explorer reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
