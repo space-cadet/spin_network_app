@@ -20,15 +20,31 @@ export function initializeBrowserFS(): Promise<void> {
   return new Promise((resolve, reject) => {
     // Check if BrowserFS is already loaded
     if (typeof window !== 'undefined' && !window.BrowserFS) {
-      // If not loaded, dynamically load the script
+      // If not loaded, dynamically load the script from the public directory
       const script = document.createElement('script');
-      script.src = '/node_modules/browserfs/dist/browserfs.min.js';
+      script.src = '/vendor/browserfs.min.js';
       script.onload = () => {
         console.log('BrowserFS script loaded dynamically');
         configureFS(resolve, reject);
       };
       script.onerror = (err) => {
-        reject(new Error('Failed to load BrowserFS script: ' + err));
+        console.error('Failed to load BrowserFS script:', err);
+        // Try an alternative CDN as fallback (only in production)
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          console.log('Attempting to load BrowserFS from CDN fallback...');
+          const fallbackScript = document.createElement('script');
+          fallbackScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/BrowserFS/1.4.3/browserfs.min.js';
+          fallbackScript.onload = () => {
+            console.log('BrowserFS loaded from CDN fallback');
+            configureFS(resolve, reject);
+          };
+          fallbackScript.onerror = (fallbackErr) => {
+            reject(new Error('Failed to load BrowserFS from both local and CDN sources'));
+          };
+          document.head.appendChild(fallbackScript);
+        } else {
+          reject(new Error('Failed to load BrowserFS script: ' + err));
+        }
       };
       document.head.appendChild(script);
     } else {

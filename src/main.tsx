@@ -79,7 +79,20 @@ async function initializeApp() {
       }
     } catch (err) {
       console.error('Failed to initialize file system:', err);
+      
+      // Add more detailed error information for troubleshooting
+      if (typeof window !== 'undefined') {
+        console.log('Environment check:', {
+          isDev: import.meta.env.DEV,
+          isProd: import.meta.env.PROD,
+          hostname: window.location.hostname,
+          protocol: window.location.protocol
+        });
+      }
+      
       // Continue app initialization even if file system fails
+      // The app will work but with reduced functionality (no log persistence)
+      console.log('Application will continue without file system support. Log persistence disabled.');
     }
   } else {
     // In non-browser environment, just enable file logging directly
