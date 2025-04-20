@@ -1,9 +1,10 @@
 # Task Registry
-*Last Updated: April 19, 2025 (11:55 IST)*
+*Last Updated: April 20, 2025 (12:15 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
+| T26 | Fix BrowserFS in Vercel Deployment | 🔄 IN PROGRESS | HIGH | 2025-04-20 | - | Deepak |
 | T1 | Simulation Library Abstraction | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 | T2 | Advanced Simulation Analysis | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T3 | Component Refactoring | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
@@ -27,6 +28,31 @@
 | T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T26: Fix BrowserFS in Vercel Deployment
+**Description**: Fix the BrowserFS loading issue in Vercel deployment. Currently, BrowserFS works locally but fails on Vercel with a 404 error when trying to load from node_modules.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 20, 2025
+**Last Active**: April 20, 2025 (12:15 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Identify root cause of BrowserFS loading failure in Vercel environment
+- ✅ Implement solution to load BrowserFS from public directory instead of node_modules
+- ✅ Add automatic copying of BrowserFS script during build process
+- ✅ Implement CDN fallback mechanism for improved reliability
+- ✅ Add enhanced error logging for easier troubleshooting
+- ⬜ Verify fix works correctly in Vercel deployment
+- ⬜ Document solution for future reference
+
+**Related Files**:
+- `/src/utils/browserFSConfig.ts`
+- `/package.json`
+- `/public/vendor/browserfs.min.js`
+- `/src/main.tsx`
+
+**Notes**:
+The issue was caused by the BrowserFS script being loaded from `/node_modules/browserfs/dist/browserfs.min.js`, which works in local development but fails in production builds since node_modules is not deployed to Vercel. The solution involves copying the script to the public directory, updating the script path in browserFSConfig.ts, automating this process with a prebuild script, and adding a CDN fallback for additional reliability.
 
 ### T25: Implement Documentation System
 **Description**: Implement a unified documentation system for the spin network app by organizing existing documentation into a structured hierarchy and making it accessible through the UI.

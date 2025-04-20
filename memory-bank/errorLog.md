@@ -1,6 +1,67 @@
 # Error Log
 
-*Last Updated: 2025-04-19*
+*Last Updated: 2025-04-20*
+
+## 2025-04-20 12:15 IST: T26 - BrowserFS Loading Failure in Vercel Deployment
+
+**Files:** 
+- `src/utils/browserFSConfig.ts`
+- `src/main.tsx`
+- `package.json`
+
+**Error Message/Cause:**
+```
+GET https://spin-network-app.vercel.app/node_modules/browserfs/dist/browserfs.min.js net::ERR_ABORTED 404 (Not Found)
+
+Failed to initialize file system: Error: Failed to load BrowserFS script: [object Event]
+```
+
+The BrowserFS script was being loaded from `/node_modules/browserfs/dist/browserfs.min.js`, which works in local development where Vite's dev server exposes the node_modules directory. However, this fails in production Vercel deployments because:
+1. The node_modules directory isn't deployed to production
+2. The build process doesn't automatically copy BrowserFS to a publicly accessible location
+3. There was no fallback mechanism when the script failed to load
+
+**Fix:**
+1. **Copy BrowserFS to Public Directory:**
+   - Created `/public/vendor/` directory to store third-party scripts
+   - Copied `browserfs.min.js` from node_modules to this directory
+   
+2. **Update Script Path in Configuration:**
+   - Modified `browserFSConfig.ts` to load BrowserFS from `/vendor/browserfs.min.js` instead
+   
+3. **Add Automated Build Process:**
+   - Added a `prebuild` script to package.json to automatically copy the file during builds:
+   ```json
+   "prebuild": "mkdir -p public/vendor && cp node_modules/browserfs/dist/browserfs.min.js public/vendor/"
+   ```
+   
+4. **Implement CDN Fallback Mechanism:**
+   - Added a CDN fallback in the error handler to attempt loading from cdnjs when the local script fails
+   ```typescript
+   script.onerror = (err) => {
+     console.error('Failed to load BrowserFS script:', err);
+     // Try an alternative CDN as fallback (only in production)
+     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+       console.log('Attempting to load BrowserFS from CDN fallback...');
+       const fallbackScript = document.createElement('script');
+       fallbackScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/BrowserFS/1.4.3/browserfs.min.js';
+       // ... rest of fallback implementation
+     }
+   }
+   ```
+   
+5. **Enhanced Error Logging:**
+   - Added detailed environment information logging in main.tsx for better debugging:
+   ```typescript
+   console.log('Environment check:', {
+     isDev: import.meta.env.DEV,
+     isProd: import.meta.env.PROD,
+     hostname: window.location.hostname,
+     protocol: window.location.protocol
+   });
+   ```
+
+This solution ensures BrowserFS is properly available in both development and production environments, with improved reliability through the CDN fallback mechanism and better error reporting for troubleshooting.
 
 ## 2025-04-19 20:36 IST: T24 - General Stability and Type Safety Fixes (TypeScript & BrowserFS)
 
