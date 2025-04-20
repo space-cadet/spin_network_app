@@ -1,18 +1,12 @@
 # Session Cache
 
-*Last Updated: April 20, 2025 (21:45 IST)*
-
-## Overview
-- Active Tasks: 12
-- Paused Tasks: 3
-- Last Task Focus: T25
-- Completed Tasks: 9
+*Last Updated: April 20, 2025 (22:30 IST)*
 
 ## Overview
 - Active Tasks: 13
 - Paused Tasks: 3
-- Last Task Focus: T28
-- Completed Tasks: 10
+- Last Task Focus: T32
+- Completed Tasks: 11
 
 ## Task Registry
 - T1: Simulation Library Abstraction - 🔄 IN PROGRESS
@@ -36,8 +30,75 @@
 - T26: Fix BrowserFS in Vercel Deployment - ✅ COMPLETE
 - T27: Fix Node/Edge Property Updates - ✅ COMPLETE
 - T28: Fix Documentation Path Issues - 🔄 IN PROGRESS
+- T32: Fix Library Build Errors - ✅ COMPLETE
 
 ## Active Tasks
+
+### T32: Fix Library Build Errors
+**Status:** ✅ COMPLETE
+**Priority:** HIGH
+**Started:** 2025-04-20
+**Last Active:** 2025-04-20 22:30 IST
+**Completed:** 2025-04-20 22:30 IST
+**Dependencies:** -
+
+#### Context
+Fixing TypeScript build errors in the library bundling process, specifically focusing on interface and type export issues that were preventing successful compilation of the library.
+
+#### Critical Files
+- `/lib/core/index.ts` - Modified to fix interface export syntax
+- `/lib/core/intertwinerSpace.ts` - Contains the interface definition
+- `/memory-bank/errorLog.md` - Updated with error details and solution
+- `/memory-bank/tasks.md` - Updated with new task
+
+#### Implementation Progress
+1. ✅ Identified the build error during `pnpm run build:lib`
+2. ✅ Located the source of the error in export syntax for `IntertwinerBasisState` interface
+3. ✅ Analyzed how the TypeScript/Vite bundler handles interface exports
+4. ✅ Modified export statement to use separate `export type` for interfaces
+5. ✅ Verified the fix by successfully building the library
+6. ✅ Documented the solution in errorLog.md
+7. ✅ Updated tasks.md with the new task and implementation details
+
+#### Working State
+Successfully fixed the TypeScript build error by modifying how interface types are exported:
+
+1. **Original Issue**:
+   ```
+   lib/core/index.ts (24:2): \"IntertwinerBasisState\" is not exported by \"lib/core/intertwinerSpace.ts\", imported by \"lib/core/index.ts\".
+   ```
+
+2. **Root Cause**:
+   - The interface was correctly defined and exported in `intertwinerSpace.ts`
+   - However, the bundler had issues with how it was imported/re-exported in `index.ts`
+   - This is a common issue with TypeScript interfaces during bundling
+
+3. **Solution**:
+   - Modified the export statement to separate type exports from value exports
+   - Changed from combined export to explicit `export type` syntax:
+   ```typescript
+   // Before:
+   export {
+     triangleInequality,
+     allowedIntermediateSpins,
+     intertwinerDimension,
+     getIntertwinerBasis,
+     getOptimizedIntertwinerBasis,
+     IntertwinerBasisState
+   } from './intertwinerSpace';
+   
+   // After:
+   export {
+     triangleInequality,
+     allowedIntermediateSpins,
+     intertwinerDimension,
+     getIntertwinerBasis,
+     getOptimizedIntertwinerBasis,
+   } from './intertwinerSpace';
+   export type { IntertwinerBasisState } from './intertwinerSpace';
+   ```
+
+The explicit separation of type exports from value exports resolves the issue by providing clearer instructions to the TypeScript compiler and bundler about how to handle the interface during the build process.
 
 ### T28: Fix Documentation Path Issues
 **Status:** 🔄 IN PROGRESS

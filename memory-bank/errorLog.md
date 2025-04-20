@@ -1,6 +1,53 @@
 # Error Log
 
-*Last Updated: 2025-04-20 (21:45 IST)*
+*Last Updated: 2025-04-20 (22:30 IST)*
+
+## 2025-04-20 22:30 IST: T32 - TypeScript Build Error in Intertwiner Export
+
+**Files:**
+- `/lib/core/index.ts`
+- `/lib/core/intertwinerSpace.ts`
+
+**Error Messages:**
+```
+vite v5.4.18 building for production...
+✓ 32 modules transformed.
+x Build failed in 91ms
+error during build:
+lib/core/index.ts (24:2): "IntertwinerBasisState" is not exported by "lib/core/intertwinerSpace.ts", imported by "lib/core/index.ts".
+```
+
+**Cause:**
+The `IntertwinerBasisState` interface was defined and properly exported in `intertwinerSpace.ts`, but Vite/Rollup was encountering issues when importing this type in `index.ts`. The error occurred specifically during the library build process because TypeScript/Vite has special handling for interface/type exports that can sometimes cause issues during bundling.
+
+**Fix:**
+Modified the export statement in `lib/core/index.ts` to use a separate, explicit type export for the interface:
+
+```typescript
+// Before:
+export {
+  triangleInequality,
+  allowedIntermediateSpins,
+  intertwinerDimension,
+  getIntertwinerBasis,
+  getOptimizedIntertwinerBasis,
+  IntertwinerBasisState
+} from './intertwinerSpace';
+
+// After:
+export {
+  triangleInequality,
+  allowedIntermediateSpins,
+  intertwinerDimension,
+  getIntertwinerBasis,
+  getOptimizedIntertwinerBasis,
+} from './intertwinerSpace';
+export type { IntertwinerBasisState } from './intertwinerSpace';
+```
+
+This explicit separation of type exports from value exports resolves the issue by providing clearer instructions to the TypeScript compiler and bundler about how to handle the interface during the build process.
+
+**Task:** T32 - Fix Library Build Errors
 
 ## 2025-04-20 21:45 IST: T28 - Documentation Page Missing Script Resources
 

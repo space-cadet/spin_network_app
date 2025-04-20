@@ -1,9 +1,47 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-20 (21:45 IST)*
+*Last Updated: 2025-04-20 (22:30 IST)*
 
 ## File Modification Log
+
+### April 20, 2025
+
+#### [22:30] - T32: Fix Library Build Errors
+
+- Modified `/lib/core/index.ts`:
+  - Fixed interface export by using explicit `export type` syntax for `IntertwinerBasisState`
+  - Separated type exports from value exports to resolve bundling issues
+  - Changed from:
+    ```typescript
+    export {
+      triangleInequality,
+      allowedIntermediateSpins,
+      intertwinerDimension,
+      getIntertwinerBasis,
+      getOptimizedIntertwinerBasis,
+      IntertwinerBasisState
+    } from './intertwinerSpace';
+    ```
+  - To:
+    ```typescript
+    export {
+      triangleInequality,
+      allowedIntermediateSpins,
+      intertwinerDimension,
+      getIntertwinerBasis,
+      getOptimizedIntertwinerBasis,
+    } from './intertwinerSpace';
+    export type { IntertwinerBasisState } from './intertwinerSpace';
+    ```
+- Updated `/memory-bank/errorLog.md`:
+  - Added detailed error log entry for the TypeScript build error with cause and solution
+- Updated `/memory-bank/tasks.md`:
+  - Added task T32 for fixing library build errors
+  - Updated task list with completion status
+  - Added detailed task implementation notes
+
+Fixed the TypeScript build error that was preventing the library from building successfully. The issue was related to how TypeScript/Vite handles interface exports during bundling. By explicitly separating the interface export with `export type`, the build process now correctly handles the type exports, allowing the library to build successfully. This approach provides clearer instructions to the TypeScript compiler and bundler about how to handle interfaces during the build process.
 
 ### April 20, 2025
 

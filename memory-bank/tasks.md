@@ -1,9 +1,10 @@
 # Task Registry
-*Last Updated: April 20, 2025 (21:30 IST)*
+*Last Updated: April 20, 2025 (22:30 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
+| T32 | Fix Library Build Errors | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
 | T28 | Fix Documentation Path Issues | 🔄 IN PROGRESS | HIGH | 2025-04-20 | T25 | Deepak |
 | T27 | Fix Node/Edge Property Updates | ✅ COMPLETE | MEDIUM | 2025-04-20 | - | Deepak |
 | T26 | Fix BrowserFS in Vercel Deployment | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
@@ -30,6 +31,29 @@
 | T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T32: Fix Library Build Errors
+**Description**: Fix TypeScript build errors in the library bundling process, particularly focusing on interface/type export issues that prevent successful compilation.
+**Status**: ✅ COMPLETE
+**Priority**: HIGH
+**Started**: April 20, 2025
+**Last Active**: April 20, 2025 (22:30 IST)
+**Completed**: April 20, 2025 (22:30 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Identify root cause of "IntertwinerBasisState" not exported error
+- ✅ Fix interface export in lib/core/index.ts
+- ✅ Fix other similar type export issues
+- ✅ Successfully build library with pnpm run build:lib
+- ✅ Document solution in errorLog.md
+
+**Related Files**:
+- `/lib/core/index.ts`
+- `/lib/core/intertwinerSpace.ts`
+- `/memory-bank/errorLog.md`
+
+**Notes**:
+The issue was related to how TypeScript/Vite handles interface exports during bundling. While the `IntertwinerBasisState` interface was properly defined and exported in `intertwinerSpace.ts`, the bundler encountered issues when importing this type in `index.ts`. The solution was to modify the export statement in `lib/core/index.ts` to use a separate, explicit `export type` statement for the interface instead of including it with the regular function exports. This explicit separation of type exports from value exports provides clearer instructions to the TypeScript compiler and bundler about how to handle the interface during the build process.
 
 ### T27: Fix Node/Edge Property Updates
 **Description**: Fix issue where changes to node and edge properties via Settings or the Type Management panel require a page refresh before being applied to the visualization.
@@ -872,6 +896,7 @@ The enhanced test pages will serve as educational resources to help users unders
 ## Completed Tasks
 | ID | Title | Completed | Related Tasks |
 |----|-------|-----------|---------------|
+| T32 | Fix Library Build Errors | 2025-04-20 | - |
 | T0 | Fix Simulation Play/Pause & Redux Sync | 2025-04-13 | - |
 | T4 | Fix PrimeReact Dropdown Transparency | 2025-04-14 | - |
 | T7 | Implement Memory Bank File Rotation | 2025-04-15 | T8 |

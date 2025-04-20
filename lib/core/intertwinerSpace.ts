@@ -5,7 +5,15 @@
  * of intertwiner spaces for spin network nodes with arbitrary edge labels.
  */
 
-import { Complex } from './types';
+// import { Complex } from './types';
+
+/**
+ * Interface for the basis state of an intertwiner
+ */
+export interface IntertwinerBasisState {
+  intermediateJ: number;
+  coefficients: number[];
+}
 
 /**
  * Check if three angular momenta satisfy the triangle inequality.
@@ -108,14 +116,6 @@ export function cgCoefficient(j1: number, m1: number, j2: number, m2: number, j:
   // For a real implementation, add more cases or use a proper algorithm
   console.warn("CG coefficient calculation falling back to approximate value.");
   return 0;
-}
-
-/**
- * Interface for the basis state of an intertwiner
- */
-export interface IntertwinerBasisState {
-  intermediateJ: number;
-  coefficients: number[];
 }
 
 /**

@@ -25,9 +25,9 @@ export {
   IndexedDBAdapter,
   BrowserFSAdapter,
   NodeFSAdapter,
-  getBestAvailableStorageAdapter,
-  StorageAdapter,
+  getBestAvailableStorageAdapter
 } from './storageAdapters';
+export type { StorageAdapter } from './types';
 
 // Export exporters
 export {

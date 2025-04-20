@@ -21,5 +21,6 @@ export {
   intertwinerDimension,
   getIntertwinerBasis,
   getOptimizedIntertwinerBasis,
-  IntertwinerBasisState
 } from './intertwinerSpace';
+
+export type { IntertwinerBasisState } from './intertwinerSpace';
