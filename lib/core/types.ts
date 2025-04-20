@@ -104,6 +104,105 @@ export interface StateVector {
   
   // Serialization
   toJSON(): Record<string, any>;
+  toArray(): number[]; // Convert to simple array of values
+}
+
+/**
+ * Extension of StateVector for serialization/deserialization
+ */
+export class SimulationStateVector implements StateVector {
+  readonly size: number;
+  readonly nodeIds: string[];
+  private values: number[];
+  
+  constructor(nodeIds: string[], values: number[]) {
+    this.nodeIds = nodeIds;
+    this.values = values;
+    this.size = values.length;
+  }
+  
+  getValue(nodeId: string): number {
+    const index = this.nodeIds.indexOf(nodeId);
+    return index >= 0 ? this.values[index] : 0;
+  }
+  
+  setValue(nodeId: string, value: number): StateVector {
+    const index = this.nodeIds.indexOf(nodeId);
+    if (index >= 0) {
+      const newValues = [...this.values];
+      newValues[index] = value;
+      return new SimulationStateVector(this.nodeIds, newValues);
+    }
+    return this;
+  }
+  
+  getValueAtIndex(index: number): number {
+    return index >= 0 && index < this.size ? this.values[index] : 0;
+  }
+  
+  setValueAtIndex(index: number, value: number): StateVector {
+    if (index >= 0 && index < this.size) {
+      const newValues = [...this.values];
+      newValues[index] = value;
+      return new SimulationStateVector(this.nodeIds, newValues);
+    }
+    return this;
+  }
+  
+  add(other: StateVector): StateVector {
+    if (this.size !== other.size) {
+      throw new Error('Cannot add vectors of different sizes');
+    }
+    const newValues = this.values.map((v, i) => v + other.getValueAtIndex(i));
+    return new SimulationStateVector(this.nodeIds, newValues);
+  }
+  
+  subtract(other: StateVector): StateVector {
+    if (this.size !== other.size) {
+      throw new Error('Cannot subtract vectors of different sizes');
+    }
+    const newValues = this.values.map((v, i) => v - other.getValueAtIndex(i));
+    return new SimulationStateVector(this.nodeIds, newValues);
+  }
+  
+  multiply(scalar: number): StateVector {
+    const newValues = this.values.map(v => v * scalar);
+    return new SimulationStateVector(this.nodeIds, newValues);
+  }
+  
+  toMathArray(): MathArray {
+    return this.values as unknown as MathArray;
+  }
+  
+  fromMathArray(array: MathArray, nodeIds: string[]): StateVector {
+    return new SimulationStateVector(nodeIds, array as unknown as number[]);
+  }
+  
+  normalize(): StateVector {
+    const norm = Math.sqrt(this.values.reduce((sum, v) => sum + v * v, 0));
+    if (norm === 0) return this;
+    return this.multiply(1 / norm);
+  }
+  
+  clone(): StateVector {
+    return new SimulationStateVector(this.nodeIds.slice(), this.values.slice());
+  }
+  
+  equals(other: StateVector): boolean {
+    if (this.size !== other.size) return false;
+    return this.values.every((v, i) => Math.abs(v - other.getValueAtIndex(i)) < 1e-10);
+  }
+  
+  toJSON(): Record<string, any> {
+    return {
+      nodeIds: this.nodeIds,
+      values: this.values
+    };
+  }
+  
+  toArray(): number[] {
+    return this.values.slice();
+  }
 }
 
 /**

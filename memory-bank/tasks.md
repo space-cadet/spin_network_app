@@ -1,9 +1,10 @@
 # Task Registry
-*Last Updated: April 20, 2025 (20:00 IST)*
+*Last Updated: April 20, 2025 (21:30 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
+| T28 | Fix Documentation Path Issues | 🔄 IN PROGRESS | HIGH | 2025-04-20 | T25 | Deepak |
 | T27 | Fix Node/Edge Property Updates | ✅ COMPLETE | MEDIUM | 2025-04-20 | - | Deepak |
 | T26 | Fix BrowserFS in Vercel Deployment | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
 | T1 | Simulation Library Abstraction | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
@@ -81,6 +82,48 @@ The issue was identified in the `useCytoscapeInstance` hook, which initializes t
 
 **Notes**:
 The issue was caused by the BrowserFS script being loaded from `/node_modules/browserfs/dist/browserfs.min.js`, which works in local development but fails in production builds since node_modules is not deployed to Vercel. The solution involves copying the script to the public directory, updating the script path in browserFSConfig.ts, automating this process with a prebuild script, and adding a CDN fallback for additional reliability.
+
+### T28: Fix Documentation Path Issues
+**Description**: Fix issues with documentation pages not loading correctly in both local development and Vercel deployment. Address 404 errors for documentation markdown files and missing UMD library.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 20, 2025
+**Last Active**: April 20, 2025 (21:45 IST)
+**Dependencies**: T25
+**Completion Criteria**:
+- ✅ Identify path resolution issues in DocsViewer component
+- ✅ Fix DocsViewer.tsx to properly handle file paths in both environments
+- ✅ Generate UMD library build for standalone test pages
+- ✅ Test documentation page loading in local development
+- ⬜ Test documentation page loading in Vercel deployment
+- ⬜ Fix any remaining 404 errors for documentation resources
+
+**Related Files**:
+- `/src/components/documentation/DocsViewer.tsx`
+- `/lib-bundle.config.js`
+- `/public/standalone-test.html`
+- `/public/docs/physics/physics-notebook.html`
+- `/public/docs/implementation/simulation-test.html`
+- `/dist/lib/spin-network.umd.js` (generated)
+- `/lib/core/types.ts`
+- `/lib/io/serialization.ts`
+
+**Notes**:
+This task addresses the issues where documentation pages show 404 errors in the Vercel deployment while working partially in local development. 
+
+Fixed local development issues:
+1. Modified DocsViewer component to try multiple paths when loading documents (both direct routes and public directory paths)
+2. Fixed UMD library by implementing proper fallback script loading and generating the library file
+3. Fixed TypeScript errors in library build by implementing SimulationStateVector class and fixing serialization imports
+
+Remaining issues:
+1. Script loading errors for test-simulation.js and simulation/index.js in documentation pages
+2. Need to test and verify Vercel deployment works with the updated path resolution
+3. The following resources are still returning 404 errors in local development:
+   - `/docs/src/test-simulation.js`
+   - `/docs/src/simulation/index.js`
+
+The path resolution system has successfully fixed the main documentation page loading issues, but some script imports within the HTML files still need to be addressed. These will be tackled in a follow-up task.
 
 ### T25: Implement Documentation System
 **Description**: Implement a unified documentation system for the spin network app by organizing existing documentation into a structured hierarchy and making it accessible through the UI.

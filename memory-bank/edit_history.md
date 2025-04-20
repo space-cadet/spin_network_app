@@ -1,9 +1,35 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-20 (20:00 IST)*
+*Last Updated: 2025-04-20 (21:45 IST)*
 
 ## File Modification Log
+
+### April 20, 2025
+
+#### [21:45] - T28: Fix Documentation Path Issues
+
+- Modified `/src/components/documentation/DocsViewer.tsx`:
+  - Implemented a fallback path resolution system to try multiple possible paths for documentation files
+  - Added detailed logging of path resolution attempts to help diagnose issues
+  - Enhanced error handling with more informative error messages and troubleshooting suggestions
+  - Added support for both local development and production path patterns
+- Modified `/public/standalone-test.html`:
+  - Implemented dynamic script loading for the UMD library with multiple path fallbacks
+  - Added error handling and console logging for library loading
+  - Enhanced the user experience by displaying loading status in the UI
+- Modified `/lib/core/types.ts`:
+  - Added SimulationStateVector implementation for serialization/deserialization
+  - Added toArray() method to StateVector interface for consistent data extraction
+- Modified `/lib/io/serialization.ts`:
+  - Fixed import to use StateVector instead of SimulationStateVector
+  - Enhanced deserializeSimulation function with dynamic imports and better error handling
+  - Added more robust checks before calling engine methods
+- Updated `/memory-bank/tasks.md`:
+  - Created task T28 for fixing documentation path issues
+  - Updated task completion criteria and implementation details
+
+These changes fix the documentation page loading issues by implementing a more robust path resolution system that can handle both local development and production environments. The fallback mechanism tries multiple possible paths for each resource, ensuring that files can be found regardless of their exact location. The UMD library loading has been improved with dynamic script loading and fallbacks to various paths. Additionally, the library build errors have been fixed by properly implementing the SimulationStateVector class and fixing import issues.
 
 ### April 20, 2025
 

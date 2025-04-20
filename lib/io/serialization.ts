@@ -2,7 +2,7 @@
  * Serialization utilities for simulation data
  */
 
-import { SimulationEngine, SimulationGraph, SimulationStateVector } from '../core/types';
+import { SimulationEngine, SimulationGraph, StateVector } from '../core/types';
 import { SerializedSimulation, ExportOptions, ExportFormat } from './types';
 
 // Current version of the serialization format
@@ -166,7 +166,7 @@ export function deserializeSimulation(
   const engineImpl = engine as any;
   
   // Check if engine supports deserialization
-  if (!engineImpl.setGraph || !engineImpl.initialize || !engineImpl.setCurrentState || !engineImpl.setHistory) {
+  if (!engineImpl.setGraph || !engineImpl.initialize) {
     throw new Error('Simulation engine does not support deserialization');
   }
   
@@ -182,17 +182,23 @@ export function deserializeSimulation(
   }
   
   // Restore history if available
-  if (data.history) {
-    const stateVectors = data.history.states.map(state => {
-      return new SimulationStateVector(state.nodeIds, state.values);
+  if (data.history && engineImpl.setHistory) {
+    import('../core/types').then(types => {
+      const { SimulationStateVector } = types;
+      
+      const stateVectors = data.history!.states.map(state => {
+        return new SimulationStateVector(state.nodeIds, state.values);
+      });
+      
+      engineImpl.setHistory(data.history!.times, stateVectors);
+      
+      // Set current state to the last state in history
+      if (stateVectors.length > 0 && engineImpl.setCurrentState) {
+        engineImpl.setCurrentState(stateVectors[stateVectors.length - 1]);
+      }
+    }).catch(err => {
+      console.error('Failed to load SimulationStateVector type:', err);
     });
-    
-    engineImpl.setHistory(data.history.times, stateVectors);
-    
-    // Set current state to the last state in history
-    if (stateVectors.length > 0) {
-      engineImpl.setCurrentState(stateVectors[stateVectors.length - 1]);
-    }
   }
   
   return engine;

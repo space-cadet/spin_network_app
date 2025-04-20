@@ -1,12 +1,18 @@
 # Session Cache
 
-*Last Updated: April 19, 2025 (20:45 IST)*
+*Last Updated: April 20, 2025 (21:45 IST)*
 
 ## Overview
 - Active Tasks: 12
 - Paused Tasks: 3
 - Last Task Focus: T25
 - Completed Tasks: 9
+
+## Overview
+- Active Tasks: 13
+- Paused Tasks: 3
+- Last Task Focus: T28
+- Completed Tasks: 10
 
 ## Task Registry
 - T1: Simulation Library Abstraction - 🔄 IN PROGRESS
@@ -20,15 +26,74 @@
 - T14: State Management Architecture for Standalone Library - 🔄 IN PROGRESS
 - T16: Enhance Simulation Data Export and Visualization - 🔄 IN PROGRESS
 - T17: Fix TypeScript Build Errors - 🔄 IN PROGRESS
-- T18: Create Logs Folder Structure - 🔄 IN PROGRESS
-- T19: Implement BrowserFS File Viewer - ⬜ NOT STARTED
+- T18: Create Logs Folder Structure - ✅ COMPLETE
+- T19: Implement BrowserFS File Viewer - ✅ COMPLETE
 - T20: Add Intertwiner Space Implementation - 🔄 IN PROGRESS
 - T21: Improve Spin Network Documentation - ✅ COMPLETE
 - T23: Implement Separate Simulation Controls - ✅ COMPLETE
-- T24: Enhance Log Explorer with State Persistence and Sorting - 🔄 IN PROGRESS
+- T24: Enhance Log Explorer with State Persistence and Sorting - ✅ COMPLETE
 - T25: Implement Documentation System - 🔄 IN PROGRESS
+- T26: Fix BrowserFS in Vercel Deployment - ✅ COMPLETE
+- T27: Fix Node/Edge Property Updates - ✅ COMPLETE
+- T28: Fix Documentation Path Issues - 🔄 IN PROGRESS
 
 ## Active Tasks
+
+### T28: Fix Documentation Path Issues
+**Status:** 🔄 IN PROGRESS
+**Priority:** HIGH
+**Started:** 2025-04-20
+**Last Active:** 2025-04-20 21:45 IST
+**Dependencies:** T25
+
+#### Context
+Fixing issues with documentation pages not loading correctly in both local development and Vercel deployment environments. Addressing 404 errors for documentation markdown files and missing UMD library.
+
+#### Critical Files
+- `/src/components/documentation/DocsViewer.tsx` - Updated to implement fallback path resolution
+- `/public/standalone-test.html` - Updated to use dynamic script loading for UMD library
+- `/lib/core/types.ts` - Modified to add SimulationStateVector implementation
+- `/lib/io/serialization.ts` - Fixed import to use StateVector instead of SimulationStateVector
+- `/dist/lib/spin-network.umd.js` - Generated via library build
+
+#### Implementation Progress
+1. ✅ Identified path resolution issues in DocsViewer component
+2. ✅ Fixed DocsViewer.tsx to properly handle file paths in both environments
+3. ✅ Modified standalone-test.html to use dynamic script loading for UMD library
+4. ✅ Fixed library build errors by implementing SimulationStateVector class
+5. ✅ Updated edit_history.md and errorLog.md with implementation details
+6. ✅ Generated UMD library build using pnpm run build:lib
+7. ✅ Verified documentation page loading in local development
+8. 🔄 Addressing remaining script loading errors in HTML files
+9. ⬜ Test documentation page loading in Vercel deployment
+
+#### Working State
+Successfully implemented path resolution improvements for documentation pages:
+
+1. **DocsViewer Component Enhancement**:
+   - Modified to try multiple possible paths in order when loading documentation
+   - Implemented structured approach to check both direct routes and public directory paths
+   - Added detailed logging of path resolution attempts to help diagnose issues
+   - Enhanced error handling with more informative error messages and troubleshooting suggestions
+   - Added support for both local development and production path patterns
+
+2. **UMD Library Loading**:
+   - Implemented dynamic script loading with multiple path fallbacks
+   - Added error handling and console logging for library loading
+   - Enhanced the user experience by displaying loading status in the UI
+
+3. **Library Build Fixes**:
+   - Added SimulationStateVector implementation to resolve build errors
+   - Fixed circular import issues with dynamic imports
+   - Built the UMD library successfully using the lib-bundle.config.js
+
+4. **Remaining Issues**:
+   - Script loading errors still exist for specific JavaScript files in HTML documents:
+     - `/docs/src/test-simulation.js` - 404 error
+     - `/docs/src/simulation/index.js` - 404 error
+   - Need to test Vercel deployment to verify the fixes work in production
+
+The changes have substantially improved documentation page loading in local development. The path resolution system now correctly finds HTML and markdown files regardless of their specific location, making the documentation system more robust. The UMD library now builds correctly and the standalone test pages can load it using the dynamic script loading system. The remaining script loading errors will be addressed in a follow-up task.
 
 ### T25: Implement Documentation System
 **Status:** 🔄 IN PROGRESS

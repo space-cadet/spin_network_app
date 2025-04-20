@@ -1,6 +1,113 @@
 # Error Log
 
-*Last Updated: 2025-04-20*
+*Last Updated: 2025-04-20 (21:45 IST)*
+
+## 2025-04-20 21:45 IST: T28 - Documentation Page Missing Script Resources
+
+**Files:** 
+- `/public/docs/implementation/simulation-test.html`
+- `/public/docs/implementation/standalone-guide.html`
+
+**Error Messages:**
+```
+GET http://localhost:5173/docs/src/test-simulation.js net::ERR_ABORTED 404 (Not Found)
+Error importing test-simulation.js: TypeError: Failed to fetch dynamically imported module: http://localhost:5173/docs/src/test-simulation.js
+GET http://localhost:5173/docs/src/simulation/index.js net::ERR_ABORTED 404 (Not Found)
+Error importing simulation/index.js: TypeError: Failed to fetch dynamically imported module: http://localhost:5173/docs/src/simulation/index.js
+```
+
+**Cause:**
+After fixing the main path resolution issues for documentation pages, there are still 404 errors for JavaScript resources within the documentation HTML files. The HTML files are attempting to load script resources from incorrect paths:
+
+1. The scripts are being requested from `/docs/src/test-simulation.js` and `/docs/src/simulation/index.js`
+2. The actual scripts are located in different directories, likely at the root `/src/test-simulation.js` or `/public/test-simulation.js`
+3. The HTML files contain hard-coded relative paths that don't match the deployment structure
+
+**Partial Fix:**
+The main documentation pages are now loading correctly with our path resolution approach in DocsViewer.tsx, but the scripts within those HTML pages are still using incorrect paths. These script loading issues aren't fully resolved yet as they require:
+
+1. Either updating the HTML files to use absolute paths
+2. Or copying the required script files to the locations expected by the HTML
+
+**Next Steps:**
+1. Map out all the script dependencies for each documentation HTML file
+2. Add code to copy required script files to the expected locations during build
+3. Update HTML files to use more reliable paths that work in both development and production
+4. Or implement a script interceptor in the iframe to rewrite script paths on the fly
+
+This error will be addressed in a follow-up task focusing specifically on script resources in documentation pages.
+
+## 2025-04-20 21:15 IST: T28 - Library Build Error in SimulationStateVector Reference
+
+**Files:**
+- `/lib/io/serialization.ts`
+- `/lib/core/types.ts`
+
+**Error Messages:**
+```
+vite v5.4.18 building for production...
+✓ 32 modules transformed.
+x Build failed in 67ms
+error during build:
+lib/io/serialization.ts (5:44): "SimulationStateVector" is not exported by "lib/core/types.ts", imported by "lib/io/serialization.ts".
+file: /Users/deepak/code/spin_network_app/lib/io/serialization.ts:5:44
+3:  */
+4:
+5: import { SimulationEngine, SimulationGraph, SimulationStateVector } from '../core/types';
+                                               ^
+6: import { SerializedSimulation, ExportOptions, ExportFormat } from './types';
+```
+
+**Cause:**
+The `SimulationStateVector` class was being imported from `lib/core/types.ts` in `serialization.ts`, but this class was not defined or exported in the types file. This prevented the library build from succeeding.
+
+**Fix:**
+1. Added `SimulationStateVector` class implementation to `lib/core/types.ts`:
+   ```typescript
+   export class SimulationStateVector implements StateVector {
+     readonly size: number;
+     readonly nodeIds: string[];
+     private values: number[];
+     
+     constructor(nodeIds: string[], values: number[]) {
+       this.nodeIds = nodeIds;
+       this.values = values;
+       this.size = values.length;
+     }
+     
+     // Implementation of all StateVector methods
+     // ...
+     
+     toArray(): number[] {
+       return this.values.slice();
+     }
+   }
+   ```
+
+2. Updated the `StateVector` interface to include the `toArray()` method:
+   ```typescript
+   export interface StateVector {
+     // Existing methods...
+     toArray(): number[]; // Convert to simple array of values
+   }
+   ```
+
+3. Modified the import in `serialization.ts` to use `StateVector` instead of `SimulationStateVector`:
+   ```typescript
+   import { SimulationEngine, SimulationGraph, StateVector } from '../core/types';
+   ```
+
+4. Enhanced the deserialization function to use dynamic imports to prevent circular dependencies:
+   ```typescript
+   if (data.history && engineImpl.setHistory) {
+     import('../core/types').then(types => {
+       const { SimulationStateVector } = types;
+       // Use SimulationStateVector to deserialize
+     });
+   }
+   ```
+
+This fix allows the library to build successfully by properly implementing the missing class and fixing the circular dependency issues.
 
 ## 2025-04-20 12:15 IST: T26 - BrowserFS Loading Failure in Vercel Deployment
 

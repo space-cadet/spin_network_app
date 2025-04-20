@@ -258,7 +258,45 @@
   
   <!-- Library scripts -->
   <script src="https://unpkg.com/mathjs@12.1.0/lib/browser/math.js"></script>
-  <script src="/dist/lib/spin-network.umd.js"></script>
+  <!-- Try multiple possible paths for the UMD library -->
+  <script>
+    // Function to dynamically load the UMD library from the first available path
+    function loadSpinNetworkLibrary() {
+      const possiblePaths = [
+        '/dist/lib/spin-network.umd.js',
+        '/lib/spin-network.umd.js',
+        './spin-network.umd.js'
+      ];
+      
+      function tryLoadScript(index) {
+        if (index >= possiblePaths.length) {
+          console.error('Failed to load spin-network library from any path');
+          document.getElementById('console-output').textContent += 'ERROR: Failed to load spin-network library\n';
+          return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = possiblePaths[index];
+        script.onload = function() {
+          console.log(`Successfully loaded spin-network library from ${possiblePaths[index]}`);
+          document.getElementById('console-output').textContent += `Loaded library from ${possiblePaths[index]}\n`;
+        };
+        script.onerror = function() {
+          console.log(`Failed to load from ${possiblePaths[index]}, trying next path...`);
+          document.getElementById('console-output').textContent += `Failed to load from ${possiblePaths[index]}\n`;
+          // Try the next path
+          tryLoadScript(index + 1);
+        };
+        document.body.appendChild(script);
+      }
+      
+      // Start trying to load from the first path
+      tryLoadScript(0);
+    }
+    
+    // Load the library when the page is ready
+    document.addEventListener('DOMContentLoaded', loadSpinNetworkLibrary);
+  </script>
   <script src="standalone-test.js"></script>
 </body>
 </html>

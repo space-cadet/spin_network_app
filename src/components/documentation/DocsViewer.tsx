@@ -27,48 +27,56 @@ const DocsViewer: React.FC<DocsViewerProps> = ({ type }) => {
       setError(null);
       
       try {
-        // Determine file extension and path
-        let path: string;
-        let extension: string;
+        // List of possible paths to try in order
+        const possiblePaths = [];
         
+        // Prepare possible paths based on provided docId
         if (docId?.includes('.')) {
           // If docId already has an extension
-          path = `/docs/${type}/${docId}`;
-          extension = docId?.split('.').pop() || '';
+          possiblePaths.push(`/docs/${type}/${docId}`);
         } else {
-          // Try markdown first, then HTML
-          extension = 'md';
-          path = `/docs/${type}/${docId}.${extension}`;
+          // Try HTML first (most likely to exist in our app structure)
+          possiblePaths.push(`/docs/${type}/${docId}.html`);
+          possiblePaths.push(`/docs/${type}/${docId}.md`);
+          
+          // Try public directory paths as fallbacks
+          possiblePaths.push(`/public/docs/${type}/${docId}.html`);
+          possiblePaths.push(`/public/docs/${type}/${docId}.md`);
+        }
+        
+        // Also try root public paths for backwards compatibility
+        possiblePaths.push(`/${docId}.html`);
+        
+        let foundContent = false;
+        let foundExtension = '';
+        let responseText = '';
+        
+        // Try each path until we find content
+        for (const path of possiblePaths) {
+          try {
+            console.log(`Attempting to load document from: ${path}`);
+            const response = await fetch(path);
+            
+            if (response.ok) {
+              responseText = await response.text();
+              foundExtension = path.split('.').pop() || '';
+              foundContent = true;
+              console.log(`Successfully loaded document from: ${path}`);
+              break;
+            }
+          } catch (pathErr) {
+            console.log(`Path not found: ${path}`);
+            // Continue to next path
+          }
+        }
+        
+        if (!foundContent) {
+          throw new Error(`Failed to load document: Could not find ${docId} in any expected location`);
         }
         
         // Set content type flag
-        setIsHtml(extension === 'html');
-        
-        // Fetch the document
-        const response = await fetch(path);
-        
-        if (!response.ok) {
-          // If markdown fails, try HTML
-          if (extension === 'md') {
-            const htmlPath = `/docs/${type}/${docId}.html`;
-            const htmlResponse = await fetch(htmlPath);
-            
-            if (htmlResponse.ok) {
-              setIsHtml(true);
-              const htmlContent = await htmlResponse.text();
-              setContent(htmlContent);
-              setIsLoading(false);
-              return;
-            }
-            
-            throw new Error(`Failed to load document: ${response.status} ${response.statusText}`);
-          }
-          
-          throw new Error(`Failed to load document: ${response.status} ${response.statusText}`);
-        }
-        
-        const text = await response.text();
-        setContent(text);
+        setIsHtml(foundExtension === 'html');
+        setContent(responseText);
       } catch (err) {
         console.error('Error loading document:', err);
         setError('Failed to load the requested document. Please try again later.');
@@ -89,7 +97,26 @@ const DocsViewer: React.FC<DocsViewerProps> = ({ type }) => {
   }
   
   if (error) {
-    return <div className="text-red-500 p-4 border border-red-300 bg-red-50 rounded">{error}</div>;
+    return (
+      <div className="flex flex-col space-y-4">
+        <div className="text-red-500 p-4 border border-red-300 bg-red-50 rounded">
+          {error}
+        </div>
+        <div className="p-4 border border-blue-300 bg-blue-50 rounded">
+          <h3 className="font-medium text-blue-800 mb-2">Troubleshooting</h3>
+          <p className="mb-2">This error may be caused by:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>The document not existing at the expected path</li>
+            <li>Missing UMD library files for standalone pages</li>
+            <li>Path differences between development and production environments</li>
+          </ul>
+          <p className="mt-2">
+            If you're in the development environment, try running <code className="bg-gray-100 px-1 py-0.5 rounded">pnpm run build:lib</code> to 
+            generate the missing UMD library files.
+          </p>
+        </div>
+      </div>
+    );
   }
   
   if (isHtml) {
