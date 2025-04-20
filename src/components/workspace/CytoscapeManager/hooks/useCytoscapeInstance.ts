@@ -92,6 +92,14 @@ export const useCytoscapeInstance = (
     };
   }, [containerRef]);
 
+  // Update styles when they change
+  useEffect(() => {
+    if (!cy) return;
+    
+    // Apply updated styles to the Cytoscape instance
+    cy.style(styles);
+  }, [cy, styles]);
+
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {

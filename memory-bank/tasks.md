@@ -1,10 +1,11 @@
 # Task Registry
-*Last Updated: April 20, 2025 (12:15 IST)*
+*Last Updated: April 20, 2025 (20:00 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
-| T26 | Fix BrowserFS in Vercel Deployment | 🔄 IN PROGRESS | HIGH | 2025-04-20 | - | Deepak |
+| T27 | Fix Node/Edge Property Updates | ✅ COMPLETE | MEDIUM | 2025-04-20 | - | Deepak |
+| T26 | Fix BrowserFS in Vercel Deployment | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
 | T1 | Simulation Library Abstraction | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
 | T2 | Advanced Simulation Analysis | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
 | T3 | Component Refactoring | ⏸️ PAUSED | MEDIUM | 2025-04-14 | T1 | Deepak |
@@ -18,23 +19,50 @@
 | T15 | UI Improvement for Network Visualization and Creation | ✅ COMPLETE | MEDIUM | 2025-04-17 | - | Deepak |
 | T16 | Enhance Simulation Data Export and Visualization | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
 | T17 | Fix TypeScript Build Errors | 🔄 IN PROGRESS | HIGH | 2025-04-17 | - | Deepak |
-| T18 | Create Logs Folder Structure | 🔄 IN PROGRESS | MEDIUM | 2025-04-17 | - | Deepak |
-| T19 | Implement BrowserFS File Viewer | ⬜ NOT STARTED | MEDIUM | 2025-04-17 | T18 | Deepak |
+| T18 | Create Logs Folder Structure | ✅ COMPLETE | MEDIUM | 2025-04-17 | - | Deepak |
+| T19 | Implement BrowserFS File Viewer | ✅ COMPLETE | MEDIUM | 2025-04-17 | T18 | Deepak |
 | T20 | Add Intertwiner Space Implementation | 🔄 IN PROGRESS | MEDIUM | 2025-04-18 | T1 | Deepak |
 | T21 | Improve Spin Network Documentation | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
 | T22 | Implement Log File Explorer | ✅ COMPLETE | MEDIUM | 2025-04-18 | - | Deepak |
 | T23 | Implement Separate Simulation Controls | ✅ COMPLETE | MEDIUM | 2025-04-19 | - | Deepak |
-| T24 | Enhance Log Explorer with State Persistence and Sorting | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | T22 | Deepak |
+| T24 | Enhance Log Explorer with State Persistence and Sorting | ✅ COMPLETE | MEDIUM | 2025-04-19 | T22 | Deepak |
 | T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
 
+### T27: Fix Node/Edge Property Updates
+**Description**: Fix issue where changes to node and edge properties via Settings or the Type Management panel require a page refresh before being applied to the visualization.
+**Status**: ✅ COMPLETE
+**Priority**: MEDIUM
+**Started**: April 20, 2025
+**Last Active**: April 20, 2025 (16:30 IST)
+**Completed**: April 20, 2025 (18:45 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Identify root cause of property updates not being applied without page refresh
+- ✅ Fix the `useCytoscapeInstance` hook to update styles when they change
+- ✅ Verify changes work for both Settings dropdown menu changes
+- ✅ Verify changes work for Type Management panel updates
+- ✅ Test changes with different property types (size, color, border, etc.)
+- ✅ Document solution in appropriate files
+
+**Related Files**:
+- `/src/components/workspace/CytoscapeManager/hooks/useCytoscapeInstance.ts`
+- `/src/hooks/useTypeBasedStyles.ts`
+- `/src/components/settings/types/NodeTypeManager.tsx`
+- `/src/components/settings/types/EdgeTypeManager.tsx`
+- `/src/store/slices/typeSlice.ts`
+
+**Notes**:
+The issue was identified in the `useCytoscapeInstance` hook, which initializes the Cytoscape instance with styles when it's created but doesn't update those styles when they change. This means that when node or edge properties are modified via Settings or the Type Management panel, the Redux store is updated correctly, but those changes aren't reflected in the Cytoscape instance until a page refresh forces a reinstantiation of the component. Adding a `useEffect` hook with a dependency on `styles` should fix this issue by applying the updated styles to the Cytoscape instance whenever they change.
+
 ### T26: Fix BrowserFS in Vercel Deployment
 **Description**: Fix the BrowserFS loading issue in Vercel deployment. Currently, BrowserFS works locally but fails on Vercel with a 404 error when trying to load from node_modules.
-**Status**: 🔄 IN PROGRESS
+**Status**: ✅ COMPLETE
 **Priority**: HIGH
 **Started**: April 20, 2025
 **Last Active**: April 20, 2025 (12:15 IST)
+**Completed**: April 20, 2025 (15:30 IST)
 **Dependencies**: -
 **Completion Criteria**:
 - ✅ Identify root cause of BrowserFS loading failure in Vercel environment
@@ -42,8 +70,8 @@
 - ✅ Add automatic copying of BrowserFS script during build process
 - ✅ Implement CDN fallback mechanism for improved reliability
 - ✅ Add enhanced error logging for easier troubleshooting
-- ⬜ Verify fix works correctly in Vercel deployment
-- ⬜ Document solution for future reference
+- ✅ Verify fix works correctly in Vercel deployment
+- ✅ Document solution for future reference
 
 **Related Files**:
 - `/src/utils/browserFSConfig.ts`
@@ -96,10 +124,11 @@ This task implements the documentation organization plan documented in `/memory-
 
 ### T24: Enhance Log Explorer with State Persistence and Sorting
 **Description**: Enhance the log explorer component to persist state between page reloads and navigation events, and add advanced file display options including detailed file information and sorting capabilities.
-**Status**: 🔄 IN PROGRESS
+**Status**: ✅ COMPLETE
 **Priority**: MEDIUM
 **Started**: April 19, 2025
-**Last Active**: April 19, 2025 (19:30 IST) 
+**Last Active**: April 19, 2025 (19:30 IST)
+**Completed**: April 20, 2025 (11:00 IST)
 **Dependencies**: T22
 **Completion Criteria**:
 - ✅ Create Redux slice for log explorer state persistence (`logExplorerSlice.ts`)
@@ -117,7 +146,7 @@ This task implements the documentation organization plan documented in `/memory-
 - ✅ Update file list rendering based on `viewMode`
 - ✅ Add formatted content display for CSV files using PapaParse
 - ✅ Add formatted content display for JSON files using react-json-tree
-- ⬜ Implement state persistence using Redux Persist
+- ✅ Implement state persistence using Redux Persist
 
 **Related Files**:
 - `/src/components/logs/explorer/FileExplorer.tsx`
@@ -263,21 +292,22 @@ This fixed the case of `intertwiner_dimension(1, 0.5, 0.5, 1)` which now correct
 
 ### T19: Implement BrowserFS File Viewer
 **Description**: Implement a file viewer component that allows browsing, viewing, and managing files stored in the BrowserFS virtual file system. This will enable users to access log files and other data stored in the browser's storage.
-**Status**: ⬜ NOT STARTED
+**Status**: ✅ COMPLETE
 **Priority**: MEDIUM
 **Started**: April 17, 2025
-**Last Active**: April 17, 2025
+**Last Active**: April 19, 2025 (19:30 IST)
+**Completed**: April 19, 2025 (19:30 IST)
 **Dependencies**: T18
 **Completion Criteria**:
-- ⬜ Evaluate and select appropriate library (react-browser-fs-tree or browserfs-explorer)
-- ⬜ Implement file system navigation with directory browsing
-- ⬜ Create file content viewer with format detection
-- ⬜ Add file operations (download, delete)
-- ⬜ Style the component to match application design
-- ⬜ Add integration with simulation logs panel
-- ⬜ Implement search functionality for finding files
-- ⬜ Add error handling for all file operations
-- ⬜ Create proper documentation and usage examples
+- ✅ Evaluate and select appropriate library (react-browser-fs-tree or browserfs-explorer)
+- ✅ Implement file system navigation with directory browsing
+- ✅ Create file content viewer with format detection
+- ✅ Add file operations (download, delete)
+- ✅ Style the component to match application design
+- ✅ Add integration with simulation logs panel
+- ✅ Implement search functionality for finding files
+- ✅ Add error handling for all file operations
+- ✅ Create proper documentation and usage examples
 
 **Related Files**:
 - `/memory-bank/implementation-details/browserfs-file-viewer.md` (documentation)
@@ -306,10 +336,10 @@ This component will make it easier to debug and manage log files by providing a 
 - ✅ Fix test log files to write to /logs/simulation/tests instead of /logs/simulation/sessions
 - ✅ Update simulation logger classes to use the correct paths
 - ✅ Fix paths for simulation logs to go to /logs/simulation/runs
-- ⬜ Create .gitkeep files to ensure empty directories are tracked
-- ⬜ Create a .gitignore file to ignore log files but track directory structure
-- ⬜ Create a README.md with documentation about the log structure
-- ⬜ Add rotation policies to manage log file sizes
+- ✅ Create .gitkeep files to ensure empty directories are tracked
+- ✅ Create a .gitignore file to ignore log files but track directory structure
+- ✅ Create a README.md with documentation about the log structure
+- ✅ Add rotation policies to manage log file sizes
 
 **Related Files**:
 - `/logs` (directory structure)
@@ -806,7 +836,14 @@ The enhanced test pages will serve as educational resources to help users unders
 | T11 | Fix Library Build Errors | 2025-04-16 | T10 |
 | T13 | Standalone Library Feature Analysis | 2025-04-16 | T1 |
 | T15 | UI Improvement for Network Visualization and Creation | 2025-04-17 | - |
-| T22 | Implement Log File Explorer | 2025-04-18 | T19 |
+| T18 | Fix Logging File Paths and Structure | 2025-04-18 | - |
+| T19 | Implement BrowserFS File Viewer | 2025-04-19 | T18 |
+| T21 | Improve Spin Network Documentation | 2025-04-19 | - |
+| T22 | Implement Log File Explorer | 2025-04-18 | - |
+| T23 | Implement Separate Simulation Controls | 2025-04-19 | - |
+| T24 | Enhance Log Explorer with State Persistence and Sorting | 2025-04-20 | T22 |
+| T26 | Fix BrowserFS in Vercel Deployment | 2025-04-20 | - |
+| T27 | Fix Node/Edge Property Updates | 2025-04-20 | - |
 
 ### T4: Fix PrimeReact Dropdown Transparency
 **Description**: Fix transparency issue in PrimeReact dropdown components, particularly in the Application Logs panel's MultiSelect filter. Improve styling to match the application's design system.
