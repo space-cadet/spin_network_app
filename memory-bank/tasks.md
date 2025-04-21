@@ -1,9 +1,10 @@
 # Task Registry
-*Last Updated: April 21, 2025 (18:15 IST)*
+*Last Updated: April 21, 2025 (22:30 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
+| T34 | Complete Simulation Engine Migration to Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T1, T14 | Deepak |
 | T33 | Fix Documentation Rendering and Interaction Issues | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T28 | Deepak |
 | T32 | Fix Library Build Errors | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
 | T28 | Fix Documentation Path Issues | ✅ COMPLETE | HIGH | 2025-04-20 | T25 | Deepak |
@@ -32,6 +33,51 @@
 | T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T34: Complete Simulation Engine Migration to Standalone Library
+**Description**: Fully migrate all simulation engine dependencies from the React app to the standalone library, ensuring there's only one version of the simulation engine in the codebase. This task builds upon the work in T1 (Simulation Library Abstraction) and T14 (State Management Architecture) to complete the migration and eliminate duplicate implementations.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 21, 2025
+**Last Active**: April 21, 2025 (22:30 IST)
+**Dependencies**: T1, T14
+**Completion Criteria**:
+- ✅ Create comprehensive migration plan (stored in `/memory-bank/implementation-details/standalone-lib/standalone-migration-plan.md`)
+- ⬜ Identify all React components that directly depend on src/simulation
+- ⬜ Complete any missing features in the standalone library from feature comparison
+- ⬜ Implement event system and adapter layer for React integration
+- ⬜ Refactor React components to use adapters instead of direct simulation imports
+- ⬜ Update hooks (useSimulation, useReduxSimulation) to use the adapters
+- ⬜ Ensure state synchronization between Redux and simulation engine
+- ⬜ Verify visualization components work correctly with the library
+- ⬜ Add comprehensive tests for the integration
+- ⬜ Remove src/simulation directory after successful migration
+- ⬜ Update documentation to reflect the new architecture
+
+**Related Files**:
+- `/memory-bank/implementation-details/standalone-lib/standalone-migration-plan.md`
+- `/memory-bank/implementation-details/standalone-lib/state-management-implementation.ts`
+- `/lib/core/engineImplementation.ts`
+- `/lib/core/types.ts`
+- `/src/simulation/` (entire directory to be migrated)
+- `/src/hooks/useSimulation.ts`
+- `/src/hooks/useReduxSimulation.ts`
+- `/src/components/simulation/` (components to be updated)
+- `/src/store/slices/simulationSlice.ts`
+
+**Notes**:
+This task represents the final step in the Simulation Library Abstraction project, focusing on fully migrating all simulation logic from the React app to the standalone library. The goal is to ensure there's only one version of the simulation engine - the standalone library version - while the React app only contains the UI-specific code with adapters that connect to the library.
+
+A comprehensive migration plan has been created in `standalone-migration-plan.md` that outlines a systematic approach with seven phases:
+1. Identify all dependencies between React components and the simulation code
+2. Complete missing features in the standalone library
+3. Create a React adapter layer for integration
+4. Update React components to use the adapters
+5. Comprehensive testing of the integration
+6. Remove duplicate implementation
+7. Update documentation
+
+The key technical challenge is implementing the proper adapter layer that translates between the event-based architecture of the standalone library and the Redux-based state management in the React app. The work in T14 (State Management Architecture) provides a foundation for this with the EventEmitter pattern and adapter interfaces.
 
 ### T33: Fix Documentation Rendering and Interaction Issues
 **Description**: Fix the rendering and interactive functionality issues in the documentation system. Address Markdown formatting, script loading, module imports, and navigation problems.
@@ -561,7 +607,7 @@ Successfully improved the UI by:
 These changes significantly improve the usability of the application, making it more intuitive for users to create and work with different types of networks.
 
 ### T14: State Management Architecture for Standalone Library
-**Description**: Design a comprehensive state management and event communication system for the standalone library to ensure complete separation from React/Redux dependencies. Update architecture diagram and enhancement plan to reflect the framework-agnostic approach.
+**Description**: Design a framework-agnostic event system for the standalone library that allows communication without UI framework dependencies. This task focuses on the design and implementation of the event system within the library itself, not the integration with React (which is covered by T34).
 **Status**: 🔄 IN PROGRESS
 **Priority**: HIGH
 **Started**: April 17, 2025
@@ -577,8 +623,7 @@ These changes significantly improve the usability of the application, making it 
 - ✅ Design persistence mechanism for saving/loading simulation state
 - ⬜ Apply design to existing implementation of the engine
 - ⬜ Implement event emitter in the core module
-- ⬜ Create adapter interface for framework integration
-- ⬜ Test with both React app and standalone environments
+- ⬜ Test event system in standalone environments
 
 **Related Files**:
 - `/memory-bank/implementation-details/standalone-lib/standalone-architecture.md`
@@ -759,8 +804,8 @@ Used an efficient approach that preserved the most recent 5 error entries while 
 **Notes**:
 These database service errors are preventing the application from building successfully. Fixing these errors is critical for the application to function properly, as they affect core data storage and retrieval functionality.
 
-### T1: Simulation Library Abstraction
-**Description**: Abstract the simulation functionality from the UI components to create standalone libraries that users can import into their code to run simulations on spin networks without UI dependencies. This will improve modularity and allow for more flexible usage of the simulation engine.
+### T1: Simulation Library Core Implementation
+**Description**: Create the core framework-agnostic simulation functionality in the standalone library. This task focuses on implementing the fundamental building blocks of the simulation engine in the library, not the integration with the React app (which is covered by T34).
 **Status**: 🔄 IN PROGRESS
 **Last Active**: April 18, 2025 (01:15 IST)
 **Completion Criteria**:
@@ -779,7 +824,6 @@ These database service errors are preventing the application from building succe
 - ⬜ Implement visualization adapters
 - ⬜ Add comprehensive documentation and usage examples
 - ⬜ Test library functionality independently
-- ⬜ Refactor original app to use the new library
 
 **Related Files**:
 - `/lib/index.ts` - Main library entry point

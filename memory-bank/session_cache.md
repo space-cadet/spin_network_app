@@ -1,15 +1,16 @@
 # Session Cache
 
-*Last Updated: April 21, 2025 (18:15 IST)*
+*Last Updated: April 21, 2025 (22:30 IST)*
 
 ## Overview
-- Active Tasks: 13
+- Active Tasks: 14
 - Paused Tasks: 3
-- Last Task Focus: T33
+- Last Task Focus: T34
 - Completed Tasks: 12
 
 ## Task Registry
-- T1: Simulation Library Abstraction - 🔄 IN PROGRESS
+- T34: Complete Simulation Engine Migration to Standalone Library - 🔄 IN PROGRESS
+- T1: Simulation Library Core Implementation - 🔄 IN PROGRESS
 - T2: Advanced Simulation Analysis - ⏸️ PAUSED
 - T3: Component Refactoring - ⏸️ PAUSED
 - T5: Enhanced Simulation Test Pages - 🔄 IN PROGRESS
@@ -34,6 +35,85 @@
 - T33: Fix Documentation Rendering and Interaction Issues - 🔄 IN PROGRESS
 
 ## Active Tasks
+
+### T34: Complete Simulation Engine Migration to Standalone Library
+**Status:** 🔄 IN PROGRESS
+**Priority:** HIGH
+**Started:** 2025-04-21
+**Last Active:** 2025-04-21 22:30 IST
+**Dependencies:** T1, T14
+
+#### Context
+This task focuses on fully migrating all simulation engine dependencies from the React app to the standalone library. It builds upon the groundwork laid in T1 (Simulation Library Core Implementation) and T14 (State Management Architecture) to complete the migration process and eliminate duplicate implementations. The goal is to ensure there's only one version of the simulation engine in the codebase - the standalone library version.
+
+#### Critical Files
+- `/memory-bank/implementation-details/standalone-lib/standalone-migration-plan.md` - Comprehensive migration plan
+- `/memory-bank/implementation-details/standalone-lib/state-management-implementation.ts` - Reference implementation for adapters
+- `/lib/core/engineImplementation.ts` - Simulation engine implementation
+- `/lib/core/types.ts` - Core type definitions
+- `/src/simulation/` - Entire directory to be migrated
+- `/src/hooks/useSimulation.ts` - Hook to be updated to use adapters
+- `/src/hooks/useReduxSimulation.ts` - Hook to be updated to use adapters
+- `/src/components/simulation/` - Components to be updated
+- `/src/store/slices/simulationSlice.ts` - Redux slice to be updated
+
+#### Implementation Progress
+1. ✅ Create comprehensive migration plan
+2. ⬜ Identify all React components that directly depend on src/simulation
+3. ⬜ Complete any missing features in the standalone library from feature comparison
+4. ⬜ Implement event system and adapter layer for React integration
+5. ⬜ Refactor React components to use adapters instead of direct simulation imports
+6. ⬜ Update hooks (useSimulation, useReduxSimulation) to use the adapters
+7. ⬜ Ensure state synchronization between Redux and simulation engine
+8. ⬜ Verify visualization components work correctly with the library
+9. ⬜ Add comprehensive tests for the integration
+10. ⬜ Remove src/simulation directory after successful migration
+11. ⬜ Update documentation to reflect the new architecture
+
+#### Working State
+Created comprehensive migration plan in `standalone-migration-plan.md` that outlines a systematic approach with seven phases:
+
+1. **Phase 1: Identify Dependencies (1-2 days)**
+   - Map React Component dependencies on src/simulation
+   - Analyze hooks implementation
+   - Create inventory of all integration points
+
+2. **Phase 2: Complete Standalone Library (3-5 days)**
+   - Implement graph templates
+   - Add visualization adapters
+   - Complete I/O and serialization
+   - Enhance analysis tools
+   - Add event system
+
+3. **Phase 3: Create Adapter Layer (2-3 days)**
+   - Design adapter interface
+   - Implement React/Redux adapter
+   - Update hooks
+   - Create state mapping between Redux and library
+
+4. **Phase 4: Update React Components (3-4 days)**
+   - Refactor components to use adapters
+   - Update visualization components
+   - Update control components
+   - Update results display
+
+5. **Phase 5: Testing and Validation (2-3 days)**
+   - Create test cases
+   - Implement tests
+   - Perform manual testing
+   - Fix issues
+
+6. **Phase 6: Remove Duplication (1-2 days)**
+   - Verify migration completeness
+   - Remove duplicate code
+   - Update build configuration
+
+7. **Phase 7: Documentation and Handover (1-2 days)**
+   - Update documentation
+   - Create migration guide
+   - Knowledge transfer
+
+The plan provides a clear roadmap for completing the migration while minimizing disruption. The next step is to begin Phase 1 by identifying all React components that directly depend on the src/simulation directory.
 
 ### T33: Fix Documentation Rendering and Interaction Issues
 **Status:** 🔄 IN PROGRESS
