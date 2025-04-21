@@ -1,11 +1,37 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-21 (10:45 IST)*
+*Last Updated: 2025-04-21 (18:15 IST)*
 
 ## File Modification Log
 
 ### April 21, 2025
+
+#### [18:08] - T33: Fix Script Path for UMD Library in Standalone Guide
+
+- Modified `/public/docs/implementation/standalone-guide.html`:
+  - Updated UMD library script path from `/dist/lib/spin-network.umd.js` to `../../dist/lib/spin-network.umd.js`
+  - Fixed script loading issues by using relative path instead of absolute path
+  - This resolves one of the key issues identified in task T33 related to script loading failures
+
+This change fixes one of the main issues with the documentation system by using the correct relative path to load the UMD library in the standalone guide. The previous absolute path was causing script loading failures in both development and production environments.
+
+#### [14:42] - T33: Enhance DocsViewer for Improved Document Loading and HTML Processing
+
+- Modified `/src/components/documentation/DocsViewer.tsx`:
+  - Simplified path resolution logic while preserving functionality
+  - Removed extensive console logging to clean up browser console
+  - Improved HTML content processing with better base path handling
+  - Added more efficient handling of KaTeX styling inclusion
+  - Enhanced iframe handling for HTML content
+  - Fixed paragraph rendering with proper anchor pattern detection
+  - Simplified error handling for missing documents
+
+- Created `/public/_redirects`:
+  - Added single line redirect rule: `/*    /index.html   200`
+  - This enables proper SPA navigation and prevents 404 errors on page refresh
+
+These changes significantly improve the document loading process and HTML content rendering in the documentation system. The modifications address several of the documentation issues identified in task T33, particularly focusing on rendering problems and navigation issues.
 
 #### [10:45] - T33: Fix Documentation Rendering and Interaction Issues
 

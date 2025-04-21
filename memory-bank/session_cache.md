@@ -1,6 +1,6 @@
 # Session Cache
 
-*Last Updated: April 21, 2025 (10:45 IST)*
+*Last Updated: April 21, 2025 (18:15 IST)*
 
 ## Overview
 - Active Tasks: 13
@@ -39,7 +39,7 @@
 **Status:** 🔄 IN PROGRESS
 **Priority:** HIGH
 **Started:** 2025-04-21
-**Last Active:** 2025-04-21 10:45 IST
+**Last Active:** 2025-04-21 18:15 IST
 **Dependencies:** T28
 
 #### Context
@@ -52,38 +52,45 @@ Following the standardization of documentation file structure and organization i
 - `/public/docs/implementation/standalone-guide.html` - Interactive page with script loading issues
 - `/public/docs/implementation/simulation-test.html` - Interactive page with module import issues
 - `/vite.config.ts` - For module resolution configuration
+- `/public/_redirects` - For SPA routing configuration
 
 #### Implementation Progress
-1. ⬜ Fix Markdown header ID anchors displaying as `{#anchor-name}`
-2. ⬜ Fix script loading in standalone-guide.html
-3. ⬜ Resolve module import issues in simulation-test.html
-4. ⬜ Implement proper routing for page refreshes
-5. ⬜ Create consistent module loading strategy for documentation
-6. ⬜ Bundle required UMD libraries to correct locations
+1. ✅ Fix paragraph rendering in DocsViewer to handle anchor patterns
+2. ✅ Fix script loading in standalone-guide.html with proper relative paths
+3. ✅ Add SPA redirect rule to fix page refresh issues
+4. ✅ Improve HTML content processing with better base path handling
+5. 🔄 Resolve module import issues in simulation-test.html
+6. 🔄 Fix Markdown header ID anchors displaying as `{#anchor-name}`
+7. 🔄 Create consistent module loading strategy for documentation
+8. ⬜ Bundle required UMD libraries to correct locations
 
 #### Working State
-The documentation system is currently experiencing four main issues that need to be fixed:
+Made significant progress on addressing documentation issues:
 
-1. **Markdown Rendering Issues**: 
-   - Markdown header ID anchors are displayed literally (e.g., "Core Concepts {#core-concepts}") instead of being processed
-   - Need to modify ReactMarkdown configuration in DocsViewer to properly handle ID anchors in headings
+1. **Script Loading Issues**:
+   - ✅ FIXED: Updated the UMD library path in standalone-guide.html from an absolute path `/dist/lib/spin-network.umd.js` to a relative path `../../dist/lib/spin-network.umd.js`
+   - This resolves the script loading failures in the standalone guide by correctly referencing the library location relative to the document
 
-2. **Script Loading Issues**:
-   - The standalone-guide.html page buttons don't function due to script loading failures
-   - The UMD library at `/dist/lib/spin-network.umd.js` is not being found
-   - Need to fix script loading paths and implement better fallback mechanisms
+2. **Routing Problems**:
+   - ✅ FIXED: Added `public/_redirects` configuration for SPA routing
+   - Added rule: `/*    /index.html   200` that redirects all routes to index.html with a 200 status code
+   - This prevents 404 errors when refreshing documentation pages and allows proper back/forward navigation
 
-3. **Module Import Issues**:
-   - The simulation-test.html shows "Missing Simulation Files" error despite running `pnpm run build:lib`
-   - It's attempting to import from `/docs/src/simulation/index.js` which doesn't exist
-   - Need to create proper module aliasing or copy necessary modules to expected locations
+3. **HTML Processing Improvements**:
+   - ✅ FIXED: Enhanced DocsViewer.tsx with better handling of HTML content
+   - Improved base path handling for HTML files
+   - Added more efficient inclusion of KaTeX styling
+   - Fixed paragraph rendering with proper anchor pattern detection
 
-4. **Routing Problems**:
-   - Refreshing documentation pages causes content to disappear
-   - The back button doesn't restore the page correctly
-   - Need to implement proper routing with history API integration
+4. **Module Import Issues in simulation-test.html**:
+   - 🔄 IN PROGRESS: Significantly simplified the simulation-test.html implementation
+   - Replaced the complex module importing mechanism with direct window.SpinNetwork access
+   - Updated all functions to use the global SpinNetwork object created by the script tag
+   - Added basic error handling to gracefully report when the library isn't loaded
 
-Next steps will focus on addressing these issues one by one, starting with the Markdown rendering problems and then moving on to the script loading and routing issues.
+The changes have resolved two of the four major issues (script loading and routing problems) and made significant progress on a third (module import issues). The remaining focus is on fixing the Markdown header ID anchors and completing the module loading strategy for all documentation pages.
+
+Next steps will focus on addressing the Markdown rendering issues and bundling the required UMD libraries to the correct locations.
 
 ### T32: Fix Library Build Errors
 **Status:** ✅ COMPLETE

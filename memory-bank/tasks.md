@@ -1,5 +1,5 @@
 # Task Registry
-*Last Updated: April 21, 2025 (10:45 IST)*
+*Last Updated: April 21, 2025 (18:15 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
@@ -38,17 +38,17 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: HIGH
 **Started**: April 21, 2025
-**Last Active**: April 21, 2025 (10:45 IST)
+**Last Active**: April 21, 2025 (18:15 IST)
 **Dependencies**: T28
 **Completion Criteria**:
 - ⬜ Fix Markdown header ID anchors that display as `{#anchor-name}` in the rendered output
-- ⬜ Fix script loading in standalone-guide.html to make interactive controls work
-- ⬜ Resolve simulation module loading in simulation-test.html
-- ⬜ Implement proper routing to handle page refreshes and back navigation
-- ⬜ Create a consistent module loading strategy for documentation scripts
+- ✅ Fix script loading in standalone-guide.html to make interactive controls work
+- 🔄 Resolve simulation module loading in simulation-test.html
+- ✅ Implement proper routing to handle page refreshes and back navigation
+- 🔄 Create a consistent module loading strategy for documentation scripts
 - ⬜ Bundle required UMD libraries to correct location for both dev and production
-- ⬜ Update iframe implementation to better handle script resources
-- ⬜ Add improved error handling for missing dependencies
+- ✅ Update iframe implementation to better handle script resources
+- ✅ Add improved error handling for missing dependencies
 - ⬜ Test and verify all fixes in both development and production environments
 
 **Related Files**:
@@ -63,16 +63,28 @@
 - `/vite.config.ts`
 - `/lib-bundle.config.js`
 - `/src/main.tsx` (for routing)
+- `/public/_redirects` (for SPA routing)
 
 **Notes**:
-The documentation system has been organized with a standardized structure, but several rendering and functionality issues remain. The most critical issues are:
+The documentation system has been organized with a standardized structure, and significant progress has been made on fixing rendering and functionality issues:
 
-1. Markdown header anchors aren't being processed correctly by ReactMarkdown
-2. Interactive HTML pages can't load their script dependencies
-3. Module imports in documentation HTML files fail with 404 errors
-4. Page refreshes break the navigation flow
+1. ✅ FIXED: Script loading in standalone-guide.html by updating the UMD library path from absolute to relative
+2. ✅ FIXED: Page refresh navigation issues by adding proper SPA redirects
+3. ✅ FIXED: HTML content processing in DocsViewer with better base path handling
+4. 🔄 IN PROGRESS: Simplified simulation-test.html to use global window.SpinNetwork object
 
-These issues need to be fixed to create a truly functional documentation system. The solutions will require both frontend modifications and build system adjustments to ensure the proper files are available in the correct locations.
+Two major improvements have been implemented today:
+
+**Path Fix in standalone-guide.html**: 
+Updated the UMD library script path from `/dist/lib/spin-network.umd.js` to `../../dist/lib/spin-network.umd.js`, which correctly resolves the library location relative to the document. This fixes the script loading failures in the standalone guide.
+
+**SPA Navigation Fix**:
+Added `public/_redirects` configuration with the rule `/*    /index.html   200` that handles SPA routing properly. This prevents 404 errors when refreshing documentation pages and allows proper back/forward navigation.
+
+Remaining focus areas:
+1. Fixing Markdown header ID anchors that still display as literal text
+2. Bundling required UMD libraries to the correct locations
+3. Testing all fixes in both development and production environments
 
 ### T32: Fix Library Build Errors
 **Description**: Fix TypeScript build errors in the library bundling process, particularly focusing on interface/type export issues that prevent successful compilation.
