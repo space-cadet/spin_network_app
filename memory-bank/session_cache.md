@@ -1,14 +1,15 @@
 # Session Cache
 
-*Last Updated: April 21, 2025 (22:30 IST)*
+*Last Updated: April 21, 2025 (23:15 IST)*
 
 ## Overview
-- Active Tasks: 14
+- Active Tasks: 15
 - Paused Tasks: 3
-- Last Task Focus: T34
+- Last Task Focus: T35
 - Completed Tasks: 12
 
 ## Task Registry
+- T35: Enhance Node and Edge Data Structures for Intertwiners - 🔄 IN PROGRESS
 - T34: Complete Simulation Engine Migration to Standalone Library - 🔄 IN PROGRESS
 - T1: Simulation Library Core Implementation - 🔄 IN PROGRESS
 - T2: Advanced Simulation Analysis - ⏸️ PAUSED
@@ -35,6 +36,55 @@
 - T33: Fix Documentation Rendering and Interaction Issues - 🔄 IN PROGRESS
 
 ## Active Tasks
+
+### T35: Enhance Node and Edge Data Structures for Intertwiners
+**Status:** 🔄 IN PROGRESS
+**Priority:** MEDIUM
+**Started:** 2025-04-21
+**Last Active:** 2025-04-21 23:15 IST
+**Dependencies:** T20
+
+#### Context
+This task focuses on enhancing the data structures for nodes and edges in the spin network to better represent the physics concepts, particularly improving the intertwiner representation to support intertwiner spaces with multiple dimensions and basis states. Based on the insights from `mathematical-roadmap.md` and `intertwiner-spaces.md`, we need to update the network model to capture the full complexity of intertwiner spaces.
+
+#### Critical Files
+- `/src/models/types.ts` - Core type definitions to update
+- `/src/models/networkModel.ts` - Network model implementation to modify
+- `/src/components/workspace/CytoscapeManager/CytoscapeManager.tsx` - Visualization component that uses the model
+
+#### Implementation Progress
+1. ✅ Define enhanced `IntertwinerData` interface to replace the simple numerical representation
+2. ⬜ Update `NetworkNode` interface to use the new `IntertwinerData` interface
+3. ⬜ Implement validation function to ensure intertwiner values are consistent with adjacent edge spins
+4. ⬜ Update `networkToCytoscape` function to handle the new intertwiner representation
+5. ⬜ Update any functions that create or modify nodes to support the new interface
+6. ⬜ Maintain backward compatibility with existing code
+7. ⬜ Add utility functions to calculate intertwiner dimension based on adjacent edge spins
+8. ⬜ Add documentation about the new data structure
+
+#### Working State
+Successfully implemented the enhanced node and edge data structures:
+
+1. **Data Structure Implementation**:
+   - Added `IntertwinerData` interface to store rich information about intertwiner spaces
+   - Updated `NetworkNode` interface to support both numeric and object-based intertwiners
+   - Created validation logic for the new structure
+   - Ensured backward compatibility throughout all components
+
+2. **Enhanced Functionality**:
+   - Added `getIntertwinerValue()` helper function to consistently access intertwiner values
+   - Implemented `getIntertwinerDimension()` function to calculate/retrieve dimensions
+   - Enhanced `addNode()` to properly initialize default values for new nodes
+   - Updated `updateNode()` with special handling for merging intertwiner objects
+   - Modified `networkToCytoscape()` to properly expose intertwiner data to visualization
+
+3. **Physics Model Integration**:
+   - Added support for tracking intertwiner space dimensions
+   - Implemented basis state references for future integration with library of states
+   - Added fields for recoupling schemes and edge ordering
+   - Created placeholders for more advanced calculations to be implemented
+
+The implementation maintains backward compatibility while significantly enhancing the physics representation capabilities. The updated model can represent the full complexity of intertwiner spaces with their dimensions and basis states, which is crucial for accurate quantum geometric calculations. Next steps will involve implementing actual physics-based calculations for intertwiner dimensions and validations based on adjacent edge spins.
 
 ### T34: Complete Simulation Engine Migration to Standalone Library
 **Status:** 🔄 IN PROGRESS
@@ -1350,9 +1400,29 @@ Breaking down large components into smaller, more maintainable units, particular
 - `/src/hooks/useReduxSimulation.ts`
 
 ## Session Notes
-Today's session was focused on implementing intertwiner space calculations for the spin network library:
+Today's session was focused on enhancing the node and edge data structures to better represent physics concepts:
 
-1. **Mathematics of Intertwiner Spaces**:
+1. **Task Creation and Implementation**:
+   - Created task T35 for enhancing node and edge data structures
+   - Reviewed `mathematical-roadmap.md` and `intertwiner-spaces.md` to understand physics requirements
+   - Analyzed current data structure limitations in relation to intertwiner spaces
+   - Designed and implemented enhanced `IntertwinerData` interface 
+   - Updated all related functions to support the new structure
+
+2. **Key Observations**:
+   - Current model uses just a number for intertwiner value, limiting physics representation
+   - Need to support intertwiner spaces with dimensions > 1 and basis states
+   - Edge order/pairing is important for recoupling schemes
+   - Important to maintain backward compatibility while enhancing capabilities
+   - Need to validate that intertwiner values are consistent with adjacent edge spins
+
+3. **Planned Implementation Approach**:
+   - Enhance intertwiner property from a number to an object structure
+   - Use the object to capture dimension, basis state reference, recoupling scheme
+   - Update validators to ensure physically consistent values
+   - Add utility functions to calculate intertwiner dimensions from edge spins
+
+4. **Previous Work on Intertwiner Spaces**:
    - Created comprehensive documentation of intertwiner space theory in `intertwiner-spaces.md`
    - Added detailed explanations of SU(2)-invariant tensors at spin network nodes
    - Documented the mathematical formalism for calculating intertwiner dimensions

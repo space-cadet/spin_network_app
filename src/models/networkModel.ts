@@ -42,7 +42,38 @@ export function validateNetwork(network: SpinNetwork): string[] {
       errors.push(`Node ${node.id || 'unknown'} has invalid position`);
     }
     
-    if (typeof node.intertwiner !== 'number') {
+    // Check if intertwiner is a valid number or IntertwinerData object
+    if (typeof node.intertwiner === 'number') {
+      // Simple number intertwiner is valid
+    } else if (typeof node.intertwiner === 'object' && node.intertwiner !== null) {
+      // IntertwinerData object - check that it has a valid value
+      if (typeof node.intertwiner.value !== 'number') {
+        errors.push(`Node ${node.id || 'unknown'} has IntertwinerData with invalid value`);
+      }
+      
+      // If dimension is provided, it should be a positive integer
+      if (node.intertwiner.dimension !== undefined && 
+         (typeof node.intertwiner.dimension !== 'number' || 
+          node.intertwiner.dimension <= 0 || 
+          !Number.isInteger(node.intertwiner.dimension))) {
+        errors.push(`Node ${node.id || 'unknown'} has IntertwinerData with invalid dimension (should be a positive integer)`);
+      }
+      
+      // If edgeOrder is provided, it should be an array of strings
+      if (node.intertwiner.edgeOrder !== undefined) {
+        if (!Array.isArray(node.intertwiner.edgeOrder)) {
+          errors.push(`Node ${node.id || 'unknown'} has IntertwinerData with invalid edgeOrder (should be an array)`);
+        } else {
+          // Check that all items in the array are strings
+          for (const edgeId of node.intertwiner.edgeOrder) {
+            if (typeof edgeId !== 'string') {
+              errors.push(`Node ${node.id || 'unknown'} has IntertwinerData with invalid edgeOrder item (should be strings)`);
+              break;
+            }
+          }
+        }
+      }
+    } else {
       errors.push(`Node ${node.id || 'unknown'} has invalid intertwiner value`);
     }
   });
@@ -77,6 +108,61 @@ export function validateNetwork(network: SpinNetwork): string[] {
   });
   
   return errors;
+}
+
+/**
+ * Gets intertwiner value from a node, regardless of whether it's a simple number
+ * or an IntertwinerData object
+ */
+export function getIntertwinerValue(node: NetworkNode): number {
+  if (typeof node.intertwiner === 'number') {
+    return node.intertwiner;
+  } else if (node.intertwiner && typeof node.intertwiner === 'object') {
+    return node.intertwiner.value;
+  }
+  return 0; // Default fallback
+}
+
+/**
+ * Gets intertwiner dimension from a node, calculating it if necessary
+ * @param node The network node
+ * @param adjacentEdges Optional array of edges connected to this node
+ * @param network Optional network containing this node (used if adjacentEdges not provided)
+ */
+export function getIntertwinerDimension(
+  node: NetworkNode, 
+  adjacentEdges?: NetworkEdge[],
+  network?: SpinNetwork
+): number {
+  // If intertwiner is an object with dimension, return it
+  if (typeof node.intertwiner === 'object' && 
+      node.intertwiner !== null && 
+      node.intertwiner.dimension !== undefined) {
+    return node.intertwiner.dimension;
+  }
+  
+  // If no adjacent edges provided but network is available, find them
+  if (!adjacentEdges && network) {
+    adjacentEdges = network.edges.filter(
+      edge => edge.source === node.id || edge.target === node.id
+    );
+  }
+  
+  // If we have adjacent edges, calculate dimension (simplified calculation for now)
+  if (adjacentEdges && adjacentEdges.length > 0) {
+    // For 4-valent nodes with same spin on all edges, dimension is usually 2
+    // This is a simplified placeholder - real calculation would use intertwiner space math
+    if (adjacentEdges.length === 4) {
+      return 2;
+    }
+    // For 3-valent nodes, dimension is usually 1
+    else if (adjacentEdges.length === 3) {
+      return 1;
+    }
+  }
+  
+  // Default dimension for other cases
+  return 1;
 }
 
 /**
@@ -117,6 +203,26 @@ export function addNode(network: SpinNetwork, node: NetworkNode): SpinNetwork {
     };
   }
   
+  // Ensure the node has a valid intertwiner representation
+  if (node.intertwiner === undefined) {
+    // Default to zero intertwiner value if none provided
+    node = {
+      ...node,
+      intertwiner: 0
+    };
+  } else if (typeof node.intertwiner === 'object' && node.intertwiner !== null) {
+    // If it's an IntertwinerData object, ensure it has at least a value property
+    if (node.intertwiner.value === undefined) {
+      node = {
+        ...node,
+        intertwiner: {
+          ...node.intertwiner,
+          value: 0
+        }
+      };
+    }
+  }
+  
   return {
     ...network,
     nodes: [...network.nodes, node],
@@ -141,11 +247,54 @@ export function updateNode(
     return network;
   }
   
-  const updatedNodes = [...network.nodes];
-  updatedNodes[nodeIndex] = {
-    ...updatedNodes[nodeIndex],
-    ...updates
+  // Get the current node
+  const currentNode = network.nodes[nodeIndex];
+  
+  // Special handling for intertwiner updates to ensure proper merging of IntertwinerData objects
+  let updatedIntertwiner = updates.intertwiner;
+  
+  // If both current and updates have object-based intertwiners, merge them
+  if (updates.intertwiner !== undefined) {
+    if (typeof currentNode.intertwiner === 'object' && 
+        currentNode.intertwiner !== null && 
+        typeof updates.intertwiner === 'object' && 
+        updates.intertwiner !== null) {
+      // Merge the intertwiner objects
+      updatedIntertwiner = {
+        ...currentNode.intertwiner,
+        ...updates.intertwiner
+      };
+    }
+    // If current is number but update is object, wrap the current value
+    else if (typeof currentNode.intertwiner === 'number' && 
+             typeof updates.intertwiner === 'object' && 
+             updates.intertwiner !== null) {
+      updatedIntertwiner = {
+        value: currentNode.intertwiner,
+        ...updates.intertwiner
+      };
+    }
+    // If current is object but update is number, preserve the object but update value
+    else if (typeof currentNode.intertwiner === 'object' && 
+             currentNode.intertwiner !== null && 
+             typeof updates.intertwiner === 'number') {
+      updatedIntertwiner = {
+        ...currentNode.intertwiner,
+        value: updates.intertwiner
+      };
+    }
+    // Otherwise, just use the update value directly (number → number or full replacement)
+  }
+  
+  // Create the updated node, handling the intertwiner specially
+  const updatedNode = {
+    ...currentNode,
+    ...updates,
+    ...(updatedIntertwiner !== undefined ? { intertwiner: updatedIntertwiner } : {})
   };
+  
+  const updatedNodes = [...network.nodes];
+  updatedNodes[nodeIndex] = updatedNode;
   
   return {
     ...network,
@@ -357,12 +506,25 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
     // For placeholder nodes, ensure no label is shown
     const label = node.type === 'placeholder' ? '' : (node.label || `Node ${node.id}`);
     
+    // Convert intertwiner to a structure that Cytoscape can handle
+    const intertwiners = typeof node.intertwiner === 'number' 
+      ? { value: node.intertwiner } // Simple numeric intertwiner
+      : { 
+          value: node.intertwiner.value,
+          dimension: node.intertwiner.dimension,
+          basisStateRef: node.intertwiner.basisStateRef,
+          recouplingScheme: node.intertwiner.recouplingScheme,
+          // Convert edgeOrder to a string for Cytoscape data (which doesn't handle arrays well)
+          edgeOrder: node.intertwiner.edgeOrder ? node.intertwiner.edgeOrder.join(',') : undefined
+        };
+    
     elements.push({
       group: 'nodes',
       data: {
         id: node.id,
         label: label,
-        intertwiner: node.intertwiner,
+        intertwiner: intertwiners.value, // Keep primary value the same for backward compatibility
+        intertwiners: intertwiners, // Store full intertwiner data for advanced functionality
         position: node.position, // Store position in data for later access
         type: node.type || 'regular', // Use node type or default to regular
         ...node.properties

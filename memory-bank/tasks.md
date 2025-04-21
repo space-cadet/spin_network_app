@@ -4,6 +4,7 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
+| T35 | Enhance Node and Edge Data Structures for Intertwiners | 🔄 IN PROGRESS | MEDIUM | 2025-04-21 | T20 | Deepak |
 | T34 | Complete Simulation Engine Migration to Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T1, T14 | Deepak |
 | T33 | Fix Documentation Rendering and Interaction Issues | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T28 | Deepak |
 | T32 | Fix Library Build Errors | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
@@ -67,6 +68,31 @@
 
 **Notes**:
 This task represents the final step in the Simulation Library Abstraction project, focusing on fully migrating all simulation logic from the React app to the standalone library. The goal is to ensure there's only one version of the simulation engine - the standalone library version - while the React app only contains the UI-specific code with adapters that connect to the library.
+
+### T35: Enhance Node and Edge Data Structures for Intertwiners
+**Description**: Enhance the data structures for nodes and edges in the spin network to better represent the physics concepts, particularly improving the intertwiner representation to support intertwiner spaces with multiple dimensions and basis states.
+**Status**: 🔄 IN PROGRESS
+**Priority**: MEDIUM
+**Started**: April 21, 2025
+**Last Active**: April 21, 2025 23:45 IST
+**Dependencies**: T20
+**Completion Criteria**:
+- ✅ Define enhanced `IntertwinerData` interface to replace the simple numerical representation
+- ✅ Update `NetworkNode` interface to use the new `IntertwinerData` interface
+- ✅ Implement validation function to ensure intertwiner values are consistent with adjacent edge spins
+- ✅ Update `networkToCytoscape` function to handle the new intertwiner representation
+- ✅ Update any functions that create or modify nodes to support the new interface
+- ✅ Maintain backward compatibility with existing code
+- ✅ Add utility functions to calculate intertwiner dimension based on adjacent edge spins
+- ⬜ Add documentation about the new data structure
+
+**Related Files**:
+- `/src/models/types.ts` - Core type definitions
+- `/src/models/networkModel.ts` - Network model implementation
+- `/src/components/workspace/CytoscapeManager/CytoscapeManager.tsx` - Visualization component
+
+**Notes**:
+The current implementation represents intertwiners as simple numerical values, which doesn't capture the full complexity of the physics model. This enhancement will modify the data structure to better represent intertwiner spaces with their dimensions and basis states, while maintaining backward compatibility with existing code. The changes will lay the groundwork for more accurate physical simulations and visualizations of spin networks.
 
 A comprehensive migration plan has been created in `standalone-migration-plan.md` that outlines a systematic approach with seven phases:
 1. Identify all dependencies between React components and the simulation code

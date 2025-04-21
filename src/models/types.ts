@@ -3,6 +3,17 @@
  */
 
 /**
+ * Represents intertwiner data with physical properties
+ */
+export interface IntertwinerData {
+  value: number;                   // The numerical value (current intertwiner number)
+  dimension?: number;              // Dimension of the intertwiner space
+  basisStateRef?: string;          // Reference to a basis state in the library
+  recouplingScheme?: string;       // Optional recoupling scheme (e.g., "(j1,j2)(j3,j4)")
+  edgeOrder?: string[];            // Optional ordered array of edge IDs
+}
+
+/**
  * Represents a node (intertwiner) in the spin network
  */
 export interface NetworkNode {
@@ -11,7 +22,7 @@ export interface NetworkNode {
     x: number;
     y: number;
   };
-  intertwiner: number; // The intertwiner value (typically a half-integer)
+  intertwiner: number | IntertwinerData; // The intertwiner value or structure
   label?: string; // Optional display label
   type?: string; // Node type ID (default: 'regular')
   properties?: Record<string, any>; // Additional custom properties
