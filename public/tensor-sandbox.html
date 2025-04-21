@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Network Tensor Sandbox</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px 5px 0 0;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .panel {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.3rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .flex-row {
+            display: flex;
+            gap: 20px;
+        }
+        .flex-row > div {
+            flex: 1;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.secondary {
+            background-color: #7f8c8d;
+        }
+        button.secondary:hover {
+            background-color: #6d7b7c;
+        }
+        .action-button {
+            margin-top: 5px;
+        }
+        canvas {
+            width: 100%;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        table th {
+            background-color: #f8f9fa;
+        }
+        .tensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .tensor-cell {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Spin Network Tensor Sandbox</h1>
+            <div>
+                <button class="secondary" id="resetButton">Reset</button>
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <!-- Left Panel - Network Creation -->
+            <div class="panel">
+                <h2>Network Creation</h2>
+                <div class="form-group">
+                    <label for="networkType">Network Type:</label>
+                    <select id="networkType">
+                        <option value="empty">Empty Network</option>
+                        <option value="line">Line Network</option>
+                        <option value="ring">Ring Network</option>
+                        <option value="custom">Custom Network</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nodeCount">Number of Nodes:</label>
+                    <input type="number" id="nodeCount" value="4" min="1" max="20">
+                </div>
+                <div class="form-group">
+                    <label for="defaultSpin">Default Spin Value:</label>
+                    <select id="defaultSpin">
+                        <option value="0.5">1/2 (Spin 1/2)</option>
+                        <option value="1">1 (Spin 1)</option>
+                        <option value="1.5">3/2 (Spin 3/2)</option>
+                        <option value="2">2 (Spin 2)</option>
+                    </select>
+                </div>
+                <button id="createNetworkButton">Create Network</button>
+
+                <div class="info-box">
+                    Create a spin network with tensor nodes and state vector edges. The network will be displayed in the visualization panel.
+                </div>
+            </div>
+
+            <!-- Right Panel - Visualization -->
+            <div class="panel">
+                <h2>Visualization</h2>
+                <canvas id="networkCanvas" height="300"></canvas>
+                <div class="form-group">
+                    <label for="visualizationMode">Visualization Mode:</label>
+                    <select id="visualizationMode">
+                        <option value="network">Network Structure</option>
+                        <option value="tensor">Tensor Values</option>
+                        <option value="stateVector">State Vectors</option>
+                        <option value="physical">Physical Properties</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <!-- Left Panel - Node Operations -->
+            <div class="panel">
+                <h2>Tensor Node Operations</h2>
+                <div class="form-group">
+                    <label for="selectedNode">Selected Node:</label>
+                    <select id="selectedNode">
+                        <option value="">Select a node...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tensor Dimensions:</label>
+                    <div id="tensorDimensions">Not selected</div>
+                </div>
+                <div class="form-group">
+                    <label>Node Intertwiner:</label>
+                    <div id="nodeIntertwiner">Not selected</div>
+                </div>
+                <div class="form-group">
+                    <label>Tensor Basis:</label>
+                    <div id="tensorBasis">Not selected</div>
+                </div>
+                <div class="form-group">
+                    <label>Tensor Values:</label>
+                    <div class="tensor-grid" id="tensorValues">
+                        <!-- Tensor values will be displayed here -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Set Tensor Element:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="tensorIndices" placeholder="Indices (e.g. 0,1,0)">
+                        <input type="text" id="tensorValue" placeholder="Value (e.g. 1+2i)">
+                    </div>
+                    <button class="action-button" id="setTensorElementButton">Set Element</button>
+                </div>
+                <div class="form-group">
+                    <label>Node Physical Properties:</label>
+                    <div id="nodeProperties">Not selected</div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Edge Operations -->
+            <div class="panel">
+                <h2>State Vector Edge Operations</h2>
+                <div class="form-group">
+                    <label for="selectedEdge">Selected Edge:</label>
+                    <select id="selectedEdge">
+                        <option value="">Select an edge...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Edge Spin:</label>
+                    <div id="edgeSpin">Not selected</div>
+                </div>
+                <div class="form-group">
+                    <label>State Vector Dimension:</label>
+                    <div id="stateVectorDimension">Not selected</div>
+                </div>
+                <div class="form-group">
+                    <label>State Vector Amplitudes:</label>
+                    <table id="stateVectorAmplitudes">
+                        <thead>
+                            <tr>
+                                <th>Index</th>
+                                <th>Real</th>
+                                <th>Imaginary</th>
+                                <th>Magnitude</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- State vector values will be displayed here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-group">
+                    <label>Set Amplitude:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="amplitudeIndex" placeholder="Index">
+                        <input type="text" id="amplitudeValue" placeholder="Value (e.g. 1+2i)">
+                    </div>
+                    <button class="action-button" id="setAmplitudeButton">Set Amplitude</button>
+                </div>
+                <div class="form-group">
+                    <button id="normalizeButton">Normalize State Vector</button>
+                </div>
+                <div class="form-group">
+                    <label>Edge Physical Properties:</label>
+                    <div id="edgeProperties">Not selected</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel - Simulation Controls -->
+        <div class="panel">
+            <h2>Analysis</h2>
+            <div class="flex-row">
+                <div>
+                    <div class="form-group">
+                        <label>Total Network Volume:</label>
+                        <div id="totalVolume">0</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Network Area:</label>
+                        <div id="totalArea">0</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Network State:</label>
+                        <div id="networkState">No state defined</div>
+                    </div>
+                    <div class="form-group">
+                        <button id="calculatePropertiesButton">Calculate Properties</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts will be added in the next stage -->
+    <script>
+        // Placeholder for future implementation
+        console.log("Tensor Sandbox loaded - UI only version");
+    </script>
+</body>
+</html>

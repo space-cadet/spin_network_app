@@ -1,9 +1,10 @@
 # Task Registry
-*Last Updated: April 21, 2025 (22:30 IST)*
+*Last Updated: April 22, 2025 (14:45 IST)*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
+| T36 | Implement Tensor and State Vector Sandbox | 🔄 IN PROGRESS | MEDIUM | 2025-04-22 | T20, T35 | Deepak |
 | T35 | Enhance Node and Edge Data Structures for Intertwiners | 🔄 IN PROGRESS | MEDIUM | 2025-04-21 | T20 | Deepak |
 | T34 | Complete Simulation Engine Migration to Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T1, T14 | Deepak |
 | T33 | Fix Documentation Rendering and Interaction Issues | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T28 | Deepak |
@@ -34,6 +35,47 @@
 | T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T36: Implement Tensor and State Vector Sandbox
+**Description**: Create a test sandbox to experiment with enhanced tensor-based representation of nodes and state vector representation of edges in spin networks before integrating these features into the main application.
+**Status**: 🔄 IN PROGRESS
+**Priority**: MEDIUM
+**Started**: April 22, 2025
+**Last Active**: April 22, 2025 (14:45 IST)
+**Dependencies**: T20, T35
+**Completion Criteria**:
+- ✅ Create implementation plan in `/memory-bank/implementation-details/tensor-test.md`
+- ⬜ Design enhanced TensorNode and StateVectorEdge data structures
+- ⬜ Create HTML test page for the sandbox
+- ⬜ Implement tensor operations module (creation, element access, contraction)
+- ⬜ Implement state vector operations module (quantum state vectors)
+- ⬜ Create tensor factory functions for intertwiner generation
+- ⬜ Implement simple visualization for tensors and state vectors
+- ⬜ Add test cases for validation against analytical solutions
+- ⬜ Implement time evolution of tensors during simulation
+- ⬜ Connect with existing intertwinerSpace.ts implementation
+- ⬜ Add documentation on tensor operations and representations
+
+**Related Files**:
+- `/memory-bank/implementation-details/tensor-test.md` - Implementation plan
+- `/lib/core/tensor.ts` - To be created
+- `/lib/core/intertwinerSpace.ts` - Existing implementation to build on
+- `/lib/quantum/tensorOperations.ts` - To be created
+- `/lib/quantum/stateVectorOperations.ts` - To be created
+- `/public/tensor-sandbox.html` - To be created
+- `/public/scripts/tensor-test.js` - To be created
+
+**Notes**:
+This task focuses on developing a test sandbox for implementing and validating tensor and state vector operations before integrating them into the main application. By creating a dedicated testing environment, we can explore the mathematical representations and operations independently of the application's UI components. This approach will help us verify that the quantum-mechanical properties of spin networks are correctly implemented before adding complexity with the full application architecture.
+
+The sandbox will allow us to:
+1. Test sparse tensor representation for efficient storage of intertwiner tensors
+2. Explore quantum state vector operations for representing edge spins
+3. Verify that tensor operations like contraction work correctly
+4. Test the integration with the existing intertwinerSpace.ts functionality
+5. Visualize tensors and state vectors for better understanding
+
+The implementation plan in tensor-test.md outlines the approach in detail, with specific data structures, core components, and implementation phases.
 
 ### T34: Complete Simulation Engine Migration to Standalone Library
 **Description**: Fully migrate all simulation engine dependencies from the React app to the standalone library, ensuring there's only one version of the simulation engine in the codebase. This task builds upon the work in T1 (Simulation Library Abstraction) and T14 (State Management Architecture) to complete the migration and eliminate duplicate implementations.
