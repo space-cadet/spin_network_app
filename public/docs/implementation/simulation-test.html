@@ -131,23 +131,74 @@
     // Try importing with error handling
     let runSimulationTest, SpinNetworkGeometryCalculator, SimulationAnalyzer;
     
-    try {
-      const testSimulation = await import('../src/test-simulation.js');
-      runSimulationTest = testSimulation.runSimulationTest;
-      console.log('Successfully imported runSimulationTest');
-    } catch (error) {
-      console.error('Error importing test-simulation.js:', error);
+    // Helper for showing import errors in UI
+    function showImportError(message) {
+      const consoleOutput = document.getElementById('console-output');
+      if (consoleOutput) {
+        consoleOutput.textContent += `❌ ERROR: ${message}\n`;
+      }
+      
+      // Also add an error message at the top
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.style.display = 'block';
+      errorDiv.textContent = message;
+      
+      // Add suggestion
+      const suggestion = document.createElement('p');
+      suggestion.textContent = 'Try running "pnpm run build:lib" to ensure all files are properly built.';
+      errorDiv.appendChild(suggestion);
+      
+      // Insert at the top
+      document.body.insertBefore(errorDiv, document.body.firstChild);
     }
     
-    try {
-      const simulation = await import('../src/simulation/index.js');
+    // Try multiple import paths
+    async function tryImport(paths, errorMessage) {
+      for (const path of paths) {
+        try {
+          console.log(`Trying to import from ${path}...`);
+          return await import(path);
+        } catch (e) {
+          console.error(`Failed to import from ${path}:`, e);
+        }
+      }
+      showImportError(errorMessage);
+      return null;
+    }
+    
+    // Try to import test simulation from various paths
+    const testSimulation = await tryImport(
+      [
+        '../src/test-simulation.js',
+        '/public/test-sim.js',
+        '/docs/src/test-simulation.js',
+        '/test-sim.js'
+      ],
+      'Could not load simulation test module. Files may be missing.'
+    );
+    
+    if (testSimulation) {
+      runSimulationTest = testSimulation.runSimulationTest;
+      console.log('Successfully imported runSimulationTest');
+    }
+    
+    // Try to import simulation components from various paths
+    const simulation = await tryImport(
+      [
+        '../src/simulation/index.js',
+        '/docs/src/simulation/index.js',
+        '/public/src/simulation/index.js'
+      ],
+      'Could not load simulation components. Core simulation files may be missing.'
+    );
+    
+    if (simulation) {
       SpinNetworkGeometryCalculator = simulation.SpinNetworkGeometryCalculator;
       SimulationAnalyzer = simulation.SimulationAnalyzer;
       console.log('Successfully imported simulation components');
       console.log('SpinNetworkGeometryCalculator available:', typeof SpinNetworkGeometryCalculator !== 'undefined');
       console.log('SimulationAnalyzer available:', typeof SimulationAnalyzer !== 'undefined');
-    } catch (error) {
-      console.error('Error importing simulation/index.js:', error);
     }
     
     // DOM elements

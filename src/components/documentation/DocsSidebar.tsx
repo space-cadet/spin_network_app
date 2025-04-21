@@ -22,15 +22,15 @@ const DocsSidebar: React.FC = () => {
   const [docMeta, setDocMeta] = useState<Record<string, DocMeta>>({});
   
   const physicsDocs = [
-    { path: '/docs/physics/physics-notebook', label: 'Physics Notebook' },
-    { path: '/docs/physics/mathematical-roadmap', label: 'Mathematical Foundations' },
-    { path: '/docs/physics/intertwiner-spaces', label: 'Intertwiner Spaces' },
-    { path: '/docs/physics/unified-dynamics', label: 'Unified Dynamics Approach' },
+    { path: '/docs/physics/physics-notebook.html', label: 'Physics Notebook', format: 'html' },
+    { path: '/docs/physics/mathematical-roadmap', label: 'Mathematical Foundations', format: 'md' },
+    { path: '/docs/physics/intertwiner-spaces', label: 'Intertwiner Spaces', format: 'md' },
+    { path: '/docs/physics/unified-dynamics', label: 'Unified Dynamics Approach', format: 'md' },
   ];
   
   const implementationDocs = [
-    { path: '/docs/implementation/standalone-guide', label: 'Standalone Library Guide' },
-    { path: '/docs/implementation/simulation-test', label: 'Simulation Test Environment' },
+    { path: '/docs/implementation/standalone-guide.html', label: 'Standalone Library Guide', format: 'html' },
+    { path: '/docs/implementation/simulation-test.html', label: 'Simulation Test Environment', format: 'html' },
   ];
   
   // Toggle TOC expansion for a specific document
@@ -70,7 +70,7 @@ const DocsSidebar: React.FC = () => {
       
       for (const doc of allDocs) {
         // Skip HTML documents - TOC only for markdown
-        if (doc.path.includes('html')) continue;
+        if (doc.format === 'html' || doc.path.endsWith('.html')) continue;
         
         try {
           // Convert path to file path
@@ -92,6 +92,7 @@ const DocsSidebar: React.FC = () => {
               [doc.path]: {
                 path: doc.path,
                 label: doc.label,
+                format: doc.format || 'md',
                 toc
               }
             }));

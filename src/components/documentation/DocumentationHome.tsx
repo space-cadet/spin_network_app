@@ -30,7 +30,7 @@ const DocumentationHome: React.FC = () => {
           <ul className="space-y-2 mb-6">
             <li className="flex items-center">
               <FaArrowRight className="text-blue-500 mr-2 text-sm" />
-              <Link to="/docs/physics/physics-notebook" className="text-blue-600 hover:underline">
+              <Link to="/docs/physics/physics-notebook.html" className="text-blue-600 hover:underline">
                 Physics Notebook
               </Link>
             </li>
@@ -69,13 +69,13 @@ const DocumentationHome: React.FC = () => {
           <ul className="space-y-2 mb-6">
             <li className="flex items-center">
               <FaArrowRight className="text-blue-500 mr-2 text-sm" />
-              <Link to="/docs/implementation/standalone-guide" className="text-blue-600 hover:underline">
+              <Link to="/docs/implementation/standalone-guide.html" className="text-blue-600 hover:underline">
                 Standalone Library Guide
               </Link>
             </li>
             <li className="flex items-center">
               <FaArrowRight className="text-blue-500 mr-2 text-sm" />
-              <Link to="/docs/implementation/simulation-test" className="text-blue-600 hover:underline">
+              <Link to="/docs/implementation/simulation-test.html" className="text-blue-600 hover:underline">
                 Simulation Test Environment
               </Link>
             </li>

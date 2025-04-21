@@ -258,7 +258,25 @@
   
   <!-- Library scripts -->
   <script src="https://unpkg.com/mathjs@12.1.0/lib/browser/math.js"></script>
-  <script src="/dist/lib/spin-network.umd.js"></script>
+  
+  <!-- Try to load the UMD library, with fallback error handling -->
+  <script>
+    // Create an error handler to track missing files
+    function handleMissingScript() {
+      console.error("Error loading spin-network.umd.js - Please run 'pnpm run build:lib' to generate this file");
+      const consoleOutput = document.getElementById('console-output');
+      if (consoleOutput) {
+        consoleOutput.textContent += "❌ ERROR: Could not load spin-network.umd.js\n";
+        consoleOutput.textContent += "Please run 'pnpm run build:lib' to generate the required library file.\n";
+        consoleOutput.textContent += "Expected path: /dist/lib/spin-network.umd.js\n";
+      }
+    }
+  </script>
+  
+  <!-- Try multiple paths for the UMD library -->
+  <script src="/dist/lib/spin-network.umd.js" onerror="handleMissingScript()"></script>
+  
+  <!-- Standalone test script -->
   <script src="standalone-test.js"></script>
 </body>
 </html>

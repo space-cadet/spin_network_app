@@ -1,6 +1,50 @@
 # Error Log
 
-*Last Updated: 2025-04-20 (22:30 IST)*
+*Last Updated: 2025-04-21 (10:30 IST)*
+
+## 2025-04-21 10:30 IST: T28 - Documentation Page Rendering and Navigation Issues
+
+**Files:**
+- `/src/components/documentation/DocsViewer.tsx`
+- `/src/components/documentation/DocsSidebar.tsx`
+- `/public/docs/physics/*.md`
+- `/public/docs/implementation/standalone-guide.html`
+- `/public/docs/implementation/simulation-test.html`
+
+**Error Message/Symptoms:**
+1. In markdown files, section titles are displayed with ID markers: `Core Concepts {#core-concepts}`
+2. Standalone-guide.html buttons don't function due to script loading failures
+3. Simulation-test.html shows error: "Missing Simulation Files" even after running `pnpm run build:lib`
+4. Pressing reload on documentation pages causes content to disappear and back button doesn't restore the page
+
+**Cause:**
+1. **Markdown Format Issues:** The DocsViewer component is not correctly processing ID anchors in markdown headers
+2. **Script Dependencies:** The standalone-guide.html depends on spin-network.umd.js which isn't correctly loaded
+3. **Module Resolution:** The simulation-test.html is attempting to import modules from incorrect paths
+4. **Routing Problems:** The routing configuration is not correctly handling page refreshes or back navigation
+
+**Partial Fix:**
+Implemented multiple fixes that resolved some, but not all of the issues:
+1. Created placeholder script modules to prevent page crashes
+2. Fixed path resolution in DocsViewer to load Markdown and HTML content correctly
+3. Added error handling and user-friendly messages for missing script dependencies
+4. Created the proper folder structure for documentation
+
+**Remaining Issues:**
+1. Section titles still display the ID anchors (e.g. `{#core-concepts}`) instead of parsing them correctly
+2. The standalone-guide.html buttons still don't work as the script loading path is incorrect
+3. The simulation test module requires importing actual implementation code that's not available in the docs directory
+4. Navigation issues persist when refreshing pages due to routing conflicts
+
+**Next Steps:**
+1. Modify ReactMarkdown configuration in DocsViewer to properly handle ID anchors in headings
+2. Update the bundling process to output the spin-network.umd.js file to a location accessible in both dev and prod
+3. Create a proper module aliasing system to handle imports in the documentation pages
+4. Implement proper routing with history API integration to handle page refreshes
+
+**Task:** T28 - Fix Documentation Path Issues
+
+*****
 
 ## 2025-04-20 22:30 IST: T32 - TypeScript Build Error in Intertwiner Export
 

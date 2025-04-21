@@ -27,52 +27,54 @@ const DocsViewer: React.FC<DocsViewerProps> = ({ type }) => {
       setError(null);
       
       try {
-        // List of possible paths to try in order
-        const possiblePaths = [];
+        // Determine if we're dealing with an HTML file explicitly
+        const isExplicitHtml = docId?.endsWith('.html');
+        let path = '';
         
-        // Prepare possible paths based on provided docId
+        // Handle paths with and without extensions
         if (docId?.includes('.')) {
-          // If docId already has an extension
-          possiblePaths.push(`/docs/${type}/${docId}`);
+          // Path already has an extension
+          path = `/docs/${type}/${docId}`;
         } else {
-          // Try HTML first (most likely to exist in our app structure)
-          possiblePaths.push(`/docs/${type}/${docId}.html`);
-          possiblePaths.push(`/docs/${type}/${docId}.md`);
-          
-          // Try public directory paths as fallbacks
-          possiblePaths.push(`/public/docs/${type}/${docId}.html`);
-          possiblePaths.push(`/public/docs/${type}/${docId}.md`);
+          // Try to load as markdown by default, unless it's a known HTML file
+          path = `/docs/${type}/${docId}.md`;
         }
         
-        // Also try root public paths for backwards compatibility
-        possiblePaths.push(`/${docId}.html`);
+        console.log(`Attempting to load document from: ${path}`);
+        let response = await fetch(path);
         
-        let foundContent = false;
-        let foundExtension = '';
-        let responseText = '';
+        // If not found and it's not explicitly HTML, try with .html extension
+        if (!response.ok && !isExplicitHtml && !docId?.includes('.')) {
+          const htmlPath = `/docs/${type}/${docId}.html`;
+          console.log(`Not found, trying HTML: ${htmlPath}`);
+          response = await fetch(htmlPath);
+        }
         
-        // Try each path until we find content
-        for (const path of possiblePaths) {
-          try {
-            console.log(`Attempting to load document from: ${path}`);
-            const response = await fetch(path);
-            
-            if (response.ok) {
-              responseText = await response.text();
-              foundExtension = path.split('.').pop() || '';
-              foundContent = true;
-              console.log(`Successfully loaded document from: ${path}`);
-              break;
-            }
-          } catch (pathErr) {
-            console.log(`Path not found: ${path}`);
-            // Continue to next path
+        // If still not found, try alternative paths
+        if (!response.ok) {
+          // Try public directory paths as fallbacks
+          const publicPath = `/public/docs/${type}/${docId}${docId?.includes('.') ? '' : '.md'}`;
+          console.log(`Not found, trying public path: ${publicPath}`);
+          response = await fetch(publicPath);
+          
+          // Try HTML in public as last resort
+          if (!response.ok && !docId?.includes('.')) {
+            const publicHtmlPath = `/public/docs/${type}/${docId}.html`;
+            console.log(`Not found, trying public HTML: ${publicHtmlPath}`);
+            response = await fetch(publicHtmlPath);
           }
         }
         
-        if (!foundContent) {
+        // If still not found, throw error
+        if (!response.ok) {
           throw new Error(`Failed to load document: Could not find ${docId} in any expected location`);
         }
+        
+        const responseText = await response.text();
+        const foundPath = response.url;
+        const foundExtension = foundPath.split('.').pop()?.toLowerCase() || '';
+        
+        console.log(`Successfully loaded document from: ${foundPath} with extension: ${foundExtension}`);
         
         // Set content type flag
         setIsHtml(foundExtension === 'html');

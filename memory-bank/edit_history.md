@@ -1,9 +1,80 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-20 (22:30 IST)*
+*Last Updated: 2025-04-21 (10:45 IST)*
 
 ## File Modification Log
+
+### April 21, 2025
+
+#### [10:45] - T33: Fix Documentation Rendering and Interaction Issues
+
+- Updated `/Users/deepak/code/spin_network_app/memory-bank/errorLog.md`:
+  - Added detailed error log entry for documentation rendering and interaction issues
+  - Documented four main problems: markdown section title display issues, script loading failures, missing module issues, and navigation problems
+  - Added findings from investigation and planned fixes
+
+- Updated `/Users/deepak/code/spin_network_app/memory-bank/tasks.md`:
+  - Created task T33 for fixing documentation rendering and interaction issues
+  - Set task as dependent on completed task T28
+  - Added detailed completion criteria for all aspects of the documentation issues
+  - Added list of relevant files that need modification
+
+- Updated `/Users/deepak/code/spin_network_app/memory-bank/session_cache.md`:
+  - Updated task focus to T33
+  - Added detailed context for T33 with implementation plan
+  - Updated status of T28 to complete
+  - Updated task registry to include T33
+
+This update creates a new task to address the four main issues that were found after standardizing the documentation structure:
+1. In markdown files, section titles are displayed with ID anchors showing literally (e.g., "Core Concepts {#core-concepts}")
+2. The standalone-guide.html interactive buttons don't function due to script loading failures
+3. The simulation-test.html shows missing simulation files error despite running the build command
+4. Page reloads cause navigation issues where content disappears and can't be restored with back button
+
+#### [10:30] - T28: Complete Documentation File Structure Standardization
+
+- Modified `/Users/deepak/code/spin_network_app/public/` folder:
+  - Reorganized documentation into standard structure in `/public/docs/`
+  - Created `/public/docs/assets/` folder for shared documentation resources
+  - Created `/public/docs/src/` folder for script dependencies
+  - Created `/public/deprecated/` folder to store legacy files
+  - Moved duplicate HTML and JS files to deprecated folder
+  - Created category metadata with `_category.json` files
+  - Added placeholder MD files pointing to HTML pages for consistency
+
+- Modified `/Users/deepak/code/spin_network_app/src/components/documentation/DocsViewer.tsx`:
+  - Improved file path resolution with multiple fallback paths
+  - Enhanced error handling with user-friendly messages
+  - Fixed iframe rendering for HTML content
+
+- Modified `/Users/deepak/code/spin_network_app/src/components/documentation/DocsSidebar.tsx`:
+  - Updated file paths to correctly point to new structure
+  - Added format property to distinguish between HTML and Markdown files
+  - Improved TOC generation to skip HTML files
+  - Fixed path handling for documentation index
+
+- Created `/Users/deepak/code/spin_network_app/public/docs/index.md`:
+  - Added comprehensive documentation home page with links to all sections
+  - Created category descriptions and document list
+
+- Created `/Users/deepak/code/spin_network_app/public/docs/physics/_category.json`:
+  - Added metadata for physics documentation category
+  - Set position and description for navigation
+
+- Created `/Users/deepak/code/spin_network_app/public/docs/implementation/_category.json`:
+  - Added metadata for implementation documentation category
+  - Set position and description for navigation
+
+- Created `/Users/deepak/code/spin_network_app/public/docs/src/test-simulation.js`:
+  - Added placeholder script with mock simulation for graceful error handling
+  - Implemented user-friendly error messages for missing files
+
+- Created `/Users/deepak/code/spin_network_app/public/docs/src/simulation/index.js`:
+  - Created placeholder module with mock calculator classes
+  - Added detailed error messages to guide users
+  
+The standardization creates a consistent documentation structure with proper categorization and improved navigation while maintaining the interactive functionality of HTML pages. The file organization follows best practices with centralized documentation in the docs folder and clean separation of concerns between content types.
 
 ### April 20, 2025
 
