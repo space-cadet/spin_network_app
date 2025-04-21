@@ -1,6 +1,6 @@
 # Session Cache
 
-*Last Updated: April 21, 2025 (23:15 IST)*
+*Last Updated: April 21, 2025 (23:55 IST)*
 
 ## Overview
 - Active Tasks: 15
@@ -41,29 +41,34 @@
 **Status:** 🔄 IN PROGRESS
 **Priority:** MEDIUM
 **Started:** 2025-04-21
-**Last Active:** 2025-04-21 23:15 IST
+**Last Active:** 2025-04-21 23:55 IST
 **Dependencies:** T20
 
 #### Context
-This task focuses on enhancing the data structures for nodes and edges in the spin network to better represent the physics concepts, particularly improving the intertwiner representation to support intertwiner spaces with multiple dimensions and basis states. Based on the insights from `mathematical-roadmap.md` and `intertwiner-spaces.md`, we need to update the network model to capture the full complexity of intertwiner spaces.
+This task focuses on enhancing the data structures for nodes and edges in the spin network to better represent the physics concepts, particularly improving the intertwiner representation to support intertwiner spaces with multiple dimensions and basis states. Based on the insights from `mathematical-roadmap.md` and `intertwiner-spaces.md`, we need to update the network model to capture the full complexity of intertwiner spaces, including proper tensor representation.
 
 #### Critical Files
 - `/src/models/types.ts` - Core type definitions to update
 - `/src/models/networkModel.ts` - Network model implementation to modify
 - `/src/components/workspace/CytoscapeManager/CytoscapeManager.tsx` - Visualization component that uses the model
+- `/memory-bank/implementation-details/tensor-plan.md` - Implementation plan for tensor structure
+- `/src/utils/intertwinerTensorUtils.ts` - (To be created) Tensor utility functions
+- `/src/utils/intertwinerTensorFactory.ts` - (To be created) Factory for creating tensor representations
 
 #### Implementation Progress
 1. ✅ Define enhanced `IntertwinerData` interface to replace the simple numerical representation
-2. ⬜ Update `NetworkNode` interface to use the new `IntertwinerData` interface
-3. ⬜ Implement validation function to ensure intertwiner values are consistent with adjacent edge spins
-4. ⬜ Update `networkToCytoscape` function to handle the new intertwiner representation
-5. ⬜ Update any functions that create or modify nodes to support the new interface
-6. ⬜ Maintain backward compatibility with existing code
-7. ⬜ Add utility functions to calculate intertwiner dimension based on adjacent edge spins
-8. ⬜ Add documentation about the new data structure
+2. ✅ Create comprehensive implementation plan for tensor representation
+3. ⬜ Create new interfaces for tensor data structure (IntertwinerTensorData, SparseIntertwinerElement, Complex)
+4. ⬜ Update `NetworkNode` interface to use the enhanced `IntertwinerData` interface
+5. ⬜ Implement utility functions for tensor operations (creation, access, contraction)
+6. ⬜ Create factory functions for generating standard intertwiner tensors
+7. ⬜ Implement validation function to ensure tensor values are consistent with adjacent edge spins
+8. ⬜ Update `networkToCytoscape` function to handle the tensor representation
+9. ⬜ Add quantum state calculation functions for graph states
+10. ⬜ Implement tensor visualization helpers
 
 #### Working State
-Successfully implemented the enhanced node and edge data structures:
+Successfully implemented the enhanced node and edge data structures and created a comprehensive plan for tensor representation:
 
 1. **Data Structure Implementation**:
    - Added `IntertwinerData` interface to store rich information about intertwiner spaces
@@ -78,13 +83,15 @@ Successfully implemented the enhanced node and edge data structures:
    - Updated `updateNode()` with special handling for merging intertwiner objects
    - Modified `networkToCytoscape()` to properly expose intertwiner data to visualization
 
-3. **Physics Model Integration**:
-   - Added support for tracking intertwiner space dimensions
-   - Implemented basis state references for future integration with library of states
-   - Added fields for recoupling schemes and edge ordering
-   - Created placeholders for more advanced calculations to be implemented
+3. **Tensor Implementation Plan**:
+   - Created comprehensive plan in `tensor-plan.md` outlining all aspects of implementation
+   - Designed sparse tensor representation for efficient storage of intertwiner tensors
+   - Planned utility functions for tensor creation, element access, and contraction
+   - Included factory functions for generating standard intertwiners (3j, 4j symbols)
+   - Designed quantum state calculation functions for computing graph state amplitudes
+   - Planned tensor visualization components for interactive exploration
 
-The implementation maintains backward compatibility while significantly enhancing the physics representation capabilities. The updated model can represent the full complexity of intertwiner spaces with their dimensions and basis states, which is crucial for accurate quantum geometric calculations. Next steps will involve implementing actual physics-based calculations for intertwiner dimensions and validations based on adjacent edge spins.
+The implementation maintains backward compatibility while creating a path to significantly enhance the physics representation capabilities. The next step is to implement the tensor data structure according to the plan in tensor-plan.md, which will enable proper quantum state calculations and visualization of intertwiner spaces. This will make the application a more powerful tool for exploring quantum geometry.
 
 ### T34: Complete Simulation Engine Migration to Standalone Library
 **Status:** 🔄 IN PROGRESS

@@ -70,7 +70,7 @@
 This task represents the final step in the Simulation Library Abstraction project, focusing on fully migrating all simulation logic from the React app to the standalone library. The goal is to ensure there's only one version of the simulation engine - the standalone library version - while the React app only contains the UI-specific code with adapters that connect to the library.
 
 ### T35: Enhance Node and Edge Data Structures for Intertwiners
-**Description**: Enhance the data structures for nodes and edges in the spin network to better represent the physics concepts, particularly improving the intertwiner representation to support intertwiner spaces with multiple dimensions and basis states.
+**Description**: Enhance the data structures for nodes and edges in the spin network to better represent the physics concepts, particularly improving the intertwiner representation to support intertwiner spaces with multiple dimensions and basis states. Implement a sparse tensor representation for efficient storage and manipulation of intertwiner tensors.
 **Status**: 🔄 IN PROGRESS
 **Priority**: MEDIUM
 **Started**: April 21, 2025
@@ -85,11 +85,21 @@ This task represents the final step in the Simulation Library Abstraction projec
 - ✅ Maintain backward compatibility with existing code
 - ✅ Add utility functions to calculate intertwiner dimension based on adjacent edge spins
 - ⬜ Add documentation about the new data structure
+- ⬜ Create tensor data structures for intertwiners (`IntertwinerTensorData`, `SparseIntertwinerElement`, `Complex`)
+- ⬜ Implement utility functions for tensor operations (creation, element access, contraction)
+- ⬜ Create factory functions for generating standard intertwiner tensors (3j, 4j, etc.)
+- ⬜ Add quantum state calculation functions for graph states
+- ⬜ Implement tensor visualization helpers
+- ⬜ Add performance optimizations for tensor operations
 
 **Related Files**:
 - `/src/models/types.ts` - Core type definitions
 - `/src/models/networkModel.ts` - Network model implementation
 - `/src/components/workspace/CytoscapeManager/CytoscapeManager.tsx` - Visualization component
+- `/memory-bank/implementation-details/tensor-plan.md` - Implementation plan
+- `/src/utils/intertwinerTensorUtils.ts` - To be created
+- `/src/utils/intertwinerTensorFactory.ts` - To be created
+- `/src/utils/quantumStateUtils.ts` - To be created
 
 **Notes**:
 The current implementation represents intertwiners as simple numerical values, which doesn't capture the full complexity of the physics model. This enhancement will modify the data structure to better represent intertwiner spaces with their dimensions and basis states, while maintaining backward compatibility with existing code. The changes will lay the groundwork for more accurate physical simulations and visualizations of spin networks.
