@@ -1,5 +1,5 @@
 # Component Index
-*Last Updated: 2025-04-19T08:17:32.144Z (Auto-generated)*
+*Last Updated: 2025-04-21T13:14:38.394Z (Auto-generated)*
 
 This file maps conceptual component names to their primary file locations. Paths are relative to the project root (`/Users/deepak/code/spin_network_app`).
 
@@ -8,6 +8,10 @@ This file maps conceptual component names to their primary file locations. Paths
 | CollapsibleSection             | `src/components/common/CollapsibleSection.tsx`                         | React Component         | -                                            |
 | ConfirmationDialog             | `src/components/common/ConfirmationDialog.tsx`                         | React Component         | -                                            |
 | CytoscapeManager               | `src/components/workspace/CytoscapeManager/CytoscapeManager.tsx`       | React Component         | `src/components/workspace/CytoscapeManager/index.ts` |
+| DocsLayout                     | `src/components/documentation/DocsLayout.tsx`                          | React Component         | `src/components/documentation/index.ts`      |
+| DocsSidebar                    | `src/components/documentation/DocsSidebar.tsx`                         | React Component         | `src/components/documentation/index.ts`      |
+| DocsViewer                     | `src/components/documentation/DocsViewer.tsx`                          | React Component         | `src/components/documentation/index.ts`      |
+| DocumentationHome              | `src/components/documentation/DocumentationHome.tsx`                   | React Component         | `src/components/documentation/index.ts`      |
 | EdgeTypeForm                   | `src/components/settings/types/EdgeTypeForm.tsx`                       | React Component         | `src/components/settings/types/index.ts`     |
 | EdgeTypeManager                | `src/components/settings/types/EdgeTypeManager.tsx`                    | React Component         | `src/components/settings/types/index.ts`     |
 | EnergyPlot                     | `src/components/visualization/EnergyPlot.tsx`                          | React Component         | -                                            |
