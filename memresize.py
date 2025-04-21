@@ -135,7 +135,16 @@ def parse_tasks(content):
             if row.strip() and '|' in row:
                 cells = [cell.strip() for cell in row.split('|')]
                 if len(cells) >= 6:  # Ensure we have enough cells
+                    # Skip header row or separator row
+                    if all(c.startswith('-') for c in cells if c) or 'ID' in cells[1]:
+                        continue
+                    
                     task_id = cells[1]
+                    # Validate that task_id follows the expected format (T followed by digits)
+                    if not re.match(r'^T\d+$', task_id):
+                        print(f"Skipping invalid task ID: {task_id}")
+                        continue
+                        
                     title = cells[2]
                     status = cells[3]
                     priority = cells[4]
@@ -167,7 +176,16 @@ def parse_tasks(content):
             if row.strip() and '|' in row:
                 cells = [cell.strip() for cell in row.split('|')]
                 if len(cells) >= 3:  # Ensure we have enough cells
+                    # Skip header row or separator row
+                    if all(c.startswith('-') for c in cells if c) or 'ID' in cells[1]:
+                        continue
+                        
                     task_id = cells[1]
+                    # Validate that task_id follows the expected format (T followed by digits)
+                    if not re.match(r'^T\d+$', task_id):
+                        print(f"Skipping invalid task ID: {task_id}")
+                        continue
+                        
                     title = cells[2]
                     completed = cells[3] if len(cells) > 3 else TIMESTAMP.split()[0]
                     
@@ -191,6 +209,12 @@ def parse_tasks(content):
     
     for match in details_matches:
         task_id = match.group(1)
+        
+        # Validate that task_id follows the expected format (T followed by digits)
+        if not re.match(r'^T\d+$', task_id):
+            print(f"Skipping invalid task ID in details section: {task_id}")
+            continue
+            
         title = match.group(2).strip()
         detail_content = match.group(0)
         
@@ -426,9 +450,15 @@ def create_master_task_file(tasks):
     paused_count = sum(1 for t in tasks.values() if t['status'] == '⏸️')
     completed_count = sum(1 for t in tasks.values() if t['status'] == '✅')
     
-    # Find latest task ID
-    task_ids = [t for t in tasks.keys()]
-    latest_task_id = max(task_ids, key=lambda x: int(x[1:])) if task_ids else "T0"
+    # Find latest task ID - only consider valid task IDs (T followed by a number)
+    valid_task_ids = [tid for tid in tasks.keys() if re.match(r'^T\d+$', tid)]
+    if valid_task_ids:
+        # Extract numbers from task IDs and find the maximum
+        task_numbers = [int(tid[1:]) for tid in valid_task_ids]
+        latest_task_number = max(task_numbers)
+        latest_task_id = f"T{latest_task_number}"
+    else:
+        latest_task_id = "T0"
     
     # Generate active tasks table
     active_rows = []
