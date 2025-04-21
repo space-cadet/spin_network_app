@@ -7,7 +7,6 @@
 | T33 | Fix Documentation Rendering and Interaction Issues | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T28 | Deepak |
 | T32 | Fix Library Build Errors | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
 | T28 | Fix Documentation Path Issues | ✅ COMPLETE | HIGH | 2025-04-20 | T25 | Deepak |
-=======
 | T27 | Fix Node/Edge Property Updates | ✅ COMPLETE | MEDIUM | 2025-04-20 | - | Deepak |
 | T26 | Fix BrowserFS in Vercel Deployment | ✅ COMPLETE | HIGH | 2025-04-20 | - | Deepak |
 | T1 | Simulation Library Abstraction | 🔄 IN PROGRESS | HIGH | 2025-04-14 | - | Deepak |
