@@ -125,102 +125,44 @@
     <pre id="console-output"></pre>
   </div>
   
+  <!-- Load the built library first -->
+  <script src="/dist/lib/spin-network.umd.js"></script>
+
   <script type="module">
     console.log('Starting script execution');
-    
-    // Try importing with error handling
-    let runSimulationTest, SpinNetworkGeometryCalculator, SimulationAnalyzer;
-    
-    // Helper for showing import errors in UI
-    function showImportError(message) {
-      const consoleOutput = document.getElementById('console-output');
-      if (consoleOutput) {
-        consoleOutput.textContent += `❌ ERROR: ${message}\n`;
-      }
-      
-      // Also add an error message at the top
+
+    // Access the library via the global window.SpinNetwork object created by the script tag
+    if (!window.SpinNetwork) {
       const errorDiv = document.createElement('div');
       errorDiv.className = 'error-message';
       errorDiv.style.display = 'block';
-      errorDiv.textContent = message;
-      
-      // Add suggestion
-      const suggestion = document.createElement('p');
-      suggestion.textContent = 'Try running "pnpm run build:lib" to ensure all files are properly built.';
-      errorDiv.appendChild(suggestion);
-      
-      // Insert at the top
+      errorDiv.textContent = `Spin Network library not loaded. Please ensure build:lib has been run and the script tag is correct.`;
       document.body.insertBefore(errorDiv, document.body.firstChild);
+      throw new Error('Spin Network library not loaded (window.SpinNetwork is undefined)');
+    } else {
+      console.log('Spin Network library loaded successfully via window.SpinNetwork');
     }
-    
-    // Try multiple import paths
-    async function tryImport(paths, errorMessage) {
-      for (const path of paths) {
-        try {
-          console.log(`Trying to import from ${path}...`);
-          return await import(path);
-        } catch (e) {
-          console.error(`Failed to import from ${path}:`, e);
-        }
-      }
-      showImportError(errorMessage);
-      return null;
-    }
-    
-    // Try to import test simulation from various paths
-    const testSimulation = await tryImport(
-      [
-        '../src/test-simulation.js',
-        '/public/test-sim.js',
-        '/docs/src/test-simulation.js',
-        '/test-sim.js'
-      ],
-      'Could not load simulation test module. Files may be missing.'
-    );
-    
-    if (testSimulation) {
-      runSimulationTest = testSimulation.runSimulationTest;
-      console.log('Successfully imported runSimulationTest');
-    }
-    
-    // Try to import simulation components from various paths
-    const simulation = await tryImport(
-      [
-        '../src/simulation/index.js',
-        '/docs/src/simulation/index.js',
-        '/public/src/simulation/index.js'
-      ],
-      'Could not load simulation components. Core simulation files may be missing.'
-    );
-    
-    if (simulation) {
-      SpinNetworkGeometryCalculator = simulation.SpinNetworkGeometryCalculator;
-      SimulationAnalyzer = simulation.SimulationAnalyzer;
-      console.log('Successfully imported simulation components');
-      console.log('SpinNetworkGeometryCalculator available:', typeof SpinNetworkGeometryCalculator !== 'undefined');
-      console.log('SimulationAnalyzer available:', typeof SimulationAnalyzer !== 'undefined');
-    }
-    
+
     // DOM elements
     const consoleOutput = document.getElementById('console-output');
     const resultsPanel = document.querySelector('.results-panel');
-    
+
     // Geometric property elements
     const totalVolumeElem = document.getElementById('total-volume');
     const totalAreaElem = document.getElementById('total-area');
     const effectiveDimensionElem = document.getElementById('effective-dimension');
     const volumeEntropyElem = document.getElementById('volume-entropy');
-    
+
     // Statistics elements
     const meanElem = document.getElementById('mean');
     const varianceElem = document.getElementById('variance');
     const skewnessElem = document.getElementById('skewness');
     const kurtosisElem = document.getElementById('kurtosis');
-    
+
     // Store current engine and graph for accessing from console
     window.currentEngine = null;
     window.currentGraph = null;
-    
+
     // Function to update the results panel with current data
     function updateResultsPanel() {
       console.log("updateResultsPanel called");
@@ -342,8 +284,8 @@
           
           try {
             console.log("Creating geometry calculator");
-            const geometryCalculator = new SpinNetworkGeometryCalculator();
-            
+            const geometryCalculator = new window.SpinNetwork.SpinNetworkGeometryCalculator(); // Use window.SpinNetwork
+
             // Calculate geometric properties with enhanced error handling
             console.log("Calculating total volume...");
             try {
@@ -390,7 +332,7 @@
             // Calculate statistics
             console.log("Calculating simulation statistics...");
             try {
-              const calculatedStats = SimulationAnalyzer.calculateStatistics(
+              const calculatedStats = window.SpinNetwork.SimulationAnalyzer.calculateStatistics( // Use window.SpinNetwork
                 state, currentTime
               );
               console.log("Statistics calculated:", calculatedStats);
@@ -474,15 +416,53 @@
     
     // Make the function globally available
     window.updateResultsPanel = updateResultsPanel;
-    
+
+    // Implement basic simulation test
+    window.runSimulationTest = async function() {
+      console.log("Starting simulation test...");
+
+      try {
+        // Create simulation components using window.SpinNetwork
+        window.currentEngine = window.SpinNetwork.createSimulationEngine();
+        window.currentGraph = window.SpinNetwork.createGraph();
+
+        // Create a simple line graph with 5 nodes
+        const lineGraphOptions = {
+          nodeCount: 5,
+          edgeSpin: 1.0
+        };
+        window.currentGraph = window.SpinNetwork.templates.createLineGraph(lineGraphOptions); // Use window.SpinNetwork
+
+        // Create initial state
+        const initialState = window.SpinNetwork.createStateVector(window.currentGraph.nodes.map(n => n.id)); // Use window.SpinNetwork
+
+        // Initialize engine with graph and state
+        window.currentEngine.initialize(window.currentGraph, initialState);
+
+        // Run simulation for 10 steps
+        for (let i = 0; i < 10; i++) {
+          window.currentEngine.step();
+        }
+
+        // Update results
+        updateResultsPanel();
+
+        console.log("Simulation test completed successfully");
+        return true;
+      } catch (error) {
+        console.error("Simulation test failed:", error);
+        return false;
+      }
+    };
+
     // Capture console.log output
     const originalLog = console.log;
     const originalError = console.error;
-    
+
     console.log = function() {
       // Call original console.log
       originalLog.apply(console, arguments);
-      
+
       // Add to our output
       const args = Array.from(arguments);
       const line = args.map(arg => {
@@ -491,14 +471,14 @@
         }
         return String(arg);
       }).join(' ');
-      
+
       consoleOutput.textContent += line + '\n';
     };
-    
+
     console.error = function() {
       // Call original console.error
       originalError.apply(console, arguments);
-      
+
       // Add to our output with error formatting
       const args = Array.from(arguments);
       const line = args.map(arg => {
@@ -507,64 +487,15 @@
         }
         return String(arg);
       }).join(' ');
-      
+
       consoleOutput.textContent += '❌ ERROR: ' + line + '\n';
     };
-    
-    // Modify runSimulationTest to update our UI and capture references
-    const originalRunTest = runSimulationTest;
-    window.runSimulationTest = async function() {
-      try {
-        console.log("Starting enhanced runSimulationTest...");
-        
-        // Run the original test
-        console.log("Calling original runSimulationTest function...");
-        const result = await originalRunTest();
-        console.log("Original runSimulationTest completed with result:", result);
-        
-        // Debug log for engine and graph references
-        console.log("Checking references - engine:", window.currentEngine ? "Available" : "Not available");
-        console.log("Checking references - graph:", window.currentGraph ? "Available" : "Not available");
-        
-        if (window.currentEngine) {
-          console.log("Engine state check:", window.currentEngine.getCurrentState() ? "State present" : "No state");
-        }
-        
-        // Attempt to update the results panel after a short delay
-        console.log("Setting timeout to update results panel...");
-        setTimeout(() => {
-          // If we have engine and graph references, update the panel
-          if (window.currentEngine && window.currentGraph) {
-            console.log("Updating results panel with simulation data...");
-            try {
-              const updateResult = updateResultsPanel();
-              console.log("Results panel update completed:", updateResult);
-            } catch (updateError) {
-              console.error("Error during updateResultsPanel:", updateError);
-              console.error("Error details:", updateError.message);
-              console.error("Stack trace:", updateError.stack);
-            }
-          } else {
-            console.warn("Engine or graph reference not available for results panel update");
-            if (!window.currentEngine) console.warn("Missing engine reference");
-            if (!window.currentGraph) console.warn("Missing graph reference");
-          }
-        }, 1000); // Increased timeout to give more time for references to be set
-        
-        return result;
-      } catch (error) {
-        console.error("Error in enhanced runSimulationTest:", error);
-        console.error("Error details:", error.message);
-        console.error("Stack trace:", error.stack);
-        return false;
-      }
-    };
-    
+
     // Set up the test button
     document.getElementById('run-test').addEventListener('click', () => {
       consoleOutput.textContent = ''; // Clear previous output
       console.log('Starting simulation test...');
-      
+
       try {
         // Run the test
         window.runSimulationTest();
@@ -572,41 +503,38 @@
         console.error('Test failed with error:', error);
       }
     });
-    
+
     // Set up the regenerate button
     document.getElementById('regenerate').addEventListener('click', () => {
       consoleOutput.textContent = ''; // Clear previous output
       console.log('Generating new random network...');
-      
+
       try {
-        // Import necessary functions with error handling
-        const regenerateFunction = async () => {
-          try {
-            // Generate a new random network
-            const testSimulation = await import('../src/test-simulation.js');
-            
-            // Call generateRandomNetwork with random parameters
-            const numNodes = 3 + Math.floor(Math.random() * 5); // 3-7 nodes
-            const connectivity = 0.3 + Math.random() * 0.5; // 0.3-0.8 connectivity
-            
-            const newNetwork = testSimulation.generateRandomNetwork(numNodes, connectivity);
-            console.log(`Generated new network with ${newNetwork.nodes.length} nodes and ${newNetwork.edges.length} edges`);
-            console.log('Nodes:', newNetwork.nodes.map(n => n.id).join(', '));
-            console.log('Edges:', newNetwork.edges.map(e => `${e.source}->${e.target} (spin=${e.spin})`).join(', '));
-            
-            // Run the test with the new network
-            if (typeof testSimulation.runSimulationTest === 'function') {
-              console.log('Running simulation with new network...');
-              await testSimulation.runSimulationTest();
-            } else {
-              console.error('runSimulationTest function not found');
-            }
-          } catch (error) {
-            console.error('Error regenerating network:', error);
-          }
+        // Create new random graph
+        const randomGraphOptions = {
+          nodeCount: 3 + Math.floor(Math.random() * 5), // 3-7 nodes
+          edgeProbability: 0.3 + Math.random() * 0.5, // 0.3-0.8 probability
+          edgeSpin: 1.0
         };
-        
-        regenerateFunction();
+
+        window.currentGraph = window.SpinNetwork.templates.createRandomGraph(randomGraphOptions); // Use window.SpinNetwork
+        console.log(`Generated new network with ${window.currentGraph.nodes.length} nodes`);
+
+        // Create new state vector
+        const initialState = window.SpinNetwork.createStateVector(window.currentGraph.nodes.map(n => n.id)); // Use window.SpinNetwork
+
+        // Reinitialize engine
+        window.currentEngine.initialize(window.currentGraph, initialState);
+
+        // Run simulation for 10 steps
+        for (let i = 0; i < 10; i++) {
+          window.currentEngine.step();
+        }
+
+        // Update results
+        updateResultsPanel();
+
+        console.log('New network simulation completed');
       } catch (error) {
         console.error('Failed to regenerate network:', error);
       }
