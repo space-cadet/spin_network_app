@@ -270,7 +270,7 @@ export function updateNode(
              typeof updates.intertwiner === 'object' && 
              updates.intertwiner !== null) {
       updatedIntertwiner = {
-        value: currentNode.intertwiner,
+        ...(typeof currentNode.intertwiner === 'object' ? currentNode.intertwiner : { value: currentNode.intertwiner }),
         ...updates.intertwiner
       };
     }
@@ -521,13 +521,13 @@ export function networkToCytoscape(network: SpinNetwork): any[] {
     elements.push({
       group: 'nodes',
       data: {
+        ...node.properties, // spread properties first
         id: node.id,
         label: label,
         intertwiner: intertwiners.value, // Keep primary value the same for backward compatibility
         intertwiners: intertwiners, // Store full intertwiner data for advanced functionality
         position: node.position, // Store position in data for later access
         type: node.type || 'regular', // Use node type or default to regular
-        ...node.properties
       },
       position: { // Set position directly for cytoscape
         x: node.position.x,

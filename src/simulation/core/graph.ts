@@ -6,9 +6,13 @@
  */
 
 import * as math from 'mathjs';
-import { SpinNetwork } from '../../models/types';
+import { SpinNetwork, IntertwinerData } from '../../models/types';
 import { SimulationGraph, SimulationNode, SimulationEdge, WeightFunction } from './types';
 import { MathAdapter } from './mathAdapter';
+
+function getIntertwinerValue(input: number | IntertwinerData): number {
+  return typeof input === 'number' ? input : input.value;
+}
 
 /**
  * Implementation of the SimulationGraph interface
@@ -41,7 +45,7 @@ export class SpinNetworkGraph implements SimulationGraph {
       
       graph._nodes.set(node.id, {
         id: node.id,
-        intertwiner: node.intertwiner,
+        intertwiner: getIntertwinerValue(node.intertwiner),
         position: {
           x: node.position.x,
           y: node.position.y,
@@ -123,7 +127,7 @@ export class SpinNetworkGraph implements SimulationGraph {
           edgeCount: graph.getEdgeCount(),
           nodes: graph.nodes.map(node => ({
             id: node.id,
-            intertwiner: node.intertwiner,
+            intertwiner: getIntertwinerValue(node.intertwiner),
             position: node.position
           })),
           edges: graph.edges.map(edge => ({
@@ -274,7 +278,7 @@ export class SpinNetworkGraph implements SimulationGraph {
         x: node.position.x,
         y: node.position.y
       },
-      intertwiner: node.intertwiner,
+      intertwiner: typeof node.intertwiner === 'number' ? node.intertwiner : (node.intertwiner as { value: number }).value,
       label: `Node ${node.id}`,
       properties: { ...node.properties }
     }));

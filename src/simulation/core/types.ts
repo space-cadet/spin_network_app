@@ -6,8 +6,9 @@
  * Cytoscape.js (current) and future three.js 3D visualization.
  */
 
-import { Matrix, MathArray } from 'mathjs';
+import { Matrix, MathArray, mod } from 'mathjs';
 import { SpinNetwork } from '../../models/types';
+import { IntertwinerData } from '../../models/types';
 
 /**
  * Represents a graph structure for simulation
