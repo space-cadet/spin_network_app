@@ -1,6 +1,39 @@
 # Error Log
 
-*Last Updated: 2025-04-21 (10:30 IST)*
+*Last Updated: 2025-04-22 (15:45 IST)*
+
+## 2025-04-22 15:45 IST: T36 - Missing TensorNode Functions in Tensor Sandbox
+
+**Files:**
+- `/public/tensor-sandbox.html`
+- `/public/scripts/tensor-sandbox.js`
+- `/public/scripts/tensor-bridge.js`
+
+**Error Message/Symptoms:**
+```
+tensor-sandbox.js:125 Error creating network: TypeError: window.SpinNetwork.createTensorNode is not a function
+at createLineNetwork (tensor-sandbox.js:143:41)
+at HTMLButtonElement.createNetwork (tensor-sandbox.js:107:17)
+```
+
+**Cause:**
+The file `tensor-bridge.js` that defines the `window.SpinNetwork` object with functions like `createTensorNode` was not being loaded in the `tensor-sandbox.html` file. While the UMD library (`spin-network.umd.js`) was properly loaded, it doesn't contain the tensor-specific functions required by the sandbox.
+
+**Fix:**
+Added the missing script tag to load `tensor-bridge.js` immediately after loading the UMD library in `tensor-sandbox.html`:
+
+```html
+<!-- Core Tensor Bridge -->
+<script src="dist/lib/spin-network.umd.js"></script>
+<!-- Tensor Bridge Implementation -->
+<script src="scripts/tensor-bridge.js"></script>
+```
+
+Also added a "Lattice Network" option to the tensor sandbox to create nodes with higher valence (3 or more), which enables non-zero intertwiner tensor components. The implementation creates a 2D grid layout where each node has 4 connections (up, down, left, right), making them 4-valent nodes with dimensions [2, 2, 2, 2].
+
+**Task:** T36 - Implement Tensor and State Vector Sandbox
+
+*****
 
 ## 2025-04-21 10:30 IST: T28 - Documentation Page Rendering and Navigation Issues
 

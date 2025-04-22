@@ -1,10 +1,10 @@
 # Active Context
 
-*Last Updated: April 22, 2025 (15:30 IST)*
+*Last Updated: April 22, 2025 (15:45 IST)*
 
 ## Current Focus
-**Primary Task:** UI Enhancement: Added Testing page and updated Documentation page
-**Secondary Tasks:** T36: Implement Tensor and State Vector Sandbox, T34: Complete Simulation Engine Migration
+**Primary Task:** T36: Implement Tensor and State Vector Sandbox
+**Secondary Tasks:** UI Enhancement: Testing/Documentation pages, T34: Complete Simulation Engine Migration
 
 ## Active Tasks
 - T36: Implement Tensor and State Vector Sandbox - 🔄 IN PROGRESS
@@ -26,7 +26,7 @@
 - T3: Component Refactoring - ⏸️ PAUSED
 
 ## Implementation Focus
-Recently completed UI enhancements to the application by:
+Recently fixed tensor-sandbox.html by adding the missing tensor-bridge.js script and implemented a lattice network option with higher valence nodes. Before that, completed UI enhancements to the application by:
 
 1. Creating a new Testing page with a sidebar layout that allows navigating between three testing resources:
    - Standalone Implementation Guide (standalone-guide.html)
@@ -52,6 +52,34 @@ Recently completed UI enhancements to the application by:
 These UI improvements provide a more integrated experience for testing and documentation, with a consistent layout that keeps navigation in a sidebar and loads content in the main viewport.
 
 ## Task-Specific Context
+
+### T36: Implement Tensor and State Vector Sandbox
+We have created a test sandbox to experiment with enhanced tensor-based representation of nodes and state vector representation of edges in spin networks before integrating these features into the main application:
+
+Key aspects of this work:
+- Created the tensor-sandbox.html page with a detailed UI for testing tensor operations
+- Fixed a critical error related to missing tensor bridge script loading
+- Added a "Lattice Network" option that creates nodes with higher valence (4-valent)
+- This enables non-zero intertwiner tensor components (nodes of valence 2 have trivial intertwiners)
+- Implemented a comprehensive grid layout for lattice networks
+- Enhanced tensor-bridge.js to expose library functions when available
+
+The sandbox provides a UI to:
+- Create different types of networks (empty, line, ring, lattice, custom)
+- Select different visualization modes (network structure, tensor values, state vectors, physical properties)
+- Modify tensor elements and state vector amplitudes
+- Calculate physical properties like total volume and area
+- Visualize network state and tensor components
+
+The key issue fixed was that the tensor-bridge.js file, which defines the SpinNetwork object with tensor operations, wasn't being loaded in the HTML file. Adding the proper script tag fixed the error "window.SpinNetwork.createTensorNode is not a function".
+
+Next steps include:
+- Implementing the actual tensor operations module
+- Creating the state vector operations module
+- Building tensor factory functions for intertwiner generation
+- Adding visualization helpers for tensors and state vectors
+- Implementing test cases for validation against analytical solutions
+- Adding time evolution support for tensors during simulation
 
 ### UI Enhancement: Added Testing Page and Updated Documentation Page
 We have redesigned and enhanced the application's documentation and testing capabilities:
@@ -162,7 +190,9 @@ Other ongoing decisions:
 - Backward compatibility will be preserved for the existing application
 
 ## Next Actions By Task
-- T36: Continue implementation of tensor and state vector sandbox
+- T36: Implement the tensor operations and state vector modules for the sandbox
+- T36: Add tensor factory functions for intertwiner generation
+- T36: Create visualization components for tensors and state vectors
 - T35: Complete the enhanced node and edge data structures for intertwiners
 - T34: Continue migration of simulation engine to standalone library
 - T33: Fix remaining documentation rendering issues
@@ -172,6 +202,8 @@ Other ongoing decisions:
 - T25: Add responsive design support to documentation system
 
 ## Recently Completed Actions
+- ✅ Fixed tensor-sandbox.html by adding missing script tag for tensor-bridge.js
+- ✅ Added "Lattice Network" option to create 4-valent nodes in the tensor sandbox
 - ✅ Created new Testing page with sidebar navigation
 - ✅ Redesigned Documentation page with improved layout
 - ✅ Implemented proper Markdown rendering for documentation files

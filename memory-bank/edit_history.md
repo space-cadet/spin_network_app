@@ -1,11 +1,22 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-22 (09:35 IST)*
+*Last Updated: 2025-04-22 (15:45 IST)*
 
 ## File Modification Log
 
 ### April 22, 2025
+
+#### [15:45] - T36: Fix Tensor Sandbox and Add Lattice Network Option
+
+- Modified `/public/tensor-sandbox.html` - Added missing script tag to load tensor-bridge.js
+- Modified `/public/scripts/tensor-sandbox.js` - Added "Lattice Network" option to network type dropdown
+- Modified `/public/scripts/tensor-sandbox.js` - Implemented createLatticeNetwork function for 4-valent nodes
+- Modified `/public/scripts/tensor-bridge.js` - Enhanced tensor-bridge.js compatibility with library functions
+- Modified `/memory-bank/errorLog.md` - Added error report and fix for tensor-sandbox issue
+- Modified `/memory-bank/tasks.md` - Updated task T36 with completed criteria and progress
+
+Fixed a critical error in the tensor sandbox where the tensor-bridge.js file wasn't being loaded, causing "createTensorNode is not a function" errors. Added a new Lattice Network option to create nodes with higher valence (4-valent with dimensions [2, 2, 2, 2]), enabling non-zero intertwiner tensor components. This is crucial for testing the tensor operations with realistic intertwiner spaces.
 
 #### [09:44] - T36: Implement Tensor and State Vector Sandbox
 

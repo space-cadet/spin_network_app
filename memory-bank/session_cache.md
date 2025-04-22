@@ -1,6 +1,6 @@
 # Session Cache
 
-*Last Updated: April 22, 2025 (15:35 IST)*
+*Last Updated: April 22, 2025 (15:45 IST)*
 
 ## Overview
 - Active Tasks: 15
@@ -95,57 +95,63 @@ These changes significantly improve the user experience by providing a more inte
 **Status:** 🔄 IN PROGRESS
 **Priority:** MEDIUM
 **Started:** 2025-04-22
-**Last Active:** 2025-04-22 14:45 IST
+**Last Active:** 2025-04-22 15:45 IST
 **Dependencies:** T20, T35
 
 #### Context
 This task focuses on creating a test sandbox to experiment with enhanced tensor-based representation of nodes and state vector representation of edges in spin networks before integrating these features into the main application.
 
 #### Critical Files
-- `/src/models/types.ts` - Core type definitions to update
-- `/src/models/networkModel.ts` - Network model implementation to modify
-- `/src/components/workspace/CytoscapeManager/CytoscapeManager.tsx` - Visualization component that uses the model
+- `/public/tensor-sandbox.html` - HTML page for the sandbox
+- `/public/scripts/tensor-sandbox.js` - JavaScript implementation for the sandbox UI
+- `/public/scripts/tensor-bridge.js` - Bridge between the core tensor implementation and the sandbox UI
 - `/memory-bank/implementation-details/tensor-plan.md` - Implementation plan for tensor structure
+- `/memory-bank/errorLog.md` - Error report for the tensor-sandbox issue
 - `/src/utils/intertwinerTensorUtils.ts` - (To be created) Tensor utility functions
 - `/src/utils/intertwinerTensorFactory.ts` - (To be created) Factory for creating tensor representations
 
 #### Implementation Progress
-1. ✅ Define enhanced `IntertwinerData` interface to replace the simple numerical representation
-2. ✅ Create comprehensive implementation plan for tensor representation
-3. ⬜ Create new interfaces for tensor data structure (IntertwinerTensorData, SparseIntertwinerElement, Complex)
-4. ⬜ Update `NetworkNode` interface to use the enhanced `IntertwinerData` interface
-5. ⬜ Implement utility functions for tensor operations (creation, access, contraction)
-6. ⬜ Create factory functions for generating standard intertwiner tensors
-7. ⬜ Implement validation function to ensure tensor values are consistent with adjacent edge spins
-8. ⬜ Update `networkToCytoscape` function to handle the tensor representation
-9. ⬜ Add quantum state calculation functions for graph states
-10. ⬜ Implement tensor visualization helpers
+1. ✅ Create implementation plan in `/memory-bank/implementation-details/tensor-test.md`
+2. ✅ Create HTML test page for the sandbox
+3. ✅ Fix loading issue with tensor-bridge.js in tensor-sandbox.html
+4. ✅ Add Lattice Network option for higher-valence nodes (4-valent)
+5. ✅ Implement tensor-bridge.js for connecting to standalone library
+6. ✅ Implement tensor-sandbox.js for interactive testing
+7. ⬜ Design enhanced TensorNode and StateVectorEdge data structures
+8. ⬜ Implement tensor operations module (creation, element access, contraction)
+9. ⬜ Implement state vector operations module (quantum state vectors)
+10. ⬜ Create tensor factory functions for intertwiner generation
+11. ⬜ Implement simple visualization for tensors and state vectors
+12. ⬜ Add test cases for validation against analytical solutions
+13. ⬜ Implement time evolution of tensors during simulation
 
 #### Working State
-Successfully implemented the enhanced node and edge data structures and created a comprehensive plan for tensor representation:
+Successfully created the tensor sandbox environment and fixed critical issues:
 
-1. **Data Structure Implementation**:
-   - Added `IntertwinerData` interface to store rich information about intertwiner spaces
-   - Updated `NetworkNode` interface to support both numeric and object-based intertwiners
-   - Created validation logic for the new structure
-   - Ensured backward compatibility throughout all components
+1. **Fixed Critical Error**:
+   - Identified and fixed the "window.SpinNetwork.createTensorNode is not a function" error
+   - The issue was that tensor-bridge.js (which defines the SpinNetwork object with tensor functions) wasn't being loaded
+   - Added the missing script tag to tensor-sandbox.html to load tensor-bridge.js after the UMD library
 
-2. **Enhanced Functionality**:
-   - Added `getIntertwinerValue()` helper function to consistently access intertwiner values
-   - Implemented `getIntertwinerDimension()` function to calculate/retrieve dimensions
-   - Enhanced `addNode()` to properly initialize default values for new nodes
-   - Updated `updateNode()` with special handling for merging intertwiner objects
-   - Modified `networkToCytoscape()` to properly expose intertwiner data to visualization
+2. **Enhanced Network Options**:
+   - Added a "Lattice Network" option to create nodes with higher valence (4-valent)
+   - This allows creating nodes with dimensions [2, 2, 2, 2] which enables non-zero intertwiner tensor components
+   - Implemented proper grid layout for lattice networks with horizontal and vertical connections
+   - This provides a better test environment for real intertwiner spaces (valence 2 nodes always have trivial intertwiners)
 
-3. **Tensor Implementation Plan**:
-   - Created comprehensive plan in `tensor-plan.md` outlining all aspects of implementation
-   - Designed sparse tensor representation for efficient storage of intertwiner tensors
-   - Planned utility functions for tensor creation, element access, and contraction
-   - Included factory functions for generating standard intertwiners (3j, 4j symbols)
-   - Designed quantum state calculation functions for computing graph state amplitudes
-   - Planned tensor visualization components for interactive exploration
+3. **Connection to Library**:
+   - Enhanced tensor-bridge.js to expose library functions if available
+   - Implemented fallback mechanisms when library functions aren't available
+   - Created structured API with proper parameter validation
+   - Added detailed error messages for better debugging
 
-The implementation maintains backward compatibility while creating a path to significantly enhance the physics representation capabilities. The next step is to implement the tensor data structure according to the plan in tensor-plan.md, which will enable proper quantum state calculations and visualization of intertwiner spaces. This will make the application a more powerful tool for exploring quantum geometry.
+4. **Interactive Testing**:
+   - The sandbox now correctly visualizes the network with nodes and edges
+   - Users can select different network types including the new lattice option
+   - The interface shows tensor dimensions and enables setting tensor elements
+   - Physical properties (volume, area) are correctly calculated
+
+The next step is to implement the actual tensor operations and state vector functionality according to the plan in tensor-test.md. This will involve creating the enhanced data structures, implementing the mathematical operations, and connecting them to the visualization.
 
 ### T34: Complete Simulation Engine Migration to Standalone Library
 **Status:** 🔄 IN PROGRESS
