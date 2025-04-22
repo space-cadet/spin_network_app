@@ -23,12 +23,11 @@ export {
   getOptimizedIntertwinerBasis,
 } from './intertwinerSpace';
 
-export type { IntertwinerBasisState } from './intertwinerSpace';
+export type { IntertwinerBasisState } from './intertwinerSpace'
 
 // Export tensor and state vector utilities
 export {
   // Tensor node
-  TensorNode,
   createTensorNode,
   setTensorElement,
   getTensorElement,
@@ -36,7 +35,6 @@ export {
   calculateNodeVolume,
   
   // State vector edge
-  StateVectorEdge,
   createStateVectorEdge,
   setStateVectorAmplitude,
   getStateVectorAmplitude,
@@ -44,18 +42,17 @@ export {
   calculateEdgeArea,
   
   // Complex number utilities
-  Complex,
   createComplex,
   addComplex,
   multiplyComplex,
   
   // Sparse element type
-  SparseElement
+  // SparseElement
 } from './tensor';
 
-export type { 
+export type {
   TensorNode,
   StateVectorEdge,
   Complex,
   SparseElement
-} from './tensor';
+ } from './tensor'
