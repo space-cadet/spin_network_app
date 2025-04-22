@@ -1,5 +1,5 @@
 # Component Index
-*Last Updated: 2025-04-21T13:14:38.394Z (Auto-generated)*
+*Last Updated: 2025-04-22T12:28:58.148Z (Auto-generated)*
 
 This file maps conceptual component names to their primary file locations. Paths are relative to the project root (`/Users/deepak/code/spin_network_app`).
 
@@ -8,10 +8,7 @@ This file maps conceptual component names to their primary file locations. Paths
 | CollapsibleSection             | `src/components/common/CollapsibleSection.tsx`                         | React Component         | -                                            |
 | ConfirmationDialog             | `src/components/common/ConfirmationDialog.tsx`                         | React Component         | -                                            |
 | CytoscapeManager               | `src/components/workspace/CytoscapeManager/CytoscapeManager.tsx`       | React Component         | `src/components/workspace/CytoscapeManager/index.ts` |
-| DocsLayout                     | `src/components/documentation/DocsLayout.tsx`                          | React Component         | `src/components/documentation/index.ts`      |
-| DocsSidebar                    | `src/components/documentation/DocsSidebar.tsx`                         | React Component         | `src/components/documentation/index.ts`      |
-| DocsViewer                     | `src/components/documentation/DocsViewer.tsx`                          | React Component         | `src/components/documentation/index.ts`      |
-| DocumentationHome              | `src/components/documentation/DocumentationHome.tsx`                   | React Component         | `src/components/documentation/index.ts`      |
+| DocsPage                       | `src/components/documentation/DocsPage.tsx`                            | React Component         | `src/components/documentation/index.ts`      |
 | EdgeTypeForm                   | `src/components/settings/types/EdgeTypeForm.tsx`                       | React Component         | `src/components/settings/types/index.ts`     |
 | EdgeTypeManager                | `src/components/settings/types/EdgeTypeManager.tsx`                    | React Component         | `src/components/settings/types/index.ts`     |
 | EnergyPlot                     | `src/components/visualization/EnergyPlot.tsx`                          | React Component         | -                                            |
@@ -45,6 +42,7 @@ This file maps conceptual component names to their primary file locations. Paths
 | SimulationResultsPanel         | `src/components/simulation/SimulationResultsPanel.tsx`                 | React Component         | `src/components/simulation/index.ts`         |
 | SimulationVisualizationManager | `src/components/workspace/SimulationVisualizationManager/SimulationVisualizationManager.tsx` | React Component         | `src/components/workspace/SimulationVisualizationManager/index.ts` |
 | StatusIndicator                | `src/components/workspace/WorkspaceControls/components/StatusIndicator.tsx` | React Component         | -                                            |
+| TestingPage                    | `src/components/testing/TestingPage.tsx`                               | React Component         | `src/components/testing/index.ts`            |
 | ThemeProvider                  | `src/components/settings/ThemeProvider.tsx`                            | React Component         | `src/components/settings/index.ts`           |
 | ToolbarButton                  | `src/components/workspace/WorkspaceControls/components/ToolbarButton.tsx` | React Component         | -                                            |
 | TypeManagementModal            | `src/components/settings/types/TypeManagementModal.tsx`                | React Component         | `src/components/settings/types/index.ts`     |
