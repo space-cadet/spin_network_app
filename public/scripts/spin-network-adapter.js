@@ -56,152 +56,126 @@
         
         // Tensor node operations
         createTensorNode: function(id, position, intertwinerValue, dimensions) {
-            // Try different paths to find the function
-            if (lib.createTensorNode) {
-                return lib.createTensorNode(id, position, intertwinerValue, dimensions);
-            } else if (lib.core && lib.core.createTensorNode) {
-                return lib.core.createTensorNode(id, position, intertwinerValue, dimensions);
-            } else {
-                console.error('createTensorNode not found in library');
-                // Fallback implementation
-                return {
-                    id,
-                    position,
-                    intertwiner: {
-                        value: intertwinerValue,
-                        dimension: dimensions.reduce((a, b) => a * b, 1)
-                    },
-                    tensor: {
-                        dimensions,
-                        elements: [],
-                        basis: 'standard'
-                    }
-                };
-            }
+            // Implementation of createTensorNode for the standalone library
+            return {
+                id,
+                position,
+                tensor: {
+                    dimensions: dimensions.length > 0 ? dimensions : [2, 2, 2, 2], // Default to 4-valent node with spin-1/2 edges
+                    elements: [],
+                    basis: 'standard'
+                },
+                intertwiner: {
+                    value: intertwinerValue,
+                    dimension: dimensions.reduce((prod, dim) => prod * dim, 1)
+                }
+            };
         },
         
         setTensorElement: function(tensor, indices, value) {
-            if (lib.setTensorElement) {
-                return lib.setTensorElement(tensor, indices, value);
-            } else if (lib.core && lib.core.setTensorElement) {
-                return lib.core.setTensorElement(tensor, indices, value);
-            } else {
-                console.error('setTensorElement not found in library');
-                // Fallback implementation
-                const existingIndex = tensor.elements.findIndex(el => 
-                    el.indices.length === indices.length && 
-                    el.indices.every((val, idx) => val === indices[idx])
-                );
-                
-                if (existingIndex >= 0) {
-                    tensor.elements[existingIndex].value = value;
-                } else {
-                    tensor.elements.push({
-                        indices: [...indices],
-                        value: { ...value }
-                    });
+            // Implementation of setTensorElement for the standalone library
+            // Validate indices against dimensions
+            if (indices.length !== tensor.dimensions.length) {
+                console.warn(`Invalid indices length: ${indices.length}, expected ${tensor.dimensions.length}`);
+                return;
+            }
+            
+            for (let i = 0; i < indices.length; i++) {
+                if (indices[i] < 0 || indices[i] >= tensor.dimensions[i]) {
+                    console.warn(`Index ${indices[i]} out of bounds for dimension ${i}`);
+                    return;
                 }
+            }
+            
+            // Check if element with these indices already exists
+            const existingIndex = tensor.elements.findIndex(
+                el => el.indices.length === indices.length && 
+                el.indices.every((idx, i) => idx === indices[i])
+            );
+            
+            if (existingIndex >= 0) {
+                // Update existing element
+                tensor.elements[existingIndex].value = value;
+            } else {
+                // Add new element
+                tensor.elements.push({
+                    indices: [...indices],
+                    value: { ...value }
+                });
             }
         },
         
         // State vector edge operations
         createStateVectorEdge: function(id, source, target, spin) {
-            if (lib.createStateVectorEdge) {
-                return lib.createStateVectorEdge(id, source, target, spin);
-            } else if (lib.core && lib.core.createStateVectorEdge) {
-                return lib.core.createStateVectorEdge(id, source, target, spin);
-            } else {
-                console.error('createStateVectorEdge not found in library');
-                // Fallback implementation
-                const dimension = Math.floor(2 * spin + 1);
-                return {
-                    id,
-                    source,
-                    target,
-                    spin,
-                    stateVector: {
-                        dimension,
-                        amplitudes: Array(dimension).fill().map(() => ({ re: 0, im: 0 }))
-                    }
-                };
-            }
+            // Implementation of createStateVectorEdge for the standalone library
+            const dimension = Math.floor(2 * spin + 1);
+            
+            // Initialize with |j,j⟩ state (highest weight state)
+            const amplitudes = new Array(dimension).fill(null).map(() => ({ re: 0, im: 0 }));
+            amplitudes[0] = { re: 1, im: 0 };  // Set amplitude for |j,j⟩ to 1
+            
+            return {
+                id,
+                source,
+                target,
+                stateVector: {
+                    dimension,
+                    amplitudes,
+                    basis: 'standard'
+                },
+                spin
+            };
         },
         
         setStateVectorAmplitude: function(stateVector, index, value) {
-            if (lib.setStateVectorAmplitude) {
-                return lib.setStateVectorAmplitude(stateVector, index, value);
-            } else if (lib.core && lib.core.setStateVectorAmplitude) {
-                return lib.core.setStateVectorAmplitude(stateVector, index, value);
-            } else {
-                console.error('setStateVectorAmplitude not found in library');
-                // Fallback implementation
-                if (index >= 0 && index < stateVector.amplitudes.length) {
-                    stateVector.amplitudes[index] = { ...value };
-                }
+            // Implementation of setStateVectorAmplitude for the standalone library
+            if (index < 0 || index >= stateVector.dimension) {
+                console.warn(`Index ${index} out of bounds for state vector of dimension ${stateVector.dimension}`);
+                return;
             }
+            
+            stateVector.amplitudes[index] = { ...value };
         },
         
         normalizeStateVector: function(stateVector) {
-            if (lib.normalizeStateVector) {
-                return lib.normalizeStateVector(stateVector);
-            } else if (lib.core && lib.core.normalizeStateVector) {
-                return lib.core.normalizeStateVector(stateVector);
-            } else {
-                console.error('normalizeStateVector not found in library');
-                // Fallback implementation
-                let sumSquares = 0;
-                for (const amp of stateVector.amplitudes) {
-                    sumSquares += amp.re * amp.re + amp.im * amp.im;
-                }
-                
-                if (sumSquares === 0) return;
-                
-                const norm = Math.sqrt(sumSquares);
-                for (let i = 0; i < stateVector.amplitudes.length; i++) {
-                    stateVector.amplitudes[i] = {
-                        re: stateVector.amplitudes[i].re / norm,
-                        im: stateVector.amplitudes[i].im / norm
-                    };
-                }
+            // Implementation of normalizeStateVector for the standalone library
+            // Calculate norm
+            const normSquared = stateVector.amplitudes.reduce(
+                (sum, amp) => sum + amp.re * amp.re + amp.im * amp.im,
+                0
+            );
+            
+            if (normSquared < 1e-10) {
+                console.warn('Cannot normalize state vector with norm close to zero');
+                return;
+            }
+            
+            const norm = Math.sqrt(normSquared);
+            
+            // Normalize amplitudes
+            for (let i = 0; i < stateVector.amplitudes.length; i++) {
+                stateVector.amplitudes[i].re /= norm;
+                stateVector.amplitudes[i].im /= norm;
             }
         },
         
         // Complex number utilities
         createComplex: function(re, im) {
-            if (lib.createComplex) {
-                return lib.createComplex(re, im);
-            } else if (lib.core && lib.core.createComplex) {
-                return lib.core.createComplex(re, im);
-            } else {
-                console.error('createComplex not found in library');
-                // Fallback implementation
-                return { re: re || 0, im: im || 0 };
-            }
+            // Implementation of createComplex for the standalone library
+            return { re: re || 0, im: im || 0 };
         },
         
         // Physical calculations
         calculateNodeVolume: function(node) {
-            if (lib.calculateNodeVolume) {
-                return lib.calculateNodeVolume(node);
-            } else if (lib.core && lib.core.calculateNodeVolume) {
-                return lib.core.calculateNodeVolume(node);
-            } else {
-                console.error('calculateNodeVolume not found in library');
-                // Fallback implementation
-                return node.intertwiner.dimension || 1;
-            }
+            // Implementation of calculateNodeVolume for the standalone library
+            const volumeFactor = 8 * Math.PI;
+            return volumeFactor * (node.intertwiner.dimension || 1);
         },
         
         calculateEdgeArea: function(edge) {
-            if (lib.calculateEdgeArea) {
-                return lib.calculateEdgeArea(edge);
-            } else if (lib.core && lib.core.calculateEdgeArea) {
-                return lib.core.calculateEdgeArea(edge);
-            } else {
-                console.error('calculateEdgeArea not found in library');
-                // Fallback implementation
-                return Math.sqrt(edge.spin * (edge.spin + 1));
-            }
+            // Implementation of calculateEdgeArea for the standalone library
+            const areaFactor = 8 * Math.PI;
+            return areaFactor * Math.sqrt(edge.spin * (edge.spin + 1));
         }
     };
     

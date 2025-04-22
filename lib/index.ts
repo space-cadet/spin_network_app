@@ -34,6 +34,40 @@ import {
   SimulationGraph 
 } from './core/types';
 
+// Direct re-exports of tensor functions for UMD bundle accessibility
+import {
+  createTensorNode,
+  setTensorElement,
+  getTensorElement,
+  createTensorNodeFromBasisState,
+  calculateNodeVolume,
+  createStateVectorEdge,
+  setStateVectorAmplitude,
+  getStateVectorAmplitude,
+  normalizeStateVector,
+  calculateEdgeArea,
+  createComplex,
+  addComplex,
+  multiplyComplex
+} from './core/tensor';
+
+// Re-export tensor functions directly at the top level
+export {
+  createTensorNode,
+  setTensorElement,
+  getTensorElement,
+  createTensorNodeFromBasisState,
+  calculateNodeVolume,
+  createStateVectorEdge,
+  setStateVectorAmplitude,
+  getStateVectorAmplitude,
+  normalizeStateVector,
+  calculateEdgeArea,
+  createComplex,
+  addComplex,
+  multiplyComplex
+};
+
 /**
  * Creates a new simulation engine with default configuration
  * @returns A new simulation engine instance
