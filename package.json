@@ -71,5 +71,11 @@
     "node": ">=16.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@10.8.1"
+  "packageManager": "pnpm@10.8.1",
+  "overrides": {
+  "esbuild": "^0.25.0",
+  "vite": {
+    "esbuild": "^0.25.0"
+  }
+}
 }
