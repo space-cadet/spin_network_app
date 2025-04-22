@@ -315,5 +315,11 @@
     
     <!-- Sandbox Implementation -->
     <script src="scripts/tensor-sandbox.js"></script>
+    <script>
+        // Override alert to prevent modal errors in sandboxed environments
+        window.alert = function(msg) {
+            console.log("Alert blocked (sandboxed environment): " + msg);
+        };
+    </script>
 </body>
 </html>

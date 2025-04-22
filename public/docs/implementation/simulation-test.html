@@ -431,7 +431,7 @@
           nodeCount: 5,
           edgeSpin: 1.0
         };
-        window.currentGraph = window.SpinNetwork.templates.createLineGraph(lineGraphOptions); // Use window.SpinNetwork
+        window.currentGraph = window.SpinNetwork.createLineGraph(lineGraphOptions); // Updated call to createLineGraph
 
         // Create initial state
         const initialState = window.SpinNetwork.createStateVector(window.currentGraph.nodes.map(n => n.id)); // Use window.SpinNetwork

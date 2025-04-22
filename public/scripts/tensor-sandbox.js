@@ -140,8 +140,8 @@ function createLineNetwork(nodeCount, spinValue) {
         const x = spacing * (i + 1);
         
         // Create tensor node
-        const node = SpinNetwork.createTensorNode(
-            id, 
+        const node = window.SpinNetwork.createTensorNode(
+            id,
             { x, y: yPos },
             0,  // Default intertwiner value
             [2, 2, 2, 2]  // Default dimensions for 4-valent node
@@ -157,7 +157,7 @@ function createLineNetwork(nodeCount, spinValue) {
         const targetId = `n${i+1}`;
         
         // Create state vector edge
-        const edge = SpinNetwork.createStateVectorEdge(
+        const edge = window.SpinNetwork.createStateVectorEdge(
             id,
             sourceId,
             targetId,
@@ -184,8 +184,8 @@ function createRingNetwork(nodeCount, spinValue) {
         const y = centerY + radius * Math.sin(angle);
         
         // Create tensor node
-        const node = SpinNetwork.createTensorNode(
-            id, 
+        const node = window.SpinNetwork.createTensorNode(
+            id,
             { x, y },
             0,
             [2, 2]  // Default dimensions for 2-valent node in a ring
@@ -201,7 +201,7 @@ function createRingNetwork(nodeCount, spinValue) {
         const targetId = `n${(i + 1) % nodeCount}`;
         
         // Create state vector edge
-        const edge = SpinNetwork.createStateVectorEdge(
+        const edge = window.SpinNetwork.createStateVectorEdge(
             id,
             sourceId,
             targetId,
@@ -228,8 +228,8 @@ function createCustomNetwork(nodeCount, spinValue) {
         const y = padding + Math.random() * height;
         
         // Create tensor node
-        const node = SpinNetwork.createTensorNode(
-            id, 
+        const node = window.SpinNetwork.createTensorNode(
+            id,
             { x, y },
             0,
             [2, 2, 2]  // Default dimensions for 3-valent node
@@ -246,7 +246,7 @@ function createCustomNetwork(nodeCount, spinValue) {
             const targetId = `n${i+1}`;
             
             // Create state vector edge
-            const edge = SpinNetwork.createStateVectorEdge(
+            const edge = window.SpinNetwork.createStateVectorEdge(
                 id,
                 sourceId,
                 targetId,
@@ -343,8 +343,8 @@ function onNodeSelected() {
         updateTensorValues();
         
         // Update node properties
-        const volume = selectedNode.volume || 
-            SpinNetwork.calculateNodeVolume(selectedNode);
+        const volume = selectedNode.volume ||
+            window.SpinNetwork.calculateNodeVolume(selectedNode);
         document.getElementById('nodeProperties').textContent = 
             `Volume: ${volume.toFixed(2)}`;
     } else {
@@ -431,10 +431,10 @@ function setTensorElement() {
         }
         
         // Set the tensor element
-        SpinNetwork.setTensorElement(
+        window.SpinNetwork.setTensorElement(
             selectedNode.tensor,
             indices,
-            SpinNetwork.createComplex(re, im)
+            window.SpinNetwork.createComplex(re, im)
         );
         
         // Update the display
@@ -465,8 +465,8 @@ function onEdgeSelected() {
         updateStateVectorAmplitudes();
         
         // Update edge properties
-        const area = selectedEdge.area || 
-            SpinNetwork.calculateEdgeArea(selectedEdge);
+        const area = selectedEdge.area ||
+            window.SpinNetwork.calculateEdgeArea(selectedEdge);
         document.getElementById('edgeProperties').textContent = 
             `Area: ${area.toFixed(2)}`;
     } else {

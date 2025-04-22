@@ -1,9 +1,5 @@
 // Make available globally for the sandbox
 console.log('Tensor Bridge initialized with quantum operations');
- * 
- * Provides a bridge between the core tensor/state vector implementations
- * and the sandbox UI, maintaining compatibility with the existing API.
- */
 
 // Import the compiled library
 import SpinNetworkLib from '../../dist/lib/spin-network.es.js';
@@ -69,7 +65,7 @@ const SpinNetwork = {
     StateVector,
     
     // Node creation and manipulation
-    createTensorNode,
+    createTensorNode: (typeof createTensorNode === 'function' ? createTensorNode : createTensorNodeFromBasisState),
     createTensorNodeFromBasisState,
     calculateNodeVolume,
     
