@@ -13,6 +13,7 @@
     "clean": "rm -rf node_modules dist .turbo",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "preinstall": "npx only-allow pnpm"
+    "postbuild": "rm -rf dist/dist dist/lib/dist"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",
@@ -68,7 +69,7 @@
     "vite": "^6.0.0"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.12.0",
     "pnpm": ">=8.0.0"
   },
   "packageManager": "pnpm@10.8.1",

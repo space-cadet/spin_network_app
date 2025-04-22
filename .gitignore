@@ -34,3 +34,4 @@ dist-ssr
 
 storage/*
 build_errors*.md
+.vercel
