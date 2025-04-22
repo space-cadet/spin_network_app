@@ -1,52 +1,84 @@
 # Active Context
 
-*Last Updated: April 18, 2025 (12:45 IST)*
+*Last Updated: April 22, 2025 (15:30 IST)*
 
 ## Current Focus
-**Primary Task:** T18: Fix Logging File Paths and Structure (Completed)
-**Secondary Tasks:** T1: Simulation Library Abstraction, T20: Add Intertwiner Space Implementation
+**Primary Task:** UI Enhancement: Added Testing page and updated Documentation page
+**Secondary Tasks:** T36: Implement Tensor and State Vector Sandbox, T34: Complete Simulation Engine Migration
 
 ## Active Tasks
-- T1: Creating a standalone simulation library separate from UI components - 🔄 IN PROGRESS
-- T5: Enhancing simulation test pages with randomized networks and physics explanations - 🔄 IN PROGRESS
-- T6: Fixing database service TypeScript errors to enable successful build - 🔄 IN PROGRESS
-- T9: Fixing UI and simulation TypeScript errors to enable successful build - 🔄 IN PROGRESS
-- T10: Developing standalone test page for simulation library - 🔄 IN PROGRESS
-- T12: Fixing numerical stability issues and adding graph configuration options - ⏸️ PAUSED
+- T36: Implement Tensor and State Vector Sandbox - 🔄 IN PROGRESS
+- T35: Enhance Node and Edge Data Structures for Intertwiners - 🔄 IN PROGRESS
+- T34: Complete Simulation Engine Migration to Standalone Library - 🔄 IN PROGRESS
+- T33: Fix Documentation Rendering and Interaction Issues - 🔄 IN PROGRESS
+- T1: Simulation Library Core Implementation - 🔄 IN PROGRESS
+- T5: Enhanced Simulation Test Pages - 🔄 IN PROGRESS
+- T6: Fix Database Service Errors - 🔄 IN PROGRESS
+- T9: Fix UI and Simulation TypeScript Errors - 🔄 IN PROGRESS
+- T10: Standalone Test Page for Simulation Library - 🔄 IN PROGRESS
+- T12: Fix Numerical Stability and Add Graph Config - ⏸️ PAUSED
 - T14: State Management Architecture for Standalone Library - 🔄 IN PROGRESS
 - T16: Enhance Simulation Data Export and Visualization - 🔄 IN PROGRESS
 - T17: Fix TypeScript Build Errors - 🔄 IN PROGRESS
-- T18: Fix Logging File Paths and Structure - ✅ COMPLETE
 - T20: Add Intertwiner Space Implementation - 🔄 IN PROGRESS
-- T2: Adding more in-depth analysis and visualization of simulation results - ⏸️ PAUSED
-- T3: Breaking down large components into smaller, more maintainable units - ⏸️ PAUSED
+- T25: Implement Documentation System - 🔄 IN PROGRESS
+- T2: Advanced Simulation Analysis - ⏸️ PAUSED
+- T3: Component Refactoring - ⏸️ PAUSED
 
 ## Implementation Focus
-Currently focusing on fixing numerical stability issues in the standalone simulation test page (T12) and adding more configuration options for creating different network topologies and adjusting simulation parameters. The critical issues involve exponential growth of state values during simulation, which persists despite the implemented normalization. We're also enhancing the user interface to allow for more flexible testing of different network configurations and diffusion models.
+Recently completed UI enhancements to the application by:
+
+1. Creating a new Testing page with a sidebar layout that allows navigating between three testing resources:
+   - Standalone Implementation Guide (standalone-guide.html)
+   - Simulation Test Page (simulation-test.html) 
+   - Tensor Sandbox (tensor-sandbox.html)
+
+2. Redesigning the Documentation page:
+   - Removed the old documentation components and implementation
+   - Created a new, simplified documentation page with the same sidebar layout as the Testing page
+   - Implemented proper Markdown rendering for .md files
+   - Added support for math equations, tables, and other markdown features
+   - Made the documentation page load the following resources:
+     - Physics Notebook (physics-notebook.html)
+     - Intertwiner Spaces (intertwiner-spaces.md)
+     - Unified Dynamics Approach (unified-dynamics.md)
+     - Mathematical Foundations (mathematical-roadmap.md)
+   
+3. Updated the main application layout:
+   - Removed the "Simulation" entry from the header
+   - Added the new Testing page link
+   - Adjusted the Documentation page link
+
+These UI improvements provide a more integrated experience for testing and documentation, with a consistent layout that keeps navigation in a sidebar and loads content in the main viewport.
 
 ## Task-Specific Context
 
-### Task T18: Fix Logging File Paths and Structure (Completed)
-We have successfully fixed the logging file paths to ensure logs are written to the correct locations:
+### UI Enhancement: Added Testing Page and Updated Documentation Page
+We have redesigned and enhanced the application's documentation and testing capabilities:
 
 Key aspects of this work:
-- Updated the simulationLogger to properly route logs to the correct directories
-- Enhanced the SpinNetworkGraph class with direct graph logging capability
-- Added a dedicated saveTestLog method for test logs
-- Implemented appendResultsToFile method to continuously log simulation data to CSV
-- Improved the BrowserFS directory creation process
-- Enhanced the application initialization to verify all required directories exist
+- Created a new Testing page with a sidebar layout for navigating between testing resources
+- Completely redesigned the Documentation page with the same sidebar layout
+- Implemented proper Markdown rendering with support for:
+  - Mathematical equations (via KaTeX)
+  - Tables and other GitHub-flavored Markdown features
+  - Improved readability with proper styling
+- Integrated both pages into the main application navigation
+- Removed the outdated documentation components and implementation
+- Simplified the header navigation by removing the unused "Simulation" link
 
-The implementation now ensures that:
-- Graph creation events are properly logged to `/logs/simulation/graphs`
-- Simulation events are logged to `/logs/simulation/runs`
-- Test logs go to `/logs/simulation/tests` instead of sessions
-- Application logs go to the appropriate subdirectories of `/logs/application`
+The implementation now provides:
+- A consistent user experience across documentation and testing pages
+- An integrated way to access test resources without opening separate tabs
+- Properly formatted documentation with math support
+- A more maintainable codebase with simplified components
+- A cleaner UI with only relevant navigation options
 
-Future improvements will include:
-- Adding .gitkeep files to ensure empty directories are tracked
-- Creating a comprehensive README.md for the log structure
-- Implementing log rotation policies to manage file sizes
+The new pages use a unified design pattern with:
+- Left sidebar for navigation between resources
+- Main content area that dynamically loads the selected resource
+- Proper header that displays the current resource title and description
+- Interactive state that remembers the selected resource
 
 ### Task T12: Fix Numerical Stability and Add Graph Configuration
 We are addressing numerical instability issues in the standalone simulation test page and adding more configuration options:
@@ -130,18 +162,22 @@ Other ongoing decisions:
 - Backward compatibility will be preserved for the existing application
 
 ## Next Actions By Task
-- T9: Fix remaining AsyncThunkAction type issues in LogViewerAdapter.tsx
-- T9: Resolve the remaining boolean | undefined issue in SimulationResultsPanel.tsx
-- T9: Fix any other remaining type issues after validation with build
-- T9: Verify final build success after all fixes
-- T6: Verify database service fixes in conjunction with T9 fixes
-- T5: Consider adding interactive demos as a future enhancement
-- T1: Implement remaining components (weight functions, analysis tools, visualization adapters)
-- T1: Create test cases to validate library functionality
-- T1: Add comprehensive documentation and usage examples
-- T1: Refactor original app to use the new library
-- T2: On hold until T1 is completed
-- T3: On hold until T1 is completed
+- T36: Continue implementation of tensor and state vector sandbox
+- T35: Complete the enhanced node and edge data structures for intertwiners
+- T34: Continue migration of simulation engine to standalone library
+- T33: Fix remaining documentation rendering issues
+- T9: Fix remaining TypeScript errors in UI components
+- T6: Verify database service fixes in the application
+- T1: Continue implementing remaining components of the simulation library
+- T25: Add responsive design support to documentation system
+
+## Recently Completed Actions
+- ✅ Created new Testing page with sidebar navigation
+- ✅ Redesigned Documentation page with improved layout
+- ✅ Implemented proper Markdown rendering for documentation files
+- ✅ Integrated math equation support for documentation
+- ✅ Streamlined application header navigation
+- ✅ Removed outdated documentation components
 
 ## Accomplished Objectives
 The following major tasks have been completed prior to the current focus:

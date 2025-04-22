@@ -17,7 +17,8 @@ export default defineConfig({
       output: {
         globals: {
           mathjs: 'math'
-        }
+        },
+        exports: 'named'
       }
     }
   }

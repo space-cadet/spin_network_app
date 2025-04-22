@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaNetworkWired, FaChartLine, FaFolder, FaBook } from 'react-icons/fa';
+import { FaNetworkWired, FaChartLine, FaFolder, FaFlask, FaBook } from 'react-icons/fa';
 import ResizablePanel from '../common/ResizablePanel';
 import { Settings } from '../settings';
 
@@ -28,22 +28,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   <span className="text-white ml-1">Network</span>
                 </Link>
               </li>
-              <li className="flex items-center">
-                <a href="#" className="flex items-center hover:text-primary-100">
-                  <FaChartLine className="text-white" />
-                  <span className="text-white ml-1">Simulation</span>
-                </a>
-              </li>
+
               <li className="flex items-center">
                 <Link to="/explorer" className={`flex items-center hover:text-primary-100 ${location.pathname === '/explorer' ? 'border-b-2 border-white' : ''}`}>
                   <FaFolder className="text-white" />
                   <span className="text-white ml-1">Log Explorer</span>
                 </Link>
               </li>
+
               <li className="flex items-center">
-                <Link to="/docs" className={`flex items-center hover:text-primary-100 ${location.pathname.startsWith('/docs') ? 'border-b-2 border-white' : ''}`}>
+                <Link to="/docs" className={`flex items-center hover:text-primary-100 ${location.pathname === '/docs' ? 'border-b-2 border-white' : ''}`}>
                   <FaBook className="text-white" />
                   <span className="text-white ml-1">Documentation</span>
+                </Link>
+              </li>
+              <li className="flex items-center">
+                <Link to="/testing" className={`flex items-center hover:text-primary-100 ${location.pathname === '/testing' ? 'border-b-2 border-white' : ''}`}>
+                  <FaFlask className="text-white" />
+                  <span className="text-white ml-1">Testing</span>
                 </Link>
               </li>
               <li className="flex items-center">

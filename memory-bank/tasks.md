@@ -1,7 +1,10 @@
 # Task Registry
-*Last Updated: April 22, 2025 (14:45 IST)*
+*Last Updated: April 22, 2025 (17:30 IST)*
 
 ## Active Tasks
+| ID | Title | Status | Priority | Started | Dependencies | Owner |
+|----|-------|--------|----------|---------|--------------|-------|
+| T37 | Implement Testing and Documentation Pages | ✅ COMPLETE | MEDIUM | 2025-04-22 | - | Deepak |
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
 | T36 | Implement Tensor and State Vector Sandbox | 🔄 IN PROGRESS | MEDIUM | 2025-04-22 | T20, T35 | Deepak |
@@ -35,6 +38,41 @@
 | T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T37: Implement Testing and Documentation Pages
+**Description**: Create dedicated Testing and Documentation pages with a consistent sidebar-based interface for accessing and displaying various technical resources, guides, and test files within the application.
+**Status**: ✅ COMPLETE 
+**Priority**: MEDIUM
+**Started**: April 22, 2025
+**Last Active**: April 22, 2025 (17:30 IST)
+**Completed**: April 22, 2025 (17:30 IST)
+**Dependencies**: -
+**Completion Criteria**:
+- ✅ Create TestingPage component with sidebar navigation and iframe content display
+- ✅ Add links to three test resources: standalone guide, simulation test, and tensor sandbox
+- ✅ Create DocsPage component with similar sidebar navigation and content display
+- ✅ Implement proper Markdown rendering with math and code support
+- ✅ Add routes for both pages in App.tsx
+- ✅ Add navigation links in MainLayout header
+- ✅ Remove outdated documentation components and routes
+- ✅ Ensure consistent styling between both pages
+- ✅ Fix all rendering issues in Markdown display
+- ✅ Test all links and resource loading
+
+**Related Files**:
+- `/src/components/testing/TestingPage.tsx` - New component for test resources
+- `/src/components/testing/index.ts` - Export for testing component
+- `/src/components/documentation/DocsPage.tsx` - New documentation component
+- `/src/components/documentation/index.ts` - Export for documentation component
+- `/src/App.tsx` - Updated routes
+- `/src/components/layouts/MainLayout.tsx` - Updated navigation
+
+**Notes**:
+Completely redesigned the documentation and testing pages with a consistent sidebar-based interface. Removed the previous documentation components (DocsLayout, DocsSidebar, DocsViewer, DocumentationHome) and replaced them with a simpler, more consistent approach that matches the testing page design. Both pages now feature a sidebar with resource navigation and a main content area that displays the selected resource.
+
+The documentation page includes proper Markdown rendering with support for GitHub-flavored Markdown, mathematical equations via KaTeX, and code syntax highlighting. The testing page provides access to three key test resources: the standalone implementation guide, simulation test page, and tensor sandbox.
+
+Also removed the "Simulation" entry from the main layout header to streamline navigation. This implementation provides a more intuitive and consistent user experience for accessing documentation and testing resources.
 
 ### T36: Implement Tensor and State Vector Sandbox
 **Description**: Create a test sandbox to experiment with enhanced tensor-based representation of nodes and state vector representation of edges in spin networks before integrating these features into the main application.

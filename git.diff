@@ -1,0 +1,3797 @@
+diff --git a/lib-bundle.config.js b/lib-bundle.config.js
+index 3a26d34..4dbb0e4 100644
+--- a/lib-bundle.config.js
++++ b/lib-bundle.config.js
+@@ -17,7 +17,8 @@ export default defineConfig({
+       output: {
+         globals: {
+           mathjs: 'math'
+-        }
++        },
++        exports: 'named'
+       }
+     }
+   }
+diff --git a/lib/core/index.ts b/lib/core/index.ts
+index b210847..5211ae4 100644
+--- a/lib/core/index.ts
++++ b/lib/core/index.ts
+@@ -23,4 +23,36 @@ export {
+   getOptimizedIntertwinerBasis,
+ } from './intertwinerSpace';
+ 
+-export type { IntertwinerBasisState } from './intertwinerSpace';
++export type { IntertwinerBasisState } from './intertwinerSpace'
++
++// Export tensor and state vector utilities
++export {
++  // Tensor node
++  createTensorNode,
++  setTensorElement,
++  getTensorElement,
++  createTensorNodeFromBasisState,
++  calculateNodeVolume,
++  
++  // State vector edge
++  createStateVectorEdge,
++  setStateVectorAmplitude,
++  getStateVectorAmplitude,
++  normalizeStateVector,
++  calculateEdgeArea,
++  
++  // Complex number utilities
++  createComplex,
++  addComplex,
++  multiplyComplex,
++  
++  // Sparse element type
++  // SparseElement
++} from './tensor';
++
++export type {
++  TensorNode,
++  StateVectorEdge,
++  Complex,
++  SparseElement
++ } from './tensor'
+\ No newline at end of file
+diff --git a/lib/core/tensor.ts b/lib/core/tensor.ts
+new file mode 100644
+index 0000000..47b8e4a
+--- /dev/null
++++ b/lib/core/tensor.ts
+@@ -0,0 +1,355 @@
++/**
++ * Tensor and State Vector representations for Spin Networks
++ * 
++ * This module provides the core data structures for representing
++ * nodes as tensors and edges as state vectors in spin networks.
++ */
++
++import { IntertwinerBasisState } from './intertwinerSpace';
++
++/**
++ * Represents a complex number for tensor operations
++ */
++export interface Complex {
++  re: number;  // Real part
++  im: number;  // Imaginary part
++}
++
++/**
++ * Creates a new complex number
++ */
++export function createComplex(re: number = 0, im: number = 0): Complex {
++  return { re, im };
++}
++
++/**
++ * Adds two complex numbers
++ */
++export function addComplex(a: Complex, b: Complex): Complex {
++  return {
++    re: a.re + b.re,
++    im: a.im + b.im
++  };
++}
++
++/**
++ * Multiplies two complex numbers
++ */
++export function multiplyComplex(a: Complex, b: Complex): Complex {
++  return {
++    re: a.re * b.re - a.im * b.im,
++    im: a.re * b.im + a.im * b.re
++  };
++}
++
++/**
++ * Represents a sparse element in a tensor
++ */
++export interface SparseElement {
++  indices: number[];  // Position in the tensor
++  value: Complex;     // Complex value at this position
++}
++
++/**
++ * Represents a tensor node in the spin network
++ */
++export interface TensorNode {
++  id: string;
++  position: {
++    x: number;
++    y: number;
++    z?: number;
++  };
++  
++  // Tensor representation
++  tensor: {
++    dimensions: number[];         // Tensor dimensions (shape)
++    elements: SparseElement[];    // Non-zero tensor elements
++    basis: string;                // Basis representation
++  };
++  
++  // Intertwiner representation (for backward compatibility)
++  intertwiner: {
++    value: number;                // The numerical value
++    dimension?: number;           // Dimension of the intertwiner space
++    basisStateRef?: string;       // Reference to a basis state
++    recouplingScheme?: string;    // E.g. "(j1,j2)(j3,j4)"
++    edgeOrder?: string[];         // Ordered array of connected edge IDs
++  };
++  
++  // Physical properties
++  volume?: number;                // Quantum volume contribution
++  
++  // Additional properties
++  label?: string;
++  type?: string;
++  properties?: Record<string, any>;
++}
++
++/**
++ * Represents a state vector edge in the spin network
++ */
++export interface StateVectorEdge {
++  id: string;
++  source: string | null;         // Source node ID (null if dangling)
++  target: string | null;         // Target node ID (null if dangling)
++  
++  // State vector representation
++  stateVector: {
++    dimension: number;           // Dimension (2j+1)
++    amplitudes: Complex[];       // State vector amplitudes
++    basis: string;               // Basis representation
++  };
++  
++  // Spin representation (for backward compatibility)
++  spin: number;                  // The spin value (typically a half-integer)
++  
++  // Physical properties
++  area?: number;                 // Quantum area contribution
++  
++  // Additional properties
++  label?: string;
++  type?: string;
++  sourcePosition?: { x: number, y: number, z?: number };  // Position for dangling source end
++  targetPosition?: { x: number, y: number, z?: number };  // Position for dangling target end
++  properties?: Record<string, any>;
++}
++
++/**
++ * Creates a tensor node with default values
++ */
++export function createTensorNode(
++  id: string,
++  position: { x: number, y: number, z?: number },
++  intertwinerId: number,
++  dimensions: number[] = []
++): TensorNode {
++  return {
++    id,
++    position,
++    tensor: {
++      dimensions: dimensions.length > 0 ? dimensions : [2, 2, 2, 2], // Default to 4-valent node with spin-1/2 edges
++      elements: [],
++      basis: 'standard'
++    },
++    intertwiner: {
++      value: intertwinerId,
++      dimension: dimensions.reduce((prod, dim) => prod * dim, 1)
++    }
++  };
++}
++
++/**
++ * Sets an element in the tensor at the specified indices
++ */
++export function setTensorElement(
++  tensor: TensorNode['tensor'], 
++  indices: number[], 
++  value: Complex
++): void {
++  // Validate indices against dimensions
++  if (indices.length !== tensor.dimensions.length) {
++    console.warn(`Invalid indices length: ${indices.length}, expected ${tensor.dimensions.length}`);
++    return;
++  }
++  
++  for (let i = 0; i < indices.length; i++) {
++    if (indices[i] < 0 || indices[i] >= tensor.dimensions[i]) {
++      console.warn(`Index ${indices[i]} out of bounds for dimension ${i}`);
++      return;
++    }
++  }
++  
++  // Check if element with these indices already exists
++  const existingIndex = tensor.elements.findIndex(
++    el => el.indices.length === indices.length && 
++    el.indices.every((idx, i) => idx === indices[i])
++  );
++  
++  if (existingIndex >= 0) {
++    // Update existing element
++    tensor.elements[existingIndex].value = value;
++  } else {
++    // Add new element
++    tensor.elements.push({
++      indices: [...indices],
++      value: { ...value }
++    });
++  }
++}
++
++/**
++ * Gets an element from the tensor at the specified indices
++ */
++export function getTensorElement(
++  tensor: TensorNode['tensor'], 
++  indices: number[]
++): Complex {
++  // Validate indices against dimensions
++  if (indices.length !== tensor.dimensions.length) {
++    console.warn(`Invalid indices length: ${indices.length}, expected ${tensor.dimensions.length}`);
++    return { re: 0, im: 0 };
++  }
++  
++  for (let i = 0; i < indices.length; i++) {
++    if (indices[i] < 0 || indices[i] >= tensor.dimensions[i]) {
++      console.warn(`Index ${indices[i]} out of bounds for dimension ${i}`);
++      return { re: 0, im: 0 };
++    }
++  }
++  
++  // Find element with these indices
++  const element = tensor.elements.find(
++    el => el.indices.length === indices.length && 
++    el.indices.every((idx, i) => idx === indices[i])
++  );
++  
++  return element ? { ...element.value } : { re: 0, im: 0 };
++}
++
++/**
++ * Creates a state vector edge with default values
++ */
++export function createStateVectorEdge(
++  id: string,
++  source: string | null,
++  target: string | null,
++  spin: number
++): StateVectorEdge {
++  const dimension = Math.floor(2 * spin + 1);
++  
++  // Initialize with |j,j⟩ state (highest weight state)
++  const amplitudes: Complex[] = new Array(dimension).fill(null).map(() => ({ re: 0, im: 0 }));
++  amplitudes[0] = { re: 1, im: 0 };  // Set amplitude for |j,j⟩ to 1
++  
++  return {
++    id,
++    source,
++    target,
++    stateVector: {
++      dimension,
++      amplitudes,
++      basis: 'standard'
++    },
++    spin
++  };
++}
++
++/**
++ * Sets an amplitude in the state vector at the specified index
++ */
++export function setStateVectorAmplitude(
++  stateVector: StateVectorEdge['stateVector'],
++  index: number,
++  value: Complex
++): void {
++  if (index < 0 || index >= stateVector.dimension) {
++    console.warn(`Index ${index} out of bounds for state vector of dimension ${stateVector.dimension}`);
++    return;
++  }
++  
++  stateVector.amplitudes[index] = { ...value };
++}
++
++/**
++ * Gets an amplitude from the state vector at the specified index
++ */
++export function getStateVectorAmplitude(
++  stateVector: StateVectorEdge['stateVector'],
++  index: number
++): Complex {
++  if (index < 0 || index >= stateVector.dimension) {
++    console.warn(`Index ${index} out of bounds for state vector of dimension ${stateVector.dimension}`);
++    return { re: 0, im: 0 };
++  }
++  
++  return { ...stateVector.amplitudes[index] };
++}
++
++/**
++ * Normalizes a state vector
++ */
++export function normalizeStateVector(stateVector: StateVectorEdge['stateVector']): void {
++  // Calculate norm
++  const normSquared = stateVector.amplitudes.reduce(
++    (sum, amp) => sum + amp.re * amp.re + amp.im * amp.im,
++    0
++  );
++  
++  if (normSquared < 1e-10) {
++    console.warn('Cannot normalize state vector with norm close to zero');
++    return;
++  }
++  
++  const norm = Math.sqrt(normSquared);
++  
++  // Normalize amplitudes
++  for (let i = 0; i < stateVector.amplitudes.length; i++) {
++    stateVector.amplitudes[i].re /= norm;
++    stateVector.amplitudes[i].im /= norm;
++  }
++}
++
++/**
++ * Creates a tensor node from intertwiner basis state
++ */
++export function createTensorNodeFromBasisState(
++  id: string,
++  position: { x: number, y: number, z?: number },
++  j1: number, j2: number, j3: number, j4: number,
++  basisState: IntertwinerBasisState
++): TensorNode {
++  const dim1 = Math.floor(2 * j1 + 1);
++  const dim2 = Math.floor(2 * j2 + 1);
++  const dim3 = Math.floor(2 * j3 + 1);
++  const dim4 = Math.floor(2 * j4 + 1);
++  
++  const node = createTensorNode(id, position, basisState.intermediateJ, [dim1, dim2, dim3, dim4]);
++  
++  // Set tensor elements from basis state coefficients
++  let coeffIndex = 0;
++  for (let i1 = 0; i1 < dim1; i1++) {
++    for (let i2 = 0; i2 < dim2; i2++) {
++      for (let i3 = 0; i3 < dim3; i3++) {
++        for (let i4 = 0; i4 < dim4; i4++) {
++          const coeff = basisState.coefficients[coeffIndex++];
++          if (Math.abs(coeff) > 1e-10) {
++            setTensorElement(
++              node.tensor, 
++              [i1, i2, i3, i4], 
++              { re: coeff, im: 0 }
++            );
++          }
++        }
++      }
++    }
++  }
++  
++  // Set intertwiner properties
++  node.intertwiner = {
++    value: basisState.intermediateJ,
++    dimension: basisState.coefficients.length,
++    basisStateRef: `${j1},${j2},${j3},${j4}:${basisState.intermediateJ}`,
++    recouplingScheme: "(j1,j2)(j3,j4)"
++  };
++  
++  return node;
++}
++
++/**
++ * Calculate the volume contribution of a tensor node
++ */
++export function calculateNodeVolume(node: TensorNode): number {
++  // Simple volume calculation proportional to dimension
++  const volumeFactor = 8 * Math.PI;
++  return volumeFactor * (node.intertwiner.dimension || 1);
++}
++
++/**
++ * Calculate the area contribution of a state vector edge
++ */
++export function calculateEdgeArea(edge: StateVectorEdge): number {
++  // Area calculation based on spin (standard LQG formula)
++  const areaFactor = 8 * Math.PI;
++  return areaFactor * Math.sqrt(edge.spin * (edge.spin + 1));
++}
+diff --git a/lib/quantum/index.ts b/lib/quantum/index.ts
+new file mode 100644
+index 0000000..1a494cd
+--- /dev/null
++++ b/lib/quantum/index.ts
+@@ -0,0 +1,35 @@
++/**
++ * Quantum module for the Spin Network simulation library
++ * 
++ * Provides tensor and state vector operations for quantum calculations
++ */
++
++// Export tensor operations
++export {
++  createTensor,
++  setTensorElement,
++  getTensorElement,
++  tensorNodeToTensor,
++  contractTensors,
++  tensorNorm,
++  normalizeTensor,
++  createIntertwinerTensor,
++  tensorExpectationValue
++} from './tensorOperations';
++
++export type { Tensor } from './tensorOperations';
++
++// Export state vector operations
++export {
++  createStateVector,
++  initializeSpinState,
++  edgeToStateVector,
++  innerProduct,
++  normSquared,
++  normalizeStateVector,
++  applyOperator,
++  createSpinOperators,
++  expectationValue
++} from './stateVectorOperations';
++
++export type { StateVector } from './stateVectorOperations';
+diff --git a/lib/quantum/stateVectorOperations.ts b/lib/quantum/stateVectorOperations.ts
+new file mode 100644
+index 0000000..846d112
+--- /dev/null
++++ b/lib/quantum/stateVectorOperations.ts
+@@ -0,0 +1,216 @@
++/**
++ * State Vector Operations Module
++ * 
++ * Provides essential operations for quantum state vectors in the
++ * context of spin networks, focusing on intertwiner properties.
++ */
++
++import { 
++  StateVectorEdge, 
++  Complex, 
++  createComplex, 
++  addComplex, 
++  multiplyComplex
++} from '../core/tensor';
++
++/**
++ * Represents a quantum state vector
++ */
++export interface StateVector {
++  dimension: number;           // Dimension (2j+1)
++  amplitudes: Complex[];       // State vector amplitudes
++}
++
++/**
++ * Creates a state vector with given dimension
++ */
++export function createStateVector(dimension: number): StateVector {
++  return {
++    dimension,
++    amplitudes: Array(dimension).fill(null).map(() => createComplex(0, 0))
++  };
++}
++
++/**
++ * Initializes a state vector to represent a specific |j,m⟩ state
++ * where j is the total angular momentum and m is the z-component
++ */
++export function initializeSpinState(j: number, m: number): StateVector {
++  const dimension = Math.floor(2 * j + 1);
++  
++  // Create zero state vector
++  const stateVector = createStateVector(dimension);
++  
++  // m runs from j, j-1, ..., -j
++  // So m = j corresponds to index 0, m = -j to index 2j
++  const index = Math.floor(j - m);
++  
++  if (index < 0 || index >= dimension) {
++    throw new Error(`Invalid m value ${m} for spin ${j}`);
++  }
++  
++  // Set the corresponding amplitude to 1
++  stateVector.amplitudes[index] = createComplex(1, 0);
++  
++  return stateVector;
++}
++
++/**
++ * Converts a StateVectorEdge to a StateVector
++ */
++export function edgeToStateVector(edge: StateVectorEdge): StateVector {
++  return {
++    dimension: edge.stateVector.dimension,
++    amplitudes: edge.stateVector.amplitudes.map(amp => ({ ...amp }))
++  };
++}
++
++/**
++ * Calculates the inner product ⟨ψ|φ⟩ of two state vectors
++ */
++export function innerProduct(stateA: StateVector, stateB: StateVector): Complex {
++  if (stateA.dimension !== stateB.dimension) {
++    throw new Error('State vectors must have the same dimension for inner product');
++  }
++  
++  let result = createComplex(0, 0);
++  
++  for (let i = 0; i < stateA.dimension; i++) {
++    // Conjugate first state vector: ⟨ψ|φ⟩ = ψ*·φ
++    const conjugatedA = {
++      re: stateA.amplitudes[i].re,
++      im: -stateA.amplitudes[i].im
++    };
++    
++    const product = multiplyComplex(conjugatedA, stateB.amplitudes[i]);
++    result = addComplex(result, product);
++  }
++  
++  return result;
++}
++
++/**
++ * Calculates the squared norm ⟨ψ|ψ⟩ of a state vector
++ */
++export function normSquared(state: StateVector): number {
++  let sum = 0;
++  
++  for (const amplitude of state.amplitudes) {
++    sum += amplitude.re * amplitude.re + amplitude.im * amplitude.im;
++  }
++  
++  return sum;
++}
++
++/**
++ * Normalizes a state vector
++ */
++export function normalizeStateVector(state: StateVector): StateVector {
++  const norm = Math.sqrt(normSquared(state));
++  
++  if (norm < 1e-10) {
++    throw new Error('Cannot normalize state vector with near-zero norm');
++  }
++  
++  const normalized = createStateVector(state.dimension);
++  
++  for (let i = 0; i < state.dimension; i++) {
++    normalized.amplitudes[i] = {
++      re: state.amplitudes[i].re / norm,
++      im: state.amplitudes[i].im / norm
++    };
++  }
++  
++  return normalized;
++}
++
++/**
++ * Applies a matrix (operator) to a state vector: |ψ'⟩ = O|ψ⟩
++ */
++export function applyOperator(state: StateVector, operator: Complex[][]): StateVector {
++  if (operator.length !== state.dimension) {
++    throw new Error('Operator dimensions must match state vector dimension');
++  }
++  
++  const result = createStateVector(state.dimension);
++  
++  for (let i = 0; i < state.dimension; i++) {
++    let sum = createComplex(0, 0);
++    
++    for (let j = 0; j < state.dimension; j++) {
++      const term = multiplyComplex(operator[i][j], state.amplitudes[j]);
++      sum = addComplex(sum, term);
++    }
++    
++    result.amplitudes[i] = sum;
++  }
++  
++  return result;
++}
++
++/**
++ * Creates the spin-j operators in the |j,m⟩ basis
++ */
++export function createSpinOperators(j: number): {
++  Sx: Complex[][],
++  Sy: Complex[][],
++  Sz: Complex[][]
++} {
++  const dimension = Math.floor(2 * j + 1);
++  
++  // Initialize operators with zeros
++  const Sx = Array(dimension).fill(null).map(() => 
++    Array(dimension).fill(null).map(() => createComplex(0, 0))
++  );
++  
++  const Sy = Array(dimension).fill(null).map(() => 
++    Array(dimension).fill(null).map(() => createComplex(0, 0))
++  );
++  
++  const Sz = Array(dimension).fill(null).map(() => 
++    Array(dimension).fill(null).map(() => createComplex(0, 0))
++  );
++  
++  // Fill Sz (diagonal)
++  for (let i = 0; i < dimension; i++) {
++    const m = j - i;  // m value for this index
++    Sz[i][i] = createComplex(m, 0);
++  }
++  
++  // Fill Sx and Sy (off-diagonal)
++  for (let i = 0; i < dimension - 1; i++) {
++    const m = j - i;  // m value for this index
++    
++    // Coefficients for raising/lowering operators
++    const coeff = Math.sqrt(j * (j + 1) - m * (m + 1));
++    
++    // S+ = Sx + iSy, S- = Sx - iSy
++    // Matrix elements: ⟨j,m|S+|j,m-1⟩ = √(j(j+1) - m(m-1))
++    // For Sx: ⟨j,m|Sx|j,m±1⟩ = √(j(j+1) - m(m±1))/2
++    // For Sy: ⟨j,m|Sy|j,m±1⟩ = ∓i√(j(j+1) - m(m±1))/2
++    
++    // Sx: upper diagonal
++    Sx[i][i+1] = createComplex(coeff/2, 0);
++    // Sx: lower diagonal (symmetric)
++    Sx[i+1][i] = createComplex(coeff/2, 0);
++    
++    // Sy: upper diagonal
++    Sy[i][i+1] = createComplex(0, -coeff/2);
++    // Sy: lower diagonal (anti-symmetric)
++    Sy[i+1][i] = createComplex(0, coeff/2);
++  }
++  
++  return { Sx, Sy, Sz };
++}
++
++/**
++ * Calculates the expectation value ⟨ψ|O|ψ⟩ of an operator
++ * with respect to a state vector
++ */
++export function expectationValue(state: StateVector, operator: Complex[][]): Complex {
++  // Apply operator to state: O|ψ⟩
++  const operated = applyOperator(state, operator);
++  
++  // Calculate inner product: ⟨ψ|O|ψ⟩
++  return innerProduct(state, operated);
++}
+diff --git a/lib/quantum/tensorOperations.ts b/lib/quantum/tensorOperations.ts
+new file mode 100644
+index 0000000..b5a9846
+--- /dev/null
++++ b/lib/quantum/tensorOperations.ts
+@@ -0,0 +1,407 @@
++/**
++ * Tensor Operations Module
++ * 
++ * Provides essential operations for manipulating tensors in the
++ * context of spin networks, focusing on intertwiner properties.
++ */
++
++import { 
++  TensorNode, 
++  Complex, 
++  SparseElement, 
++  createComplex, 
++  addComplex, 
++  multiplyComplex,
++  getTensorElement
++} from '../core/tensor';
++
++/**
++ * Represents a tensor for mathematical operations
++ */
++export interface Tensor {
++  dimensions: number[];        // Tensor dimensions (shape)
++  elements: SparseElement[];   // Non-zero tensor elements
++}
++
++/**
++ * Creates a tensor with given dimensions
++ */
++export function createTensor(dimensions: number[]): Tensor {
++  return {
++    dimensions,
++    elements: []
++  };
++}
++
++/**
++ * Sets an element in a tensor at the specified indices
++ */
++export function setTensorElement(
++  tensor: Tensor, 
++  indices: number[], 
++  value: Complex
++): void {
++  // Validate indices against dimensions
++  if (indices.length !== tensor.dimensions.length) {
++    throw new Error(`Invalid indices length: ${indices.length}, expected ${tensor.dimensions.length}`);
++  }
++  
++  for (let i = 0; i < indices.length; i++) {
++    if (indices[i] < 0 || indices[i] >= tensor.dimensions[i]) {
++      throw new Error(`Index ${indices[i]} out of bounds for dimension ${i}`);
++    }
++  }
++  
++  // Check if element with these indices already exists
++  const existingIndex = tensor.elements.findIndex(
++    el => el.indices.length === indices.length && 
++    el.indices.every((idx, i) => idx === indices[i])
++  );
++  
++  // Skip if value is essentially zero
++  if (Math.abs(value.re) < 1e-10 && Math.abs(value.im) < 1e-10) {
++    if (existingIndex >= 0) {
++      // Remove existing element if value is now zero
++      tensor.elements.splice(existingIndex, 1);
++    }
++    return;
++  }
++  
++  if (existingIndex >= 0) {
++    // Update existing element
++    tensor.elements[existingIndex].value = { ...value };
++  } else {
++    // Add new element
++    tensor.elements.push({
++      indices: [...indices],
++      value: { ...value }
++    });
++  }
++}
++
++/**
++ * Gets an element from a tensor at the specified indices
++ */
++export function getTensorElement(
++  tensor: Tensor, 
++  indices: number[]
++): Complex {
++  // Validate indices against dimensions
++  if (indices.length !== tensor.dimensions.length) {
++    throw new Error(`Invalid indices length: ${indices.length}, expected ${tensor.dimensions.length}`);
++  }
++  
++  for (let i = 0; i < indices.length; i++) {
++    if (indices[i] < 0 || indices[i] >= tensor.dimensions[i]) {
++      throw new Error(`Index ${indices[i]} out of bounds for dimension ${i}`);
++    }
++  }
++  
++  // Find element with these indices
++  const element = tensor.elements.find(
++    el => el.indices.length === indices.length && 
++    el.indices.every((idx, i) => idx === indices[i])
++  );
++  
++  return element ? { ...element.value } : { re: 0, im: 0 };
++}
++
++/**
++ * Converts a TensorNode to a Tensor
++ */
++export function tensorNodeToTensor(node: TensorNode): Tensor {
++  return {
++    dimensions: [...node.tensor.dimensions],
++    elements: node.tensor.elements.map(el => ({
++      indices: [...el.indices],
++      value: { ...el.value }
++    }))
++  };
++}
++
++/**
++ * Contracts two tensors along specified indices
++ * 
++ * Example: contracting tensors A and B along indices [[0, 1]] means
++ * summing over index 0 of A and index 1 of B.
++ */
++export function contractTensors(
++  tensorA: Tensor,
++  tensorB: Tensor,
++  contractionPairs: [number, number][]
++): Tensor {
++  // Validate contraction pairs
++  for (const [indexA, indexB] of contractionPairs) {
++    if (indexA < 0 || indexA >= tensorA.dimensions.length) {
++      throw new Error(`Invalid index ${indexA} for first tensor`);
++    }
++    if (indexB < 0 || indexB >= tensorB.dimensions.length) {
++      throw new Error(`Invalid index ${indexB} for second tensor`);
++    }
++    if (tensorA.dimensions[indexA] !== tensorB.dimensions[indexB]) {
++      throw new Error(`Dimension mismatch for contraction: ${tensorA.dimensions[indexA]} != ${tensorB.dimensions[indexB]}`);
++    }
++  }
++  
++  // Determine free (non-contracted) indices
++  const freeIndicesA = Array.from(
++    { length: tensorA.dimensions.length },
++    (_, i) => i
++  ).filter(i => !contractionPairs.some(([a, _]) => a === i));
++  
++  const freeIndicesB = Array.from(
++    { length: tensorB.dimensions.length },
++    (_, i) => i
++  ).filter(i => !contractionPairs.some(([_, b]) => b === i));
++  
++  // Determine result dimensions
++  const resultDimensions = [
++    ...freeIndicesA.map(i => tensorA.dimensions[i]),
++    ...freeIndicesB.map(i => tensorB.dimensions[i])
++  ];
++  
++  // Create result tensor
++  const result = createTensor(resultDimensions);
++  
++  // If either tensor is empty, return empty result
++  if (tensorA.elements.length === 0 || tensorB.elements.length === 0) {
++    return result;
++  }
++  
++  // Perform contraction (only for non-zero elements)
++  // This is a simplified version that works for simple contractions
++  const contractionDimensions = contractionPairs.map(([a, _]) => tensorA.dimensions[a]);
++  
++  // Generate all possible free index values for result tensor
++  const generateIndices = (dims: number[]): number[][] => {
++    if (dims.length === 0) return [[]];
++    
++    const subIndices = generateIndices(dims.slice(1));
++    const result: number[][] = [];
++    
++    for (let i = 0; i < dims[0]; i++) {
++      for (const sub of subIndices) {
++        result.push([i, ...sub]);
++      }
++    }
++    
++    return result;
++  };
++  
++  // Generate free indices for first tensor
++  const freeIndicesValuesA = generateIndices(freeIndicesA.map(i => tensorA.dimensions[i]));
++  
++  // Generate free indices for second tensor
++  const freeIndicesValuesB = generateIndices(freeIndicesB.map(i => tensorB.dimensions[i]));
++  
++  // For each combination of free indices
++  for (const freeValuesA of freeIndicesValuesA) {
++    for (const freeValuesB of freeIndicesValuesB) {
++      // Initialize sum for this element
++      let sum = createComplex(0, 0);
++      
++      // Generate all possible contraction index values
++      const contractionIndicesValues = generateIndices(contractionDimensions);
++      
++      for (const contractionValues of contractionIndicesValues) {
++        // Build complete indices for tensor A
++        const indicesA = new Array(tensorA.dimensions.length);
++        for (let i = 0; i < freeIndicesA.length; i++) {
++          indicesA[freeIndicesA[i]] = freeValuesA[i];
++        }
++        for (let i = 0; i < contractionPairs.length; i++) {
++          indicesA[contractionPairs[i][0]] = contractionValues[i];
++        }
++        
++        // Build complete indices for tensor B
++        const indicesB = new Array(tensorB.dimensions.length);
++        for (let i = 0; i < freeIndicesB.length; i++) {
++          indicesB[freeIndicesB[i]] = freeValuesB[i];
++        }
++        for (let i = 0; i < contractionPairs.length; i++) {
++          indicesB[contractionPairs[i][1]] = contractionValues[i];
++        }
++        
++        // Get elements from both tensors
++        const elementA = getTensorElement(tensorA, indicesA);
++        const elementB = getTensorElement(tensorB, indicesB);
++        
++        // Compute product and add to sum
++        const product = multiplyComplex(elementA, elementB);
++        sum = addComplex(sum, product);
++      }
++      
++      // If sum is non-zero, add to result tensor
++      if (Math.abs(sum.re) > 1e-10 || Math.abs(sum.im) > 1e-10) {
++        const resultIndices = [...freeValuesA, ...freeValuesB];
++        setTensorElement(result, resultIndices, sum);
++      }
++    }
++  }
++  
++  return result;
++}
++
++/**
++ * Calculates the norm of a tensor (Frobenius norm)
++ */
++export function tensorNorm(tensor: Tensor): number {
++  let sumSquared = 0;
++  
++  for (const element of tensor.elements) {
++    const value = element.value;
++    sumSquared += value.re * value.re + value.im * value.im;
++  }
++  
++  return Math.sqrt(sumSquared);
++}
++
++/**
++ * Normalizes a tensor to have Frobenius norm of 1
++ */
++export function normalizeTensor(tensor: Tensor): Tensor {
++  const norm = tensorNorm(tensor);
++  
++  if (norm < 1e-10) {
++    throw new Error('Cannot normalize tensor with near-zero norm');
++  }
++  
++  const result = createTensor(tensor.dimensions);
++  
++  for (const element of tensor.elements) {
++    setTensorElement(
++      result,
++      element.indices,
++      {
++        re: element.value.re / norm,
++        im: element.value.im / norm
++      }
++    );
++  }
++  
++  return result;
++}
++
++/**
++ * Creates a 4-valent intertwiner tensor from j values and intermediate j
++ */
++export function createIntertwinerTensor(
++  j1: number, j2: number, j3: number, j4: number, 
++  intermediateJ: number
++): Tensor {
++  // Create dimensions based on j values
++  const dim1 = Math.floor(2 * j1 + 1);
++  const dim2 = Math.floor(2 * j2 + 1);
++  const dim3 = Math.floor(2 * j3 + 1);
++  const dim4 = Math.floor(2 * j4 + 1);
++  
++  // Create tensor
++  const tensor = createTensor([dim1, dim2, dim3, dim4]);
++  
++  // Generate m values for each j
++  const m1Values = Array.from({ length: dim1 }, (_, i) => j1 - i);
++  const m2Values = Array.from({ length: dim2 }, (_, i) => j2 - i);
++  const m3Values = Array.from({ length: dim3 }, (_, i) => j3 - i);
++  const m4Values = Array.from({ length: dim4 }, (_, i) => j4 - i);
++  
++  // Generate intertwiner coefficients using CG coefficients
++  // For each combination of m values
++  for (let i1 = 0; i1 < dim1; i1++) {
++    const m1 = m1Values[i1];
++    
++    for (let i2 = 0; i2 < dim2; i2++) {
++      const m2 = m2Values[i2];
++      const m12 = m1 + m2;
++      
++      // Skip if m12 is out of range for intermediateJ
++      if (Math.abs(m12) > intermediateJ + 1e-10) continue;
++      
++      for (let i3 = 0; i3 < dim3; i3++) {
++        const m3 = m3Values[i3];
++        
++        for (let i4 = 0; i4 < dim4; i4++) {
++          const m4 = m4Values[i4];
++          const m34 = m3 + m4;
++          
++          // For an invariant intertwiner, we need m12 + m34 = 0
++          if (Math.abs(m12 + m34) > 1e-10) continue;
++          
++          // Simple coefficient based on positions
++          // In a full implementation, this would use proper CG coefficients
++          let coefficient = 0;
++          
++          // Special case: four spin-1/2 edges
++          if (Math.abs(j1 - 0.5) < 1e-10 && 
++              Math.abs(j2 - 0.5) < 1e-10 && 
++              Math.abs(j3 - 0.5) < 1e-10 && 
++              Math.abs(j4 - 0.5) < 1e-10) {
++            
++            if (Math.abs(intermediateJ) < 1e-10) {
++              // Singlet basis state (j=0)
++              if ((i1 + i2 + i3 + i4) % 2 === 0) {
++                coefficient = (i1 + i3) % 2 === 0 ? 0.5 : -0.5;
++              }
++            } else if (Math.abs(intermediateJ - 1) < 1e-10) {
++              // Triplet basis state (j=1)
++              if (i1 === 0 && i2 === 0 && i3 === 1 && i4 === 1) coefficient = 1/Math.sqrt(3);
++              else if (i1 === 1 && i2 === 1 && i3 === 0 && i4 === 0) coefficient = 1/Math.sqrt(3);
++              else if ((i1 + i2 + i3 + i4) % 2 === 0) coefficient = -1/(2*Math.sqrt(3));
++            }
++          } else {
++            // For other cases, use a simplified placeholder coefficient
++            // This is a placeholder - not physically accurate
++            coefficient = 1 / Math.sqrt(dim1 * dim2 * dim3 * dim4);
++          }
++          
++          if (Math.abs(coefficient) > 1e-10) {
++            setTensorElement(
++              tensor,
++              [i1, i2, i3, i4],
++              { re: coefficient, im: 0 }
++            );
++          }
++        }
++      }
++    }
++  }
++  
++  // Normalize the tensor
++  return normalizeTensor(tensor);
++}
++
++/**
++ * Calculates the expectation value of an operator with respect to a state vector
++ */
++export function tensorExpectationValue(
++  tensor: Tensor,
++  operator: Tensor
++): Complex {
++  // Validate dimensions
++  if (JSON.stringify(tensor.dimensions) !== JSON.stringify(operator.dimensions)) {
++    throw new Error('Tensor and operator dimensions must match for expectation value');
++  }
++  
++  // For a rank-2 tensor (matrix) operator, calculate <ψ|O|ψ>
++  let result = createComplex(0, 0);
++  
++  // For simplicity, only handle the case where all indices have same dimension
++  const dim = tensor.dimensions[0];
++  
++  // Generate all possible indices
++  for (let i = 0; i < dim; i++) {
++    for (let j = 0; j < dim; j++) {
++      const psi_i = getTensorElement(tensor, [i]);
++      const O_ij = getTensorElement(operator, [i, j]);
++      const psi_j = getTensorElement(tensor, [j]);
++      
++      // psi_i* * O_ij * psi_j
++      const psi_i_conj = { re: psi_i.re, im: -psi_i.im };
++      const temp = multiplyComplex(O_ij, psi_j);
++      const term = multiplyComplex(psi_i_conj, temp);
++      
++      result = addComplex(result, term);
++    }
++  }
++  
++  return result;
++}
+diff --git a/memory-bank/activeContext.md b/memory-bank/activeContext.md
+index 4a35364..b8d273c 100644
+--- a/memory-bank/activeContext.md
++++ b/memory-bank/activeContext.md
+@@ -1,52 +1,84 @@
+ # Active Context
+ 
+-*Last Updated: April 18, 2025 (12:45 IST)*
++*Last Updated: April 22, 2025 (15:30 IST)*
+ 
+ ## Current Focus
+-**Primary Task:** T18: Fix Logging File Paths and Structure (Completed)
+-**Secondary Tasks:** T1: Simulation Library Abstraction, T20: Add Intertwiner Space Implementation
++**Primary Task:** UI Enhancement: Added Testing page and updated Documentation page
++**Secondary Tasks:** T36: Implement Tensor and State Vector Sandbox, T34: Complete Simulation Engine Migration
+ 
+ ## Active Tasks
+-- T1: Creating a standalone simulation library separate from UI components - 🔄 IN PROGRESS
+-- T5: Enhancing simulation test pages with randomized networks and physics explanations - 🔄 IN PROGRESS
+-- T6: Fixing database service TypeScript errors to enable successful build - 🔄 IN PROGRESS
+-- T9: Fixing UI and simulation TypeScript errors to enable successful build - 🔄 IN PROGRESS
+-- T10: Developing standalone test page for simulation library - 🔄 IN PROGRESS
+-- T12: Fixing numerical stability issues and adding graph configuration options - ⏸️ PAUSED
++- T36: Implement Tensor and State Vector Sandbox - 🔄 IN PROGRESS
++- T35: Enhance Node and Edge Data Structures for Intertwiners - 🔄 IN PROGRESS
++- T34: Complete Simulation Engine Migration to Standalone Library - 🔄 IN PROGRESS
++- T33: Fix Documentation Rendering and Interaction Issues - 🔄 IN PROGRESS
++- T1: Simulation Library Core Implementation - 🔄 IN PROGRESS
++- T5: Enhanced Simulation Test Pages - 🔄 IN PROGRESS
++- T6: Fix Database Service Errors - 🔄 IN PROGRESS
++- T9: Fix UI and Simulation TypeScript Errors - 🔄 IN PROGRESS
++- T10: Standalone Test Page for Simulation Library - 🔄 IN PROGRESS
++- T12: Fix Numerical Stability and Add Graph Config - ⏸️ PAUSED
+ - T14: State Management Architecture for Standalone Library - 🔄 IN PROGRESS
+ - T16: Enhance Simulation Data Export and Visualization - 🔄 IN PROGRESS
+ - T17: Fix TypeScript Build Errors - 🔄 IN PROGRESS
+-- T18: Fix Logging File Paths and Structure - ✅ COMPLETE
+ - T20: Add Intertwiner Space Implementation - 🔄 IN PROGRESS
+-- T2: Adding more in-depth analysis and visualization of simulation results - ⏸️ PAUSED
+-- T3: Breaking down large components into smaller, more maintainable units - ⏸️ PAUSED
++- T25: Implement Documentation System - 🔄 IN PROGRESS
++- T2: Advanced Simulation Analysis - ⏸️ PAUSED
++- T3: Component Refactoring - ⏸️ PAUSED
+ 
+ ## Implementation Focus
+-Currently focusing on fixing numerical stability issues in the standalone simulation test page (T12) and adding more configuration options for creating different network topologies and adjusting simulation parameters. The critical issues involve exponential growth of state values during simulation, which persists despite the implemented normalization. We're also enhancing the user interface to allow for more flexible testing of different network configurations and diffusion models.
++Recently completed UI enhancements to the application by:
++
++1. Creating a new Testing page with a sidebar layout that allows navigating between three testing resources:
++   - Standalone Implementation Guide (standalone-guide.html)
++   - Simulation Test Page (simulation-test.html) 
++   - Tensor Sandbox (tensor-sandbox.html)
++
++2. Redesigning the Documentation page:
++   - Removed the old documentation components and implementation
++   - Created a new, simplified documentation page with the same sidebar layout as the Testing page
++   - Implemented proper Markdown rendering for .md files
++   - Added support for math equations, tables, and other markdown features
++   - Made the documentation page load the following resources:
++     - Physics Notebook (physics-notebook.html)
++     - Intertwiner Spaces (intertwiner-spaces.md)
++     - Unified Dynamics Approach (unified-dynamics.md)
++     - Mathematical Foundations (mathematical-roadmap.md)
++   
++3. Updated the main application layout:
++   - Removed the "Simulation" entry from the header
++   - Added the new Testing page link
++   - Adjusted the Documentation page link
++
++These UI improvements provide a more integrated experience for testing and documentation, with a consistent layout that keeps navigation in a sidebar and loads content in the main viewport.
+ 
+ ## Task-Specific Context
+ 
+-### Task T18: Fix Logging File Paths and Structure (Completed)
+-We have successfully fixed the logging file paths to ensure logs are written to the correct locations:
++### UI Enhancement: Added Testing Page and Updated Documentation Page
++We have redesigned and enhanced the application's documentation and testing capabilities:
+ 
+ Key aspects of this work:
+-- Updated the simulationLogger to properly route logs to the correct directories
+-- Enhanced the SpinNetworkGraph class with direct graph logging capability
+-- Added a dedicated saveTestLog method for test logs
+-- Implemented appendResultsToFile method to continuously log simulation data to CSV
+-- Improved the BrowserFS directory creation process
+-- Enhanced the application initialization to verify all required directories exist
+-
+-The implementation now ensures that:
+-- Graph creation events are properly logged to `/logs/simulation/graphs`
+-- Simulation events are logged to `/logs/simulation/runs`
+-- Test logs go to `/logs/simulation/tests` instead of sessions
+-- Application logs go to the appropriate subdirectories of `/logs/application`
+-
+-Future improvements will include:
+-- Adding .gitkeep files to ensure empty directories are tracked
+-- Creating a comprehensive README.md for the log structure
+-- Implementing log rotation policies to manage file sizes
++- Created a new Testing page with a sidebar layout for navigating between testing resources
++- Completely redesigned the Documentation page with the same sidebar layout
++- Implemented proper Markdown rendering with support for:
++  - Mathematical equations (via KaTeX)
++  - Tables and other GitHub-flavored Markdown features
++  - Improved readability with proper styling
++- Integrated both pages into the main application navigation
++- Removed the outdated documentation components and implementation
++- Simplified the header navigation by removing the unused "Simulation" link
++
++The implementation now provides:
++- A consistent user experience across documentation and testing pages
++- An integrated way to access test resources without opening separate tabs
++- Properly formatted documentation with math support
++- A more maintainable codebase with simplified components
++- A cleaner UI with only relevant navigation options
++
++The new pages use a unified design pattern with:
++- Left sidebar for navigation between resources
++- Main content area that dynamically loads the selected resource
++- Proper header that displays the current resource title and description
++- Interactive state that remembers the selected resource
+ 
+ ### Task T12: Fix Numerical Stability and Add Graph Configuration
+ We are addressing numerical instability issues in the standalone simulation test page and adding more configuration options:
+@@ -130,18 +162,22 @@ Other ongoing decisions:
+ - Backward compatibility will be preserved for the existing application
+ 
+ ## Next Actions By Task
+-- T9: Fix remaining AsyncThunkAction type issues in LogViewerAdapter.tsx
+-- T9: Resolve the remaining boolean | undefined issue in SimulationResultsPanel.tsx
+-- T9: Fix any other remaining type issues after validation with build
+-- T9: Verify final build success after all fixes
+-- T6: Verify database service fixes in conjunction with T9 fixes
+-- T5: Consider adding interactive demos as a future enhancement
+-- T1: Implement remaining components (weight functions, analysis tools, visualization adapters)
+-- T1: Create test cases to validate library functionality
+-- T1: Add comprehensive documentation and usage examples
+-- T1: Refactor original app to use the new library
+-- T2: On hold until T1 is completed
+-- T3: On hold until T1 is completed
++- T36: Continue implementation of tensor and state vector sandbox
++- T35: Complete the enhanced node and edge data structures for intertwiners
++- T34: Continue migration of simulation engine to standalone library
++- T33: Fix remaining documentation rendering issues
++- T9: Fix remaining TypeScript errors in UI components
++- T6: Verify database service fixes in the application
++- T1: Continue implementing remaining components of the simulation library
++- T25: Add responsive design support to documentation system
++
++## Recently Completed Actions
++- ✅ Created new Testing page with sidebar navigation
++- ✅ Redesigned Documentation page with improved layout
++- ✅ Implemented proper Markdown rendering for documentation files
++- ✅ Integrated math equation support for documentation
++- ✅ Streamlined application header navigation
++- ✅ Removed outdated documentation components
+ 
+ ## Accomplished Objectives
+ The following major tasks have been completed prior to the current focus:
+diff --git a/memory-bank/edit_history.md b/memory-bank/edit_history.md
+index b8c19c0..b207335 100644
+--- a/memory-bank/edit_history.md
++++ b/memory-bank/edit_history.md
+@@ -1,10 +1,17 @@
+ # Edit History
+ 
+ *Created: April 14, 2025*
+-*Last Updated: 2025-04-21 (23:55 IST)*
++*Last Updated: 2025-04-22 (09:35 IST)*
+ 
+ ## File Modification Log
+ 
++### April 22, 2025
++
++#### [09:35] - UI Enhancement: Added Testing page and updated Documentation page
++- Modified `/Users/deepak/code/spin_network_app/memory-bank/tasks.md` - Updated task statuses and details
++- Modified `/Users/deepak/code/spin_network_app/memory-bank/session_cache.md` - Updated task registry and session details
++- Modified `/Users/deepak/code/spin_network_app/memory-bank/activeContext.md` - Updated current focus and active tasks
++
+ ### April 21, 2025
+ 
+ #### [23:55] - T35: Create Intertwiner Tensor Implementation Plan
+@@ -832,3 +839,18 @@ These changes address the "Maximum update depth exceeded" errors by breaking cir
+ # Edit History
+ 
+ This file tracks specific file and folder changes in the project.
++
++### April 22, 2025
++
++#### [09:44] - T36: Implement Tensor and State Vector Sandbox
++
++- Created `lib/core/tensor.ts` - Implemented core data structures for representing nodes as tensors and edges as state vectors in spin networks.
++- Modified `lib/core/index.ts` - Exported tensor and state vector utilities from the new `tensor.ts` file.
++- Created `lib/quantum/index.ts` - Exported tensor and state vector operations for quantum calculations.
++- Created `lib/quantum/stateVectorOperations.ts` - Provided essential operations for quantum state vectors.
++- Created `lib/quantum/tensorOperations.ts` - Provided essential operations for manipulating tensors.
++- Created `memory-bank/implementation-details/tensor-test.md` - Outlined the plan for implementing a test sandbox for tensor-based representation.
++- Modified `memory-bank/tasks.md` - Added a new task T36 for implementing the tensor and state vector sandbox.
++- Created `public/scripts/tensor-bridge.js` - Provided a bridge between the core tensor/state vector implementations and the sandbox UI.
++- Created `public/scripts/tensor-sandbox.js` - Connected the tensor-sandbox.html UI to the standalone library for testing.
++- Created `public/tensor-sandbox.html` - Provided a UI for testing the tensor node and state vector edge implementations.
+diff --git a/memory-bank/implementation-details/tensor-test.md b/memory-bank/implementation-details/tensor-test.md
+new file mode 100644
+index 0000000..382392b
+--- /dev/null
++++ b/memory-bank/implementation-details/tensor-test.md
+@@ -0,0 +1,245 @@
++# Tensor Test Sandbox Implementation Plan
++
++*Last Updated: April 22, 2025*
++
++## Overview
++
++This document outlines the plan for implementing a test sandbox to experiment with enhanced tensor-based representation of nodes and state vector representation of edges in spin networks. This approach will allow us to test the mathematical implementation before integrating it into the main application.
++
++## Table of Contents
++
++1. [Goals and Objectives](#1-goals-and-objectives)
++2. [Data Structures](#2-data-structures)
++3. [Core Components](#3-core-components)
++4. [Implementation Phases](#4-implementation-phases)
++5. [Visualization Approach](#5-visualization-approach)
++6. [Testing Methodology](#6-testing-methodology)
++7. [Integration with Existing Code](#7-integration-with-existing-code)
++8. [References](#8-references)
++
++## 1. Goals and Objectives
++
++The primary goals of this test sandbox are:
++
++- Implement and test node tensor representations that accurately reflect the physics of spin networks
++- Develop edge state vector representations that properly encode quantum mechanical properties
++- Verify that tensor and state vector operations perform correctly during simulation
++- Provide visual feedback to understand how these structures behave
++- Establish a foundation for integration into the main application
++
++## 2. Data Structures
++
++### 2.1 TensorNode Structure
++
++```typescript
++interface TensorNode {
++  id: string;
++  position: { x: number, y: number };
++  
++  // Tensor data
++  tensor: {
++    dimensions: number[];        // Tensor dimensions (shape)
++    elements: SparseElement[];   // Non-zero tensor elements
++    basis: string;               // Basis representation
++  };
++  
++  // Intertwiner representation (backward compatibility)
++  intertwiner: IntertwinerData;
++  
++  // Additional data
++  recouplingScheme: string;      // E.g. "(j1,j2)(j3,j4)" 
++  edgeOrder: string[];           // Ordered array of connected edge IDs
++  
++  // Physical properties
++  volume: number;                // Quantum volume contribution
++  
++  // Visualization properties
++  label?: string;
++  type?: string;
++  properties?: Record<string, any>;
++}
++
++interface SparseElement {
++  indices: number[];             // Position in the tensor
++  value: Complex;                // Complex value at this position
++}
++
++interface Complex {
++  re: number;                    // Real part
++  im: number;                    // Imaginary part
++}
++```
++
++### 2.2 StateVectorEdge Structure
++
++```typescript
++interface StateVectorEdge {
++  id: string;
++  source: string | null;
++  target: string | null;
++  
++  // State vector data
++  stateVector: {
++    dimension: number;           // Dimension (2j+1)
++    amplitudes: Complex[];       // State vector amplitudes
++    basis: string;               // Basis representation
++  };
++  
++  // Spin representation (backward compatibility)
++  spin: number;
++  
++  // Physical properties
++  area: number;                  // Quantum area contribution
++  
++  // Visualization properties
++  label?: string;
++  type?: string;
++  sourcePosition?: { x: number, y: number };
++  targetPosition?: { x: number, y: number };
++  properties?: Record<string, any>;
++}
++```
++
++## 3. Core Components
++
++The test sandbox will include the following core components:
++
++### 3.1 TensorOperations Module
++
++```typescript
++// tensor-operations.ts
++export function createTensor(dimensions: number[]): Tensor;
++export function setTensorElement(tensor: Tensor, indices: number[], value: Complex): Tensor;
++export function getTensorElement(tensor: Tensor, indices: number[]): Complex;
++export function contractTensors(tensorA: Tensor, tensorB: Tensor, contractionIndices: [number, number][]): Tensor;
++export function tensorProduct(tensorA: Tensor, tensorB: Tensor): Tensor;
++export function normalizeTensor(tensor: Tensor): Tensor;
++export function tensorToMatrix(tensor: Tensor, rowIndices: number[], columnIndices: number[]): Matrix;
++```
++
++### 3.2 StateVectorOperations Module
++
++```typescript
++// state-vector-operations.ts
++export function createStateVector(dimension: number): StateVector;
++export function initializeSpinState(j: number, m: number): StateVector;
++export function evolveStateVector(stateVector: StateVector, operator: Matrix, dt: number): StateVector;
++export function innerProduct(stateVectorA: StateVector, stateVectorB: StateVector): Complex;
++export function normalizeStateVector(stateVector: StateVector): StateVector;
++export function expectationValue(stateVector: StateVector, operator: Matrix): number;
++```
++
++### 3.3 TensorFactory Module
++
++```typescript
++// tensor-factory.ts
++export function createIntertwinerTensor(spins: number[], intermediateSpins: number[]): Tensor;
++export function createTrivalentIntertwiner(j1: number, j2: number, j3: number): Tensor;
++export function createFourValentIntertwiner(j1: number, j2: number, j3: number, j4: number, j12: number): Tensor;
++export function createSpinNetworkState(nodes: TensorNode[], edges: StateVectorEdge[]): Tensor;
++```
++
++### 3.4 PhysicalProperties Module
++
++```typescript
++// physical-properties.ts
++export function calculateNodeVolume(node: TensorNode): number;
++export function calculateEdgeArea(edge: StateVectorEdge): number;
++export function calculateNetworkGeometry(nodes: TensorNode[], edges: StateVectorEdge[]): GeometryProperties;
++export function validateIntertwinerConsistency(node: TensorNode, adjacentEdges: StateVectorEdge[]): boolean;
++```
++
++### 3.5 Visualization Module
++
++```typescript
++// visualization.ts
++export function renderNetwork(canvas: HTMLCanvasElement, nodes: TensorNode[], edges: StateVectorEdge[]): void;
++export function visualizeTensor(canvas: HTMLCanvasElement, tensor: Tensor): void;
++export function visualizeStateVector(canvas: HTMLCanvasElement, stateVector: StateVector): void;
++export function updateVisualization(canvas: HTMLCanvasElement, network: SpinNetwork, time: number): void;
++```
++
++## 4. Implementation Phases
++
++### Phase 1: Basic Structure Setup
++- Create HTML test page with controls and visualization areas
++- Implement basic tensor and state vector data structures
++- Set up rendering framework for visualization
++
++### Phase 2: Core Tensor Operations
++- Implement sparse tensor representation
++- Develop basic tensor operations (creation, element access, contraction)
++- Add validation functions to verify mathematical consistency
++
++### Phase 3: State Vector Implementation
++- Implement state vector operations
++- Create intertwiner tensor factory functions
++- Connect to existing intertwinerSpace.ts module
++
++### Phase 4: Network Operations
++- Implement functions to create and modify tensor nodes
++- Develop functions to create and evolve state vector edges
++- Add validation to ensure consistency between connected tensor nodes and state vector edges
++
++### Phase 5: Simulation Implementation
++- Create mini-simulation engine for tensor evolution
++- Implement time evolution of state vectors during simulation
++- Add measurement operators for physical observables
++
++### Phase 6: Visualization and UI
++- Implement tensor and state vector visualization
++- Add interactive controls for creating and modifying the network
++- Create readouts for physical properties
++
++### Phase 7: Testing and Validation
++- Create test cases for various network configurations
++- Compare with analytical solutions for simple cases
++- Benchmark performance and optimize for larger networks
++
++## 5. Visualization Approach
++
++The test sandbox will include the following visualization features:
++
++### 5.1 Tensor Visualization
++- Color coding for tensor dimensions
++- Visual representation of tensor sparsity
++- 3D plot option for rank-3 tensors
++
++### 5.2 State Vector Visualization
++- Amplitude and phase visualization using color and size
++- Bloch sphere representation for spin-1/2 edges
++- Probability distribution plots
++
++### 5.3 Network Visualization
++- Interactive graph with draggable nodes
++- Visual encoding of tensor dimensions using node size
++- Edge thickness based on state vector properties
++- Color coding for physical properties
++
++## 6. Testing Methodology
++
++The test sandbox will include facilities for:
++
++1. **Unit Tests**: Verifying individual tensor and state vector operations
++2. **Network Tests**: Checking consistency between connected tensor nodes and state vector edges
++3. **Evolution Tests**: Validating correct time evolution behavior during simulation
++4. **Conservation Tests**: Ensuring physical conservation laws are maintained
++5. **Performance Tests**: Measuring computational efficiency and optimization opportunities
++
++## 7. Integration with Existing Code
++
++The test sandbox will leverage existing components while extending them:
++
++1. **intertwinerSpace.ts**: Use the existing module to calculate dimension and basis information
++2. **stateVector.ts**: Extend the current implementation with quantum state capabilities
++3. **graph.ts**: Integrate with the current graph implementation for network structure
++4. **diffusionModels.ts**: Adapt existing models to work with tensor and state vector representations
++5. **solvers.ts**: Extend numerical solvers to handle tensor operations
++
++## 8. References
++
++1. Spin Networks in Loop Quantum Gravity
++2. Tensor Contraction in Quantum Computing
++3. Intertwiner Spaces in Spin Network States
++4. State Vector Evolution in Quantum Mechanics
++5. Numerical Methods for Tensor Calculus
+diff --git a/memory-bank/session_cache.md b/memory-bank/session_cache.md
+index 2ffe8a5..bb982a0 100644
+--- a/memory-bank/session_cache.md
++++ b/memory-bank/session_cache.md
+@@ -1,11 +1,11 @@
+ # Session Cache
+ 
+-*Last Updated: April 21, 2025 (23:55 IST)*
++*Last Updated: April 22, 2025 (15:35 IST)*
+ 
+ ## Overview
+ - Active Tasks: 15
+ - Paused Tasks: 3
+-- Last Task Focus: T35
++- Last Task Focus: UI Enhancement
+ - Completed Tasks: 12
+ 
+ ## Task Registry
+@@ -37,15 +37,69 @@
+ 
+ ## Active Tasks
+ 
+-### T35: Enhance Node and Edge Data Structures for Intertwiners
++### UI Enhancement: Added Testing Page and Updated Documentation Page
++**Status:** ✅ COMPLETE
++**Priority:** MEDIUM
++**Started:** 2025-04-22
++**Last Active:** 2025-04-22 15:35 IST
++**Dependencies:** -
++
++#### Context
++This task focused on enhancing the application's UI by adding a dedicated Testing page and redesigning the Documentation page with a consistent, user-friendly layout. The goal was to provide better access to testing resources and documentation while maintaining a consistent user experience.
++
++#### Critical Files
++- `/src/components/testing/TestingPage.tsx` - New Testing page component
++- `/src/components/testing/index.ts` - Component export
++- `/src/components/documentation/DocsPage.tsx` - New Documentation page component
++- `/src/components/documentation/index.ts` - Component export
++- `/src/App.tsx` - Updated with new routes
++- `/src/components/layouts/MainLayout.tsx` - Updated header navigation
++
++#### Implementation Progress
++1. ✅ Create TestingPage component with sidebar layout
++2. ✅ Add TestingPage to router and navigation
++3. ✅ Remove old documentation components
++4. ✅ Create new DocsPage component with matching sidebar layout
++5. ✅ Implement proper Markdown rendering with plugins
++6. ✅ Add math equation support via KaTeX
++7. ✅ Fix Markdown rendering issues
++8. ✅ Clean up header navigation
++9. ✅ Test all resource loading and rendering
++
++#### Working State
++Successfully implemented the UI enhancements with a consistent design across documentation and testing pages:
++
++1. **Testing Page Implementation**:
++   - Created a sidebar-based layout for navigating between testing resources
++   - Added links to standalone-guide.html, simulation-test.html, and tensor-sandbox.html
++   - Implemented iframe-based content display in the main viewport
++   - Added responsive styles and proper resource descriptions
++
++2. **Documentation Page Redesign**:
++   - Completely removed the old documentation components and implementation
++   - Created a new, simplified documentation page with the same sidebar layout
++   - Added support for rendering HTML documents and Markdown files
++   - Implemented proper Markdown formatting with math equation support
++   - Added links to physics-notebook.html, intertwiner-spaces.md, unified-dynamics.md, and mathematical-roadmap.md
++
++3. **Application Integration**:
++   - Updated routes in App.tsx for both new pages
++   - Streamlined the header navigation
++   - Removed the unused "Simulation" link
++   - Used consistent styling across components
++   - Fixed header active state highlighting
++
++These changes significantly improve the user experience by providing a more integrated way to access documentation and testing resources within the application.
++
++### T36: Implement Tensor and State Vector Sandbox
+ **Status:** 🔄 IN PROGRESS
+ **Priority:** MEDIUM
+-**Started:** 2025-04-21
+-**Last Active:** 2025-04-21 23:55 IST
+-**Dependencies:** T20
++**Started:** 2025-04-22
++**Last Active:** 2025-04-22 14:45 IST
++**Dependencies:** T20, T35
+ 
+ #### Context
+-This task focuses on enhancing the data structures for nodes and edges in the spin network to better represent the physics concepts, particularly improving the intertwiner representation to support intertwiner spaces with multiple dimensions and basis states. Based on the insights from `mathematical-roadmap.md` and `intertwiner-spaces.md`, we need to update the network model to capture the full complexity of intertwiner spaces, including proper tensor representation.
++This task focuses on creating a test sandbox to experiment with enhanced tensor-based representation of nodes and state vector representation of edges in spin networks before integrating these features into the main application.
+ 
+ #### Critical Files
+ - `/src/models/types.ts` - Core type definitions to update
+diff --git a/memory-bank/tasks.md b/memory-bank/tasks.md
+index 9bbaebb..6674d78 100644
+--- a/memory-bank/tasks.md
++++ b/memory-bank/tasks.md
+@@ -1,9 +1,13 @@
+ # Task Registry
+-*Last Updated: April 21, 2025 (22:30 IST)*
++*Last Updated: April 22, 2025 (17:30 IST)*
+ 
+ ## Active Tasks
+ | ID | Title | Status | Priority | Started | Dependencies | Owner |
+ |----|-------|--------|----------|---------|--------------|-------|
++| T37 | Implement Testing and Documentation Pages | ✅ COMPLETE | MEDIUM | 2025-04-22 | - | Deepak |
++| ID | Title | Status | Priority | Started | Dependencies | Owner |
++|----|-------|--------|----------|---------|--------------|-------|
++| T36 | Implement Tensor and State Vector Sandbox | 🔄 IN PROGRESS | MEDIUM | 2025-04-22 | T20, T35 | Deepak |
+ | T35 | Enhance Node and Edge Data Structures for Intertwiners | 🔄 IN PROGRESS | MEDIUM | 2025-04-21 | T20 | Deepak |
+ | T34 | Complete Simulation Engine Migration to Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T1, T14 | Deepak |
+ | T33 | Fix Documentation Rendering and Interaction Issues | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T28 | Deepak |
+@@ -35,6 +39,82 @@
+ 
+ ## Task Details
+ 
++### T37: Implement Testing and Documentation Pages
++**Description**: Create dedicated Testing and Documentation pages with a consistent sidebar-based interface for accessing and displaying various technical resources, guides, and test files within the application.
++**Status**: ✅ COMPLETE 
++**Priority**: MEDIUM
++**Started**: April 22, 2025
++**Last Active**: April 22, 2025 (17:30 IST)
++**Completed**: April 22, 2025 (17:30 IST)
++**Dependencies**: -
++**Completion Criteria**:
++- ✅ Create TestingPage component with sidebar navigation and iframe content display
++- ✅ Add links to three test resources: standalone guide, simulation test, and tensor sandbox
++- ✅ Create DocsPage component with similar sidebar navigation and content display
++- ✅ Implement proper Markdown rendering with math and code support
++- ✅ Add routes for both pages in App.tsx
++- ✅ Add navigation links in MainLayout header
++- ✅ Remove outdated documentation components and routes
++- ✅ Ensure consistent styling between both pages
++- ✅ Fix all rendering issues in Markdown display
++- ✅ Test all links and resource loading
++
++**Related Files**:
++- `/src/components/testing/TestingPage.tsx` - New component for test resources
++- `/src/components/testing/index.ts` - Export for testing component
++- `/src/components/documentation/DocsPage.tsx` - New documentation component
++- `/src/components/documentation/index.ts` - Export for documentation component
++- `/src/App.tsx` - Updated routes
++- `/src/components/layouts/MainLayout.tsx` - Updated navigation
++
++**Notes**:
++Completely redesigned the documentation and testing pages with a consistent sidebar-based interface. Removed the previous documentation components (DocsLayout, DocsSidebar, DocsViewer, DocumentationHome) and replaced them with a simpler, more consistent approach that matches the testing page design. Both pages now feature a sidebar with resource navigation and a main content area that displays the selected resource.
++
++The documentation page includes proper Markdown rendering with support for GitHub-flavored Markdown, mathematical equations via KaTeX, and code syntax highlighting. The testing page provides access to three key test resources: the standalone implementation guide, simulation test page, and tensor sandbox.
++
++Also removed the "Simulation" entry from the main layout header to streamline navigation. This implementation provides a more intuitive and consistent user experience for accessing documentation and testing resources.
++
++### T36: Implement Tensor and State Vector Sandbox
++**Description**: Create a test sandbox to experiment with enhanced tensor-based representation of nodes and state vector representation of edges in spin networks before integrating these features into the main application.
++**Status**: 🔄 IN PROGRESS
++**Priority**: MEDIUM
++**Started**: April 22, 2025
++**Last Active**: April 22, 2025 (14:45 IST)
++**Dependencies**: T20, T35
++**Completion Criteria**:
++- ✅ Create implementation plan in `/memory-bank/implementation-details/tensor-test.md`
++- ⬜ Design enhanced TensorNode and StateVectorEdge data structures
++- ⬜ Create HTML test page for the sandbox
++- ⬜ Implement tensor operations module (creation, element access, contraction)
++- ⬜ Implement state vector operations module (quantum state vectors)
++- ⬜ Create tensor factory functions for intertwiner generation
++- ⬜ Implement simple visualization for tensors and state vectors
++- ⬜ Add test cases for validation against analytical solutions
++- ⬜ Implement time evolution of tensors during simulation
++- ⬜ Connect with existing intertwinerSpace.ts implementation
++- ⬜ Add documentation on tensor operations and representations
++
++**Related Files**:
++- `/memory-bank/implementation-details/tensor-test.md` - Implementation plan
++- `/lib/core/tensor.ts` - To be created
++- `/lib/core/intertwinerSpace.ts` - Existing implementation to build on
++- `/lib/quantum/tensorOperations.ts` - To be created
++- `/lib/quantum/stateVectorOperations.ts` - To be created
++- `/public/tensor-sandbox.html` - To be created
++- `/public/scripts/tensor-test.js` - To be created
++
++**Notes**:
++This task focuses on developing a test sandbox for implementing and validating tensor and state vector operations before integrating them into the main application. By creating a dedicated testing environment, we can explore the mathematical representations and operations independently of the application's UI components. This approach will help us verify that the quantum-mechanical properties of spin networks are correctly implemented before adding complexity with the full application architecture.
++
++The sandbox will allow us to:
++1. Test sparse tensor representation for efficient storage of intertwiner tensors
++2. Explore quantum state vector operations for representing edge spins
++3. Verify that tensor operations like contraction work correctly
++4. Test the integration with the existing intertwinerSpace.ts functionality
++5. Visualize tensors and state vectors for better understanding
++
++The implementation plan in tensor-test.md outlines the approach in detail, with specific data structures, core components, and implementation phases.
++
+ ### T34: Complete Simulation Engine Migration to Standalone Library
+ **Description**: Fully migrate all simulation engine dependencies from the React app to the standalone library, ensuring there's only one version of the simulation engine in the codebase. This task builds upon the work in T1 (Simulation Library Abstraction) and T14 (State Management Architecture) to complete the migration and eliminate duplicate implementations.
+ **Status**: 🔄 IN PROGRESS
+diff --git a/public/scripts/tensor-bridge.js b/public/scripts/tensor-bridge.js
+new file mode 100644
+index 0000000..bc981e0
+--- /dev/null
++++ b/public/scripts/tensor-bridge.js
+@@ -0,0 +1,120 @@
++// Make available globally for the sandbox
++console.log('Tensor Bridge initialized with quantum operations');
++ * 
++ * Provides a bridge between the core tensor/state vector implementations
++ * and the sandbox UI, maintaining compatibility with the existing API.
++ */
++
++// Import the compiled library
++import SpinNetworkLib from '../../dist/lib/spin-network.es.js';
++
++// Extract needed functionality from the library
++const {
++    core: {
++        tensor: {
++            TensorNode,
++            StateVectorEdge,
++            createComplex,
++            addComplex,
++            multiplyComplex,
++            createTensorNode,
++            createStateVectorEdge,
++            setTensorElement: coreTensorSetElement,
++            getTensorElement: coreTensorGetElement,
++            setStateVectorAmplitude,
++            getStateVectorAmplitude,
++            normalizeStateVector: coreNormalizeStateVector,
++            calculateNodeVolume,
++            calculateEdgeArea,
++            createTensorNodeFromBasisState
++        },
++        intertwinerSpace: {
++            getOptimizedIntertwinerBasis,
++            IntertwinerBasisState
++        }
++    },
++    quantum: {
++        tensorOperations: {
++            Tensor,
++            createTensor,
++            setTensorElement,
++            getTensorElement,
++            tensorNodeToTensor,
++            contractTensors,
++            tensorNorm,
++            normalizeTensor,
++            createIntertwinerTensor,
++            tensorExpectationValue
++        },
++        stateVectorOperations: {
++            StateVector,
++            createStateVector,
++            initializeSpinState,
++            edgeToStateVector,
++            normalizeStateVector,
++            innerProduct,
++            applyOperator,
++            createSpinOperators,
++            expectationValue
++        }
++    }
++} = SpinNetworkLib;
++
++// Export the API expected by tensor-sandbox.js
++const SpinNetwork = {
++    // Core types
++    TensorNode,
++    StateVectorEdge,
++    Tensor,
++    StateVector,
++    
++    // Node creation and manipulation
++    createTensorNode,
++    createTensorNodeFromBasisState,
++    calculateNodeVolume,
++    
++    // Edge creation and manipulation
++    createStateVectorEdge,
++    setStateVectorAmplitude,
++    getStateVectorAmplitude,
++    coreNormalizeStateVector,
++    calculateEdgeArea,
++    
++    // Tensor operations
++    createTensor,
++    setTensorElement,
++    getTensorElement,
++    tensorNodeToTensor,
++    contractTensors,
++    tensorNorm,
++    normalizeTensor,
++    createIntertwinerTensor,
++    tensorExpectationValue,
++    
++    // State vector operations
++    createStateVector,
++    initializeSpinState,
++    edgeToStateVector,
++    normalizeStateVector,
++    innerProduct,
++    applyOperator,
++    createSpinOperators,
++    expectationValue,
++    
++    // Intertwiner operations
++    getIntertwinerBasis: getOptimizedIntertwinerBasis,
++    
++    // Complex number utilities
++    createComplex,
++    complexAdd: addComplex,
++    complexMultiply: multiplyComplex,
++    
++    // Constants
++    PI: Math.PI,
++    SQRT2: Math.SQRT2
++};
++
++// Make available globally for the sandbox
++window.SpinNetwork = SpinNetwork;
++
++console.log('Tensor Bridge initialized with quantum operations');
+diff --git a/public/scripts/tensor-sandbox.js b/public/scripts/tensor-sandbox.js
+new file mode 100644
+index 0000000..3549881
+--- /dev/null
++++ b/public/scripts/tensor-sandbox.js
+@@ -0,0 +1,801 @@
++//  * Tensor Sandbox Implementation
++//  * 
++//  * This script connects the tensor-sandbox.html UI to the standalone library
++//  * for testing the tensor node and state vector edge implementations.
++//  */
++
++// Network state
++let network = {
++    nodes: [],
++    edges: []
++};
++
++// Currently selected elements
++let selectedNode = null;
++let selectedEdge = null;
++
++// Canvas and rendering context
++let canvas;
++let ctx;
++
++// Initialize when the page is loaded
++document.addEventListener('DOMContentLoaded', function() {
++    // Initialize canvas
++    canvas = document.getElementById('networkCanvas');
++    ctx = canvas.getContext('2d');
++    
++    // Attach event handlers
++    attachEventHandlers();
++    
++    // Set initial UI state
++    updateUI();
++});
++
++/**
++ * Attaches event handlers to UI controls
++ */
++function attachEventHandlers() {
++    // Network creation
++    document.getElementById('createNetworkButton').addEventListener('click', createNetwork);
++    document.getElementById('resetButton').addEventListener('click', resetNetwork);
++    
++    // Change handlers for network type
++    document.getElementById('networkType').addEventListener('change', updateNetworkTypeOptions);
++    
++    // Node operations
++    document.getElementById('selectedNode').addEventListener('change', onNodeSelected);
++    document.getElementById('setTensorElementButton').addEventListener('click', setTensorElement);
++    
++    // Edge operations
++    document.getElementById('selectedEdge').addEventListener('change', onEdgeSelected);
++    document.getElementById('setAmplitudeButton').addEventListener('click', setStateVectorAmplitude);
++    document.getElementById('normalizeButton').addEventListener('click', normalizeStateVector);
++    
++    // Analysis
++    document.getElementById('calculatePropertiesButton').addEventListener('click', calculateProperties);
++    
++    // Visualization mode
++    document.getElementById('visualizationMode').addEventListener('change', renderNetwork);
++}
++
++/**
++ * Updates UI options based on selected network type
++ */
++function updateNetworkTypeOptions() {
++    const networkType = document.getElementById('networkType').value;
++    const nodeCountInput = document.getElementById('nodeCount');
++    
++    // Enable/disable and set appropriate defaults based on network type
++    switch(networkType) {
++        case 'empty':
++            nodeCountInput.value = '0';
++            nodeCountInput.disabled = true;
++            break;
++        case 'line':
++            nodeCountInput.value = '4';
++            nodeCountInput.disabled = false;
++            break;
++        case 'ring':
++            nodeCountInput.value = '6';
++            nodeCountInput.disabled = false;
++            break;
++        case 'custom':
++            nodeCountInput.value = '2';
++            nodeCountInput.disabled = false;
++            break;
++    }
++}
++
++/**
++ * Creates a new network based on selected options
++ */
++function createNetwork() {
++    // Clear current network
++    resetNetwork();
++    
++    const networkType = document.getElementById('networkType').value;
++    const nodeCount = parseInt(document.getElementById('nodeCount').value) || 0;
++    const spinValue = parseFloat(document.getElementById('defaultSpin').value) || 0.5;
++    
++    try {
++        switch(networkType) {
++            case 'empty':
++                // Just leave the network empty
++                break;
++                
++            case 'line':
++                createLineNetwork(nodeCount, spinValue);
++                break;
++                
++            case 'ring':
++                createRingNetwork(nodeCount, spinValue);
++                break;
++                
++            case 'custom':
++                createCustomNetwork(nodeCount, spinValue);
++                break;
++        }
++        
++        // Update UI
++        updateUI();
++        renderNetwork();
++        
++        console.log(`Created ${networkType} network with ${network.nodes.length} nodes and ${network.edges.length} edges`);
++    } catch (error) {
++        console.error('Error creating network:', error);
++        alert(`Error creating network: ${error.message}`);
++    }
++}
++
++/**
++ * Creates a line network with the specified number of nodes
++ */
++function createLineNetwork(nodeCount, spinValue) {
++    const spacing = canvas.width / (nodeCount + 1);
++    const yPos = canvas.height / 2;
++    
++    // Create nodes
++    for (let i = 0; i < nodeCount; i++) {
++        const id = `n${i}`;
++        const x = spacing * (i + 1);
++        
++        // Create tensor node
++        const node = SpinNetwork.createTensorNode(
++            id, 
++            { x, y: yPos },
++            0,  // Default intertwiner value
++            [2, 2, 2, 2]  // Default dimensions for 4-valent node
++        );
++        
++        network.nodes.push(node);
++    }
++    
++    // Create edges
++    for (let i = 0; i < nodeCount - 1; i++) {
++        const id = `e${i}`;
++        const sourceId = `n${i}`;
++        const targetId = `n${i+1}`;
++        
++        // Create state vector edge
++        const edge = SpinNetwork.createStateVectorEdge(
++            id,
++            sourceId,
++            targetId,
++            spinValue
++        );
++        
++        network.edges.push(edge);
++    }
++}
++
++/**
++ * Creates a ring network with the specified number of nodes
++ */
++function createRingNetwork(nodeCount, spinValue) {
++    const centerX = canvas.width / 2;
++    const centerY = canvas.height / 2;
++    const radius = Math.min(canvas.width, canvas.height) * 0.4;
++    
++    // Create nodes
++    for (let i = 0; i < nodeCount; i++) {
++        const id = `n${i}`;
++        const angle = (2 * Math.PI * i) / nodeCount;
++        const x = centerX + radius * Math.cos(angle);
++        const y = centerY + radius * Math.sin(angle);
++        
++        // Create tensor node
++        const node = SpinNetwork.createTensorNode(
++            id, 
++            { x, y },
++            0,
++            [2, 2]  // Default dimensions for 2-valent node in a ring
++        );
++        
++        network.nodes.push(node);
++    }
++    
++    // Create edges
++    for (let i = 0; i < nodeCount; i++) {
++        const id = `e${i}`;
++        const sourceId = `n${i}`;
++        const targetId = `n${(i + 1) % nodeCount}`;
++        
++        // Create state vector edge
++        const edge = SpinNetwork.createStateVectorEdge(
++            id,
++            sourceId,
++            targetId,
++            spinValue
++        );
++        
++        network.edges.push(edge);
++    }
++}
++
++/**
++ * Creates a custom network with the specified number of nodes
++ */
++function createCustomNetwork(nodeCount, spinValue) {
++    // For now, just create a simple network with nodes in random positions
++    const padding = 50;
++    const width = canvas.width - 2 * padding;
++    const height = canvas.height - 2 * padding;
++    
++    // Create nodes
++    for (let i = 0; i < nodeCount; i++) {
++        const id = `n${i}`;
++        const x = padding + Math.random() * width;
++        const y = padding + Math.random() * height;
++        
++        // Create tensor node
++        const node = SpinNetwork.createTensorNode(
++            id, 
++            { x, y },
++            0,
++            [2, 2, 2]  // Default dimensions for 3-valent node
++        );
++        
++        network.nodes.push(node);
++    }
++    
++    // Create some edges - for simplicity, connect neighboring nodes
++    if (nodeCount >= 2) {
++        for (let i = 0; i < nodeCount - 1; i++) {
++            const id = `e${i}`;
++            const sourceId = `n${i}`;
++            const targetId = `n${i+1}`;
++            
++            // Create state vector edge
++            const edge = SpinNetwork.createStateVectorEdge(
++                id,
++                sourceId,
++                targetId,
++                spinValue
++            );
++            
++            network.edges.push(edge);
++        }
++    }
++}
++
++/**
++ * Resets the network to an empty state
++ */
++function resetNetwork() {
++    network = {
++        nodes: [],
++        edges: []
++    };
++    
++    selectedNode = null;
++    selectedEdge = null;
++    
++    updateUI();
++    renderNetwork();
++}
++
++/**
++ * Updates the UI based on the current network state
++ */
++function updateUI() {
++    // Update node selection dropdown
++    const nodeSelect = document.getElementById('selectedNode');
++    nodeSelect.innerHTML = '<option value=\"\">Select a node...</option>';
++    
++    network.nodes.forEach(node => {
++        const option = document.createElement('option');
++        option.value = node.id;
++        option.textContent = `Node ${node.id}`;
++        nodeSelect.appendChild(option);
++    });
++    
++    // Update edge selection dropdown
++    const edgeSelect = document.getElementById('selectedEdge');
++    edgeSelect.innerHTML = '<option value=\"\">Select an edge...</option>';
++    
++    network.edges.forEach(edge => {
++        const option = document.createElement('option');
++        option.value = edge.id;
++        option.textContent = `Edge ${edge.id} (${edge.source || 'null'} → ${edge.target || 'null'})`;
++        edgeSelect.appendChild(option);
++    });
++    
++    // Clear node details
++    document.getElementById('tensorDimensions').textContent = 'Not selected';
++    document.getElementById('nodeIntertwiner').textContent = 'Not selected';
++    document.getElementById('tensorBasis').textContent = 'Not selected';
++    document.getElementById('tensorValues').innerHTML = '';
++    document.getElementById('nodeProperties').textContent = 'Not selected';
++    
++    // Clear edge details
++    document.getElementById('edgeSpin').textContent = 'Not selected';
++    document.getElementById('stateVectorDimension').textContent = 'Not selected';
++    document.getElementById('stateVectorAmplitudes').querySelector('tbody').innerHTML = '';
++    document.getElementById('edgeProperties').textContent = 'Not selected';
++    
++    // Clear analysis
++    document.getElementById('totalVolume').textContent = '0';
++    document.getElementById('totalArea').textContent = '0';
++    document.getElementById('networkState').textContent = 'No state defined';
++}
++
++/**
++ * Handles selection of a node
++ */
++function onNodeSelected() {
++    const nodeId = document.getElementById('selectedNode').value;
++    selectedNode = network.nodes.find(node => node.id === nodeId) || null;
++    
++    if (selectedNode) {
++        // Update tensor dimensions
++        document.getElementById('tensorDimensions').textContent = 
++            selectedNode.tensor.dimensions.join(' × ');
++        
++        // Update intertwiner info
++        document.getElementById('nodeIntertwiner').textContent = 
++            `Value: ${selectedNode.intertwiner.value}, Dimension: ${selectedNode.intertwiner.dimension || 'N/A'}`;
++        
++        // Update tensor basis
++        document.getElementById('tensorBasis').textContent = 
++            selectedNode.tensor.basis || 'standard';
++        
++        // Update tensor values
++        updateTensorValues();
++        
++        // Update node properties
++        const volume = selectedNode.volume || 
++            SpinNetwork.calculateNodeVolume(selectedNode);
++        document.getElementById('nodeProperties').textContent = 
++            `Volume: ${volume.toFixed(2)}`;
++    } else {
++        // Clear node details
++        document.getElementById('tensorDimensions').textContent = 'Not selected';
++        document.getElementById('nodeIntertwiner').textContent = 'Not selected';
++        document.getElementById('tensorBasis').textContent = 'Not selected';
++        document.getElementById('tensorValues').innerHTML = '';
++        document.getElementById('nodeProperties').textContent = 'Not selected';
++    }
++}
++
++/**
++ * Updates the tensor values display
++ */
++function updateTensorValues() {
++    if (!selectedNode) return;
++    
++    const valuesContainer = document.getElementById('tensorValues');
++    valuesContainer.innerHTML = '';
++    
++    // For simplicity, only show up to the first 10 non-zero elements
++    if (selectedNode.tensor.elements.length === 0) {
++        valuesContainer.textContent = 'No non-zero elements';
++        return;
++    }
++    
++    const elementsToShow = selectedNode.tensor.elements.slice(0, 10);
++    
++    elementsToShow.forEach(el => {
++        const cell = document.createElement('div');
++        cell.classList.add('tensor-cell');
++        
++        const indices = el.indices.join(',');
++        const value = el.value.im === 0 
++            ? el.value.re.toFixed(2)
++            : `${el.value.re.toFixed(2)} ${el.value.im >= 0 ? '+' : ''}${el.value.im.toFixed(2)}i`;
++        
++        cell.textContent = `[${indices}]: ${value}`;
++        valuesContainer.appendChild(cell);
++    });
++    
++    if (selectedNode.tensor.elements.length > 10) {
++        const moreInfo = document.createElement('div');
++        moreInfo.textContent = `... ${selectedNode.tensor.elements.length - 10} more elements`;
++        valuesContainer.appendChild(moreInfo);
++    }
++}
++
++/**
++ * Sets a tensor element for the selected node
++ */
++function setTensorElement() {
++    if (!selectedNode) {
++        alert('Please select a node first');
++        return;
++    }
++    
++    const indicesInput = document.getElementById('tensorIndices').value;
++    const valueInput = document.getElementById('tensorValue').value;
++    
++    try {
++        // Parse indices (e.g., \"0,1,0\")
++        const indices = indicesInput.split(',').map(idx => parseInt(idx.trim()));
++        
++        // Check indices validity
++        if (indices.length !== selectedNode.tensor.dimensions.length) {
++            throw new Error(`Expected ${selectedNode.tensor.dimensions.length} indices but got ${indices.length}`);
++        }
++        
++        // Parse complex value (e.g., \"1+2i\" or \"1.5-3i\" or just \"2\")
++        let re = 0, im = 0;
++        
++        // Basic regex to match real and imaginary parts
++        const match = valueInput.match(/^([-+]?\\d*\\.?\\d*)(?:([-+]\\d*\\.?\\d*)i)?$/);
++        if (match) {
++            re = parseFloat(match[1] || '0');
++            if (match[2]) {
++                // Handle imaginary part with sign
++                im = parseFloat(match[2] + '1');
++            }
++        } else {
++            throw new Error('Invalid complex number format. Use format like \"1+2i\", \"3-1.5i\", or just \"2\"');
++        }
++        
++        // Set the tensor element
++        SpinNetwork.setTensorElement(
++            selectedNode.tensor,
++            indices,
++            SpinNetwork.createComplex(re, im)
++        );
++        
++        // Update the display
++        updateTensorValues();
++        renderNetwork();
++    } catch (error) {
++        console.error('Error setting tensor element:', error);
++        alert(`Error setting tensor element: ${error.message}`);
++    }
++}
++
++/**
++ * Handles selection of an edge
++ */
++function onEdgeSelected() {
++    const edgeId = document.getElementById('selectedEdge').value;
++    selectedEdge = network.edges.find(edge => edge.id === edgeId) || null;
++    
++    if (selectedEdge) {
++        // Update edge spin
++        document.getElementById('edgeSpin').textContent = selectedEdge.spin;
++        
++        // Update state vector dimension
++        document.getElementById('stateVectorDimension').textContent = 
++            selectedEdge.stateVector.dimension;
++        
++        // Update state vector amplitudes
++        updateStateVectorAmplitudes();
++        
++        // Update edge properties
++        const area = selectedEdge.area || 
++            SpinNetwork.calculateEdgeArea(selectedEdge);
++        document.getElementById('edgeProperties').textContent = 
++            `Area: ${area.toFixed(2)}`;
++    } else {
++        // Clear edge details
++        document.getElementById('edgeSpin').textContent = 'Not selected';
++        document.getElementById('stateVectorDimension').textContent = 'Not selected';
++        document.getElementById('stateVectorAmplitudes').querySelector('tbody').innerHTML = '';
++        document.getElementById('edgeProperties').textContent = 'Not selected';
++    }
++}
++
++/**
++ * Updates the state vector amplitudes display
++ */
++function updateStateVectorAmplitudes() {
++    if (!selectedEdge) return;
++    
++    const tbody = document.getElementById('stateVectorAmplitudes').querySelector('tbody');
++    tbody.innerHTML = '';
++    
++    selectedEdge.stateVector.amplitudes.forEach((amp, idx) => {
++        const row = document.createElement('tr');
++        
++        // Index
++        const idxCell = document.createElement('td');
++        idxCell.textContent = idx;
++        row.appendChild(idxCell);
++        
++        // Real part
++        const reCell = document.createElement('td');
++        reCell.textContent = amp.re.toFixed(4);
++        row.appendChild(reCell);
++        
++        // Imaginary part
++        const imCell = document.createElement('td');
++        imCell.textContent = amp.im.toFixed(4);
++        row.appendChild(imCell);
++        
++        // Magnitude
++        const magCell = document.createElement('td');
++        const magnitude = Math.sqrt(amp.re * amp.re + amp.im * amp.im);
++        magCell.textContent = magnitude.toFixed(4);
++        row.appendChild(magCell);
++        
++        tbody.appendChild(row);
++    });
++}
++
++/**
++ * Sets a state vector amplitude for the selected edge
++ */
++function setStateVectorAmplitude() {
++    if (!selectedEdge) {
++        alert('Please select an edge first');
++        return;
++    }
++    
++    const indexInput = document.getElementById('amplitudeIndex').value;
++    const valueInput = document.getElementById('amplitudeValue').value;
++    
++    try {
++        // Parse index
++        const index = parseInt(indexInput);
++        
++        // Check index validity
++        if (isNaN(index) || index < 0 || index >= selectedEdge.stateVector.dimension) {
++            throw new Error(`Index must be between 0 and ${selectedEdge.stateVector.dimension - 1}`);
++        }
++        
++        // Parse complex value (e.g., \"1+2i\" or \"1.5-3i\" or just \"2\")
++        let re = 0, im = 0;
++        
++        // Basic regex to match real and imaginary parts
++        const match = valueInput.match(/^([-+]?\\d*\\.?\\d*)(?:([-+]\\d*\\.?\\d*)i)?$/);
++        if (match) {
++            re = parseFloat(match[1] || '0');
++            if (match[2]) {
++                // Handle imaginary part with sign
++                im = parseFloat(match[2] + '1');
++            }
++        } else {
++            throw new Error('Invalid complex number format. Use format like \"1+2i\", \"3-1.5i\", or just \"2\"');
++        }
++        
++        // Set the amplitude
++        SpinNetwork.setStateVectorAmplitude(
++            selectedEdge.stateVector,
++            index,
++            SpinNetwork.createComplex(re, im)
++        );
++        
++        // Update the display
++        updateStateVectorAmplitudes();
++        renderNetwork();
++    } catch (error) {
++        console.error('Error setting amplitude:', error);
++        alert(`Error setting amplitude: ${error.message}`);
++    }
++}
++
++/**
++ * Normalizes the state vector of the selected edge
++ */
++function normalizeStateVector() {
++    if (!selectedEdge) {
++        alert('Please select an edge first');
++        return;
++    }
++    
++    try {
++        // Normalize the state vector
++        SpinNetwork.normalizeStateVector(selectedEdge.stateVector);
++        
++        // Update the display
++        updateStateVectorAmplitudes();
++        renderNetwork();
++    } catch (error) {
++        console.error('Error normalizing state vector:', error);
++        alert(`Error normalizing state vector: ${error.message}`);
++    }
++}
++
++/**
++ * Calculates and displays total physical properties of the network
++ */
++function calculateProperties() {
++    try {
++        // Calculate total volume
++        let totalVolume = 0;
++        network.nodes.forEach(node => {
++            const volume = node.volume || SpinNetwork.calculateNodeVolume(node);
++            totalVolume += volume;
++        });
++        
++        // Calculate total area
++        let totalArea = 0;
++        network.edges.forEach(edge => {
++            const area = edge.area || SpinNetwork.calculateEdgeArea(edge);
++            totalArea += area;
++        });
++        
++        // Update the display
++        document.getElementById('totalVolume').textContent = totalVolume.toFixed(2);
++        document.getElementById('totalArea').textContent = totalArea.toFixed(2);
++        
++        // Generate a simple description of the network state
++        const state = `Network with ${network.nodes.length} nodes and ${network.edges.length} edges`;
++        document.getElementById('networkState').textContent = state;
++    } catch (error) {
++        console.error('Error calculating properties:', error);
++        alert(`Error calculating properties: ${error.message}`);
++    }
++}
++
++/**
++ * Renders the network on the canvas
++ */
++function renderNetwork() {
++    const mode = document.getElementById('visualizationMode').value;
++    
++    // Clear canvas
++    ctx.fillStyle = '#ffffff';
++    ctx.fillRect(0, 0, canvas.width, canvas.height);
++    
++    // Render edges
++    network.edges.forEach(edge => {
++        renderEdge(edge, mode);
++    });
++    
++    // Render nodes
++    network.nodes.forEach(node => {
++        renderNode(node, mode);
++    });
++}
++
++/**
++ * Renders a node on the canvas
++ */
++function renderNode(node, mode) {
++    // Get node position
++    const x = node.position.x;
++    const y = node.position.y;
++    
++    // Different visualization modes
++    let fillColor = '#3498db';  // Default blue
++    let size = 20;
++    let label = node.id;
++    
++    switch (mode) {
++        case 'tensor':
++            // Color based on tensor dimension
++            const dimension = node.tensor.dimensions.reduce((a, b) => a * b, 1);
++            const hue = (dimension % 10) * 36;  // Map dimension to hue (0-360)
++            fillColor = `hsl(${hue}, 70%, 50%)`;
++            break;
++            
++        case 'physical':
++            // Size based on volume
++            const volume = node.volume || SpinNetwork.calculateNodeVolume(node);
++            size = Math.max(10, Math.min(30, 15 + volume / 10));
++            label = volume.toFixed(1);
++            break;
++    }
++    
++    // Is this node selected?
++    const isSelected = selectedNode && selectedNode.id === node.id;
++    if (isSelected) {
++        // Draw selection indicator
++        ctx.strokeStyle = '#e74c3c';
++        ctx.lineWidth = 3;
++        ctx.beginPath();
++        ctx.arc(x, y, size + 5, 0, 2 * Math.PI);
++        ctx.stroke();
++    }
++    
++    // Draw node
++    ctx.fillStyle = fillColor;
++    ctx.beginPath();
++    ctx.arc(x, y, size, 0, 2 * Math.PI);
++    ctx.fill();
++    
++    // Draw border
++    ctx.strokeStyle = '#2c3e50';
++    ctx.lineWidth = 1;
++    ctx.stroke();
++    
++    // Draw label
++    ctx.fillStyle = '#ffffff';
++    ctx.font = '12px Arial';
++    ctx.textAlign = 'center';
++    ctx.textBaseline = 'middle';
++    ctx.fillText(label, x, y);
++}
++
++/**
++ * Renders an edge on the canvas
++ */
++function renderEdge(edge, mode) {
++    // Find source and target nodes
++    const sourceNode = network.nodes.find(n => n.id === edge.source);
++    const targetNode = network.nodes.find(n => n.id === edge.target);
++    
++    if (!sourceNode || !targetNode) {
++        // Skip rendering dangling edges for simplicity
++        return;
++    }
++    
++    // Get node positions
++    const x1 = sourceNode.position.x;
++    const y1 = sourceNode.position.y;
++    const x2 = targetNode.position.x;
++    const y2 = targetNode.position.y;
++    
++    // Different visualization modes
++    let strokeColor = '#7f8c8d';  // Default gray
++    let lineWidth = 2;
++    
++    switch (mode) {
++        case 'stateVector':
++            // Color based on first amplitude magnitude
++            if (edge.stateVector && edge.stateVector.amplitudes.length > 0) {
++                const amp = edge.stateVector.amplitudes[0];
++                const magnitude = Math.sqrt(amp.re * amp.re + amp.im * amp.im);
++                const hue = (Math.atan2(amp.im, amp.re) * 180 / Math.PI + 360) % 360;
++                const saturation = 70;
++                const lightness = 50 - Math.min(40, magnitude * 20);
++                strokeColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
++                lineWidth = Math.max(1, Math.min(5, magnitude * 4));
++            }
++            break;
++            
++        case 'physical':
++            // Width based on area
++            const area = edge.area || SpinNetwork.calculateEdgeArea(edge);
++            lineWidth = Math.max(1, Math.min(8, 1 + area / 5));
++            strokeColor = '#2c3e50';
++            break;
++    }
++    
++    // Is this edge selected?
++    const isSelected = selectedEdge && selectedEdge.id === edge.id;
++    if (isSelected) {
++        // Draw selection indicator with glow effect
++        ctx.strokeStyle = '#e74c3c';
++        ctx.lineWidth = lineWidth + 4;
++        ctx.beginPath();
++        ctx.moveTo(x1, y1);
++        ctx.lineTo(x2, y2);
++        ctx.stroke();
++    }
++    
++    // Draw edge
++    ctx.strokeStyle = strokeColor;
++    ctx.lineWidth = lineWidth;
++    ctx.beginPath();
++    ctx.moveTo(x1, y1);
++    ctx.lineTo(x2, y2);
++    ctx.stroke();
++    
++    // Draw edge label at midpoint
++    const midX = (x1 + x2) / 2;
++    const midY = (y1 + y2) / 2;
++    
++    // Add small offset to the label
++    const dx = y2 - y1;
++    const dy = x1 - x2;
++    const len = Math.sqrt(dx * dx + dy * dy);
++    const offsetX = (len > 0) ? (dx * 10 / len) : 0;
++    const offsetY = (len > 0) ? (dy * 10 / len) : 0;
++    
++    // Draw label background
++    ctx.fillStyle = '#ffffff';
++    ctx.beginPath();
++    ctx.arc(midX + offsetX, midY + offsetY, 10, 0, 2 * Math.PI);
++    ctx.fill();
++    
++    // Draw label
++    ctx.fillStyle = '#2c3e50';
++    ctx.font = '10px Arial';
++    ctx.textAlign = 'center';
++    ctx.textBaseline = 'middle';
++    
++    let label = edge.id;
++    if (mode === 'physical') {
++        const area = edge.area || SpinNetwork.calculateEdgeArea(edge);
++        label = area.toFixed(1);
++    } else if (mode === 'network') {
++        label = edge.spin.toString();
++    }
++    
++    ctx.fillText(label, midX + offsetX, midY + offsetY);
++}
+diff --git a/public/tensor-sandbox.html b/public/tensor-sandbox.html
+new file mode 100644
+index 0000000..3eeeee1
+--- /dev/null
++++ b/public/tensor-sandbox.html
+@@ -0,0 +1,319 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <meta name="viewport" content="width=device-width, initial-scale=1.0">
++    <title>Spin Network Tensor Sandbox</title>
++    <style>
++        body {
++            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
++            margin: 0;
++            padding: 0;
++            background-color: #f5f5f5;
++            color: #333;
++        }
++        .container {
++            width: 95%;
++            max-width: 1200px;
++            margin: 0 auto;
++            padding: 20px;
++        }
++        .header {
++            background-color: #2c3e50;
++            color: white;
++            padding: 15px 20px;
++            border-radius: 5px 5px 0 0;
++            margin-bottom: 20px;
++            display: flex;
++            justify-content: space-between;
++            align-items: center;
++        }
++        .header h1 {
++            margin: 0;
++            font-size: 1.5rem;
++        }
++        .controls {
++            display: flex;
++            justify-content: space-between;
++            margin-bottom: 20px;
++        }
++        .panel {
++            background-color: white;
++            border-radius: 5px;
++            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
++            padding: 20px;
++            margin-bottom: 20px;
++        }
++        .panel h2 {
++            margin-top: 0;
++            color: #2c3e50;
++            font-size: 1.3rem;
++            border-bottom: 1px solid #eee;
++            padding-bottom: 10px;
++        }
++        .flex-row {
++            display: flex;
++            gap: 20px;
++        }
++        .flex-row > div {
++            flex: 1;
++        }
++        .form-group {
++            margin-bottom: 15px;
++        }
++        label {
++            display: block;
++            margin-bottom: 5px;
++            font-weight: 500;
++        }
++        input, select, button {
++            width: 100%;
++            padding: 8px 12px;
++            border: 1px solid #ddd;
++            border-radius: 4px;
++            font-size: 14px;
++        }
++        button {
++            background-color: #3498db;
++            color: white;
++            border: none;
++            cursor: pointer;
++            font-weight: 500;
++            transition: background-color 0.2s;
++        }
++        button:hover {
++            background-color: #2980b9;
++        }
++        button.secondary {
++            background-color: #7f8c8d;
++        }
++        button.secondary:hover {
++            background-color: #6d7b7c;
++        }
++        .action-button {
++            margin-top: 5px;
++        }
++        canvas {
++            width: 100%;
++            background-color: #fff;
++            border: 1px solid #ddd;
++            border-radius: 4px;
++        }
++        table {
++            width: 100%;
++            border-collapse: collapse;
++        }
++        table th, table td {
++            padding: 8px;
++            text-align: left;
++            border-bottom: 1px solid #ddd;
++        }
++        table th {
++            background-color: #f8f9fa;
++        }
++        .tensor-grid {
++            display: grid;
++            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
++            gap: 5px;
++            margin-top: 10px;
++        }
++        .tensor-cell {
++            border: 1px solid #ddd;
++            padding: 10px;
++            text-align: center;
++            background-color: #f9f9f9;
++            border-radius: 4px;
++        }
++        .info-box {
++            background-color: #f8f9fa;
++            border-left: 4px solid #3498db;
++            padding: 10px;
++            margin: 10px 0;
++        }
++    </style>
++</head>
++<body>
++    <div class="container">
++        <div class="header">
++            <h1>Spin Network Tensor Sandbox</h1>
++            <div>
++                <button class="secondary" id="resetButton">Reset</button>
++            </div>
++        </div>
++
++        <div class="flex-row">
++            <!-- Left Panel - Network Creation -->
++            <div class="panel">
++                <h2>Network Creation</h2>
++                <div class="form-group">
++                    <label for="networkType">Network Type:</label>
++                    <select id="networkType">
++                        <option value="empty">Empty Network</option>
++                        <option value="line">Line Network</option>
++                        <option value="ring">Ring Network</option>
++                        <option value="custom">Custom Network</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label for="nodeCount">Number of Nodes:</label>
++                    <input type="number" id="nodeCount" value="4" min="1" max="20">
++                </div>
++                <div class="form-group">
++                    <label for="defaultSpin">Default Spin Value:</label>
++                    <select id="defaultSpin">
++                        <option value="0.5">1/2 (Spin 1/2)</option>
++                        <option value="1">1 (Spin 1)</option>
++                        <option value="1.5">3/2 (Spin 3/2)</option>
++                        <option value="2">2 (Spin 2)</option>
++                    </select>
++                </div>
++                <button id="createNetworkButton">Create Network</button>
++
++                <div class="info-box">
++                    Create a spin network with tensor nodes and state vector edges. The network will be displayed in the visualization panel.
++                </div>
++            </div>
++
++            <!-- Right Panel - Visualization -->
++            <div class="panel">
++                <h2>Visualization</h2>
++                <canvas id="networkCanvas" height="300"></canvas>
++                <div class="form-group">
++                    <label for="visualizationMode">Visualization Mode:</label>
++                    <select id="visualizationMode">
++                        <option value="network">Network Structure</option>
++                        <option value="tensor">Tensor Values</option>
++                        <option value="stateVector">State Vectors</option>
++                        <option value="physical">Physical Properties</option>
++                    </select>
++                </div>
++            </div>
++        </div>
++
++        <div class="flex-row">
++            <!-- Left Panel - Node Operations -->
++            <div class="panel">
++                <h2>Tensor Node Operations</h2>
++                <div class="form-group">
++                    <label for="selectedNode">Selected Node:</label>
++                    <select id="selectedNode">
++                        <option value="">Select a node...</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Tensor Dimensions:</label>
++                    <div id="tensorDimensions">Not selected</div>
++                </div>
++                <div class="form-group">
++                    <label>Node Intertwiner:</label>
++                    <div id="nodeIntertwiner">Not selected</div>
++                </div>
++                <div class="form-group">
++                    <label>Tensor Basis:</label>
++                    <div id="tensorBasis">Not selected</div>
++                </div>
++                <div class="form-group">
++                    <label>Tensor Values:</label>
++                    <div class="tensor-grid" id="tensorValues">
++                        <!-- Tensor values will be displayed here -->
++                    </div>
++                </div>
++                <div class="form-group">
++                    <label>Set Tensor Element:</label>
++                    <div style="display: flex; gap: 10px;">
++                        <input type="text" id="tensorIndices" placeholder="Indices (e.g. 0,1,0)">
++                        <input type="text" id="tensorValue" placeholder="Value (e.g. 1+2i)">
++                    </div>
++                    <button class="action-button" id="setTensorElementButton">Set Element</button>
++                </div>
++                <div class="form-group">
++                    <label>Node Physical Properties:</label>
++                    <div id="nodeProperties">Not selected</div>
++                </div>
++            </div>
++
++            <!-- Right Panel - Edge Operations -->
++            <div class="panel">
++                <h2>State Vector Edge Operations</h2>
++                <div class="form-group">
++                    <label for="selectedEdge">Selected Edge:</label>
++                    <select id="selectedEdge">
++                        <option value="">Select an edge...</option>
++                    </select>
++                </div>
++                <div class="form-group">
++                    <label>Edge Spin:</label>
++                    <div id="edgeSpin">Not selected</div>
++                </div>
++                <div class="form-group">
++                    <label>State Vector Dimension:</label>
++                    <div id="stateVectorDimension">Not selected</div>
++                </div>
++                <div class="form-group">
++                    <label>State Vector Amplitudes:</label>
++                    <table id="stateVectorAmplitudes">
++                        <thead>
++                            <tr>
++                                <th>Index</th>
++                                <th>Real</th>
++                                <th>Imaginary</th>
++                                <th>Magnitude</th>
++                            </tr>
++                        </thead>
++                        <tbody>
++                            <!-- State vector values will be displayed here -->
++                        </tbody>
++                    </table>
++                </div>
++                <div class="form-group">
++                    <label>Set Amplitude:</label>
++                    <div style="display: flex; gap: 10px;">
++                        <input type="number" id="amplitudeIndex" placeholder="Index">
++                        <input type="text" id="amplitudeValue" placeholder="Value (e.g. 1+2i)">
++                    </div>
++                    <button class="action-button" id="setAmplitudeButton">Set Amplitude</button>
++                </div>
++                <div class="form-group">
++                    <button id="normalizeButton">Normalize State Vector</button>
++                </div>
++                <div class="form-group">
++                    <label>Edge Physical Properties:</label>
++                    <div id="edgeProperties">Not selected</div>
++                </div>
++            </div>
++        </div>
++
++        <!-- Bottom Panel - Simulation Controls -->
++        <div class="panel">
++            <h2>Analysis</h2>
++            <div class="flex-row">
++                <div>
++                    <div class="form-group">
++                        <label>Total Network Volume:</label>
++                        <div id="totalVolume">0</div>
++                    </div>
++                    <div class="form-group">
++                        <label>Total Network Area:</label>
++                        <div id="totalArea">0</div>
++                    </div>
++                </div>
++                <div>
++                    <div class="form-group">
++                        <label>Network State:</label>
++                        <div id="networkState">No state defined</div>
++                    </div>
++                    <div class="form-group">
++                        <button id="calculatePropertiesButton">Calculate Properties</button>
++                    </div>
++                </div>
++            </div>
++        </div>
++    </div>
++
++    <!-- Core Tensor Bridge -->
++    <script src="dist/lib/spin-network.umd.js"></script>
++    
++    <!-- Sandbox Implementation -->
++    <script src="scripts/tensor-sandbox.js"></script>
++</body>
++</html>
+diff --git a/src/App.tsx b/src/App.tsx
+index 977399d..bd65820 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -3,11 +3,8 @@ import { Routes, Route, useLocation } from 'react-router-dom'
+ import MainLayout from './components/layouts/MainLayout'
+ import Workspace from './components/workspace/Workspace'
+ import { LogExplorerPage } from './components/logs/explorer'
+-import { 
+-  DocsLayout, 
+-  DocumentationHome, 
+-  DocsViewer 
+-} from './components/documentation'
++import { TestingPage } from './components/testing'
++import { DocsPage } from './components/documentation'
+ import NetworkTools from './components/tools/NetworkTools'
+ import { PropertiesPanel, TypeManagementPanel, SimulationControlPanel } from './components/panels'
+ import { SimulationResultsPanel, SimulationLogsPanel, SimulationDebugPanel } from './components/simulation'
+@@ -42,12 +39,11 @@ function App() {
+         <Routes>
+           <Route path="/explorer" element={<LogExplorerPage />} />
+           
+-          {/* Documentation Routes */}
+-          <Route path="/docs" element={<DocsLayout />}>
+-            <Route index element={<DocumentationHome />} />
+-            <Route path="physics/:docId" element={<DocsViewer type="physics" />} />
+-            <Route path="implementation/:docId" element={<DocsViewer type="implementation" />} />
+-          </Route>
++          {/* Testing Page Route */}
++          <Route path="/testing" element={<TestingPage />} />
++          
++          {/* Documentation Page Route */}
++          <Route path="/docs" element={<DocsPage />} />
+           
+           <Route path="/" element={
+             <div className="flex h-full">
+diff --git a/src/components/documentation/DocsLayout.tsx b/src/components/documentation/DocsLayout.tsx
+deleted file mode 100644
+index 97212f6..0000000
+--- a/src/components/documentation/DocsLayout.tsx
++++ /dev/null
+@@ -1,22 +0,0 @@
+-import React from 'react';
+-import { Outlet } from 'react-router-dom';
+-import DocsSidebar from './DocsSidebar';
+-import './DocsStyles.css';
+-
+-const DocsLayout: React.FC = () => {
+-  return (
+-    <div className="flex h-full">
+-      {/* Sidebar */}
+-      <div className="w-64 border-r border-gray-200 bg-gray-50 overflow-y-auto">
+-        <DocsSidebar />
+-      </div>
+-      
+-      {/* Main content area */}
+-      <div className="flex-1 overflow-auto p-6">
+-        <Outlet />
+-      </div>
+-    </div>
+-  );
+-};
+-
+-export default DocsLayout;
+\ No newline at end of file
+diff --git a/src/components/documentation/DocsSidebar.tsx b/src/components/documentation/DocsSidebar.tsx
+deleted file mode 100644
+index 4224914..0000000
+--- a/src/components/documentation/DocsSidebar.tsx
++++ /dev/null
+@@ -1,242 +0,0 @@
+-import React, { useState, useEffect } from 'react';
+-import { NavLink, useLocation } from 'react-router-dom';
+-import { FaBook, FaAtom, FaCode, FaChevronDown, FaChevronRight } from 'react-icons/fa';
+-
+-// Interface for TOC items
+-interface TocItem {
+-  id: string;
+-  title: string;
+-  level: number;
+-}
+-
+-// Interface for document metadata
+-interface DocMeta {
+-  path: string;
+-  label: string;
+-  toc: TocItem[];
+-}
+-
+-const DocsSidebar: React.FC = () => {
+-  const location = useLocation();
+-  const [expandedTOCs, setExpandedTOCs] = useState<Record<string, boolean>>({});
+-  const [docMeta, setDocMeta] = useState<Record<string, DocMeta>>({});
+-  
+-  const physicsDocs = [
+-    { path: '/docs/physics/physics-notebook.html', label: 'Physics Notebook', format: 'html' },
+-    { path: '/docs/physics/mathematical-roadmap', label: 'Mathematical Foundations', format: 'md' },
+-    { path: '/docs/physics/intertwiner-spaces', label: 'Intertwiner Spaces', format: 'md' },
+-    { path: '/docs/physics/unified-dynamics', label: 'Unified Dynamics Approach', format: 'md' },
+-  ];
+-  
+-  const implementationDocs = [
+-    { path: '/docs/implementation/standalone-guide.html', label: 'Standalone Library Guide', format: 'html' },
+-    { path: '/docs/implementation/simulation-test.html', label: 'Simulation Test Environment', format: 'html' },
+-  ];
+-  
+-  // Toggle TOC expansion for a specific document
+-  const toggleTOC = (path: string) => {
+-    setExpandedTOCs(prev => ({
+-      ...prev,
+-      [path]: !prev[path]
+-    }));
+-  };
+-  
+-  // Extract TOC from markdown content
+-  const extractTOC = (content: string): TocItem[] => {
+-    const toc: TocItem[] = [];
+-    const lines = content.split('\n');
+-    
+-    // Regex to match markdown headings
+-    const headingRegex = /^(#{1,6})\s+(.+)$/;
+-    
+-    lines.forEach(line => {
+-      const match = line.match(headingRegex);
+-      if (match) {
+-        const level = match[1].length;
+-        const title = match[2];
+-        const id = title.toLowerCase().replace(/[^\w]+/g, '-');
+-        
+-        toc.push({ id, title, level });
+-      }
+-    });
+-    
+-    return toc;
+-  };
+-  
+-  // Fetch document metadata and TOC
+-  useEffect(() => {
+-    const fetchTOC = async () => {
+-      const allDocs = [...physicsDocs, ...implementationDocs];
+-      
+-      for (const doc of allDocs) {
+-        // Skip HTML documents - TOC only for markdown
+-        if (doc.format === 'html' || doc.path.endsWith('.html')) continue;
+-        
+-        try {
+-          // Convert path to file path
+-          let filePath = doc.path;
+-          // Remove /docs/ prefix
+-          filePath = filePath.replace('/docs/', '/');
+-          // Add .md extension if not present
+-          if (!filePath.includes('.')) {
+-            filePath = `${filePath}.md`;
+-          }
+-          
+-          const response = await fetch(`/docs${filePath}`);
+-          if (response.ok) {
+-            const content = await response.text();
+-            const toc = extractTOC(content);
+-            
+-            setDocMeta(prev => ({
+-              ...prev,
+-              [doc.path]: {
+-                path: doc.path,
+-                label: doc.label,
+-                format: doc.format || 'md',
+-                toc
+-              }
+-            }));
+-          }
+-        } catch (error) {
+-          console.error(`Error fetching TOC for ${doc.path}:`, error);
+-        }
+-      }
+-    };
+-    
+-    fetchTOC();
+-  }, []);
+-  
+-  // Auto-expand TOC of the active document
+-  useEffect(() => {
+-    if (location.pathname) {
+-      setExpandedTOCs(prev => ({
+-        ...prev,
+-        [location.pathname]: true
+-      }));
+-    }
+-  }, [location.pathname]);
+-  
+-  const renderTOCItems = (path: string) => {
+-    const meta = docMeta[path];
+-    if (!meta || !meta.toc || meta.toc.length === 0) return null;
+-    
+-    return (
+-      <div className="pl-4 pb-2">
+-        <ul className="border-l border-gray-200 space-y-1">
+-          {meta.toc.map((item, index) => (
+-            // Only render h1, h2, and h3 to avoid overwhelming the TOC
+-            item.level <= 3 && (
+-              <li 
+-                key={`${item.id}-${index}`}
+-                className={`pl-${item.level * 2} text-xs`}
+-              >
+-                <a 
+-                  href={`${path}#${item.id}`}
+-                  className="text-gray-600 hover:text-blue-600 block py-1 truncate"
+-                  style={{ paddingLeft: `${(item.level - 1) * 0.75}rem` }}
+-                >
+-                  {item.title}
+-                </a>
+-              </li>
+-            )
+-          ))}
+-        </ul>
+-      </div>
+-    );
+-  };
+-  
+-  return (
+-    <div className="py-4">
+-      <div className="px-4 mb-6">
+-        <h2 className="text-lg font-semibold flex items-center">
+-          <FaBook className="mr-2" />
+-          Documentation
+-        </h2>
+-      </div>
+-      
+-      {/* Physics Section */}
+-      <div className="mb-6">
+-        <div className="px-4 mb-2 text-sm font-medium text-gray-600 flex items-center">
+-          <FaAtom className="mr-2" />
+-          Physics & Theory
+-        </div>
+-        <ul className="space-y-1">
+-          {physicsDocs.map(doc => (
+-            <li key={doc.path}>
+-              <div className="flex flex-col">
+-                <div className="flex items-center">
+-                  {docMeta[doc.path]?.toc?.length > 0 && (
+-                    <button 
+-                      onClick={() => toggleTOC(doc.path)}
+-                      className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+-                    >
+-                      {expandedTOCs[doc.path] ? 
+-                        <FaChevronDown size={12} /> : 
+-                        <FaChevronRight size={12} />
+-                      }
+-                    </button>
+-                  )}
+-                  <NavLink 
+-                    to={doc.path}
+-                    className={({ isActive }) => 
+-                      `flex-1 block px-2 py-2 text-sm ${isActive 
+-                        ? 'bg-blue-100 text-blue-700' 
+-                        : 'text-gray-700 hover:bg-gray-100'}`
+-                    }
+-                  >
+-                    {doc.label}
+-                  </NavLink>
+-                </div>
+-                
+-                {expandedTOCs[doc.path] && renderTOCItems(doc.path)}
+-              </div>
+-            </li>
+-          ))}
+-        </ul>
+-      </div>
+-      
+-      {/* Implementation Section */}
+-      <div>
+-        <div className="px-4 mb-2 text-sm font-medium text-gray-600 flex items-center">
+-          <FaCode className="mr-2" />
+-          Implementation
+-        </div>
+-        <ul className="space-y-1">
+-          {implementationDocs.map(doc => (
+-            <li key={doc.path}>
+-              <div className="flex flex-col">
+-                <div className="flex items-center">
+-                  {docMeta[doc.path]?.toc?.length > 0 && (
+-                    <button 
+-                      onClick={() => toggleTOC(doc.path)}
+-                      className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+-                    >
+-                      {expandedTOCs[doc.path] ? 
+-                        <FaChevronDown size={12} /> : 
+-                        <FaChevronRight size={12} />
+-                      }
+-                    </button>
+-                  )}
+-                  <NavLink 
+-                    to={doc.path}
+-                    className={({ isActive }) => 
+-                      `flex-1 block px-2 py-2 text-sm ${isActive 
+-                        ? 'bg-blue-100 text-blue-700' 
+-                        : 'text-gray-700 hover:bg-gray-100'}`
+-                    }
+-                  >
+-                    {doc.label}
+-                  </NavLink>
+-                </div>
+-                
+-                {expandedTOCs[doc.path] && renderTOCItems(doc.path)}
+-              </div>
+-            </li>
+-          ))}
+-        </ul>
+-      </div>
+-    </div>
+-  );
+-};
+-
+-export default DocsSidebar;
+\ No newline at end of file
+diff --git a/src/components/documentation/DocsStyles.css b/src/components/documentation/DocsStyles.css
+deleted file mode 100644
+index adedb5c..0000000
+--- a/src/components/documentation/DocsStyles.css
++++ /dev/null
+@@ -1,129 +0,0 @@
+-/* Documentation custom styles */
+-
+-/* Override default GitHub markdown styles */
+-.markdown-body {
+-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+-  line-height: 1.6;
+-  color: #24292e;
+-  max-width: 960px;
+-  margin: 0 auto;
+-}
+-
+-/* Improve heading styles */
+-.markdown-body h1 {
+-  padding-bottom: 0.3em;
+-  border-bottom: 1px solid #eaecef;
+-  margin-top: 1.5em;
+-}
+-
+-.markdown-body h2 {
+-  padding-bottom: 0.3em;
+-  border-bottom: 1px solid #eaecef;
+-  margin-top: 1.5em;
+-}
+-
+-/* Code blocks */
+-.markdown-body pre {
+-  background-color: #f6f8fa;
+-  border-radius: 6px;
+-  padding: 16px;
+-  overflow: auto;
+-}
+-
+-.markdown-body code {
+-  background-color: rgba(27, 31, 35, 0.05);
+-  border-radius: 3px;
+-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+-  font-size: 85%;
+-  padding: 0.2em 0.4em;
+-}
+-
+-/* Table styles */
+-.markdown-body table {
+-  border-collapse: collapse;
+-  width: 100%;
+-  margin-bottom: 16px;
+-}
+-
+-.markdown-body table th,
+-.markdown-body table td {
+-  border: 1px solid #dfe2e5;
+-  padding: 6px 13px;
+-}
+-
+-.markdown-body table tr:nth-child(2n) {
+-  background-color: #f6f8fa;
+-}
+-
+-/* Math formula styles */
+-.katex-display {
+-  overflow-x: auto;
+-  overflow-y: hidden;
+-  padding: 1em 0;
+-}
+-
+-/* HTML content styles */
+-.html-content {
+-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+-  line-height: 1.6;
+-  color: #24292e;
+-  max-width: 960px;
+-  margin: 0 auto;
+-}
+-
+-.html-content h1,
+-.html-content h2,
+-.html-content h3 {
+-  margin-top: 1.5em;
+-  margin-bottom: 0.5em;
+-  color: #24292e;
+-}
+-
+-.html-content pre,
+-.html-content code {
+-  background-color: #f6f8fa;
+-  border-radius: 3px;
+-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+-  font-size: 85%;
+-  padding: 0.2em 0.4em;
+-}
+-
+-.html-content pre {
+-  padding: 1em;
+-  overflow: auto;
+-}
+-
+-/* Sidebar TOC styles */
+-.toc-list {
+-  font-size: 0.9em;
+-  border-left: 1px solid #e1e4e8;
+-}
+-
+-.toc-item {
+-  padding: 4px 0 4px 15px;
+-  transition: all 0.2s ease;
+-}
+-
+-.toc-item:hover {
+-  background-color: #f6f8fa;
+-}
+-
+-.toc-item-h1 {
+-  margin-left: 0px;
+-}
+-
+-.toc-item-h2 {
+-  margin-left: 12px;
+-}
+-
+-.toc-item-h3 {
+-  margin-left: 24px;
+-  font-size: 0.85em;
+-}
+-
+-/* Active TOC item */
+-.toc-active {
+-  color: #0366d6;
+-  background-color: #f1f8ff;
+-  border-left: 2px solid #0366d6;
+-}
+diff --git a/src/components/documentation/DocsViewer.tsx b/src/components/documentation/DocsViewer.tsx
+deleted file mode 100644
+index 719dd2c..0000000
+--- a/src/components/documentation/DocsViewer.tsx
++++ /dev/null
+@@ -1,182 +0,0 @@
+-import React, { useState, useEffect } from 'react';
+-import { useParams } from 'react-router-dom';
+-import ReactMarkdown from 'react-markdown';
+-import remarkGfm from 'remark-gfm';
+-import remarkMath from 'remark-math';
+-import rehypeRaw from 'rehype-raw';
+-import rehypeSanitize from 'rehype-sanitize';
+-import rehypeKatex from 'rehype-katex';
+-import 'github-markdown-css/github-markdown-light.css';
+-import 'katex/dist/katex.min.css';
+-import './DocsStyles.css';
+-
+-interface DocsViewerProps {
+-  type: 'physics' | 'implementation';
+-}
+-
+-const DocsViewer: React.FC<DocsViewerProps> = ({ type }) => {
+-  const { docId } = useParams<{ docId: string }>();
+-  const [content, setContent] = useState<string>('');
+-  const [isLoading, setIsLoading] = useState<boolean>(true);
+-  const [isHtml, setIsHtml] = useState<boolean>(false);
+-  const [error, setError] = useState<string | null>(null);
+-
+-  useEffect(() => {
+-    const fetchDocument = async () => {
+-      setIsLoading(true);
+-      setError(null);
+-      
+-      try {
+-        const isExplicitHtml = docId?.endsWith('.html');
+-        let path = '';
+-        
+-        if (docId?.includes('.')) {
+-          path = `/docs/${type}/${docId}`;
+-        } else {
+-          path = `/docs/${type}/${docId}.md`;
+-        }
+-        
+-        let response = await fetch(path);
+-        
+-        if (!response.ok && !isExplicitHtml && !docId?.includes('.')) {
+-          const htmlPath = `/docs/${type}/${docId}.html`;
+-          response = await fetch(htmlPath);
+-        }
+-        
+-        if (!response.ok) {
+-          const publicPath = `/public/docs/${type}/${docId}${docId?.includes('.') ? '' : '.md'}`;
+-          response = await fetch(publicPath);
+-          
+-          if (!response.ok && !docId?.includes('.')) {
+-            const publicHtmlPath = `/public/docs/${type}/${docId}.html`;
+-            response = await fetch(publicHtmlPath);
+-          }
+-        }
+-        
+-        if (!response.ok) {
+-          throw new Error(`Failed to load document: Could not find ${docId} in any expected location`);
+-        }
+-        
+-        const responseText = await response.text();
+-        const foundExtension = response.url.split('.').pop()?.toLowerCase() || '';
+-        
+-        setIsHtml(foundExtension === 'html');
+-        setContent(responseText);
+-      } catch (err) {
+-        console.error('Error loading document:', err);
+-        setError('Failed to load the requested document. Please try again later.');
+-      } finally {
+-        setIsLoading(false);
+-      }
+-    };
+-    
+-    if (docId) {
+-      fetchDocument();
+-    }
+-  }, [docId, type]);
+-
+-  if (isLoading) {
+-    return <div className="flex justify-center items-center h-64">
+-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+-    </div>;
+-  }
+-  
+-  if (error) {
+-    return (
+-      <div className="flex flex-col space-y-4">
+-        <div className="text-red-500 p-4 border border-red-300 bg-red-50 rounded">
+-          {error}
+-        </div>
+-        <div className="p-4 border border-blue-300 bg-blue-50 rounded">
+-          <h3 className="font-medium text-blue-800 mb-2">Troubleshooting</h3>
+-          <p className="mb-2">This error may be caused by:</p>
+-          <ul className="list-disc pl-5 space-y-1">
+-            <li>The document not existing at the expected path</li>
+-            <li>Missing UMD library files for standalone pages</li>
+-            <li>Path differences between development and production environments</li>
+-          </ul>
+-        </div>
+-      </div>
+-    );
+-  }
+-  
+-  if (isHtml) {
+-    const processHtmlContent = (rawContent: string) => {
+-      let processed = rawContent;
+-      
+-      // Ensure base href exists
+-      if (!processed.includes('<base href')) {
+-        const basePath = `/docs/${type}/`;
+-        processed = processed.replace('<head>', `<head><base href="${basePath}">`);
+-      }
+-
+-      // Add required styles
+-      if (!processed.includes('katex.min.css')) {
+-        processed = processed.replace('</head>', 
+-          '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">\n</head>');
+-      }
+-
+-      return processed;
+-    };
+-
+-    const finalContent = content.includes('<head>')
+-      ? processHtmlContent(content)
+-      : `<!DOCTYPE html>
+-        <html>
+-        <head>
+-          <base href="/docs/${type}/">
+-          <meta charset="UTF-8">
+-          <title>${docId || 'Documentation'}</title>
+-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+-          <style>
+-            body { 
+-              font-family: -apple-system, system-ui, sans-serif;
+-              line-height: 1.6;
+-              padding: 20px;
+-              max-width: 1200px;
+-              margin: 0 auto;
+-            }
+-          </style>
+-        </head>
+-        <body>${content}</body>
+-        </html>`;
+-
+-    return (
+-      <div className="relative w-full h-full">
+-        <iframe 
+-          className="w-full h-full border-0"
+-          srcDoc={finalContent}
+-          title={docId || 'Documentation'}
+-          sandbox="allow-scripts allow-same-origin"
+-        />
+-      </div>
+-    );
+-  }
+-  
+-  return (
+-    <div className="markdown-body px-4">
+-      <ReactMarkdown
+-        remarkPlugins={[remarkGfm, remarkMath]}
+-        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
+-        components={{
+-          h1: ({node, ...props}) => <h1 id={props.children?.toString().toLowerCase().replace(/[^\w]+/g, '-')} {...props} />,
+-          h2: ({node, ...props}) => <h2 id={props.children?.toString().toLowerCase().replace(/[^\w]+/g, '-')} {...props} />,
+-          p: ({node, ...props}) => {
+-            if (typeof props.children === 'string') {
+-              const content = props.children.toString();
+-              const anchorPattern = /\s+\{#[\w-]+\}$/;
+-              if (anchorPattern.test(content)) {
+-                props.children = content.replace(anchorPattern, '');
+-              }
+-            }
+-            return <p {...props} />;
+-          }
+-        }}
+-      >
+-        {content}
+-      </ReactMarkdown>
+-    </div>
+-  );
+-};
+-
+-export default DocsViewer;
+\ No newline at end of file
+diff --git a/src/components/documentation/DocumentationHome.tsx b/src/components/documentation/DocumentationHome.tsx
+deleted file mode 100644
+index a204ca0..0000000
+--- a/src/components/documentation/DocumentationHome.tsx
++++ /dev/null
+@@ -1,98 +0,0 @@
+-import React from 'react';
+-import { Link } from 'react-router-dom';
+-import { FaBook, FaAtom, FaCode, FaArrowRight } from 'react-icons/fa';
+-
+-const DocumentationHome: React.FC = () => {
+-  return (
+-    <div className="max-w-4xl mx-auto">
+-      <div className="mb-8">
+-        <h1 className="text-3xl font-bold flex items-center mb-2">
+-          <FaBook className="mr-3 text-blue-600" />
+-          Spin Network Documentation
+-        </h1>
+-        <p className="text-lg text-gray-600">
+-          Comprehensive resources to understand spin networks from theory to implementation.
+-        </p>
+-      </div>
+-      
+-      <div className="grid md:grid-cols-2 gap-8">
+-        {/* Physics Section */}
+-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+-          <div className="flex items-center mb-4">
+-            <FaAtom className="text-xl text-blue-600 mr-2" />
+-            <h2 className="text-xl font-semibold">Physics & Theory</h2>
+-          </div>
+-          
+-          <p className="text-gray-600 mb-4">
+-            Explore the mathematical foundations and physical theory behind spin networks.
+-          </p>
+-          
+-          <ul className="space-y-2 mb-6">
+-            <li className="flex items-center">
+-              <FaArrowRight className="text-blue-500 mr-2 text-sm" />
+-              <Link to="/docs/physics/physics-notebook.html" className="text-blue-600 hover:underline">
+-                Physics Notebook
+-              </Link>
+-            </li>
+-            <li className="flex items-center">
+-              <FaArrowRight className="text-blue-500 mr-2 text-sm" />
+-              <Link to="/docs/physics/mathematical-roadmap" className="text-blue-600 hover:underline">
+-                Mathematical Foundations
+-              </Link>
+-            </li>
+-            <li className="flex items-center">
+-              <FaArrowRight className="text-blue-500 mr-2 text-sm" />
+-              <Link to="/docs/physics/intertwiner-spaces" className="text-blue-600 hover:underline">
+-                Intertwiner Spaces
+-              </Link>
+-            </li>
+-            <li className="flex items-center">
+-              <FaArrowRight className="text-blue-500 mr-2 text-sm" />
+-              <Link to="/docs/physics/unified-dynamics" className="text-blue-600 hover:underline">
+-                Unified Dynamics Approach
+-              </Link>
+-            </li>
+-          </ul>
+-        </div>
+-        
+-        {/* Implementation Section */}
+-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+-          <div className="flex items-center mb-4">
+-            <FaCode className="text-xl text-blue-600 mr-2" />
+-            <h2 className="text-xl font-semibold">Implementation Details</h2>
+-          </div>
+-          
+-          <p className="text-gray-600 mb-4">
+-            Guides and resources for implementing and testing spin network simulations.
+-          </p>
+-          
+-          <ul className="space-y-2 mb-6">
+-            <li className="flex items-center">
+-              <FaArrowRight className="text-blue-500 mr-2 text-sm" />
+-              <Link to="/docs/implementation/standalone-guide.html" className="text-blue-600 hover:underline">
+-                Standalone Library Guide
+-              </Link>
+-            </li>
+-            <li className="flex items-center">
+-              <FaArrowRight className="text-blue-500 mr-2 text-sm" />
+-              <Link to="/docs/implementation/simulation-test.html" className="text-blue-600 hover:underline">
+-                Simulation Test Environment
+-              </Link>
+-            </li>
+-          </ul>
+-        </div>
+-      </div>
+-      
+-      <div className="mt-10 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+-        <h3 className="text-lg font-medium text-blue-700 mb-2">About the Documentation</h3>
+-        <p className="text-gray-700">
+-          This documentation hub centralizes resources for the Spin Network project, making it easier to access 
+-          technical documents, guides, and theoretical explanations. All content is accessible from within the 
+-          application interface for a seamless experience.
+-        </p>
+-      </div>
+-    </div>
+-  );
+-};
+-
+-export default DocumentationHome;
+\ No newline at end of file
+diff --git a/src/components/documentation/index.ts b/src/components/documentation/index.ts
+index b6cbcfd..a4e9c21 100644
+--- a/src/components/documentation/index.ts
++++ b/src/components/documentation/index.ts
+@@ -1,4 +1 @@
+-export { default as DocsLayout } from './DocsLayout';
+-export { default as DocsSidebar } from './DocsSidebar';
+-export { default as DocsViewer } from './DocsViewer';
+-export { default as DocumentationHome } from './DocumentationHome';
+\ No newline at end of file
++export { default as DocsPage } from './DocsPage';
+\ No newline at end of file
+diff --git a/src/components/layouts/MainLayout.tsx b/src/components/layouts/MainLayout.tsx
+index 91a0416..b5bd01b 100644
+--- a/src/components/layouts/MainLayout.tsx
++++ b/src/components/layouts/MainLayout.tsx
+@@ -1,6 +1,6 @@
+ import React from 'react';
+ import { Link, useLocation } from 'react-router-dom';
+-import { FaNetworkWired, FaChartLine, FaFolder, FaBook } from 'react-icons/fa';
++import { FaNetworkWired, FaChartLine, FaFolder, FaFlask, FaBook } from 'react-icons/fa';
+ import ResizablePanel from '../common/ResizablePanel';
+ import { Settings } from '../settings';
+ 
+@@ -28,24 +28,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+                   <span className="text-white ml-1">Network</span>
+                 </Link>
+               </li>
+-              <li className="flex items-center">
+-                <a href="#" className="flex items-center hover:text-primary-100">
+-                  <FaChartLine className="text-white" />
+-                  <span className="text-white ml-1">Simulation</span>
+-                </a>
+-              </li>
++
+               <li className="flex items-center">
+                 <Link to="/explorer" className={`flex items-center hover:text-primary-100 ${location.pathname === '/explorer' ? 'border-b-2 border-white' : ''}`}>
+                   <FaFolder className="text-white" />
+                   <span className="text-white ml-1">Log Explorer</span>
+                 </Link>
+               </li>
++
+               <li className="flex items-center">
+-                <Link to="/docs" className={`flex items-center hover:text-primary-100 ${location.pathname.startsWith('/docs') ? 'border-b-2 border-white' : ''}`}>
++                <Link to="/docs" className={`flex items-center hover:text-primary-100 ${location.pathname === '/docs' ? 'border-b-2 border-white' : ''}`}>
+                   <FaBook className="text-white" />
+                   <span className="text-white ml-1">Documentation</span>
+                 </Link>
+               </li>
++              <li className="flex items-center">
++                <Link to="/testing" className={`flex items-center hover:text-primary-100 ${location.pathname === '/testing' ? 'border-b-2 border-white' : ''}`}>
++                  <FaFlask className="text-white" />
++                  <span className="text-white ml-1">Testing</span>
++                </Link>
++              </li>
+               <li className="flex items-center">
+                 <Settings />
+               </li>

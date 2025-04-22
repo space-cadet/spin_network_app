@@ -98,13 +98,6 @@ function createNetwork() {
     const spinValue = parseFloat(document.getElementById('defaultSpin').value) || 0.5;
     
     try {
-        // Load SpinNetwork library
-        if (typeof SpinNetwork === 'undefined') {
-            console.error('SpinNetwork library not loaded');
-            alert('Error: SpinNetwork library not loaded. Please check the console for details.');
-            return;
-        }
-        
         switch(networkType) {
             case 'empty':
                 // Just leave the network empty

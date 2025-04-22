@@ -1,57 +1,64 @@
-/**
- * Tensor Bridge Module
+// Make available globally for the sandbox
+console.log('Tensor Bridge initialized with quantum operations');
  * 
  * Provides a bridge between the core tensor/state vector implementations
  * and the sandbox UI, maintaining compatibility with the existing API.
  */
 
-import { 
-    TensorNode,
-    StateVectorEdge,
-    createComplex,
-    addComplex,
-    multiplyComplex,
-    createTensorNode,
-    createStateVectorEdge,
-    setTensorElement as coreTensorSetElement,
-    getTensorElement as coreTensorGetElement,
-    setStateVectorAmplitude,
-    getStateVectorAmplitude,
-    normalizeStateVector as coreNormalizeStateVector,
-    calculateNodeVolume,
-    calculateEdgeArea,
-    createTensorNodeFromBasisState
-} from '../../lib/core/tensor';
+// Import the compiled library
+import SpinNetworkLib from '../../dist/lib/spin-network.es.js';
 
-import {
-    getOptimizedIntertwinerBasis,
-    IntertwinerBasisState
-} from '../../lib/core/intertwinerSpace';
-
-import {
-    Tensor,
-    createTensor,
-    setTensorElement,
-    getTensorElement,
-    tensorNodeToTensor,
-    contractTensors,
-    tensorNorm,
-    normalizeTensor,
-    createIntertwinerTensor,
-    tensorExpectationValue
-} from '../../lib/quantum/tensorOperations';
-
-import {
-    StateVector,
-    createStateVector,
-    initializeSpinState,
-    edgeToStateVector,
-    normalizeStateVector,
-    innerProduct,
-    applyOperator,
-    createSpinOperators,
-    expectationValue
-} from '../../lib/quantum/stateVectorOperations';
+// Extract needed functionality from the library
+const {
+    core: {
+        tensor: {
+            TensorNode,
+            StateVectorEdge,
+            createComplex,
+            addComplex,
+            multiplyComplex,
+            createTensorNode,
+            createStateVectorEdge,
+            setTensorElement: coreTensorSetElement,
+            getTensorElement: coreTensorGetElement,
+            setStateVectorAmplitude,
+            getStateVectorAmplitude,
+            normalizeStateVector: coreNormalizeStateVector,
+            calculateNodeVolume,
+            calculateEdgeArea,
+            createTensorNodeFromBasisState
+        },
+        intertwinerSpace: {
+            getOptimizedIntertwinerBasis,
+            IntertwinerBasisState
+        }
+    },
+    quantum: {
+        tensorOperations: {
+            Tensor,
+            createTensor,
+            setTensorElement,
+            getTensorElement,
+            tensorNodeToTensor,
+            contractTensors,
+            tensorNorm,
+            normalizeTensor,
+            createIntertwinerTensor,
+            tensorExpectationValue
+        },
+        stateVectorOperations: {
+            StateVector,
+            createStateVector,
+            initializeSpinState,
+            edgeToStateVector,
+            normalizeStateVector,
+            innerProduct,
+            applyOperator,
+            createSpinOperators,
+            expectationValue
+        }
+    }
+} = SpinNetworkLib;
 
 // Export the API expected by tensor-sandbox.js
 const SpinNetwork = {
