@@ -5,7 +5,7 @@
  * nodes as tensors and edges as state vectors in spin networks.
  */
 
-import { IntertwinerBasisState } from './intertwinerSpace';
+import { IntertwinerBasisState, getOptimizedIntertwinerBasis, triangleInequality } from './intertwinerSpace';
 
 /**
  * Represents a complex number for tensor operations
@@ -116,7 +116,8 @@ export interface StateVectorEdge {
 }
 
 /**
- * Creates a tensor node with default values
+ * Creates a tensor node with default values and automatically initializes tensor elements
+ * based on the intertwiner values and dimensions (which correspond to edge spins)
  */
 export function createTensorNode(
   id: string,
@@ -124,19 +125,103 @@ export function createTensorNode(
   intertwinerId: number,
   dimensions: number[] = []
 ): TensorNode {
-  return {
+  // Use provided dimensions or default to 4-valent node with spin-1/2 edges
+  const dims = dimensions.length > 0 ? dimensions : [2, 2, 2, 2];
+  
+  // Create the basic node structure
+  const node: TensorNode = {
     id,
     position,
     tensor: {
-      dimensions: dimensions.length > 0 ? dimensions : [2, 2, 2, 2], // Default to 4-valent node with spin-1/2 edges
+      dimensions: dims,
       elements: [],
       basis: 'standard'
     },
     intertwiner: {
       value: intertwinerId,
-      dimension: dimensions.reduce((prod, dim) => prod * dim, 1)
+      dimension: dims.reduce((prod, dim) => prod * dim, 1)
     }
   };
+  
+  // Initialize tensor elements if we have exactly 4 edges (4-valent node)
+  if (dims.length === 4) {
+    // Calculate spins from dimensions (j = (dim-1)/2)
+    const j1 = (dims[0] - 1) / 2;
+    const j2 = (dims[1] - 1) / 2;
+    const j3 = (dims[2] - 1) / 2;
+    const j4 = (dims[3] - 1) / 2;
+    
+    try {
+      // Use the optimized intertwiner basis calculation from intertwinerSpace.ts
+      // Get basis state that corresponds to this intertwiner value
+      const basis = getOptimizedIntertwinerBasis(j1, j2, j3, j4);
+        
+        // Find the basis state matching the requested intertwiner value or use the first one
+        const basisState = basis.find(state => 
+          Math.abs(state.intermediateJ - intertwinerId) < 1e-6
+        ) || basis[0];
+        
+        if (basisState) {
+          // Initialize tensor elements from the basis state coefficients
+          let coeffIndex = 0;
+          for (let i1 = 0; i1 < dims[0]; i1++) {
+            for (let i2 = 0; i2 < dims[1]; i2++) {
+              for (let i3 = 0; i3 < dims[2]; i3++) {
+                for (let i4 = 0; i4 < dims[3]; i4++) {
+                  const coeff = basisState.coefficients[coeffIndex++];
+                  if (Math.abs(coeff) > 1e-10) {
+                    setTensorElement(
+                      node.tensor, 
+                      [i1, i2, i3, i4], 
+                      { re: coeff, im: 0 }
+                    );
+                  }
+                }
+              }
+            }
+          }
+          
+          // Update intertwiner properties
+          node.intertwiner.dimension = basisState.coefficients.length;
+          node.intertwiner.basisStateRef = `${j1},${j2},${j3},${j4}:${basisState.intermediateJ}`;
+          node.intertwiner.recouplingScheme = "(j1,j2)(j3,j4)";
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to initialize tensor elements:', error);
+    }
+  } else if (dims.length === 3) {
+    // Handle 3-valent nodes
+    // For 3-valent nodes, the intertwiner space is 1-dimensional if the spins satisfy triangle inequality
+    const j1 = (dims[0] - 1) / 2;
+    const j2 = (dims[1] - 1) / 2;
+    const j3 = (dims[2] - 1) / 2;
+    
+    try {
+      // Check if the spins satisfy triangle inequality
+      if (triangleInequality(j1, j2, j3)) {
+        // For 3-valent nodes with valid spins, set up a normalized tensor 
+        // This is a simplified implementation; a full implementation would use 3j-symbols
+        
+        // Set a single non-zero element to represent the intertwiner
+        const maxIndices = [0, 0, 0]; // Use highest weight states for simplicity
+        setTensorElement(
+          node.tensor,
+          maxIndices,
+          { re: 1, im: 0 } // Normalized coefficient
+        );
+        
+        // Update intertwiner properties
+        node.intertwiner.dimension = 1; // 3-valent nodes have 1-dimensional intertwiner space
+        node.intertwiner.basisStateRef = `${j1},${j2},${j3}`;
+        node.intertwiner.recouplingScheme = "3-valent";
+      }
+    } catch (error) {
+      console.warn('Failed to initialize 3-valent tensor elements:', error);
+    }
+  }
+  
+  return node;
 }
 
 /**

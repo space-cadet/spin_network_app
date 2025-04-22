@@ -7,6 +7,7 @@
 | T37 | Implement Testing and Documentation Pages | ✅ COMPLETE | MEDIUM | 2025-04-22 | - | Deepak |
 | ID | Title | Status | Priority | Started | Dependencies | Owner |
 |----|-------|--------|----------|---------|--------------|-------|
+| T38 | Implement Intertwiner Tensor Initialization | 🔄 IN PROGRESS | HIGH | 2025-04-22 | T36, T20 | Deepak |
 | T36 | Implement Tensor and State Vector Sandbox | 🔄 IN PROGRESS | MEDIUM | 2025-04-22 | T20, T35 | Deepak |
 | T35 | Enhance Node and Edge Data Structures for Intertwiners | 🔄 IN PROGRESS | MEDIUM | 2025-04-21 | T20 | Deepak |
 | T34 | Complete Simulation Engine Migration to Standalone Library | 🔄 IN PROGRESS | HIGH | 2025-04-21 | T1, T14 | Deepak |
@@ -38,6 +39,33 @@
 | T25 | Implement Documentation System | 🔄 IN PROGRESS | MEDIUM | 2025-04-19 | - | Deepak |
 
 ## Task Details
+
+### T38: Implement Intertwiner Tensor Initialization
+**Description**: Add functionality to the standalone library to properly initialize tensor nodes with appropriate intertwiner tensor elements based on edge spins. Currently, tensor nodes are created with empty elements arrays, preventing proper display of non-trivial intertwiner components for 3-valent and 4-valent nodes.
+**Status**: 🔄 IN PROGRESS
+**Priority**: HIGH
+**Started**: April 22, 2025
+**Last Active**: April 22, 2025 (20:30 IST)
+**Dependencies**: T36, T20
+**Completion Criteria**:
+- ⬜ Analyze how intertwiner tensors should be calculated in the standalone library
+- ⬜ Identify appropriate location for tensor initialization code
+- ⬜ Implement functions to calculate tensor elements based on intertwiner values
+- ⬜ Update tensor node creation to initialize elements
+- ⬜ Ensure 3-valent and 4-valent nodes display appropriate non-zero elements
+- ⬜ Add support for different edge spin values
+- ⬜ Test initialization with different network topologies
+- ⬜ Verify functionality in the tensor-sandbox.html test page
+
+**Related Files**:
+- `/lib/core/intertwinerSpace.ts` - Contains intertwiner basis functions
+- `/lib/tensor/tensorNode.js` - To be created for tensor creation and manipulation
+- `/public/tensor-sandbox.html` - Test page for verifying functionality
+- `/public/scripts/tensor-sandbox.js` - Implementation of tensor sandbox
+- `/public/scripts/spin-network-adapter.js` - Adapter connecting to standalone library
+
+**Notes**:
+The issue was identified when testing the 3x3 lattice network in the tensor sandbox. Nodes with three or more edges should have non-trivial intertwiner tensor components, but the current implementation creates tensor nodes with empty elements arrays. The standalone library includes functions like `getIntertwinerBasis` and `getOptimizedIntertwinerBasis` that calculate the appropriate tensor elements, but they aren't being used during tensor node creation. This task will implement proper tensor element initialization based on the node's intertwiner value and edge spins.
 
 ### T37: Implement Testing and Documentation Pages
 **Description**: Create dedicated Testing and Documentation pages with a consistent sidebar-based interface for accessing and displaying various technical resources, guides, and test files within the application.
