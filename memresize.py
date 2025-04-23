@@ -300,8 +300,13 @@ def create_session_file(session_data):
     content = content.replace("### [Date] - [Brief description of session]", f"### {today} - Initial session file creation")
     content = content.replace("- [Work completed]\n- [Decisions made]\n- [Issues encountered]", "- Converted from monolithic session cache\n- Created modular session file")
     
-    # Generate filename with date
-    filename = f"{session_data['id']}_{today.replace('-', '')}.md"
+    # Use last_updated date from session data, fallback to started date, then today
+    session_date = (
+        session_data.get('last_updated', '').split()[0] or 
+        session_data.get('started', '').split()[0] or 
+        today
+    )
+    filename = f"{session_data['id']}_{session_date.replace('-', '')}.md"
     filepath = SESSIONS_DIR / filename
     
     write_file(filepath, content)
@@ -405,26 +410,25 @@ def create_master_session_file(sessions):
             
         registry_rows.append(f"| {task_id} | {title} | {session['status']} | {session['priority']} | [sessions/{filename}] |")
     
-    # Limit to top 10 sessions if there are many
-    if len(registry_rows) > 10:
-        registry_table = "\n".join(registry_rows[:10]) + f"\n| ... | {len(registry_rows) - 10} more sessions | ... | ... | ... |"
-    else:
-        registry_table = "\n".join(registry_rows)
+    # Show all sessions
+    registry_table = "\n".join(registry_rows)
     
-    # Generate quick status sections - keep only 5 most recent
+    # Generate quick status sections - show all active sessions
     active_tasks = []
-    active_sessions_list = [(task_id, session) for task_id, session in sessions.items() if session['status'] == '🔄']
+    active_sessions_list = [
+        (task_id, session) for task_id, session in sessions.items() 
+        if '🔄' in session['status'] or 'IN PROGRESS' in session['status']
+    ]
     # Sort by last updated (most recent first)
-    active_sessions_list.sort(key=lambda x: x[1]['last_updated'], reverse=True)
+    active_sessions_list.sort(key=lambda x: x[1].get('last_updated', '') or x[1].get('started', ''), reverse=True)
     
-    for task_id, session in active_sessions_list[:5]:
-        context = session['context']
-        if len(context) > 40:  # Truncate long contexts
-            context = context[:37] + "..."
-        active_tasks.append(f"- **{task_id}:** 🔄 {context} - Updated {session['last_updated']}")
-    
-    if len(active_sessions_list) > 5:
-        active_tasks.append(f"- ... {len(active_sessions_list) - 5} more active sessions")
+    for task_id, session in active_sessions_list:
+        status = '🔄' if 'IN PROGRESS' in session['status'] else session['status']
+        context = session.get('context', '').replace('\n', ' ').strip()
+        if len(context) > 40:
+            context = f"{context[:37]}…"
+        last_updated = session.get('last_updated', '') or session.get('started', '')
+        active_tasks.append(f"- **{task_id}:** {status} {context} - Updated {last_updated}")
     
     paused_tasks = []
     paused_sessions_list = [(task_id, session) for task_id, session in sessions.items() if session['status'] == '⏸️']
@@ -459,13 +463,41 @@ def create_master_session_file(sessions):
     else:
         content = content.replace("- **T3:** ⏸️ [Reason for pause] - Paused [date]", "- No paused tasks")
     
-    # Add session notes
+    # Add session notes using actual data
+    blockers = []
+    for task_id, session in sessions.items():
+        if session.get('blockers'):
+            blockers.extend(session['blockers'])
+    
     content = content.replace("- Last session focused on [Task ID]", f"- Last session focused on {current_focus}")
     content = content.replace("- Next planned focus: [Task ID]", f"- Next planned focus: {current_focus}")
+    if blockers:
+        content = content.replace("- Critical blockers: [Brief description if any]", 
+                                "- Critical blockers:\n  " + "\n  ".join(blockers))
+    else:
+        content = content.replace("- Critical blockers: [Brief description if any]", 
+                                "- No critical blockers identified")
     
     # Add command history
     content = content.replace("[Recent command]\n[Recent command]", "memory_bank_restructure.py  # Restructured memory bank")
     
+    # Find actual task relationships from dependencies
+    relationships = []
+    for task_id, task in tasks.items():
+        if task.get('dependencies') and task['dependencies'] != '-':
+            deps = task['dependencies'].split(',')
+            for dep in deps:
+                dep = dep.strip()
+                if dep:
+                    relationships.append(f"- {task_id} → Depends on → {dep}")
+    
+    if relationships:
+        content = content.replace("## Links Between Tasks\n- T1 → T3: [Brief description of relationship]\n- T2 → T4: [Brief description of relationship]",
+                                "## Links Between Tasks\n" + "\n".join(relationships))
+    else:
+        content = content.replace("## Links Between Tasks\n- T1 → T3: [Brief description of relationship]\n- T2 → T4: [Brief description of relationship]",
+                                "## Links Between Tasks\n- No task relationships defined")
+
     # Create new master session cache file
     master_path = MEMORY_BANK_DIR / "session_cache_new.md"
     write_file(master_path, content)
@@ -475,10 +507,10 @@ def create_master_task_file(tasks):
     """Create master tasks file from template and data."""
     template = read_file(MASTER_TASK_TEMPLATE_PATH)
     
-    # Count tasks by status
-    active_count = sum(1 for t in tasks.values() if t['status'] == '🔄')
-    paused_count = sum(1 for t in tasks.values() if t['status'] == '⏸️')
-    completed_count = sum(1 for t in tasks.values() if t['status'] == '✅')
+    # Count tasks by status (handle both emoji and text variants)
+    active_count = sum(1 for t in tasks.values() if '🔄' in t['status'] or 'IN PROGRESS' in t['status'])
+    paused_count = sum(1 for t in tasks.values() if '⏸️' in t['status'] or 'PAUSED' in t['status'])
+    completed_count = sum(1 for t in tasks.values() if '✅' in t['status'] or 'COMPLETE' in t['status'])
     
     # Find latest task ID - only consider valid task IDs (T followed by a number)
     valid_task_ids = [tid for tid in tasks.keys() if re.match(r'^T\d+$', tid)]
@@ -495,16 +527,22 @@ def create_master_task_file(tasks):
     for task_id, task in sorted(tasks.items()):
         if task['status'] != '✅':
             # Just include task ID, a brief title (truncated if needed), status, and link
-            title = task['title']
-            if len(title) > 30:  # Truncate long titles
-                title = title[:27] + "..."
-            active_rows.append(f"| {task_id} | {title} | {task['status']} | {task['priority']} | [tasks/{task_id}.md] |")
+            title = task['title'].replace('\n', ' ').strip()  # Remove line breaks
+            if len(title) > 40:  # Truncate long titles but maintain table alignment
+                title = f"{title[:37]}…"  # Use single character ellipsis
+            # Normalize status to just show emoji
+            status = task['status']
+            if 'IN PROGRESS' in status:
+                status = '🔄'
+            elif 'COMPLETE' in status:
+                status = '✅'
+            elif 'PAUSED' in status:
+                status = '⏸️'
+                
+            active_rows.append(f"| {task_id} | {title} | {status} | {task['priority']} | {task['started']} | [tasks/{task_id}.md] |")
     
-    # Limit to top 10 active tasks if there are many
-    if len(active_rows) > 10:
-        active_table = "\n".join(active_rows[:10]) + f"\n| ... | {len(active_rows) - 10} more tasks | ... | ... | ... |"
-    else:
-        active_table = "\n".join(active_rows) if active_rows else "| - | No active tasks | - | - | - |"
+    # Show all active tasks
+    active_table = "\n".join(active_rows) if active_rows else "| - | No active tasks | - | - | - |"
     
     # Generate completed tasks table - only include minimal info and limit to recent completions
     completed_rows = []
@@ -512,17 +550,14 @@ def create_master_task_file(tasks):
     # Sort by completion date (most recent first)
     completed_tasks.sort(key=lambda x: x[1]['completed'] if x[1]['completed'] else "", reverse=True)
     
-    # Only show 5 most recently completed tasks
-    for task_id, task in completed_tasks[:5]:
+    # Show all completed tasks
+    for task_id, task in completed_tasks:
         title = task['title']
         if len(title) > 30:  # Truncate long titles
             title = title[:27] + "..."
         completed_rows.append(f"| {task_id} | {title} | {task['completed']} | [tasks/{task_id}.md] |")
     
-    if len(completed_tasks) > 5:
-        completed_table = "\n".join(completed_rows) + f"\n| ... | {len(completed_tasks) - 5} more completed tasks | ... | ... |"
-    else:
-        completed_table = "\n".join(completed_rows) if completed_rows else "| - | No completed tasks | - | - |"
+    completed_table = "\n".join(completed_rows) if completed_rows else "| - | No completed tasks | - | - |"
     
     # Generate dependencies section - keep it brief
     dependencies = []
@@ -533,11 +568,8 @@ def create_master_task_file(tasks):
         if task['dependencies'] and task['dependencies'] != "-":
             dependencies.append(f"- **{task_id}** → Depends on → **{task['dependencies']}**")
     
-    # Limit to 5 most important dependencies
-    if len(dependencies) > 5:
-        dependencies_section = "\n".join(dependencies[:5]) + f"\n- ... {len(dependencies) - 5} more dependencies"
-    else:
-        dependencies_section = "\n".join(dependencies) if dependencies else "- No dependencies recorded"
+    # Show all dependencies
+    dependencies_section = "\n".join(dependencies) if dependencies else "- No dependencies recorded"
     
     # Generate priority queue - top 5 only
     priority_queue = []
