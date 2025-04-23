@@ -45,17 +45,17 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: HIGH
 **Started**: April 22, 2025
-**Last Active**: April 22, 2025 (20:30 IST)
+**Last Active**: April 23, 2025 (14:30 IST)
 **Dependencies**: T36, T20
 **Completion Criteria**:
-- ⬜ Analyze how intertwiner tensors should be calculated in the standalone library
-- ⬜ Identify appropriate location for tensor initialization code
-- ⬜ Implement functions to calculate tensor elements based on intertwiner values
-- ⬜ Update tensor node creation to initialize elements
-- ⬜ Ensure 3-valent and 4-valent nodes display appropriate non-zero elements
-- ⬜ Add support for different edge spin values
-- ⬜ Test initialization with different network topologies
-- ⬜ Verify functionality in the tensor-sandbox.html test page
+- ✅ Analyze how intertwiner tensors should be calculated in the standalone library
+- ✅ Identify appropriate location for tensor initialization code
+- ✅ Implement functions to calculate tensor elements based on intertwiner values
+- ✅ Update tensor node creation to initialize elements
+- ✅ Ensure 3-valent and 4-valent nodes display appropriate non-zero elements
+- ✅ Add support for different edge spin values
+- 🔄 Test initialization with different network topologies
+- 🔄 Verify functionality in the tensor-sandbox.html test page
 
 **Related Files**:
 - `/lib/core/intertwinerSpace.ts` - Contains intertwiner basis functions

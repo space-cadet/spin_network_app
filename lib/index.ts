@@ -51,9 +51,15 @@ import {
   multiplyComplex
 } from './core/tensor';
 
-// Re-export tensor functions directly at the top level
+// Import enhanced tensor functionality
+import {
+  createTensorNode as createEnhancedTensorNode,
+  calculateIntertwinerDimension
+} from './tensor';
+
+// Re-export tensor functions directly at the top level with enhanced versions taking precedence
 export {
-  createTensorNode,
+  createEnhancedTensorNode as createTensorNode, // Use the enhanced version as default
   setTensorElement,
   getTensorElement,
   createTensorNodeFromBasisState,
@@ -65,7 +71,8 @@ export {
   calculateEdgeArea,
   createComplex,
   addComplex,
-  multiplyComplex
+  multiplyComplex,
+  calculateIntertwinerDimension
 };
 
 /**

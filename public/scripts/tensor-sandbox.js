@@ -100,6 +100,63 @@ function updateNetworkTypeOptions() {
 }
 
 /**
+ * Helper function that creates tensor nodes with correct dimensions based on connected edges
+ */
+function createNetworkHelper(graph, spinValue) {
+    try {
+        // First create all edges to ensure they exist when processing nodes
+        graph.edges.forEach(edge => {
+            try {
+                const stateVectorEdge = window.SpinNetwork.createStateVectorEdge(
+                    edge.id,
+                    edge.sourceId,
+                    edge.targetId,
+                    edge.spin || spinValue
+                );
+                network.edges.push(stateVectorEdge);
+            } catch (edgeError) {
+                console.error('Error creating edge:', edgeError);
+            }
+        });
+        
+        // Then create nodes with proper dimensions based on connected edges
+        graph.nodes.forEach(node => {
+            try {
+                // Get connected edges to determine dimensions
+                const connectedEdges = graph.edges.filter(e => 
+                    e.sourceId === node.id || e.targetId === node.id
+                );
+                
+                // Create appropriate dimension array based on connected edges' spins
+                const dimensions = connectedEdges.map(e => 
+                    Math.round(2 * (e.spin || spinValue) + 1)
+                );
+                
+                // If no connected edges, default to 2-valent with given spin
+                const dims = dimensions.length > 0 ? dimensions : [Math.round(2 * spinValue + 1), Math.round(2 * spinValue + 1)];
+                
+                // Adjust node position if needed
+                const position = { ...node.position };
+                
+                // Create tensor node
+                const tensorNode = window.SpinNetwork.createTensorNode(
+                    node.id,
+                    position,
+                    node.intertwiner || 0,
+                    dims
+                );
+                
+                network.nodes.push(tensorNode);
+            } catch (nodeError) {
+                console.error('Error creating node:', nodeError);
+            }
+        });
+    } catch (error) {
+        console.error('Error in createNetworkHelper:', error);
+    }
+}
+
+/**
  * Creates a new network based on selected options
  */
 function createNetwork() {
@@ -160,27 +217,8 @@ function createLineNetwork(nodeCount, spinValue) {
     // Create a graph using the library function
     const graph = window.SpinNetwork.createLineGraph(window.SpinNetwork.createGraph(), graphOptions);
     
-    // Convert library graph nodes to tensor nodes
-    graph.nodes.forEach(node => {
-        const tensorNode = window.SpinNetwork.createTensorNode(
-            node.id,
-            node.position,
-            node.intertwiner || 0,
-            [2, 2, 2, 2]  // 4-valent node
-        );
-        network.nodes.push(tensorNode);
-    });
-    
-    // Convert library graph edges to state vector edges
-    graph.edges.forEach(edge => {
-        const stateVectorEdge = window.SpinNetwork.createStateVectorEdge(
-            edge.id,
-            edge.sourceId,
-            edge.targetId,
-            edge.spin || spinValue
-        );
-        network.edges.push(stateVectorEdge);
-    });
+    // Use the helper to create network with proper dimensions
+    createNetworkHelper(graph, spinValue);
 }
 
 /**
@@ -200,27 +238,8 @@ function createRingNetwork(nodeCount, spinValue) {
     // Create a graph using the library function
     const graph = window.SpinNetwork.createRingGraph(window.SpinNetwork.createGraph(), graphOptions);
     
-    // Convert library graph nodes to tensor nodes
-    graph.nodes.forEach(node => {
-        const tensorNode = window.SpinNetwork.createTensorNode(
-            node.id,
-            node.position,
-            node.intertwiner || 0,
-            [2, 2]  // 2-valent node in a ring
-        );
-        network.nodes.push(tensorNode);
-    });
-    
-    // Convert library graph edges to state vector edges
-    graph.edges.forEach(edge => {
-        const stateVectorEdge = window.SpinNetwork.createStateVectorEdge(
-            edge.id,
-            edge.sourceId,
-            edge.targetId,
-            edge.spin || spinValue
-        );
-        network.edges.push(stateVectorEdge);
-    });
+    // Use the helper to create network with proper dimensions
+    createNetworkHelper(graph, spinValue);
 }
 
 /**
@@ -246,36 +265,19 @@ function createLatticeNetwork(nodeCount, spinValue) {
     // Create a graph using the library function
     const graph = window.SpinNetwork.createGridGraph(window.SpinNetwork.createGraph(), graphOptions);
     
-    // Convert library graph nodes to tensor nodes
+    // Adjust positions to center the grid in the canvas before creating nodes
+    const offsetX = (canvas.width - (cols - 1) * spacing) / 2;
+    const offsetY = (canvas.height - (rows - 1) * spacing) / 2;
+    
     graph.nodes.forEach(node => {
-        // Adjust positions to center the grid in the canvas
-        const offsetX = (canvas.width - (cols - 1) * spacing) / 2;
-        const offsetY = (canvas.height - (rows - 1) * spacing) / 2;
-        
-        const position = {
+        node.position = {
             x: offsetX + (node.position.x || 0),
             y: offsetY + (node.position.y || 0)
         };
-        
-        const tensorNode = window.SpinNetwork.createTensorNode(
-            node.id,
-            position,
-            node.intertwiner || 0,
-            [2, 2, 2, 2]  // 4-valent node
-        );
-        network.nodes.push(tensorNode);
     });
     
-    // Convert library graph edges to state vector edges
-    graph.edges.forEach(edge => {
-        const stateVectorEdge = window.SpinNetwork.createStateVectorEdge(
-            edge.id,
-            edge.sourceId,
-            edge.targetId,
-            edge.spin || spinValue
-        );
-        network.edges.push(stateVectorEdge);
-    });
+    // Use the helper to create network with proper dimensions
+    createNetworkHelper(graph, spinValue);
 }
 
 /**
@@ -300,33 +302,16 @@ function createCustomNetwork(nodeCount, spinValue) {
     // Create a graph using the library function
     const graph = window.SpinNetwork.createRandomGraph(window.SpinNetwork.createGraph(), graphOptions);
     
-    // Convert library graph nodes to tensor nodes
+    // Adjust positions to account for padding
     graph.nodes.forEach(node => {
-        // Adjust positions to account for padding
-        const position = {
+        node.position = {
             x: padding + (node.position.x || 0),
             y: padding + (node.position.y || 0)
         };
-        
-        const tensorNode = window.SpinNetwork.createTensorNode(
-            node.id,
-            position,
-            node.intertwiner || 0,
-            [2, 2, 2]  // 3-valent node
-        );
-        network.nodes.push(tensorNode);
     });
     
-    // Convert library graph edges to state vector edges
-    graph.edges.forEach(edge => {
-        const stateVectorEdge = window.SpinNetwork.createStateVectorEdge(
-            edge.id,
-            edge.sourceId,
-            edge.targetId,
-            edge.spin || spinValue
-        );
-        network.edges.push(stateVectorEdge);
-    });
+    // Use the helper to create network with proper dimensions
+    createNetworkHelper(graph, spinValue);
 }
 
 /**

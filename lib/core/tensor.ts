@@ -155,37 +155,36 @@ export function createTensorNode(
       // Use the optimized intertwiner basis calculation from intertwinerSpace.ts
       // Get basis state that corresponds to this intertwiner value
       const basis = getOptimizedIntertwinerBasis(j1, j2, j3, j4);
-        
-        // Find the basis state matching the requested intertwiner value or use the first one
-        const basisState = basis.find(state => 
-          Math.abs(state.intermediateJ - intertwinerId) < 1e-6
-        ) || basis[0];
-        
-        if (basisState) {
-          // Initialize tensor elements from the basis state coefficients
-          let coeffIndex = 0;
-          for (let i1 = 0; i1 < dims[0]; i1++) {
-            for (let i2 = 0; i2 < dims[1]; i2++) {
-              for (let i3 = 0; i3 < dims[2]; i3++) {
-                for (let i4 = 0; i4 < dims[3]; i4++) {
-                  const coeff = basisState.coefficients[coeffIndex++];
-                  if (Math.abs(coeff) > 1e-10) {
-                    setTensorElement(
-                      node.tensor, 
-                      [i1, i2, i3, i4], 
-                      { re: coeff, im: 0 }
-                    );
-                  }
+      
+      // Find the basis state matching the requested intertwiner value or use the first one
+      const basisState = basis.find(state => 
+        Math.abs(state.intermediateJ - intertwinerId) < 1e-6
+      ) || basis[0];
+      
+      if (basisState) {
+        // Initialize tensor elements from the basis state coefficients
+        let coeffIndex = 0;
+        for (let i1 = 0; i1 < dims[0]; i1++) {
+          for (let i2 = 0; i2 < dims[1]; i2++) {
+            for (let i3 = 0; i3 < dims[2]; i3++) {
+              for (let i4 = 0; i4 < dims[3]; i4++) {
+                const coeff = basisState.coefficients[coeffIndex++];
+                if (Math.abs(coeff) > 1e-10) {
+                  setTensorElement(
+                    node.tensor, 
+                    [i1, i2, i3, i4], 
+                    { re: coeff, im: 0 }
+                  );
                 }
               }
             }
           }
-          
-          // Update intertwiner properties
-          node.intertwiner.dimension = basisState.coefficients.length;
-          node.intertwiner.basisStateRef = `${j1},${j2},${j3},${j4}:${basisState.intermediateJ}`;
-          node.intertwiner.recouplingScheme = "(j1,j2)(j3,j4)";
         }
+        
+        // Update intertwiner properties
+        node.intertwiner.dimension = basisState.coefficients.length;
+        node.intertwiner.basisStateRef = `${j1},${j2},${j3},${j4}:${basisState.intermediateJ}`;
+        node.intertwiner.recouplingScheme = "(j1,j2)(j3,j4)";
       }
     } catch (error) {
       console.warn('Failed to initialize tensor elements:', error);
