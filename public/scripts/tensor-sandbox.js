@@ -26,7 +26,17 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Error: SpinNetwork library not found. The sandbox requires the Spin Network library to function.');
         return;
     }
+
+    console.log("SpinNetwork object:", window.SpinNetwork);
+
+    // Add this right after your previous console.log statement
+    console.log("SpinNetwork keys:", Object.keys(window.SpinNetwork));
+    console.log("Does SpinNetwork have tensor namespace?", window.SpinNetwork.tensor ? "Yes" : "No");
+    console.log("Does SpinNetwork have core namespace?", window.SpinNetwork.core ? "Yes" : "No");
     
+    // Replace the previous console.log statements with this more detailed one
+    console.log("All SpinNetwork keys:", Object.keys(window.SpinNetwork).join(", "));
+
     // Initialize canvas
     canvas = document.getElementById('networkCanvas');
     ctx = canvas.getContext('2d');

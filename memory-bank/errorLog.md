@@ -1,5 +1,61 @@
 # Error Log
 
+## 2025-04-24: CommonJS require() Error in Tensor Module
+
+**Files:**
+- `/lib/tensor/tensorNode.js`
+- `/lib/index.ts`
+- `/lib-bundle.config.js`
+
+**Error Message:**
+```
+index.ts:31 Uncaught ReferenceError: require is not defined
+    at index.ts:31:26
+    at spin-network.umd.js:2:265
+    at spin-network.umd.js:3:3
+```
+
+**Cause:**
+The tensor module (`tensorNode.js`) was using Node.js-style CommonJS `require` statements which are not compatible with browser environments. The UMD build process was not properly converting these `require` statements to browser-compatible imports.
+
+**Fix:**
+1. Converted `tensorNode.js` to use ES module syntax:
+   - Changed `require` statements to `import` statements
+   - Changed `module.exports` to individual `export` declarations
+   - Update file extension to `.ts` for TypeScript integration
+
+Key changes:
+```typescript
+// Before:
+const { getOptimizedIntertwinerBasis } = require('../core/intertwinerSpace');
+module.exports = { createTensorNode };
+
+// After:
+import { getOptimizedIntertwinerBasis } from '../core/intertwinerSpace';
+export function createTensorNode() { ... }
+```
+
+2. Configure build to output directly to correct location:
+```javascript
+// lib-bundle.config.js
+export default defineConfig({
+  build: {
+    lib: {
+      entry: path.resolve(__dirname, 'lib/index.ts'),
+      name: 'SpinNetwork',
+      formats: ['es', 'umd'],
+      fileName: (format) => `spin-network.${format}.js`
+    },
+    outDir: 'public/dist/lib',
+    // ...
+  }
+})
+```
+
+**Related Task:** T39 - Fix Tensor Module Browser Compatibility
+
+# Error Log
+
 *Last Updated: 2025-04-23 (15:30 IST)*
 
 ## 2025-04-23 15:30 IST: T38 - Adapter Layer Causing Library Function Errors

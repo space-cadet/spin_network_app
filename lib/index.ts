@@ -34,9 +34,9 @@ import {
   SimulationGraph 
 } from './core/types';
 
-// Direct re-exports of tensor functions for UMD bundle accessibility
+// Import core tensor functions
 import {
-  createTensorNode,
+  createTensorNode as createCoreTensorNode,
   setTensorElement,
   getTensorElement,
   createTensorNodeFromBasisState,
@@ -57,9 +57,9 @@ import {
   calculateIntertwinerDimension
 } from './tensor';
 
-// Re-export tensor functions directly at the top level with enhanced versions taking precedence
-export {
-  createEnhancedTensorNode as createTensorNode, // Use the enhanced version as default
+// Export tensor functions directly - these will be available in UMD as SpinNetwork.[functionName]
+export const createTensorNode = createEnhancedTensorNode;
+export { 
   setTensorElement,
   getTensorElement,
   createTensorNodeFromBasisState,

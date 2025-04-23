@@ -1,12 +1,14 @@
 # Active Context
 
-*Last Updated: April 22, 2025 (15:45 IST)*
+*Last Updated: April 24, 2025 (14:30 IST)*
 
 ## Current Focus
-**Primary Task:** T36: Implement Tensor and State Vector Sandbox
-**Secondary Tasks:** UI Enhancement: Testing/Documentation pages, T34: Complete Simulation Engine Migration
+**Primary Task:** T39: Fix Tensor Module Browser Compatibility
+**Secondary Tasks:** T38: Intertwiner Tensor Initialization, T36: Tensor Sandbox Implementation
 
 ## Active Tasks
+- T39: Fix Tensor Module Browser Compatibility - ✅ COMPLETE
+- T38: Implement Intertwiner Tensor Initialization - ✅ COMPLETE
 - T36: Implement Tensor and State Vector Sandbox - 🔄 IN PROGRESS
 - T35: Enhance Node and Edge Data Structures for Intertwiners - 🔄 IN PROGRESS
 - T34: Complete Simulation Engine Migration to Standalone Library - 🔄 IN PROGRESS

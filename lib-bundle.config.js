@@ -9,7 +9,7 @@ export default defineConfig({
       formats: ['es', 'umd'],
       fileName: (format) => `spin-network.${format}.js`
     },
-    outDir: 'dist/lib',
+    outDir: 'dist/lib',  // Build to dist/lib first
     emptyOutDir: false,
     sourcemap: true,
     rollupOptions: {
@@ -18,8 +18,11 @@ export default defineConfig({
         globals: {
           mathjs: 'math'
         },
-        exports: 'named'
+        exports: 'named',
+        format: 'umd',
+        inlineDynamicImports: true,
       }
-    }
+    },
+    minify: false
   }
 })
