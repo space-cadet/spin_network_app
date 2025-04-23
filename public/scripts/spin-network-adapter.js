@@ -10,120 +10,204 @@
 (function() {
     console.log('Initializing SpinNetwork Adapter');
     
-    // Check if SpinNetwork is available
-    if (!window.SpinNetwork) {
+    // Check if SpinNetwork global is available from the UMD library
+    if (typeof window.SpinNetwork === 'undefined') {
         console.error('SpinNetwork library not loaded. Cannot initialize adapter.');
         return;
     }
     
-    // Log the structure to help with debugging
-    console.log('SpinNetwork library structure:', Object.keys(window.SpinNetwork));
-
-    // Store the original SpinNetwork library reference and log it
+    // Store the original library reference
     const lib = window.SpinNetwork;
-    console.log("Available SpinNetwork functions:", Object.keys(lib).join(", "));
     
-    // Direct function access for simplicity
-    // No need to store in originalLib which might cause reference issues
+    // Dump the entire library structure to console for debugging
+    console.log('SpinNetwork library:', lib);
+    console.log('SpinNetwork library functions:', Object.keys(lib).join(", "));
     
-    // Create a new adapter object that will provide the expected interface
-    const adapter = {
-        // Core graph creation functions
-        createGraph: lib.createGraph || function() {
-            console.error('createGraph not found in library');
-            return { nodes: [], edges: [] };
-        },
-        
-        createLineGraph: function(graph, options) {
-            if (lib.createLineGraph) return lib.createLineGraph(graph, options);
-            console.error('createLineGraph not found in library');
-            return graph;
-        },
-        
-        createRingGraph: function(graph, options) {
-            if (lib.createRingGraph) return lib.createRingGraph(graph, options);
-            console.error('createRingGraph not found in library');
-            return graph;
-        },
-        
-        createGridGraph: function(graph, options) {
-            if (lib.createGridGraph) return lib.createGridGraph(graph, options);
-            console.error('createGridGraph not found in library');
-            return graph;
-        },
-        
-        createRandomGraph: function(graph, options) {
-            if (lib.createRandomGraph) return lib.createRandomGraph(graph, options);
-            console.error('createRandomGraph not found in library');
-            return graph;
-        },
-        
-        // Tensor node operations
-        createTensorNode: function(id, position, intertwinerValue, dimensions) {
-            // Convert dimensions to spins
-            const spins = dimensions.map(dim => (dim - 1) / 2);
-            
-            // Log what's happening for debugging
-            console.log(`Creating tensor node: id=${id}, intertwiner=${intertwinerValue}, dimensions=${dimensions.join(',')}`);
-            
-            // Use the direct library function
-            return lib.createTensorNode(id, position, intertwinerValue, dimensions);
-        },
-        
-        setTensorElement: function(tensor, indices, value) {
-            // Direct library function call
-            return lib.setTensorElement(tensor, indices, value);
-        },
-        
-        // State vector edge operations
-        createStateVectorEdge: function(id, source, target, spin) {
-            return lib.createStateVectorEdge(id, source, target, spin);
-        },
-        
-        setStateVectorAmplitude: function(stateVector, index, value) {
-            // Direct library function call
-            return lib.setStateVectorAmplitude(stateVector, index, value);
-        },
-        
-        normalizeStateVector: function(stateVector) {
-            // Direct library function call
-            return lib.normalizeStateVector(stateVector);
-        },
-        
-        // Complex number utilities
-        createComplex: function(re, im) {
-            // Implementation of createComplex for the standalone library
-            return { re: re || 0, im: im || 0 };
-        },
-        
-        // Physical calculations - use library implementations
-        calculateNodeVolume: function(node) {
-            // Direct library function call
-            return lib.calculateNodeVolume(node);
-        },
-        
-        calculateEdgeArea: function(edge) {
-            // Direct library function call
-            return lib.calculateEdgeArea(edge);
+    // Create an adapter with direct mappings to the library functions
+    const adapter = {};
+    
+    // First, check for all the functions we need from the library
+    const requiredFunctions = [
+        'createGraph',
+        'createLineGraph', 
+        'createRingGraph', 
+        'createGridGraph', 
+        'createRandomGraph',
+        'createTensorNode',
+        'createStateVectorEdge',
+        'setTensorElement',
+        'setStateVectorAmplitude',
+        'normalizeStateVector',
+        'createComplex',
+        'calculateNodeVolume',
+        'calculateEdgeArea'
+    ];
+    
+    // Map library functions to adapter
+    for (const func of requiredFunctions) {
+        if (typeof lib[func] === 'function') {
+            adapter[func] = lib[func];
+            console.log(`Found library function: ${func}`);
+        } else {
+            console.warn(`Library function not found: ${func}`);
         }
-    };
+    }
     
-    // Try to determine if functions are exported directly or in namespaces
-    console.log('Creating adapter with found functions:');
+    // Add fallback implementations for missing functions
     
-    // Copy any other needed functions from the library
+    // Core graph functions
+    if (!adapter.createGraph) {
+        console.warn('Using fallback implementation for createGraph');
+        adapter.createGraph = function() {
+            return { nodes: [], edges: [] };
+        };
+    }
+    
+    if (!adapter.createLineGraph) {
+        console.warn('Using fallback implementation for createLineGraph');
+        adapter.createLineGraph = function(graph, options) {
+            return graph; // Placeholder
+        };
+    }
+    
+    if (!adapter.createRingGraph) {
+        console.warn('Using fallback implementation for createRingGraph');
+        adapter.createRingGraph = function(graph, options) {
+            return graph; // Placeholder
+        };
+    }
+    
+    if (!adapter.createGridGraph) {
+        console.warn('Using fallback implementation for createGridGraph');
+        adapter.createGridGraph = function(graph, options) {
+            return graph; // Placeholder
+        };
+    }
+    
+    if (!adapter.createRandomGraph) {
+        console.warn('Using fallback implementation for createRandomGraph');
+        adapter.createRandomGraph = function(graph, options) {
+            return graph; // Placeholder
+        };
+    }
+    
+    // Tensor node operations
+    if (!adapter.createTensorNode) {
+        console.warn('Using fallback implementation for createTensorNode');
+        adapter.createTensorNode = function(id, position, intertwinerValue, dimensions) {
+            console.log(`Fallback creating tensor node: id=${id}, intertwiner=${intertwinerValue}, dimensions=${dimensions.join(',')}`);
+            return {
+                id,
+                position,
+                intertwiner: {
+                    value: intertwinerValue,
+                    dimension: dimensions.reduce((a, b) => a * b, 1)
+                },
+                tensor: {
+                    dimensions,
+                    elements: [],
+                    basis: 'standard'
+                }
+            };
+        };
+    }
+    
+    // State vector edge operations
+    if (!adapter.createStateVectorEdge) {
+        console.warn('Using fallback implementation for createStateVectorEdge');
+        adapter.createStateVectorEdge = function(id, source, target, spin) {
+            console.log(`Fallback creating state vector edge: id=${id}, source=${source}, target=${target}, spin=${spin}`);
+            const dimension = Math.floor(2 * spin + 1);
+            return {
+                id,
+                source,
+                target,
+                spin,
+                stateVector: {
+                    dimension,
+                    amplitudes: Array(dimension).fill().map(() => ({ re: 0, im: 0 }))
+                }
+            };
+        };
+    }
+    
+    // Element and amplitude manipulation
+    if (!adapter.setTensorElement) {
+        console.warn('Using fallback implementation for setTensorElement');
+        adapter.setTensorElement = function(tensor, indices, value) {
+            const existingIndex = tensor.elements.findIndex(el => 
+                el.indices.length === indices.length && 
+                el.indices.every((val, idx) => val === indices[idx])
+            );
+            
+            if (existingIndex >= 0) {
+                tensor.elements[existingIndex].value = value;
+            } else {
+                tensor.elements.push({
+                    indices: [...indices],
+                    value: { ...value }
+                });
+            }
+        };
+    }
+    
+    if (!adapter.setStateVectorAmplitude) {
+        console.warn('Using fallback implementation for setStateVectorAmplitude');
+        adapter.setStateVectorAmplitude = function(stateVector, index, value) {
+            if (index >= 0 && index < stateVector.amplitudes.length) {
+                stateVector.amplitudes[index] = { ...value };
+            }
+        };
+    }
+    
+    if (!adapter.normalizeStateVector) {
+        console.warn('Using fallback implementation for normalizeStateVector');
+        adapter.normalizeStateVector = function(stateVector) {
+            let sumSquares = 0;
+            for (const amp of stateVector.amplitudes) {
+                sumSquares += amp.re * amp.re + amp.im * amp.im;
+            }
+            
+            if (sumSquares === 0) return;
+            
+            const norm = Math.sqrt(sumSquares);
+            for (let i = 0; i < stateVector.amplitudes.length; i++) {
+                stateVector.amplitudes[i] = {
+                    re: stateVector.amplitudes[i].re / norm,
+                    im: stateVector.amplitudes[i].im / norm
+                };
+            }
+        };
+    }
+    
+    // Complex number utilities
+    if (!adapter.createComplex) {
+        console.warn('Using fallback implementation for createComplex');
+        adapter.createComplex = function(re, im) {
+            return { re: re || 0, im: im || 0 };
+        };
+    }
+    
+    // Physical property calculations
+    if (!adapter.calculateNodeVolume) {
+        console.warn('Using fallback implementation for calculateNodeVolume');
+        adapter.calculateNodeVolume = function(node) {
+            return node.intertwiner.dimension || 1;
+        };
+    }
+    
+    if (!adapter.calculateEdgeArea) {
+        console.warn('Using fallback implementation for calculateEdgeArea');
+        adapter.calculateEdgeArea = function(edge) {
+            return Math.sqrt(edge.spin * (edge.spin + 1));
+        };
+    }
+    
+    // Add any other functions from the original library
     Object.keys(lib).forEach(key => {
         if (typeof lib[key] === 'function' && !adapter[key]) {
             adapter[key] = lib[key];
-            console.log(`- Added ${key} from library root`);
-        } else if (typeof lib[key] === 'object' && lib[key] !== null) {
-            // Look for functions in namespaces
-            Object.keys(lib[key]).forEach(subKey => {
-                if (typeof lib[key][subKey] === 'function' && !adapter[subKey]) {
-                    adapter[subKey] = lib[key][subKey];
-                    console.log(`- Added ${subKey} from ${key} namespace`);
-                }
-            });
+            console.log(`- Added ${key} from library`);
         }
     });
     

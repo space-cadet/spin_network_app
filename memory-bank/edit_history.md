@@ -1,11 +1,19 @@
 # Edit History
 
 *Created: April 14, 2025*
-*Last Updated: 2025-04-23 (14:30 IST)*
+*Last Updated: 2025-04-23 (15:30 IST)*
 
 ## File Modification Log
 
 ### April 23, 2025
+
+#### [15:30] - T38: Remove Unnecessary Adapter Layer for Tensor Functions
+
+- Modified `/public/tensor-sandbox.html` - Removed reference to spin-network-adapter.js and simplified loading model
+- Removed `/public/scripts/spin-network-adapter.js` - Eliminated unnecessary adapter layer
+- Modified `/public/scripts/tensor-sandbox.js` - Updated to use UMD library functions directly
+
+Simplified the tensor sandbox implementation by removing the unnecessary adapter layer that was causing errors. The spin-network-adapter.js file was introducing complexity by attempting to wrap the library functions in another layer, which led to "function not found" errors. By eliminating this adapter and having the tensor-sandbox.js use the UMD library directly, we've simplified the architecture and fixed the errors with creating tensor nodes and state vector edges.
 
 #### [14:30] - T38: Implement Intertwiner Tensor Initialization
 

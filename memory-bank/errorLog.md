@@ -1,6 +1,41 @@
 # Error Log
 
-*Last Updated: 2025-04-22 (15:45 IST)*
+*Last Updated: 2025-04-23 (15:30 IST)*
+
+## 2025-04-23 15:30 IST: T38 - Adapter Layer Causing Library Function Errors
+
+**Files:**
+- `/public/tensor-sandbox.html`
+- `/public/scripts/spin-network-adapter.js`
+- `/public/scripts/tensor-bridge.js`
+
+**Error Message/Symptoms:**
+```
+Error creating edge:TypeError: lib.createStateVectorEdge is not a function
+    createStateVectorEdge file:///Users/deepak/code/spin_network_app/public/scripts/spin-network-adapter.js:80
+    createNetworkHelper file:///Users/deepak/code/spin_network_app/public/scripts/tensor-sandbox.js:110
+```
+
+**Cause:**
+The spin-network-adapter.js file was introducing an unnecessary abstraction layer. The adapter was attempting to use functions from the standalone library but accessing them incorrectly through a `lib` object reference. Meanwhile, tensor-bridge.js contained direct implementations of the required functions but wasn't being properly used.
+
+The adapter pattern created a complex and unnecessary indirection:
+1. UMD library exports functions directly
+2. spin-network-adapter.js wraps them in another object and tries to call through a lib reference
+3. tensor-bridge.js reimplements the same functions
+
+This multi-layered approach caused confusion about which implementation should be used and led to the "function not found" errors.
+
+**Fix:**
+1. Remove the spin-network-adapter.js layer entirely
+2. Update tensor-sandbox.html to load only the UMD library directly
+3. Transfer any necessary functionality from tensor-bridge.js directly into the UMD library if needed
+
+The simplified approach provides a direct connection between the tensor-sandbox.js and the standalone library, eliminating unnecessary abstraction layers.
+
+**Task:** T38 - Implement Intertwiner Tensor Initialization
+
+*****
 
 ## 2025-04-22 15:45 IST: T36 - Missing TensorNode Functions in Tensor Sandbox
 

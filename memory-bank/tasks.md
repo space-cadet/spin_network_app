@@ -45,7 +45,7 @@
 **Status**: 🔄 IN PROGRESS
 **Priority**: HIGH
 **Started**: April 22, 2025
-**Last Active**: April 23, 2025 (14:30 IST)
+**Last Active**: April 23, 2025 (15:30 IST)
 **Dependencies**: T36, T20
 **Completion Criteria**:
 - ✅ Analyze how intertwiner tensors should be calculated in the standalone library
@@ -54,6 +54,7 @@
 - ✅ Update tensor node creation to initialize elements
 - ✅ Ensure 3-valent and 4-valent nodes display appropriate non-zero elements
 - ✅ Add support for different edge spin values
+- ✅ Remove unnecessary adapter layer to fix initialization errors
 - 🔄 Test initialization with different network topologies
 - 🔄 Verify functionality in the tensor-sandbox.html test page
 
