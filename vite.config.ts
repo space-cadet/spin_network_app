@@ -11,6 +11,7 @@ export default defineConfig({
     }
   },
   build: {
+    emptyOutDir: true,
     cssCodeSplit: true,
     target: 'esnext',
     chunkSizeWarningLimit: 500, // Increase the warning limit (in kB)

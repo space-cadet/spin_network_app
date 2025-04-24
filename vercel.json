@@ -1,5 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "pnpm install && pnpm prebuild && pnpm run build && pnpm run build:lib",
+  "buildCommand": "pnpm clean && pnpm install && pnpm prebuild && pnpm run build && pnpm run build:lib",
   "installCommand": "pnpm install"
 }

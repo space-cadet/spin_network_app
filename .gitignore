@@ -39,3 +39,4 @@ build_errors*.md
 memory-bank-bak/*
 
 vercel.logs
+screen.log

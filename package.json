@@ -4,16 +4,18 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "prebuild": "mkdir -p public/vendor && cp node_modules/browserfs/dist/browserfs.min.js public/vendor/",
-    "build": "tsc && vite build",
-    "build:lib": "vite build --config lib-bundle.config.js && mkdir -p public/dist/lib && cp -R dist/lib/* public/dist/lib/",
+    "build": "rm -rf dist && tsc && vite build",
+    "build:lib": "rm -rf dist/lib && vite build --config lib-bundle.config.js && mkdir -p public/dist/lib && cp -R dist/lib/* public/dist/lib/",
+    "postbuild": "find dist -type d -name 'dist' -exec rm -rf {} \\; 2>/dev/null || true",
+  
+    "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "clean": "rm -rf node_modules dist .turbo",
+    "clean": "rm -rf node_modules dist .turbo public/dist",
+    "clean:dist": "rm -rf dist public/dist",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "preinstall": "npx only-allow pnpm",
-    "postbuild": "rm -rf dist/lib/dist"
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",

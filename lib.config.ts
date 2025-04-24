@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: (format) => `spin-network.${format}.js`
     },
     outDir: 'dist/lib',
-    emptyOutDir: false,
+    emptyOutDir: true,
     sourcemap: true,
     minify: false,
     

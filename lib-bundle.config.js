@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: (format) => `spin-network.${format}.js`
     },
     outDir: 'dist/lib',  // Build to dist/lib first
-    emptyOutDir: false,
+    emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {
       external: ['mathjs'],
