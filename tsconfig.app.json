@@ -1,0 +1,6 @@
+// tsconfig.app.json
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*"],
+  "exclude": ["lib/**/*"]
+}

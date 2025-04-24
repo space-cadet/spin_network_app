@@ -2,15 +2,16 @@
 *Last Updated: 2025-04-24 14:45:16*
 
 ## Tasks Overview
-- **Active Tasks:** 15
+- **Active Tasks:** 16
 - **Paused Tasks:** 3
 - **Completed Tasks:** 19
-- **Latest Task ID:** T39
+- **Latest Task ID:** T41
 
 ## Task Registry
 ### Active Tasks
 | ID | Title | Status | Priority | Started | Task File |
 |----|-------|--------|----------|---------|-----------|
+| T41 | Fix Multiple Dist Folders Issue | 🔄 | HIGH | 2025-04-24 | [tasks/T41.md] |
 | T40 | Memory Bank Hierarchical Restructure | ✅ | HIGH | 2025-04-24 | [tasks/T40.md] |
 
 | ID | Title | Status | Priority | Started | Task File |

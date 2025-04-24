@@ -1,4 +1,10 @@
 # Edit History
+*Last Updated: 2025-04-24 15:30:00*
+
+## 2025-04-24
+### 15:30 - T41: Created New Task for Multiple Dist Folders Issue
+- Updated `tasks.md` - Added task T41 to active tasks
+- Created `tasks/T41.md` - New task file for fixing multiple dist folders issue
 *Last Updated: 2025-04-24*
 
 ## 2025-04-24

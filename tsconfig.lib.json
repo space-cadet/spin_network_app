@@ -1,0 +1,10 @@
+// tsconfig.lib.json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/lib",
+    "declaration": true
+  },
+  "include": ["lib/**/*"],
+  "exclude": ["src/**/*"]
+}
