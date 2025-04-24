@@ -1,4 +1,14 @@
 # Edit History
+*Last Updated: 2025-04-24*
+
+## 2025-04-24
+### 02:45 - T40: Memory Bank Hierarchical Restructure
+- Modified `/Users/deepak/code/spin_network_app/memresize.py` - Fixed title formatting and status consistency
+- Created `/memory-bank/tasks/*` - Generated individual task files
+- Created `/memory-bank/sessions/*` - Generated individual session files
+- Created `/memory-bank/tasks_new.md` - New master task reference file
+- Created `/memory-bank/session_cache_new.md` - New master session reference file
+- Updated `/memory-bank/edit_history.md` - Added documentation of changes
 
 *Created: April 14, 2025*
 *Last Updated: 2025-04-24 (14:30 IST)*
