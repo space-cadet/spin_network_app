@@ -1,6 +1,6 @@
 {
   "version": 2,
   "outputDirectory": "dist",
-  "buildCommand": "pnpm install && pnpm prebuild && pnpm run build && pnpm run build:lib && pnpm postbuild",
+  "buildCommand": "pnpm install && pnpm prebuild && pnpm run build && pnpm run build:lib",
   "installCommand": "pnpm install"
 }
