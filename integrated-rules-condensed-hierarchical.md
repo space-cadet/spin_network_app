@@ -25,26 +25,37 @@ The hierarchical memory bank organizes files into a structured directory system 
 ```
 memory-bank/
 ├── activeContext.md      # Current task context
+├── archive/              # Archived files
 ├── changelog.md          # Log of changes across sessions
+├── component_index.md    # Index of all components with references
+├── database/             # Hierarchical database for memory bank
 ├── edit_history.md       # File modification log (with task references)
 ├── errorLog.md           # Error tracking (with task references)
+├── implementation-details/ # Detailed implementation notes
 ├── progress.md           # Implementation status
 ├── projectbrief.md       # Project overview
 ├── session_cache.md      # Multi-task session state
+├── sessions/             # Individual session files by task
 ├── systemPatterns.md     # Architecture and design patterns
+├── task_contexts/        # Context files for specific tasks
+├── tasks/                # Individual task definition files
 ├── tasks.md              # Task registry and tracking
 ├── techContext.md        # Technical implementation details
-└── database/             # Hierarchical database for memory bank
-    ├── archive/          # Archived files
-    ├── implementation-details/ # Detailed implementation notes
-    └── templates/        # Template files for memory bank documents
+├── templates/            # Template files for memory bank documents
+└── TODO.md               # Project-wide TODO items and quick notes
 ```
 
 ### 2.3 File Relationships
 
-- **Tasks**: Tracked in `tasks.md`, with related information in `session_cache.md`, `edit_history.md`, and `errorLog.md`.
-- **Templates**: Stored in the `/templates/` directory and follow formats in section 10.
-- **Database**: Contains archived and detailed implementation files for long-term reference.
+- **Tasks**: Tracked in `tasks.md`, with detailed task definitions in the `/tasks/` directory. Related information in `session_cache.md`, `edit_history.md`, and `errorLog.md`.
+- **Sessions**: Individual session files stored in `/sessions/` directory with task-specific session information, referenced from `session_cache.md`.
+- **Task Contexts**: Stored in `/task_contexts/` directory, containing context-specific information for individual tasks.
+- **Templates**: Stored in the `/templates/` directory and follow formats in section 9.
+- **Component Index**: `component_index.md` maintains a registry of all project components with references to implementation files.
+- **TODO**: `TODO.md` contains project-wide to-do items and quick notes that don't warrant full task creation.
+- **Archive**: Contains archived files for long-term reference.
+- **Implementation Details**: Stores detailed implementation notes and documentation.
+- **Database**: Contains hierarchical database for memory bank organization.
 
 ### 2.4 Validation Rules
 
@@ -91,18 +102,23 @@ Knowledge is organized in four tiers with task-oriented loading priorities:
 1. **Bootstrap Tier (Minimal Required Knowledge)**
    - `bootstrap.md` - Core system structure
    - `tasks.md` - Registry of all tasks
+   - `TODO.md` - Quick project-wide notes and to-do items
    - Access only when needed to understand command system or task structure
 
 2. **Critical Tier (Task-Relevant Only)**
    - `activeContext.md` - Current state relevant to immediate task
    - `progress.md` - Status information needed for current step
    - `session_cache.md` - Task contexts for active and paused tasks
+   - Individual task files in `/tasks/` directory - For current task details
+   - Individual session files in `/sessions/` directory - For current session context
+   - Task context files in `/task_contexts/` directory - For specific task contexts
    - `errorLog.md` - Record of errors (load when debugging)
    - `edit_history.md` - File modifications (load when context about recent changes needed)
    - Load only files directly relevant to current task step
 
 3. **Essential Tier (Load Only When Required)**
    - `projectbrief.md` - Reference only when task scope is unclear
+   - `component_index.md` - Reference only when component structure is needed
    - `.cursorrules` - Reference only when implementation patterns are needed
    - Load only when task requirements aren't clear from Critical tier
 
@@ -110,6 +126,7 @@ Knowledge is organized in four tiers with task-oriented loading priorities:
    - `productContext.md` - Why and how the project works
    - `systemPatterns.md` - Architecture and design patterns
    - `techContext.md` - Technical implementation details
+   - Implementation details in `/implementation-details/` directory
    - Load only specific files when directly relevant to current task step
 
 ## 5. Documentation Decision Framework

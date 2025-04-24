@@ -2,6 +2,13 @@
 *Last Updated: 2025-04-24*
 
 ## 2025-04-24
+### 17:30 - T40: Memory Bank Hierarchical Restructure Update
+- Modified `/Users/deepak/code/spin_network_app/integrated-rules-condensed-hierarchical.md` - Updated directory structure to correctly position archive, implementation-details, and templates as direct subfolders of memory-bank
+- Modified `/Users/deepak/code/spin_network_app/integrated-rules-condensed-hierarchical.md` - Added component_index.md, TODO.md, and sessions/tasks/task_contexts directories to guidelines
+- Modified `/memory-bank/tasks/T40.md` - Updated to match new format guidelines
+- Modified `/memory-bank/sessions/T40_20250424.md` - Updated to match new format guidelines
+- Updated `/memory-bank/edit_history.md` - Added documentation of changes
+
 ### 02:45 - T40: Memory Bank Hierarchical Restructure
 - Modified `/Users/deepak/code/spin_network_app/memresize.py` - Fixed title formatting and status consistency
 - Created `/memory-bank/tasks/*` - Generated individual task files
