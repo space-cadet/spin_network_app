@@ -1,158 +1,179 @@
-# Integrated Code Rules and Memory Bank System
+# Integrated Code Rules and Memory Bank System, v6.1 (Hierarchical Memory Bank Augmented)
 
-*Last Updated: April 10, 2025*
+*Last Updated: April 22, 2025*
 
-⚠️ IMPORTANT: NEVER modify files without explicit user approval. Always present a plan and wait for confirmation before making any changes.
+YOU WILL KEEP IT REALLY SIMPLE, STUPID (KIRSS). IF YOU THINK A SOLUTION IS SIMPLE ENOUGH, MAKE IT EVEN SIMPLER.
+YOU WILL NEVER UPDATE ANY FILES, INCLUDING MEMORY BANK FILES, WITHOUT EXPLICIT USER APPROVAL
+YOU WILL NEVER ADD NEW FEATURES WITHOUT APPROVAL
+YOU WILL NEVER GENERATE ANY CODE WITHOUT APPROVAL
+YOU WILL GO SLOW AND STEADY. WHEN YOU THINK YOU'RE GOING SLOW, GO EVEN SLOWER.
 
-### File Locations
+## 1. Unified System Purpose
 
-- Memory Bank files (session_cache.md, edit_history.md, errorLog.md, etc.) should be located in the `/memory-bank/` directory
-- Integrated Rules files remain in the project root
-- This structure ensures consistent organization and prevents confusion about file locations
+### 1.1 Core Implementation Philosophy
 
-## 1. Unified System Purpose and Philosophy
+- Follow KIRSS (Keep It Really Simple, Stupid)
+- Always choose the simplest possible solution
+- Avoid overengineering and unnecessary complexity
+- If a solution seems simple enough, try to make it even simpler
+- Question any solution that requires complex coordination or multiple moving parts
 
-### 1.1 Core Purpose
+- Balance task execution with project knowledge
+- Maintain consistent coding standards
+- Ensure project continuity across sessions
+- Support multiple concurrent tasks
 
-The Integrated Code Rules and Memory Bank System is designed to:
-- Balance task execution efficiency with comprehensive project knowledge
-- Maintain consistent coding standards and documentation practices
-- Ensure project continuity across multiple sessions
-- Optimize resource usage by loading only necessary information
-- Standardize tool usage and communication formats
+## 2. Hierarchical Memory Bank Structure
 
-### 1.2 Balanced Approach
+### 2.1 Overview
 
-This system implements a balance between:
-- **Task-First Efficiency**: Prioritizing immediate task execution with minimal context
-- **Consistent Documentation**: Maintaining sufficient project knowledge for continuity
-- **Standardized Implementation**: Following consistent coding patterns and practices
-- **Progressive Knowledge**: Building and maintaining project history when valuable
+The hierarchical memory bank organizes files into a structured directory system to ensure efficient access and management of project knowledge. The structure is divided into tiers based on relevance and frequency of use.
 
-### 1.3 Documentation Update Cadence
+### 2.2 Directory Structure
 
-- `edit_history.md` must be updated on a periodic basis:
-  - After every file/folder creation operation
-  - After every file edit operation
-  - Or at minimum after every few chat messages
-  - For rapid sequential edits to the same file, batch updates are acceptable to maintain efficiency
-- `errorLog.md` should be updated whenever an error is encountered and resolved
-- `session_cache.md` should be updated at session boundaries or significant implementation milestones
+```
+memory-bank/
+├── activeContext.md      # Current task context
+├── changelog.md          # Log of changes across sessions
+├── edit_history.md       # File modification log (with task references)
+├── errorLog.md           # Error tracking (with task references)
+├── progress.md           # Implementation status
+├── projectbrief.md       # Project overview
+├── session_cache.md      # Multi-task session state
+├── systemPatterns.md     # Architecture and design patterns
+├── tasks.md              # Task registry and tracking
+├── techContext.md        # Technical implementation details
+├── archive/          # Archived files
+├── implementation-details/ # Detailed implementation notes
+├── templates/        # Template files for memory bank documents
+└── database/             # Hierarchical database for memory bank
+```
 
-## 2. Communication Style
+### 2.3 File Relationships
 
-### 2.1 Task-Oriented Communication
+- **Tasks**: Overview in `tasks.md`, detailed information in individual files under `tasks/`, with related data in `session_cache.md`, `edit_history.md`, and `errorLog.md`
+- **Sessions**: Current state in `session_cache.md`, detailed session information in individual files under `sessions/`
+- **Templates**: Stored in `/templates/` directory and follow formats in section 10
+- **Database**: Contains archived and detailed implementation files for long-term reference
 
-1. Use direct, clear statements focused on actions and results
-2. Avoid unnecessary explanations of process or methodology
-3. Be concise and avoid conversational language
-4. Focus on what was done and what will be done next
-5. For task discussions, use action-oriented language
+### 2.4 Individual Task Files
 
-### 2.2 Implementation Process
+Each active task must have its own file in the `tasks/` directory following this format:
 
-When starting work:
-1. Focus immediately on understanding the specific task
-2. Load only the minimum files needed for the current step
-3. Execute the step completely before getting additional context
-4. Document changes in a targeted, minimal way
-5. Complete tasks efficiently with minimal information gathering
+```markdown
+# [TASK ID]: [TASK TITLE]
+*Last Updated: [TIMESTAMP]*
 
-## 3. Implementation Guidelines
+**Description**: [DETAILED DESCRIPTION]
+**Status**: [STATUS EMOJI + STATE]
+**Priority**: [PRIORITY]
+**Started**: [DATE]
+**Last Active**: [TIMESTAMP]
+**Dependencies**: [TASK IDS]
 
-### 3.1 Safety & Scope
+## Completion Criteria
+- [CRITERION 1]
+- [CRITERION 2]
+- [CRITERION 3]
 
-1. Operate exclusively within the designated project directory and subdirectories
-2. Do not access, read, or modify files outside defined scope
-3. Avoid executing shell commands that might affect system state
-4. Always verify paths before file operations
+## Related Files
+- `[FILE1]`
+- `[FILE2]`
+- `[FILE3]`
 
-### 3.2 Mandatory Step-by-Step Approval
+## Progress
+1. ✅ [COMPLETED STEP]
+2. 🔄 [CURRENT STEP]
+3. ⬜ [NEXT STEP]
 
-1. NEVER modify files without EXPLICIT user approval first
-2. For each discrete file modification:
-   - Present a concise description of WHAT will be changed
-   - Get explicit approval BEFORE making the change
-3. No need to present all planned changes at once - proceed incrementally
-4. Complex changes can be broken into manageable approval steps
-5. If approval is ambiguous, request clarification
-6. Focus on necessary files/components related to the task
-7. Avoid unnecessary project-wide scans
+## Context
+[IMPORTANT DECISIONS OR CONTEXT]
+```
 
-### 3.3 Efficiency Rules
+### 2.5 Individual Session Files
 
-1. Do not read file content you already have
-2. Avoid reading entire repos or directories
-3. Focus only on the specific files needed for the current step
-4. When examining code, look for the specific components relevant to the task
-5. Trust that you can access more information if needed rather than loading it preemptively
+Individual session files in the `sessions/` directory track work done in a specific time period:
 
-## 4. Integration with Development Workflow
+```markdown
+# Session [DATE] - [PERIOD]
+*Created: [TIMESTAMP]*
 
-This integrated system is designed to:
-- Support rapid task execution while maintaining documentation quality
-- Ensure code standards are maintained without excessive overhead
-- Provide just enough context for effective implementation
-- Document only what's necessary for project continuity
-- Balance immediate task needs with long-term project knowledge
+## Focus Task
+[TASK ID]: [BRIEF DESCRIPTION]
+**Status**: [STATUS EMOJI + STATE]
 
-## 5. Integrated Command System
+## Active Tasks
+### [TASK ID]: [TASK TITLE]
+**Status**: [STATUS EMOJI + STATE]
+**Progress**:
+1. ✅ [COMPLETED THIS SESSION]
+2. 🔄 [IN PROGRESS]
+3. ⬜ [PLANNED]
 
-### 5.1 Task Execution Commands
+## Context and Working State
+[ESSENTIAL CONTEXT FOR THIS SESSION]
 
-| Command | Description |
-|---------|-------------|
-| `do_task [task]` | Execute specific task with minimal context loading |
-| `continue_task` | Resume previous task using minimal context from cache |
-| `complete_task` | Finish current task with targeted documentation updates |
-| `verify_task` | Check implementation against code standards |
+## Critical Files
+- `[FILE1]`: [RELEVANCE]
+- `[FILE2]`: [RELEVANCE]
 
-### 5.2 Memory Management Commands
+## Session Notes
+[IMPORTANT DECISIONS OR OBSERVATIONS]
+```
 
-| Command | Description |
-|---------|-------------|
-| `read_mb` | Load Critical tier files needed for current task |
-| `read_mb [file]` | Load specific file only |
-| `read_mb standard` | Load Critical + Essential tiers |
-| `read_mb complete` | Load all Memory Bank files (rarely needed) |
-| `update_mb [file]` | Update specific file with minimal changes |
-| `log_error [title]` | Record a new error with details in errorLog.md |
-| `record_edits [task]` | Add file modifications to edit_history.md |
-| `read_errors [component]` | Load error history for a specific component or error type |
+### 2.6 Validation Rules
 
-### 5.3 Session Management Commands
+1. All files must have:
+   - Clear header with last updated date
+   - Consistent section formatting
+   - Status indicators where applicable
+   - Task ID references where applicable
 
-| Command | Description |
-|---------|-------------|
-| `continue_session` | Flag this as a continuation; prioritize session_cache.md |
-| `complete_session` | Mark session as complete, update necessary docs |
-| `cache_session` | Create continuation point with minimal updates |
-| `start_session` | Begin new session with fresh timestamp |
+2. Prohibited:
+   - Unstructured notes
+   - Redundant information
+   - File-specific details in wrong documents
+   - Missing task ID references
 
-### 5.4 Code Implementation Commands
+### 2.5 Maintenance Guidelines
 
-| Command | Description |
-|---------|-------------|
-| `verify_code` | Check code against project standards |
-| `format_code` | Ensure code follows formatting guidelines |
-| `document_code` | Update documentation for code changes |
+* IMPORTANT: ALL file updates below require EXPLICIT user approval before implementation
+* Update `tasks.md` only after receiving approval, whenever task status changes
+* Update `edit_history.md` only after receiving approval, after each file change, with task ID reference
+* Update `session_cache.md` only after receiving approval, when switching between tasks
+* Review `errorLog.md` weekly, but make no modifications without approval
+* Archive `session_cache.md` only after receiving approval, after all active tasks complete
+* Keep `progress.md` organized by task ID, updating only with explicit approval
 
-## 6. Knowledge Organization and Management
+### 2.6 File Size Management Protocol
 
-### 6.1 Tiered Knowledge Structure
+**NOTE: The following operations require explicit approval before implementation**
+
+1. **Size-Based Rotation**:
+   - Upper limit of 500 lines for `edit_history.md` and `errorLog.md`
+   - Archive completed tasks after 30 days in `tasks.md`
+   - When exceeding limit, move to `archive/` subfolder
+   - Rename using format `edit_history_YYYY-MM.md`
+
+## 3. Integration with Development Workflow
+
+This system supports rapid task execution while maintaining documentation quality and balancing immediate needs with long-term project knowledge.
+
+## 4. Tiered Knowledge Structure
 
 Knowledge is organized in four tiers with task-oriented loading priorities:
 
 1. **Bootstrap Tier (Minimal Required Knowledge)**
-   - `bootstrap.md` - Core system structure, loaded only when essential
-   - Access only when needed to understand command system
+   - `bootstrap.md` - Core system structure
+   - `tasks.md` - Registry of all tasks
+   - Access only when needed to understand command system or task structure
 
 2. **Critical Tier (Task-Relevant Only)**
    - `activeContext.md` - Current state relevant to immediate task
    - `progress.md` - Status information needed for current step
-   - `session_cache.md` - Minimal continuity information if continuing a task
-   - `errorLog.md` - Record of errors, their causes, and resolutions for reference (load when debugging)
-   - `edit_history.md` - Chronological record of file modifications with timestamps (load when context about recent changes is needed)
+   - `session_cache.md` - Task contexts for active and paused tasks
+   - `errorLog.md` - Record of errors (load when debugging)
+   - `edit_history.md` - File modifications (load when context about recent changes needed)
    - Load only files directly relevant to current task step
 
 3. **Essential Tier (Load Only When Required)**
@@ -166,34 +187,111 @@ Knowledge is organized in four tiers with task-oriented loading priorities:
    - `techContext.md` - Technical implementation details
    - Load only specific files when directly relevant to current task step
 
-### 6.2 Task-First Loading Process
+## 5. Documentation Decision Framework
 
-1. Analyze the immediate task requirements
-2. Identify the minimal set of files needed for the current step
-3. Load only those files directly relevant to the current task
-4. Execute the current step completely
-5. Load additional files only when needed for the next step
-6. Update only files with meaningful changes related to the task
-
-### 6.3 Documentation Decision Framework
+**IMPORTANT: All commands that modify files require explicit user approval before execution, unless such approval has already been explicitly given**
 
 | Change Type | Documentation Requirements |
 |-------------|----------------------------|
-| Interface changes | Update API docs, activeContext.md |
-| Implementation details | Code comments only |
-| Architecture changes | Update systemPatterns.md |
-| New features | Update progress.md, projectbrief.md |
-| Bug fixes | Update progress.md only |
+| Task creation | Update `tasks.md` with new task ID and details |
+| Task status change | Update `tasks.md` with new status |
+| Task switching | Update `session_cache.md` to preserve context |
+| Interface changes | Update API docs, `activeContext.md` with task reference |
+| Implementation details | Code comments only, `edit_history.md` with task ID |
+| Architecture changes | Update `systemPatterns.md`, add task reference |
+| New features | Update `progress.md`, `projectbrief.md` with task reference |
+| Bug fixes | Update `progress.md` with task reference |
 | Refactoring | Minimal documentation unless patterns change |
-| Error resolution | Update errorLog.md with error details and fix |
-| File modification | Update edit_history.md with file changes |
-| Multiple file edits | Update both session_cache.md and edit_history.md |
-| Ongoing work | Update session_cache.md with clear "in progress" indicators (🔄) |
-| Mixed change types | Document according to highest impact change type, ensuring all aspects are covered |
+| Error resolution | Update `errorLog.md` with error details, fix, and task ID |
+| File modification | Update `edit_history.md` with file changes and task ID |
+| Multiple file edits | Update both `session_cache.md` and `edit_history.md` with task ID |
+| Ongoing work | Update `session_cache.md` with clear "in progress" indicators (🔄) |
 
-## 7. Technical Implementation Standards
+## 6. Integrated Command System
 
-### 7.1 XML Tag Format
+### 6.1 Task Management Commands
+
+**IMPORTANT: All commands that modify files require explicit user approval before execution, unless such approval has already been explicitly given**
+
+| Command | Description |
+|---------|-------------|
+| `create_task [title]` | Create new task with unique ID in tasks.md |
+| `switch_task [task_id]` | Switch focus to different task, update session_cache.md |
+| `pause_task [task_id]` | Mark task as paused in tasks.md |
+| `resume_task [task_id]` | Resume a paused task |
+| `complete_task [task_id]` | Mark task as completed and update docs |
+
+### 6.2 Task Execution Commands
+
+| Command | Description |
+|---------|-------------|
+| `do_task [task_id]` | Execute specific task with minimal context |
+| `continue_task [task_id]` | Resume previous task using minimal context |
+| `verify_task [task_id]` | Check implementation against standards |
+
+### 6.3 Memory Management Commands
+
+| Command | Description |
+|---------|-------------|
+| `read_mb` | Load Critical tier files needed for current task |
+| `read_mb [file]` | Load specific file only |
+| `read_mb standard` | Load Critical + Essential tiers |
+| `read_mb complete` | Load all Memory Bank files (rarely needed) |
+| `update_mb [file]` | Update specific file with minimal changes |
+| `log_error [title] [task_id]` | Record new error in errorLog.md |
+| `record_edits [task_id] [description]` | Add file mods to edit_history.md |
+| `read_errors [component]` | Load error history for specific component |
+| `read_task [task_id]` | Load task-specific information from tasks.md |
+
+### 6.4 Session Management Commands
+
+| Command | Description |
+|---------|-------------|
+| `continue_session` | Flag continuation; prioritize session_cache.md |
+| `complete_session` | Mark session complete, update necessary docs |
+| `cache_session` | Create continuation point with minimal updates |
+| `start_session` | Begin new session with fresh timestamp |
+
+### 6.5 Code Implementation Commands
+
+| Command | Description |
+|---------|-------------|
+| `verify_code` | Check code against project standards |
+| `format_code` | Ensure code follows formatting guidelines |
+| `document_code` | Update documentation for code changes |
+
+## 7. Integrated Workflows
+
+### 7.1 Task-First Implementation Flow
+
+1. Receive task → analyze minimal requirements, focus strictly on specified task → request approval to create or load task
+2. After approval, check if task exists → create or load task
+3. Analyze immediate task needs
+4. Request approval to load minimal required context
+5. After approval, load minimal required context
+6. Present implementation plan and request approval before execution
+7. After approval, execute first step
+8. Request approval to update edit_history.md with task ID
+9. After approval, update edit_history.md with task ID
+10. For each additional step:
+   1. Request approval to load context needed for that step
+   2. After approval, load only context needed for that step
+   3. Present implementation plan and request approval before execution
+   4. After approval, execute step
+   5. Request approval to update documentation with task ID
+   6. After approval, update documentation with task ID
+11. Request approval to mark complete or update session_cache.md
+12. After approval, mark complete or update session_cache.md
+
+### 7.2 Error Handling Flow
+
+1. Identify error cause → **request approval before** implementing fix → **after approval** test
+2. If fixed: **request approval to** document in errorLog.md with task ID, **then request approval to** update edit_history.md
+3. If not fixed: return to identification step
+
+## 8. Technical Implementation Standards
+
+### 8.1 XML Tag Format
 
 Tool use is formatted using XML-style tags:
 
@@ -205,7 +303,11 @@ Tool use is formatted using XML-style tags:
 </tool_name>
 ```
 
-### 7.2 File Operations
+### 8.2 File Operations
+
+**IMPORTANT: All file operations require explicit user approval before execution**
+
+**Note:** File editing and creation operations should be performed using the Desktop Commander (dc) MCP server. When editing files, prioritize using block edits (`edit_block` tool) to minimize token usage and ensure precise changes.
 
 #### Reading Files
 
@@ -244,319 +346,99 @@ With line specifications:
 </list_files>
 ```
 
-#### File Modification (Diff Format)
+#### File Modification (Block Edit Format)
 
 For precise, surgical modifications:
 
 ```
-<apply_diff>
-<path>File path here</path>
-<diff>
+<edit_block>
+<blockContent>File path here
 <<<<<<< SEARCH
-:start_line:1
-:end_line:5
--------
-def calculate_total(items):
-    total = 0
-    for item in items:
-        total += item
-    return total
+Original content to find
 =======
-def calculate_total(items):
-    """Calculate total with 10% markup"""
-    return sum(item * 1.1 for item in items)
+New content to replace with
 >>>>>>> REPLACE
-</diff>
-</apply_diff>
+</blockContent>
+</edit_block>
 ```
 
-#### File Creation/Overwriting
+## 9. Core File Structure Templates
 
-```
-<write_to_file>
-<path>config.json</path>
-<content>
-{
-  "apiEndpoint": "https://api.example.com",
-  "version": "1.0.0"
-}
-</content>
-</write_to_file>
-```
+### 9.1 tasks.md (Task Registry)
 
-### 7.3 Code Standards
+```markdown
+# Task Registry
+*Last Updated: [Timestamp]*
 
-- Use modular design with clear separation of concerns
-- Make surgical, precise changes when editing existing files
-- Maintain consistent indentation and formatting
-- Document interfaces and APIs with clear specifications
-- Follow asynchronous patterns for I/O operations
-- Implement proper error handling and validation
+## Active Tasks
+| ID | Title | Status | Priority | Started | Dependencies |
+|----|-------|--------|----------|---------|--------------|
+| T1 | Implement login | 🔄 | HIGH | 2025-04-10 | - |
+| T2 | Fix pagination | 🔄 | MEDIUM | 2025-04-12 | - |
+| T3 | Refactor DB | ⏸️ | LOW | 2025-04-08 | T1 |
 
-### 7.4 Documentation Standards
+## Task Details
+### T1: [Title]
+**Description**: [Brief description]
+**Status**: 🔄 **Last**: [Timestamp]
+**Criteria**: [Key completion points]
+**Files**: `[file1]`, `[file2]`
+**Notes**: [Important context]
 
-- Update only files with meaningful changes
-- Include creation and last updated timestamps
-- Use clear section headings with ## heading level
-- Use status indicators: ✅ (Complete), 🔄 (In Progress), ⬜ (Not Started)
-- Make targeted updates rather than comprehensive rewrites
-
-## 8. Integrated Workflows
-
-### 8.1 Task-First Implementation Flow
-
-```
-flowchart TD
-    Start[Receive Task] --> Analyze[Analyze Immediate Task Needs]
-    Analyze --> LoadMinimal[Load Minimal Required Context]
-    LoadMinimal --> Execute[Execute First Step]
-    Execute --> RecordEdits[Update edit_history.md]
-    RecordEdits --> Evaluate{More Steps?}
-    Evaluate -->|Yes| NextContext[Load Context for Next Step]
-    NextContext --> NextStep[Execute Next Step]
-    NextStep --> UpdateHistory[Update edit_history.md]
-    UpdateHistory --> Evaluate
-    Evaluate -->|No| Verify[Verify Against Standards]
-    Verify --> Document[Update Required Documentation]
-    Document --> End[End]
+## Completed Tasks
+| ID | Title | Completed |
+|----|-------|-----------|
+| T0 | Setup | 2025-04-07 |
 ```
 
-**Note:** The "Execute First Step" and "Execute Next Step" boxes inherently include multiple edit operations, each of which should trigger the `record_edits` command to update `edit_history.md`. The diagram simplifies this cycle for clarity.
-
-### 8.2 Session Management Flow
-
-```
-flowchart TD
-    Start[Start Session] --> CheckCache{Check session_cache.md}
-    CheckCache -->|Exists| LoadCache[Load Session Cache]
-    LoadCache --> LoadTask[Load Task-Relevant Files]
-    
-    CheckCache -->|Doesn't Exist| CreateSession[Create New Session Log]
-    CreateSession --> LoadTask
-    
-    LoadTask --> ExecuteTask[Execute Task Steps]
-    ExecuteTask --> UpdateHistory[Update edit_history.md]
-    UpdateHistory --> SessionEnd{Session Ending?}
-    
-    SessionEnd -->|Yes, Complete| UpdateDocs[Update Documentation]
-    SessionEnd -->|Yes, Continuing| UpdateCache[Update Session Cache]
-    SessionEnd -->|No| ExecuteTask
-    
-    UpdateDocs --> End[End Session]
-    UpdateCache --> End
-```
-
-**Note:** Use `record_edits` command after each file modification, and `cache_session` command when creating continuation points. The "ExecuteTask" box represents multiple cycles of implementation and documentation.
-
-### 8.3 Documentation Update Process
-
-1. After completing a task, determine documentation requirements based on change type
-2. Update only the necessary files based on the Documentation Decision Framework
-3. Always update timestamps and status indicators
-4. For continuing tasks, update session_cache.md with minimal state information
-5. For completed tasks, update relevant Memory Bank files based on impact
-6. Update edit_history.md after each file modification (using `record_edits`) or at most every few messages
-7. Log errors in errorLog.md (using `log_error`) when encountered and document their resolution
-
-### 8.4 Error Handling and Resolution Flow
-
-```
-flowchart TD
-    Start[Encounter Error] --> Identify[Identify Error Cause]
-    Identify --> Resolve[Implement Fix]
-    Resolve --> Test[Test Resolution]
-    Test --> Success{Fixed?}
-    Success -->|Yes| LogError[Document in errorLog.md]
-    LogError --> RecordEdits[Update edit_history.md]
-    RecordEdits --> End[Continue Task]
-    Success -->|No| Identify
-```
-
-**Note:** Use the `log_error` command when documenting errors in errorLog.md, and the `record_edits` command when updating edit_history.md with the fixes applied.
-
-## 9. Core File Structure and Templates
-
-### 9.1 session_cache.md (Task-Oriented Version)
+### 9.2 session_cache.md
 
 ```markdown
 # Session Cache
+*Last Updated: [Timestamp]*
 
-*Last Updated: [Date]*
+## Overview
+- Active: [Count] | Paused: [Count] | Focus: [Task ID]
 
-## Status
-[CONTINUING or COMPLETE]
+## Task Registry
+- T1: [Brief] - 🔄
+- T2: [Brief] - 🔄
+- T3: [Brief] - ⏸️
 
-## Current Task
-[Specific task in progress]
-
-## Current Step
-[Exact step in the process]
-
-## Critical Files
-[Only files needed to continue the task]
-
-## State Information
-[Minimal state needed to continue]
-
-## Implementation Progress
-1. ✅ [Completed step]
-2. ✅ [Completed step]
-3. 🔄 [In-progress step]
-4. ⬜ [Planned step]
-5. ⬜ [Planned step]
-
-## Design Decisions
-- [Key decision made during implementation]
-- [Rationale for technical approach]
-- [Important architectural choices]
-- [Implementation patterns selected]
-
-## Notes
-[Additional context relevant for continuing the task]
+## Active Tasks
+### [Task ID]: [Title]
+**Status:** 🔄 **Priority:** [H/M/L]
+**Started:** [Date] **Last**: [Date]
+**Context**: [Key context]
+**Files**: `[file1]`, `[file2]`
+**Progress**:
+1. ✅ [Done]
+2. 🔄 [Current]
+3. ⬜ [Next]
 ```
 
-The template format is flexible as long as all required sections are present and clearly labeled.
-
-### 9.2 activeContext.md (Task-Oriented Version)
+### 9.3 edit_history.md
 
 ```markdown
-# Active Context
+# Edit History
+*Created: [Date]*
 
-*Last Updated: [Date]*
-
-## Current Tasks
-[List of active tasks with current status]
-
-## Implementation Focus
-[Specific components currently being modified]
-
-## Current Decisions
-[Only decisions directly affecting current tasks]
-
-## Next Actions
-[Specific next steps for current tasks]
+## [Date]
+### [Time] - [Task ID]: [Brief Description]
+- Modified `[file]` - [Brief changes]
+- Created `[file]` - [Brief description]
 ```
 
-### 9.3 Time-stamped Session Logs
-
-```markdown
-# Session Log: [ISO Date-Time]
-
-## Task Focus
-[Specific tasks addressed in this session]
-
-## Implementation Steps
-[Steps taken during implementation]
-
-## Decisions Made
-[Key decisions with rationale]
-
-## Status
-[COMPLETE or CONTINUING]
-
-## Next Steps
-[Only if continuing]
-```
-
-### 9.4 errorLog.md (Error Tracking and Resolution)
-
-The error log should follow this structure for each error entry:
+### 9.4 errorLog.md
 
 ```markdown
 # Error Log
 
-## [YYYY-MM-DD HH:MM TZ]: [Error Title/Component]
-
+## [Date Time]: [Task ID] - [Error Title]
 **File:** `[file path]`
-
-**Error Message:**
+**Error:** `[Message]`
+**Cause:** [Brief explanation]
+**Fix:** [Steps taken]
+**Changes:** [Key code changes]
+**Task:** [Task ID]
 ```
-[Exact error message text]
-```
-
-**Cause:**
-[Brief explanation of what caused the error]
-
-**Fix:**
-[Steps taken to resolve the error]
-
-**Key Code Changes:**
-```[language]
-[Code snippet or diff showing the fix]
-```
-
-**Affected Files:**
-- [List of files modified to fix the error]
-```
-
-The format may be adjusted as needed while maintaining the key information sections (File, Error Message, Cause, Fix, and Affected Files).
-
-### 9.5 edit_history.md (File Modification Tracking)
-
-The edit history should be organized chronologically with timestamps:
-
-```markdown
-# Edit History
-
-*Created: [Date]*
-
-## File Modification Log
-
-### [Date]
-
-#### [Time] - [Brief Task Description]
-
-- Created/Modified/Updated `[file path]` - [Brief description of changes]
-- Created/Modified/Updated `[file path]` - [Brief description of changes]
-- ...
-
-#### [Time] - [Brief Task Description]
-
-- ...
-```
-
-For rapid sequential edits, changes can be batched under a single time entry to maintain efficiency while preserving the chronological record.
-
-## 10. External Tools and Integration
-
-### 10.1 MCP (Model Context Protocol) Servers
-
-Available MCP servers include:
-
-- **arxiv-mcp-server**: Academic paper research
-- **deepwebresearch**: Web research and content extraction
-- **playwright**: Browser automation and web interaction
-- **youtube**: Video analysis and content retrieval
-- **github**: Repository management and interaction
-
-#### Example: MCP Tool Usage
-
-```
-<use_mcp_tool>
-<server_name>github</server_name>
-<tool_name>get_file_contents</tool_name>
-<arguments>
-{
-  "owner": "username",
-  "repo": "repository",
-  "path": "file.js"
-}
-</arguments>
-</use_mcp_tool>
-```
-
-### 10.2 API Integration
-
-- Use structured JSON for data exchange
-- Implement proper error handling for API responses
-- Follow RESTful principles for endpoint design
-- Document all API contracts as part of the implementation
-
-### 10.3 External Libraries
-
-- Prefer established libraries over custom implementations
-- Document dependencies in the appropriate Memory Bank files
-- Maintain compatibility with existing project dependencies
-- Verify license compatibility before introducing new dependencies
-
-Remember: The system's effectiveness comes from balancing task efficiency with appropriate documentation, loading only what's needed when it's needed, and following a consistent, standardized approach to both code and documentation.
