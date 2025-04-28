@@ -2,11 +2,13 @@
 *Last Updated: 2025-04-28*
 
 ## Current Session
-**Task:** T43 - Convert tensorNode to TypeScript
+**Task:** T44 - Clean Up Build Configuration and Fix Directory Structure
 **Status:** 🔄 In Progress
 **Started:** 2025-04-28
+**Previous Task:** T43 - Convert tensorNode to TypeScript
 
 ## Active Tasks
+- T44: Clean Up Build Configuration and Fix Directory Structure
 - T43: Convert tensorNode to TypeScript
 - T42: Fix Simulation Test Page Library Usage
 

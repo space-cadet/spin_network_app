@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import path from 'path'
+import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig({
   build: {
@@ -9,8 +9,8 @@ export default defineConfig({
       formats: ['es', 'umd'],
       fileName: (format) => `spin-network.${format}.js`
     },
-    outDir: 'dist/lib',  // Build to dist/lib first
-    emptyOutDir: true,
+    outDir: 'dist/lib',
+    emptyOutDir: false,  // Don't empty dist directory
     sourcemap: true,
     rollupOptions: {
       external: ['mathjs'],
@@ -20,9 +20,9 @@ export default defineConfig({
         },
         exports: 'named',
         format: 'umd',
-        inlineDynamicImports: true,
+        inlineDynamicImports: true
       }
     },
     minify: false
   }
-})
+});

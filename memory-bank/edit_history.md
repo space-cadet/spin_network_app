@@ -1,4 +1,14 @@
 # Edit History
+*Last Updated: 2025-04-28 15:30:00*
+
+## 2025-04-28
+### 15:30 - T44: Build Configuration Cleanup
+- Modified `vite.config.ts` - Updated build configuration and output settings
+- Modified `lib-bundle.config.js` - Optimized library build settings
+- Modified `package.json` - Updated build scripts
+- Created `scripts/build-docs.js` - Added documentation build script
+- Moved `tensor-sandbox.html` from public/ to src/
+- Reorganized public/ directory structure
 *Updated: 2025-04-28*
 
 ## 2025-04-28

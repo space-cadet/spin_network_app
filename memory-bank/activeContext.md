@@ -3,8 +3,9 @@
 *Last Updated: April 24, 2025 (14:30 IST)*
 
 ## Current Focus
-**Primary Task:** T39: Fix Tensor Module Browser Compatibility
-**Secondary Tasks:** T38: Intertwiner Tensor Initialization, T36: Tensor Sandbox Implementation
+**Primary Task:** T44: Clean Up Build Configuration and Fix Directory Structure
+**Secondary Tasks:** T43: Convert tensorNode to TypeScript, T42: Fix Simulation Test Page Library Usage
+**Previous Focus:** T39: Fix Tensor Module Browser Compatibility
 
 ## Active Tasks
 - T39: Fix Tensor Module Browser Compatibility - ✅ COMPLETE
@@ -28,7 +29,14 @@
 - T3: Component Refactoring - ⏸️ PAUSED
 
 ## Implementation Focus
-Recently fixed tensor-sandbox.html by adding the missing tensor-bridge.js script and implemented a lattice network option with higher valence nodes. Before that, completed UI enhancements to the application by:
+Currently cleaning up the build configuration and directory structure to eliminate duplicate files and optimize the build process. Key changes include:
+- Updating build configurations in vite.config.ts and lib-bundle.config.js
+- Reorganizing public folder structure
+- Creating dedicated documentation build script
+- Moving tensor-sandbox.html to src directory
+- Updating build scripts to prevent file duplication
+
+Previously: Fixed tensor-sandbox.html by adding the missing tensor-bridge.js script and implemented a lattice network option with higher valence nodes. Before that, completed UI enhancements to the application by:
 
 1. Creating a new Testing page with a sidebar layout that allows navigating between three testing resources:
    - Standalone Implementation Guide (standalone-guide.html)

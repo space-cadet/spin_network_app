@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,23 +12,26 @@ export default defineConfig({
   },
   build: {
     emptyOutDir: true,
+    outDir: 'dist',
+    assetsDir: 'assets',
     cssCodeSplit: true,
     target: 'esnext',
-    chunkSizeWarningLimit: 500, // Increase the warning limit (in kB)
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        sandbox: path.resolve(__dirname, 'src/tensor-sandbox.html')
+      },
       output: {
         manualChunks(id) {
-          // Split node_modules into vendor chunk
           if (id.includes('node_modules')) {
-            // Further split large libraries into separate chunks
             if (id.includes('three')) return 'vendor-three';
             if (id.includes('cytoscape')) return 'vendor-cytoscape';
             if (id.includes('react')) return 'vendor-react';
-            // All other dependencies go into the general vendor chunk
             return 'vendor';
           }
         }
       }
     }
   }
-})
+});
