@@ -30,8 +30,9 @@ import {
 // // Using require for JavaScript file compatibility
 // const tensorNodeModule = require('./tensorNode');
 
-import { createTensorNode, calculateIntertwinerDimension } from './tensorNode';
+// import { createTensorNode, calculateIntertwinerDimension } from './tensorNode';
 
+import * as tensorNodeModule from './tensorNode';
 
 /**
  * Enhanced createTensorNode function that uses the improved implementation

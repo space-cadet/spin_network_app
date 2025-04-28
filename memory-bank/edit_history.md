@@ -1,4 +1,12 @@
 # Edit History
+*Updated: 2025-04-28*
+
+## 2025-04-28
+### T43: Convert tensorNode to TypeScript
+- Converted `/lib/tensor/tensorNode.js` to TypeScript implementation
+- Updated type imports from core/tensor.ts
+- Removed duplicate type definitions
+- Renamed old JS file to tensorNode.js.old
 
 ## 2025-04-28
 ### 15:30 - [T42]: Fix Library Usage in Simulation Test Page

@@ -11,6 +11,7 @@
 ### Active Tasks
 | ID | Title | Status | Priority | Started | Task File |
 |----|-------|--------|----------|---------|-----------|
+| T43 | Convert tensorNode to TypeScript | 🔄 | HIGH | 2025-04-28 | [tasks/T43.md] |
 | T42 | Fix Simulation Test Page Library Usage | 🔄 | HIGH | 2025-04-28 | [tasks/T42.md] |
 | T41 | Fix Multiple Dist Folders Issue | 🔄 | HIGH | 2025-04-24 | [tasks/T41.md] |
 | T40 | Memory Bank Hierarchical Restructure | ✅ | HIGH | 2025-04-24 | [tasks/T40.md] |
