@@ -32,12 +32,25 @@ dist-ssr
 .env.test.local
 .env.production.local
 
+# Firebase
+.firebase/
+firebase-debug.log*
+firebase-debug.*.log*
+ui-debug.log*
+database-debug.log*
+pubsub-debug.log*
+.runtimeconfig.json
+*-service-account.json
+
+# Storage
 storage/*
 build_errors*.md
 .vercel
 
+# Backups
 memory-bank-bak/*
 
+# Logs
 vercel.logs
 screen.log
 .env*.local
