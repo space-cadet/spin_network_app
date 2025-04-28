@@ -5,9 +5,23 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
+// import rehypeKatex from 'rehype-katex';
+import rehypeMathJax from 'rehype-mathjax';
+// import 'katex/dist/katex.min.css';
 import 'github-markdown-css/github-markdown.css';
+
+// Add MathJax configuration after imports
+const mathJaxConfig = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']],
+    packages: ['base', 'ams', 'noerrors', 'noundefined']
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+
 
 type DocResource = {
   id: string;
@@ -29,22 +43,22 @@ const docResources: DocResource[] = [
     id: 'intertwiner-spaces',
     title: 'Intertwiner Spaces',
     description: 'Detailed explanation of intertwiner spaces in spin networks.',
-    path: '/docs/physics/intertwiner-spaces.md',
-    type: 'markdown'
+    path: '/docs/physics/intertwiner-spaces.html',
+    type: 'html'
   },
   {
     id: 'unified-dynamics',
     title: 'Unified Dynamics Approach',
     description: 'Unified approach to dynamics in spin network systems.',
-    path: '/docs/physics/unified-dynamics.md',
-    type: 'markdown'
+    path: '/docs/physics/unified-dynamics.html',
+    type: 'html'
   },
   {
     id: 'mathematical-roadmap',
     title: 'Mathematical Foundations',
     description: 'Mathematical roadmap and foundations for spin network theory.',
-    path: '/docs/physics/mathematical-roadmap.md',
-    type: 'markdown'
+    path: '/docs/physics/mathematical-roadmap.html',
+    type: 'html'
   }
 ];
 
@@ -93,39 +107,16 @@ const DocsPage: React.FC = () => {
   }, [selectedResource]);
 
   const renderContent = () => {
-    if (selectedResource.type === 'html') {
-      return (
-        <iframe
-          ref={iframeRef}
-          src={selectedResource.path}
-          className="w-full border-0"
-          style={{ height: iframeHeight }}
-          title={selectedResource.title}
-          sandbox="allow-same-origin allow-scripts allow-forms"
-        />
-      );
-    } else {
-      return (
-        <div className="p-6 overflow-auto bg-white" style={{ height: iframeHeight }}>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <div className="max-w-4xl mx-auto">
-              <div className="markdown-body">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
-                >
-                  {markdownContent}
-                </ReactMarkdown>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
+    return (
+      <iframe
+        ref={iframeRef}
+        src={selectedResource.path}
+        className="w-full border-0"
+        style={{ height: iframeHeight }}
+        title={selectedResource.title}
+        sandbox="allow-same-origin allow-scripts allow-forms"
+      />
+    );
   };
 
   return (
