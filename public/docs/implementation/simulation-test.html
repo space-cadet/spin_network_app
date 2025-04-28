@@ -125,6 +125,9 @@
     <pre id="console-output"></pre>
   </div>
   
+  <!-- Add mathjs before spin-network -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+
   <!-- Load the built library first -->
   <script src="/dist/lib/spin-network.umd.js"></script>
 
@@ -162,6 +165,26 @@
     // Store current engine and graph for accessing from console
     window.currentEngine = null;
     window.currentGraph = null;
+
+    // Create proper simulation parameters
+    const DEFAULT_SIMULATION_PARAMS = {
+      initialStateType: 'uniform',
+      initialStateParams: {
+        value: 1.0
+      },
+      timeStep: 0.01,
+      totalTime: 1.0,
+      diffusionType: 'ordinary',
+      recordHistory: true,
+      historyInterval: 0.1,
+      weightFunction: 'spin',
+      alpha: 1.0,
+      parameters: {
+        stabilityThreshold: 1e6,
+        autoNormalize: true,
+        normalizeFrequency: 10
+      }
+    };
 
     // Function to update the results panel with current data
     function updateResultsPanel() {
@@ -284,7 +307,7 @@
           
           try {
             console.log("Creating geometry calculator");
-            const geometryCalculator = new window.SpinNetwork.SpinNetworkGeometryCalculator(); // Use window.SpinNetwork
+            const geometryCalculator = new window.SpinNetwork.GeometricPropertiesCalculator(); // Use window.SpinNetwork
 
             // Calculate geometric properties with enhanced error handling
             console.log("Calculating total volume...");
@@ -419,41 +442,39 @@
 
     // Implement basic simulation test
     window.runSimulationTest = async function() {
-      console.log("Starting simulation test...");
+  console.log("Starting simulation test...");
 
-      try {
-        // Create simulation components using window.SpinNetwork
-        window.currentEngine = window.SpinNetwork.createSimulationEngine();
-        window.currentGraph = window.SpinNetwork.createGraph();
+  try {
+    // Create simulation components using window.SpinNetwork
+    window.currentEngine = window.SpinNetwork.createSimulationEngine();
+    // window.currentGraph = window.SpinNetwork.createGraph();
 
-        // Create a simple line graph with 5 nodes
-        const lineGraphOptions = {
-          nodeCount: 5,
-          edgeSpin: 1.0
-        };
-        window.currentGraph = window.SpinNetwork.createLineGraph(lineGraphOptions); // Updated call to createLineGraph
-
-        // Create initial state
-        const initialState = window.SpinNetwork.createStateVector(window.currentGraph.nodes.map(n => n.id)); // Use window.SpinNetwork
-
-        // Initialize engine with graph and state
-        window.currentEngine.initialize(window.currentGraph, initialState);
-
-        // Run simulation for 10 steps
-        for (let i = 0; i < 10; i++) {
-          window.currentEngine.step();
-        }
-
-        // Update results
-        updateResultsPanel();
-
-        console.log("Simulation test completed successfully");
-        return true;
-      } catch (error) {
-        console.error("Simulation test failed:", error);
-        return false;
-      }
+    // Create a simple line graph with 5 nodes
+    const lineGraphOptions = {
+      nodeCount: 5,
+      edgeSpin: 1.0
     };
+    window.currentGraph = window.SpinNetwork.createLineGraph(lineGraphOptions);
+
+
+    // Initialize engine with graph and parameters
+    window.currentEngine.initialize(window.currentGraph, DEFAULT_SIMULATION_PARAMS);
+
+    // Run simulation for 10 steps
+    for (let i = 0; i < 10; i++) {
+      window.currentEngine.step();
+    }
+
+    // Update results
+    updateResultsPanel();
+
+    console.log("Simulation test completed successfully");
+    return true;
+  } catch (error) {
+    console.error("Simulation test failed:", error);
+    return false;
+  }
+};
 
     // Capture console.log output
     const originalLog = console.log;
@@ -517,14 +538,14 @@
           edgeSpin: 1.0
         };
 
-        window.currentGraph = window.SpinNetwork.templates.createRandomGraph(randomGraphOptions); // Use window.SpinNetwork
+        window.currentGraph = window.SpinNetwork.createRandomGraph(randomGraphOptions); // Use window.SpinNetwork
         console.log(`Generated new network with ${window.currentGraph.nodes.length} nodes`);
 
         // Create new state vector
-        const initialState = window.SpinNetwork.createStateVector(window.currentGraph.nodes.map(n => n.id)); // Use window.SpinNetwork
+        // const initialState = window.SpinNetwork.createStateVector(window.currentGraph.nodes.map(n => n.id)); // Use window.SpinNetwork
 
         // Reinitialize engine
-        window.currentEngine.initialize(window.currentGraph, initialState);
+        window.currentEngine.initialize(window.currentGraph, DEFAULT_SIMULATION_PARAMS);
 
         // Run simulation for 10 steps
         for (let i = 0; i < 10; i++) {

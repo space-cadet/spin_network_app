@@ -2,15 +2,16 @@
 *Last Updated: 2025-04-24 14:45:16*
 
 ## Tasks Overview
-- **Active Tasks:** 16
+- **Active Tasks:** 17
 - **Paused Tasks:** 3
 - **Completed Tasks:** 19
-- **Latest Task ID:** T41
+- **Latest Task ID:** T42
 
 ## Task Registry
 ### Active Tasks
 | ID | Title | Status | Priority | Started | Task File |
 |----|-------|--------|----------|---------|-----------|
+| T42 | Fix Simulation Test Page Library Usage | 🔄 | HIGH | 2025-04-28 | [tasks/T42.md] |
 | T41 | Fix Multiple Dist Folders Issue | 🔄 | HIGH | 2025-04-24 | [tasks/T41.md] |
 | T40 | Memory Bank Hierarchical Restructure | ✅ | HIGH | 2025-04-24 | [tasks/T40.md] |
 

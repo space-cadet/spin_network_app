@@ -1,5 +1,18 @@
 # Error Log
 
+## 2025-04-28: [T42] - Library Usage Errors in Simulation Test Page
+**Files:** `/public/docs/implementation/simulation-test.html`
+**Errors:**
+1. `SpinNetworkGeometryCalculator is not a constructor`
+   - Class renamed to GeometricPropertiesCalculator but reference not updated
+   - Fixed by updating class name in code
+2. `window.SpinNetwork.templates is undefined`
+   - Accessing createRandomGraph through incorrect namespace
+   - Fixed by using direct window.SpinNetwork.createRandomGraph
+3. `window.SpinNetwork.calculateStatistics is not a function`
+   - Statistics function accessed incorrectly
+   - Fixed by using window.SpinNetwork.SimulationAnalyzer.calculateStatistics
+
 ## 2025-04-24: CommonJS require() Error in Tensor Module
 
 **Files:**

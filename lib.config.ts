@@ -22,6 +22,8 @@ export default defineConfig({
         },
         exports: 'named',
         inlineDynamicImports: true,
+        format: 'umd',
+        name: 'SpinNetwork'
       }
     }
   }

@@ -40,3 +40,4 @@ memory-bank-bak/*
 
 vercel.logs
 screen.log
+.env*.local

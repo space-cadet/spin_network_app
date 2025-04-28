@@ -1,4 +1,13 @@
 # Edit History
+
+## 2025-04-28
+### 15:30 - [T42]: Fix Library Usage in Simulation Test Page
+- Updated `/public/docs/implementation/simulation-test.html`:
+  - Fixed GeometricPropertiesCalculator class name
+  - Fixed createRandomGraph direct access
+  - Fixed SimulationAnalyzer.calculateStatistics access
+  - Centralized simulation parameters
+  - Removed redundant graph initialization
 *Last Updated: 2025-04-24 15:30:00*
 
 ## 2025-04-24

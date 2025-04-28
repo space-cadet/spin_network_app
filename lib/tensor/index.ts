@@ -27,8 +27,11 @@ import {
 } from '../core/tensor';
 
 // Import the new TensorNode implementation
-// Using require for JavaScript file compatibility
-const tensorNodeModule = require('./tensorNode');
+// // Using require for JavaScript file compatibility
+// const tensorNodeModule = require('./tensorNode');
+
+import { createTensorNode, calculateIntertwinerDimension } from './tensorNode';
+
 
 /**
  * Enhanced createTensorNode function that uses the improved implementation
