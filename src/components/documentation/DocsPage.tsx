@@ -36,7 +36,7 @@ const docResources: DocResource[] = [
     id: 'physics-notebook',
     title: 'Physics Notebook',
     description: 'Interactive notebook exploring the physics of spin networks.',
-    path: '/docs/physics/physics-notebook.html',
+    path: '/docs/physics/physics-notebook.html',  // No change needed - these are served URLs
     type: 'html'
   },
   {

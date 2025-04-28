@@ -25,7 +25,7 @@ const testResources: TestResource[] = [
     id: 'tensor-sandbox',
     title: 'Tensor Sandbox',
     description: 'Experimental sandbox for working with tensors and state vectors in spin networks.',
-    path: '/tensor-sandbox.html'
+    path: '/docs/implementation/tensor-sandbox.html'
   }
 ];
 

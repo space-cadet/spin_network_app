@@ -1,11 +1,37 @@
 # Session Cache
-*Last Updated: 2025-04-28*
+*Last Updated: 2025-04-29*
 
 ## Current Session
 **Task:** T44 - Clean Up Build Configuration and Fix Directory Structure
 **Status:** 🔄 In Progress
 **Started:** 2025-04-28
 **Previous Task:** T43 - Convert tensorNode to TypeScript
+
+## Active Session Context
+**Phase:** Documentation Migration
+**Last Update:** 2025-04-29 11:30:00
+**Key Changes:**
+- Relocated documentation files from /public to /docs
+- Moved JS files to /docs/static/scripts
+- Updated script references to reflect new structure
+
+## Implementation Notes
+- All HTML files moved to appropriate directories
+- Script references updated to use relative paths
+- DocsPage.tsx paths maintained for compatibility
+
+## Active Session Context
+**Phase:** Documentation Migration
+**Last Update:** 2025-04-29 11:30:00
+**Key Changes:**
+- Relocated documentation files from /public to /docs
+- Moved JS files to /docs/static/scripts
+- Updated script references to reflect new structure
+
+## Implementation Notes
+- All HTML files moved to appropriate directories
+- Script references updated to use relative paths
+- DocsPage.tsx paths maintained for compatibility
 
 ## Active Tasks
 - T44: Clean Up Build Configuration and Fix Directory Structure

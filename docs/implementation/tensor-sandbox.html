@@ -312,88 +312,10 @@
     </div>
 
     <!-- Core Spin Network Library -->
-    <script src="dist/lib/spin-network.umd.js"></script>
-    
-    <!-- Add this script right after loading the spin-network.umd.js library -->
-    <!-- <script>
-        // Ensure tensor functions are accessible on the global SpinNetwork object
-        (function() {
-        // Import the functions from the core tensor module
-        const tensorFunctions = {
-            createStateVectorEdge: function(id, source, target, spin) {
-            const dimension = Math.floor(2 * spin + 1);
-            
-            // Initialize with |j,j⟩ state (highest weight state)
-            const amplitudes = new Array(dimension).fill(null).map(() => ({ re: 0, im: 0 }));
-            amplitudes[0] = { re: 1, im: 0 };  // Set amplitude for |j,j⟩ to 1
-            
-            return {
-                id,
-                source,
-                target,
-                stateVector: {
-                dimension,
-                amplitudes,
-                basis: 'standard'
-                },
-                spin
-            };
-            },
-            
-            // Add other missing functions as needed
-            setStateVectorAmplitude: function(stateVector, index, value) {
-            if (index < 0 || index >= stateVector.dimension) {
-                console.warn(`Index ${index} out of bounds for state vector of dimension ${stateVector.dimension}`);
-                return;
-            }
-            
-            stateVector.amplitudes[index] = { ...value };
-            },
-            
-            getStateVectorAmplitude: function(stateVector, index) {
-            if (index < 0 || index >= stateVector.dimension) {
-                console.warn(`Index ${index} out of bounds for state vector of dimension ${stateVector.dimension}`);
-                return { re: 0, im: 0 };
-            }
-            
-            return { ...stateVector.amplitudes[index] };
-            },
-            
-            normalizeStateVector: function(stateVector) {
-            // Calculate norm
-            const normSquared = stateVector.amplitudes.reduce(
-                (sum, amp) => sum + amp.re * amp.re + amp.im * amp.im,
-                0
-            );
-            
-            if (normSquared < 1e-10) {
-                console.warn('Cannot normalize state vector with norm close to zero');
-                return;
-            }
-            
-            const norm = Math.sqrt(normSquared);
-            
-            // Normalize amplitudes
-            for (let i = 0; i < stateVector.amplitudes.length; i++) {
-                stateVector.amplitudes[i].re /= norm;
-                stateVector.amplitudes[i].im /= norm;
-            }
-            },
-            
-            createComplex: function(re = 0, im = 0) {
-            return { re, im };
-            }
-        };
-        
-        // Add the functions to the window.SpinNetwork object
-        Object.assign(window.SpinNetwork, tensorFunctions);
-        
-        console.log("Added missing tensor functions to SpinNetwork");
-        })();
-    </script> -->
+    <script src="/dist/lib/spin-network.umd.js"></script>
 
     <!-- Sandbox Implementation -->
-    <script src="scripts/tensor-sandbox.js"></script>
+    <script src="../static/scripts/tensor-sandbox.js"></script>
     <script>
         // Override alert to prevent modal errors in sandboxed environments
         window.alert = function(msg) {

@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin Network Physics Notebook</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      color: #333;
+      display: flex;
+    }
+    .toc-sidebar {
+      width: 280px;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      background-color: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px;
+      box-sizing: border-box;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    }
+    .toc-sidebar h2 {
+      font-size: 1.2em;
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .toc-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .toc-section {
+      margin-bottom: 10px;
+    }
+    .toc-section > a {
+      font-weight: 600;
+      display: block;
+      padding: 8px 5px;
+      border-radius: 4px;
+      color: #1e3a8a;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .toc-section > a:hover {
+      background-color: #e0e7ff;
+      text-decoration: none;
+    }
+    .toc-section > a.active {
+      background-color: #e0e7ff;
+      border-left: 3px solid #4f46e5;
+    }
+    .toc-subsection a.active {
+      background-color: #e0f2fe;
+      border-left: 3px solid #0ea5e9;
+    }
+    .toc-subsection {
+      list-style-type: none;
+      padding-left: 15px;
+      margin: 5px 0;
+    }
+    .toc-subsection li {
+      margin: 3px 0;
+    }
+    .toc-subsection a {
+      font-size: 0.9em;
+      display: block;
+      padding: 4px 5px;
+      border-radius: 4px;
+      color: #3b82f6;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .toc-subsection a:hover {
+      background-color: #e0f2fe;
+      text-decoration: none;
+    }
+    .main-content {
+      margin-left: 280px;
+      padding: 20px;
+      max-width: 900px;
+      box-sizing: border-box;
+    }
+    .mobile-toc-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      z-index: 1000;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s, background-color 0.3s;
+    }
+    .mobile-toc-toggle:hover {
+      background-color: #2563eb;
+      transform: scale(1.05);
+    }
+    .mobile-toc-toggle:active {
+      transform: scale(0.95);
+    }
+    h1, h2, h3, h4 {
+      font-weight: 600;
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      color: #2563eb;
+    }
+    h1 {
+      font-size: 2.5em;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.8em;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 5px;
+    }
+    h3 {
+      font-size: 1.5em;
+    }
+    code, pre {
+      font-family: 'SF Mono', Consolas, Monaco, 'Andale Mono', monospace;
+      background-color: #f1f5f9;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    pre {
+      padding: 16px;
+      overflow: auto;
+      line-height: 1.45;
+      border-radius: 6px;
+    }
+    pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+    a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .equation {
+      display: block;
+      text-align: center;
+      margin: 20px 0;
+      font-style: italic;
+    }
+    .equation-number {
+      float: right;
+    }
+    .note {
+      background-color: #dbeafe;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .warning {
+      background-color: #fee2e2;
+      border-left: 4px solid #ef4444;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .notebook-section {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .notebook-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .notebook-section-header h3 {
+      margin: 0;
+    }
+    .notebook-cell {
+      margin: 20px 0;
+    }
+    .notebook-cell-code {
+      background-color: #f1f5f9;
+      padding: 15px;
+      border-radius: 6px;
+      overflow: auto;
+    }
+    .notebook-cell-output {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 20px auto;
+      border-radius: 4px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f5f9;
+      font-weight: 600;
+    }
+    .variable-table {
+      width: 100%;
+      margin: 20px 0;
+    }
+    .variable-table th {
+      width: 20%;
+    }
+    .katex {
+      font-size: 1.1em;
+    }
+    .implementation-note {
+      background-color: #f0fdf4;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    /* Collapsible sections */
+    .section-header {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      user-select: none;
+      transition: background-color 0.2s;
+      padding: 8px 12px;
+      margin: 0 -12px;
+      border-radius: 6px;
+    }
+    .section-header:hover {
+      background-color: #f1f5f9;
+    }
+    .section-header::before {
+      content: '▼';
+      display: inline-block;
+      margin-right: 10px;
+      transition: transform 0.3s;
+      font-size: 0.7em;
+      color: #3b82f6;
+    }
+    .section-header.collapsed::before {
+      transform: rotate(-90deg);
+    }
+    .section-content {
+      transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+      max-height: 10000px;
+      opacity: 1;
+      overflow: hidden;
+    }
+    .section-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    
+    /* Top TOC */
+    .top-toc {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .top-toc h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .top-toc-list {
+      column-count: 2;
+      column-gap: 20px;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .top-toc-list li {
+      margin-bottom: 5px;
+      break-inside: avoid;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 1024px) {
+      .toc-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 100;
+      }
+      .toc-sidebar.visible {
+        transform: translateX(0);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+      }
+      .mobile-toc-toggle {
+        display: block;
+      }
+      .top-toc-list {
+        column-count: 1;
+      }
+    }
+  </style>
+  <!-- Include KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+</head>
+<body>
+  <!-- Mobile TOC toggle button -->
+  <button class="mobile-toc-toggle" id="toc-toggle">≡</button>
+  
+  <!-- Table of Contents Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <h2>Table of Contents</h2>
+    <ul class="toc-list" id="toc-list">
+      <!-- Will be populated via JavaScript -->
+    </ul>
+  </aside>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Spin Network Physics Notebook</h1>
+    
+    <p>This notebook explains the physics behind the spin network simulation, the mathematical models used, and how each component of the calculation is implemented in code. To see the simulation in action, visit the <a href="test-simulation.html" style="font-weight: bold; color: #2563eb;">Test Simulation Page</a>.</p>
+    
+    <div class="top-toc">
+      <h3>Contents</h3>
+      <ul class="top-toc-list" id="top-toc-list">
+        <!-- Will be populated via JavaScript -->
+      </ul>
+    </div>
+    
+    <div class="note">
+      <strong>Note:</strong> This is an educational notebook designed to help understand the simulation code in <code>test-simulation.html</code>. It breaks down the calculations step-by-step to explain the physics concepts involved.
+    </div>
+  
+  <!-- SECTION 1: Introduction to Spin Networks -->
+  <div class="notebook-section" id="section-1">
+    <div class="notebook-section-header">
+      <h2>1. Introduction to Spin Networks</h2>
+    </div>
+    
+    <p>Spin networks are mathematical structures used in loop quantum gravity (LQG) that represent quantum states of space. They consist of:</p>
+    
+    <ul>
+      <li><strong>Nodes</strong>: Represent "quanta of volume" with an associated intertwiner value</li>
+      <li><strong>Edges</strong>: Connections between nodes with an associated spin value (usually denoted by j)</li>
+    </ul>
+    
+    <p>In our simulation, we model the evolution of a state vector defined on the nodes of a spin network. The state vector represents the amplitude (or probability amplitude in quantum mechanics) at each node, and we study how it evolves over time according to various diffusion models.</p>
+    
+    <h3>1.1 Quantum Geometric Interpretation</h3>
+    
+    <p>In loop quantum gravity, spin networks have a direct geometric interpretation:</p>
+    
+    <ul>
+      <li>The spin j on an edge determines the area of a surface crossing that edge (proportional to \(\sqrt{j(j+1)}\))</li>
+      <li>The intertwiner value at a node determines its volume contribution</li>
+      <li>The network as a whole represents a discrete quantum geometry</li>
+    </ul>
+    
+    <p>Our simulation explores how quantum states evolve on this discrete geometry, which can be thought of as modeling how quantum information propagates through a quantum spacetime.</p>
+    
+    <h3>1.2 Physical Significance</h3>
+    
+    <p>The diffusion of quantum states on a spin network can be viewed as a simplified model of several physical phenomena:</p>
+    
+    <ul>
+      <li><strong>Quantum Decoherence</strong>: How quantum information spreads and potentially "decoheres" in a quantum gravitational setting</li>
+      <li><strong>Information Propagation</strong>: How information travels through a discrete quantum spacetime</li>
+      <li><strong>Emergent Spacetime</strong>: How classical space might emerge from quantum geometric degrees of freedom</li>
+    </ul>
+    
+    <p>By studying the behavior of diffusion on these networks, we can gain insights into fundamental questions about quantum gravity and the quantum nature of spacetime.</p>
+  </div>
+  
+  <!-- SECTION 2: Network Structure and Representation -->
+  <div class="notebook-section" id="section-2">
+    <div class="notebook-section-header">
+      <h2>2. Network Structure and Representation</h2>
+    </div>
+    
+    <h3>2.1 Graph Representation</h3>
+    
+    <p>The spin network is represented as a graph with nodes and edges. In our code, we use the <code>SimulationGraph</code> class to store and manipulate this structure.</p>
+    
+    <div class="notebook-cell">
+      <div class="notebook-cell-code">
+<pre><code>// Example of how a spin network is represented in code:
+const network = {
+  nodes: [
+    { id: 'node1', position: { x: 100, y: 100 }, intertwiner: 1 },
+    { id: 'node2', position: { x: 200, y: 100 }, intertwiner: 1 },
+    // ...more nodes
+  ],
+  edges: [
+    { id: 'edge1', source: 'node1', target: 'node2', spin: 0.5 },
+    // ...more edges
+  ]
+};
+
+// Create a simulation graph from this network
+const graph = createSimulationGraph(network);</code></pre>
+      </div>
+    </div>
+    
+    <p>In our randomized approach, we generate networks with varying numbers of nodes and edges, allowing us to explore how network topology affects diffusion behavior.</p>
+    
+    <h3>2.2 Mathematical Representation: Laplacian Matrix</h3>
+    
+    <p>To perform calculations on the graph, we convert it to a Laplacian matrix \(L\). For a graph with \(n\) nodes, this is an \(n \times n\) matrix defined as:</p>
+    
+    <p class="equation">
+      \(L_{ij} = \begin{cases}
+        deg(i) & \text{if } i = j \\
+        -w_{ij} & \text{if } i \text{ and } j \text{ are adjacent} \\
+        0 & \text{otherwise}
+      \end{cases}\)
+    </p>
+    
+    <p>Where \(deg(i)\) is the degree of node \(i\) (number of connected edges), and \(w_{ij}\) is the weight of the edge connecting nodes \(i\) and \(j\).</p>
+    
+    <p>The Laplacian matrix is crucial because it represents the discrete analog of the Laplace operator \(\nabla^2\) in continuous space. Just as the Laplace operator is used in diffusion equations in continuous physics, the Laplacian matrix is used in discrete diffusion processes on graphs.</p>
+    
+    <div class="implementation-note">
+      <h4>Implementation in Code:</h4>
+      <p>The Laplacian matrix is calculated in the <code>MathAdapter.createLaplacianMatrix()</code> method. The edge weights are determined by a weight function that typically uses the spin values of the edges.</p>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From SpinNetworkGraph class
+toLaplacianMatrix(weightFunction?: WeightFunction): math.Matrix {
+  return MathAdapter.createLaplacianMatrix(this, weightFunction);
+}</code></pre>
+      </div>
+    </div>
+    
+    <h3>2.3 Importance of Network Topology</h3>
+    
+    <p>The structure of the network significantly affects diffusion behavior:</p>
+    
+    <ul>
+      <li><strong>Connectivity</strong>: More highly connected networks allow faster diffusion across the entire system</li>
+      <li><strong>Edge Weights (Spins)</strong>: Higher spin values create "wider channels" for diffusion</li>
+      <li><strong>Clustering</strong>: Densely connected regions can act as temporary reservoirs for quantum amplitude</li>
+    </ul>
+    
+    <p>By randomizing our network structure in the test simulation, we can observe how these topological features affect the geometric properties and statistics we calculate.</p>
+  </div>
+  
+  <!-- SECTION 3: Intertwiner Spaces -->
+  <div class="notebook-section" id="section-3">
+    <div class="notebook-section-header">
+      <h2>3. Intertwiner Spaces</h2>
+    </div>
+    
+    <p>Intertwiner spaces are a fundamental concept in spin networks that provide the mathematical structure for how edges meet at nodes while preserving gauge invariance. This section explores the theory and calculation of intertwiner spaces with a focus on four-valent nodes.</p>
+    
+    <h3>3.1 Basic Concepts</h3>
+    
+    <p>In a spin network, each edge is labeled by a spin value \(j\) (typically \(\frac{1}{2}\), 1, \(\frac{3}{2}\), etc.). When representing this as a quantum state, each edge corresponds to a Hilbert space of dimension \(2j+1\).</p>
+    
+    <p>An <strong>intertwiner</strong> is an SU(2)-invariant tensor that maps between the tensor product of the edge Hilbert spaces connected to a node. In physical terms, intertwiners represent the "glue" that connects the angular momentum carriers (edges) in a way that satisfies the quantum mechanical rules for coupling angular momenta.</p>
+    
+    <p>In simple terms, an intertwiner at a node ensures that the total angular momentum is conserved, maintaining gauge invariance under SU(2) transformations. The space of all possible intertwiners at a node is called the <strong>intertwiner space</strong>.</p>
+    
+    <div class="note">
+      <p><strong>Physical Significance:</strong> In loop quantum gravity, intertwiners represent quantum states of volume, while the spins on edges represent quantum states of area. The intertwiner space dimension tells us how many independent quantum states of volume are possible for a given configuration of areas.</p>
+    </div>
+    
+    <h3>3.2 Four-Valent Nodes and Intertwiner Dimension</h3>
+    
+    <p>For a node with four edges labeled \(j_1\), \(j_2\), \(j_3\), \(j_4\), the intertwiner space dimension equals the number of independent ways to couple these four representations to obtain a scalar (j=0) representation.</p>
+    
+    <p class="equation">
+      \(\dim(\text{Inv}(j_1 \otimes j_2 \otimes j_3 \otimes j_4)) = \sum_j N_{j_1,j_2}^j \cdot N_{j_3,j_4}^j\)
+    </p>
+    
+    <p>Where \(N_{a,b}^c\) counts how many times spin \(c\) appears in the tensor product of spins \(a\) and \(b\).</p>
+    
+    <p>In practical terms, this dimension can be calculated by:</p>
+    <ol>
+      <li>Finding allowed intermediate spins when coupling \(j_1\) and \(j_2\) (yielding \(j_{12}\) values)</li>
+      <li>Finding allowed intermediate spins when coupling \(j_3\) and \(j_4\) (yielding \(j_{34}\) values)</li>
+      <li>Counting overlapping values between these two sets</li>
+    </ol>
+    
+    <div class="implementation-note">
+      <h4>Important Implementation Detail:</h4>
+      <p>When determining the allowed intermediate spin values, we must correctly apply quantum angular momentum coupling rules:</p>
+      <ul>
+        <li>The intermediate spin \(j\) must satisfy the triangle inequalities: \(|j_1 - j_2| \leq j \leq j_1 + j_2\)</li>
+        <li>When coupling two integer spins, the intermediate spins must be integers</li>
+        <li>When coupling two half-integer spins, the intermediate spins must be integers</li>
+        <li>When coupling an integer spin and a half-integer spin, the intermediate spins must be half-integers</li>
+      </ul>
+      <p>A common error in implementations is failing to enforce the correct "integer-ness" rules, which can lead to incorrect dimension calculations.</p>
+    </div>
+    
+    <p>For example, when calculating intertwiner dimensions for specific spin combinations:</p>
+    <ul>
+      <li>For spins (1, 0.5, 0.5, 1):
+        <ul>
+          <li>\(j_1=1, j_2=0.5 \Rightarrow j_{12} \in \{0.5, 1.5\}\) (since we couple integer and half-integer)</li>
+          <li>\(j_3=0.5, j_4=1 \Rightarrow j_{34} \in \{0.5, 1.5\}\) (since we couple integer and half-integer)</li>
+          <li>Overlapping values: 0.5, 1.5 → dimension = 2</li>
+        </ul>
+      </li>
+      <li>For spins (1, 1, 0.5, 0.5):
+        <ul>
+          <li>\(j_1=1, j_2=1 \Rightarrow j_{12} \in \{0, 1, 2\}\) (since we couple two integers)</li>
+          <li>\(j_3=0.5, j_4=0.5 \Rightarrow j_{34} \in \{0, 1\}\) (since we couple two half-integers)</li>
+          <li>Overlapping values: 0, 1 → dimension = 2</li>
+        </ul>
+      </li>
+    </ul>
+    
+    <h3>3.3 Order Dependence in Intertwiner Space Calculations</h3>
+    
+    <p>An important subtlety in intertwiner calculations is that the dimension can depend on the specific recoupling scheme used, which means that different orderings of the same set of spins can yield different results.</p>
+    
+    <p>For example, consider these permutations of the same spins (two spin-1 and two spin-1/2 values):</p>
+    <ul>
+      <li>Dimension of intertwiner space for (1, 0.5, 0.5, 1) = 2</li>
+      <li>Dimension of intertwiner space for (1, 1, 0.5, 0.5) = 2</li>
+      <li>Dimension of intertwiner space for (1, 0.5, 1, 0.5) = 2</li>
+    </ul>
+    
+    <p>The dimensions are consistent in this example, but this is not always the case. The order matters because it determines the recoupling scheme - which spins are coupled first to produce intermediate values.</p>
+    
+    <h3>3.4 Recoupling Schemes and Physical Meaning</h3>
+    
+    <p>The dependence of intertwiner dimensions on the recoupling scheme has profound physical meaning in quantum angular momentum theory.</p>
+    
+    <p>Different recoupling schemes represent different bases for the same physical space. The standard approach involves:</p>
+    
+    <p class="equation">
+      \( (j_1 \otimes j_2) \otimes (j_3 \otimes j_4) \rightarrow j = 0 \)
+    </p>
+    
+    <p>But we could equally well have chosen different pairings:</p>
+    <p class="equation">
+      \( (j_1 \otimes j_3) \otimes (j_2 \otimes j_4) \rightarrow j = 0 \)
+    </p>
+    <p class="equation">
+      \( (j_1 \otimes j_4) \otimes (j_2 \otimes j_3) \rightarrow j = 0 \)
+    </p>
+    
+    <p>The relationship between different coupling schemes is governed by recoupling theory, which uses mathematical objects called 6j symbols:</p>
+    
+    <p class="equation">
+      \(\begin{Bmatrix} j_1 & j_2 & j_{12} \\ j_3 & j_4 & j_{34} \end{Bmatrix}\)
+    </p>
+    
+    <p>These symbols give the transformation coefficients between different coupling schemes.</p>
+    
+    <div class="note">
+      <p><strong>Physical Interpretation:</strong> In quantum mechanics, the order in which we couple angular momenta matters. Each recoupling scheme represents a different "history" of how intermediate quantum states are formed before reaching the final state. Different coupling histories may provide different orthogonal basis states for the same physical system.</p>
+    </div>
+    
+    <h3>3.5 Computing Intertwiner Basis States</h3>
+    
+    <p>For a concrete example, let's examine the basis states for a 4-valent node with all edges labeled j=1/2:</p>
+    
+    <p>When all four edges have spin-1/2, we have exactly two independent basis states for the intertwiner space:</p>
+    
+    <ol>
+      <li>First basis state (pairing 1-2 and 3-4):
+        <p class="equation">
+          \(|\Psi_1\rangle = \frac{1}{\sqrt{2}}(|\uparrow\downarrow\rangle - |\downarrow\uparrow\rangle)_{12} \otimes \frac{1}{\sqrt{2}}(|\uparrow\downarrow\rangle - |\downarrow\uparrow\rangle)_{34}\)
+        </p>
+        <p>This represents coupling spins 1-2 into a singlet and spins 3-4 into another singlet.</p>
+      </li>
+      
+      <li>Second basis state (using triplet coupling):
+        <p class="equation">
+          \(|\Psi_2\rangle = \frac{1}{\sqrt{3}}(|\uparrow\uparrow\downarrow\downarrow\rangle + |\downarrow\downarrow\uparrow\uparrow\rangle - \frac{1}{2}(|\uparrow\downarrow\uparrow\downarrow\rangle + |\uparrow\downarrow\downarrow\uparrow\rangle + |\downarrow\uparrow\uparrow\downarrow\rangle + |\downarrow\uparrow\downarrow\uparrow\rangle))\)
+        </p>
+        <p>This represents coupling spins 1-2 into a triplet state and spins 3-4 into another triplet, which are then coupled to give a total spin zero.</p>
+      </li>
+    </ol>
+    
+    <p>These basis states are orthogonal to each other and represent different ways of ensuring the total angular momentum is zero.</p>
+    
+    <h3>3.6 Implementation Strategies</h3>
+    
+    <p>When implementing intertwiner space calculations, several approaches are possible:</p>
+    
+    <ol>
+      <li><strong>Standard Convention</strong>: Always use the same recoupling scheme
+        <ul>
+          <li>Choose a specific ordering convention</li>
+          <li>Reorder input spins to match this convention</li>
+          <li>Apply the standard calculation method</li>
+        </ul>
+      </li>
+      
+      <li><strong>Permutation-Invariant Approach</strong>: Ensure consistent results regardless of input order
+        <ul>
+          <li>Sort spins before calculation</li>
+          <li>Use a consistent coupling scheme on the sorted spins</li>
+        </ul>
+      </li>
+      
+      <li><strong>Maximum Dimension Approach</strong>: Calculate all possible dimensions and take the maximum
+        <ul>
+          <li>Compute dimensions for all distinct recoupling schemes</li>
+          <li>Use the maximum value as the "true" dimension</li>
+          <li>This ensures a complete basis</li>
+        </ul>
+      </li>
+    </ol>
+    
+    <div class="implementation-note">
+      <h4>Code Example:</h4>
+      <p>A robust implementation of the allowed intermediate spins calculation might look like:</p>
+      
+      <div class="notebook-cell-code">
+<pre><code>function allowedIntermediateSpins(j1, j2) {
+  const EPSILON = 0.0000000001;  // Define epsilon as a constant
+  
+  // Minimum and maximum allowed j values by triangle inequalities
+  const j_min = Math.abs(j1 - j2);
+  const j_max = j1 + j2;
+  
+  // Determine if j1 and j2 are integers or half-integers
+  const j1_is_integer = Math.abs(j1 - Math.round(j1)) < EPSILON;
+  const j2_is_integer = Math.abs(j2 - Math.round(j2)) < EPSILON;
+  
+  // Determine if j should be integer or half-integer
+  const j_must_be_integer = (j1_is_integer && j2_is_integer) || 
+                           (!j1_is_integer && !j2_is_integer);
+  
+  const result = [];
+  
+  // Start at j_min and increment by 1 until we reach j_max
+  let j = j_min;
+  while (j <= j_max + EPSILON) {
+    const j_is_integer = Math.abs(j - Math.round(j)) < EPSILON;
+    
+    // Add to results if j has the correct "integer-ness"
+    if ((j_must_be_integer && j_is_integer) || 
+        (!j_must_be_integer && !j_is_integer)) {
+      result.push(j);
+    }
+    
+    j += 1;
+  }
+  
+  return result;
+}</code></pre>
+      </div>
+    </div>
+    
+    <p>This implementation correctly enforces the quantum mechanical rules for angular momentum coupling, avoiding the error of including physically impossible intermediate spin values.</p>
+  </div>
+  
+  <!-- SECTION 4: State Vector Representation -->
+  <div class="notebook-section" id="section-4">
+    <div class="notebook-section-header">
+      <h2>4. State Vector Representation</h2>
+    </div>
+    
+    <p>The state of our quantum system is represented by a vector \(\psi\) where each component \(\psi_i\) corresponds to the amplitude at node \(i\).</p>
+    
+    <p>In quantum mechanics, the state vector represents the probability amplitude distribution of finding a particle or quantum excitation at different locations. The probability of finding the particle at node \(i\) is proportional to \(|\psi_i|^2\).</p>
+    
+    <div class="notebook-cell">
+      <div class="notebook-cell-code">
+<pre><code>// Creating a state vector in code
+const state = new SimulationStateVector(nodeIds);
+
+// Setting an initial delta function state (concentrated at a single node)
+const nodeId = 'node1';
+const value = 1.0;
+state = state.setValue(nodeId, value);</code></pre>
+      </div>
+    </div>
+    
+    <h3>3.1 Types of Initial States</h3>
+    
+    <p>Our simulation supports different types of initial states:</p>
+    
+    <ul>
+      <li><strong>Delta Function</strong>: State is concentrated at a single node (like a particle localized at one point)</li>
+      <li><strong>Uniform</strong>: Equal amplitude across all nodes</li>
+      <li><strong>Gaussian</strong>: A bell-curved distribution centered at a specific node</li>
+    </ul>
+    
+    <p>Each of these initial states has a different physical interpretation:</p>
+    
+    <table>
+      <tr>
+        <th>Initial State Type</th>
+        <th>Physical Interpretation</th>
+      </tr>
+      <tr>
+        <td>Delta Function</td>
+        <td>A quantum excitation perfectly localized at a single point in the spacetime network</td>
+      </tr>
+      <tr>
+        <td>Uniform</td>
+        <td>A completely delocalized quantum state, spread equally across the entire network</td>
+      </tr>
+      <tr>
+        <td>Gaussian</td>
+        <td>A wave packet or partially localized excitation</td>
+      </tr>
+    </table>
+    
+    <div class="implementation-note">
+      <h4>Code Implementation:</h4>
+      <p>These initial states are created in the <code>createInitialState</code> method of the <code>SpinNetworkSimulationEngineImpl</code> class. The type of initial state is determined by the <code>initialStateType</code> parameter.</p>
+      
+      <div class="notebook-cell-code">
+<pre><code>// Delta function state creation (simplified code)
+if (initialStateType === 'delta') {
+  // Validate that the node ID exists in the network
+  let nodeId = initialStateParams.nodeId;
+  
+  // If node ID is missing or not in the graph, use the first node
+  if (!nodeId || !this.graph.getNode(nodeId)) {
+    nodeId = nodeIds[0];
+  }
+  
+  const value = initialStateParams.value || 1.0;
+  this.state = this.state.setValue(nodeId, value);
+}</code></pre>
+      </div>
+    </div>
+    
+    <h3>3.2 State Vector Operations</h3>
+    
+    <p>The <code>SimulationStateVector</code> class provides various operations to manipulate state vectors:</p>
+    
+    <ul>
+      <li><strong>getValue/setValue</strong>: Access and modify individual node values</li>
+      <li><strong>add/subtract</strong>: Combine state vectors</li>
+      <li><strong>multiply</strong>: Scale a state vector by a constant</li>
+      <li><strong>normalize</strong>: Ensure the L2 norm of the vector equals 1</li>
+      <li><strong>toMathArray</strong>: Convert to a format usable by the math library</li>
+    </ul>
+    
+    <p>These operations allow us to implement the numerical methods needed to solve the diffusion equations that govern the state's evolution.</p>
+  </div>
+  
+  <!-- SECTION 5: Diffusion Models -->
+  <div class="notebook-section" id="section-5">
+    <div class="notebook-section-header">
+      <h2>5. Diffusion Models</h2>
+    </div>
+    
+    <p>Our simulation implements two main diffusion models that govern how the quantum state evolves over time. These models represent different physical processes that could occur in a quantum geometric setting.</p>
+    
+    <h3>4.1 Ordinary Diffusion (Heat Equation)</h3>
+    
+    <p>The ordinary diffusion model is analogous to the heat equation in physics:</p>
+    
+    <p class="equation">
+      \(\frac{\partial \psi}{\partial t} = \alpha \nabla^2 \psi\)
+    </p>
+    
+    <p>Where:</p>
+    <ul>
+      <li>\(\psi\) is the state vector</li>
+      <li>\(\alpha\) is the diffusion coefficient (controlling the diffusion rate)</li>
+      <li>\(\nabla^2\) is the Laplacian operator (represented by the Laplacian matrix in our discrete case)</li>
+    </ul>
+    
+    <p>This equation describes how the state spreads out over time, similar to how heat diffuses through a material or how a drop of ink spreads in water. In the quantum context, it can represent the spreading of a wavefunction due to quantum uncertainty.</p>
+    
+    <div class="implementation-note">
+      <h4>Numerical Implementation:</h4>
+      <p>In discrete form, we use the Laplacian matrix \(L\) to represent the \(\nabla^2\) operator:</p>
+      
+      <p class="equation">
+        \(\psi(t+dt) = \psi(t) + dt \cdot \alpha \cdot L \cdot \psi(t)\)
+      </p>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From OrdinaryDiffusionModel.evolveStep method
+const laplacian = this.graph.toLaplacianMatrix(this.weightFunction);
+const stateArray = this.state.toMathArray();
+
+const alpha = this.parameters.alpha || 1.0;
+const diffusionTerm = this.mathAdapter.multiply(laplacian, stateArray);
+const alphaDiffusion = this.mathAdapter.multiply(diffusionTerm, alpha);
+const deltaState = this.mathAdapter.multiply(alphaDiffusion, dt);
+const newStateArray = this.mathAdapter.add(stateArray, deltaState);</code></pre>
+      </div>
+    </div>
+    
+    <h3>4.2 Telegraph Diffusion (Wave-Like Equation)</h3>
+    
+    <p>The telegraph diffusion model adds a second-order time derivative, making it behave like a damped wave equation:</p>
+    
+    <p class="equation">
+      \(\frac{\partial^2 \psi}{\partial t^2} + \beta \frac{\partial \psi}{\partial t} = c^2 \nabla^2 \psi\)
+    </p>
+    
+    <p>Where:</p>
+    <ul>
+      <li>\(\beta\) is the damping coefficient</li>
+      <li>\(c\) is the wave propagation speed</li>
+    </ul>
+    
+    <p>This model allows for wave-like propagation while still having diffusive behavior at longer time scales. Physically, it can represent quantum excitations that propagate like waves through the spin network but gradually dissipate energy.</p>
+    
+    <div class="implementation-note">
+      <h4>Numerical Implementation:</h4>
+      <p>In discrete form, we use a second-order approximation:</p>
+      
+      <p class="equation">
+        \(\psi(t+dt) = 2\psi(t) - \psi(t-dt) + dt^2 \cdot (c^2 L \psi(t) - \beta \frac{\psi(t) - \psi(t-dt)}{dt})\)
+      </p>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From TelegraphDiffusionModel.evolveStep method
+const laplacian = this.graph.toLaplacianMatrix(this.weightFunction);
+const stateArray = this.state.toMathArray();
+const prevStateArray = this.previousState.toMathArray();
+
+const beta = this.parameters.beta || 0.5;
+const c = this.parameters.c || 1.0;
+const c2 = c * c;
+
+// Calculate the right hand side of the equation: c²∇²ϕ
+const laplacianTerm = this.mathAdapter.multiply(laplacian, stateArray);
+const c2Laplacian = this.mathAdapter.multiply(laplacianTerm, c2);
+
+// Calculate first-order time derivative approximation
+const timeDeriv = this.mathAdapter.subtract(stateArray, prevStateArray);
+const timeDerivScaled = this.mathAdapter.divide(timeDeriv, dt);
+
+// Calculate damping term
+const dampingTerm = this.mathAdapter.multiply(timeDerivScaled, beta);
+
+// Calculate wave propagation term
+const waveterm = this.mathAdapter.subtract(c2Laplacian, dampingTerm);
+const wavetermScaled = this.mathAdapter.multiply(waveterm, dt * dt);
+
+// Calculate new state
+const twoState = this.mathAdapter.multiply(stateArray, 2);
+const stateMinusPrev = this.mathAdapter.subtract(twoState, prevStateArray);
+const newStateArray = this.mathAdapter.add(stateMinusPrev, wavetermScaled);</code></pre>
+      </div>
+    </div>
+    
+    <h3>4.3 Physical Significance</h3>
+    
+    <p>The choice between these two diffusion models reflects different physical theories about how quantum information propagates in a quantum spacetime:</p>
+    
+    <ul>
+      <li><strong>Ordinary Diffusion</strong>: Corresponds to parabolic equations in physics, where effects propagate with infinite speed but diminish rapidly with distance</li>
+      <li><strong>Telegraph Diffusion</strong>: Corresponds to hyperbolic equations, where effects propagate with finite speed (like waves) and can show oscillatory behavior</li>
+    </ul>
+    
+    <p>In a quantum gravity context, the telegraph equation might better represent reality since it respects the finite speed of information propagation, consistent with relativity.</p>
+  </div>
+  
+  <!-- SECTION 6: Geometric Properties Calculation -->
+  <div class="notebook-section" id="section-6">
+    <div class="notebook-section-header">
+      <h2>6. Geometric Properties Calculation</h2>
+    </div>
+    
+    <p>Our simulation calculates several geometric properties of the evolving quantum state on the spin network. These properties help us understand the quantum geometric interpretation of the system.</p>
+    
+    <h3>5.1 Total Volume</h3>
+    
+    <p>In loop quantum gravity, the volume is related to the quantum state at each node. We calculate the total volume as:</p>
+    
+    <p class="equation">
+      \(V_{total} = \sum_i |\psi_i|^2\)
+    </p>
+    
+    <p>This represents the total "quantum volume" of the spacetime represented by the spin network. In physical terms, this is proportional to the total probability of finding a quantum excitation anywhere in the network.</p>
+    
+    <div class="implementation-note">
+      <h4>Code Implementation:</h4>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From SpinNetworkGeometryCalculator
+calculateTotalVolume(state: StateVector): number {
+  let totalVolume = 0;
+  
+  // Sum up the volumes associated with each node
+  for (let i = 0; i < state.size; i++) {
+    // Get state value
+    const stateValue = state.getValueAtIndex(i);
+    
+    // The volume contribution of a node is proportional to |ψ|²
+    // This is a simplified model; in full LQG, volume depends on
+    // intertwiner quantum numbers in a more complex way
+    const volumeContribution = Math.abs(stateValue) ** 2;
+    totalVolume += volumeContribution;
+  }
+  
+  return totalVolume;
+}</code></pre>
+      </div>
+    </div>
+    
+    <h3>5.2 Total Area</h3>
+    
+    <p>In loop quantum gravity, the area of a surface crossed by an edge is related to the spin value of that edge. The total area is calculated as:</p>
+    
+    <p class="equation">
+      \(A_{total} = \sum_e \sqrt{j_e(j_e+1)}\)
+    </p>
+    
+    <p>Where \(j_e\) is the spin value of edge \(e\). This formula comes directly from loop quantum gravity, where the area operator has eigenvalues proportional to \(\sqrt{j(j+1)}\) in Planck units.</p>
+    
+    <div class="implementation-note">
+      <h4>Code Implementation:</h4>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From SpinNetworkGeometryCalculator
+calculateTotalArea(graph: SimulationGraph): number {
+  let totalArea = 0;
+  
+  // Sum up the areas associated with each edge
+  for (const edge of graph.edges) {
+    // The area contribution of an edge is proportional to sqrt(j(j+1))
+    const spinValue = Math.max(0, edge.spin); // Ensure non-negative
+    const areaContribution = Math.sqrt(spinValue * (spinValue + 1));
+    
+    totalArea += areaContribution;
+  }
+  
+  return totalArea;
+}</code></pre>
+      </div>
+    </div>
+    
+    <h3>5.3 Effective Dimension</h3>
+    
+    <p>The effective dimension provides an estimate of the spectral dimension of the network, which is a measure of how the network "looks" dimensionally based on diffusion processes.</p>
+    
+    <p>We calculate this by analyzing the eigenvalues of the Laplacian matrix. The spectral dimension \(d_s\) is related to how the eigenvalue counting function \(N(\lambda)\) scales with \(\lambda\):</p>
+    
+    <p class="equation">
+      \(N(\lambda) \sim \lambda^{d_s/2}\)
+    </p>
+    
+    <p>Or equivalently:</p>
+    
+    <p class="equation">
+      \(d_s = 2 \cdot \frac{d\log N(\lambda)}{d\log \lambda}\)
+    </p>
+    
+    <p>This dimension tells us how many effective dimensions the quantum space has from the perspective of diffusion processes. In classical physics, the spectral dimension of ordinary flat space equals its topological dimension (e.g., 2 for a plane, 3 for ordinary space).</p>
+    
+    <div class="implementation-note">
+      <h4>Code Implementation:</h4>
+      <p>This is calculated through linear regression on the log of eigenvalues vs. the log of their cumulative count:</p>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From SpinNetworkGeometryCalculator
+calculateEffectiveDimension(graph: SimulationGraph, state: StateVector): number {
+  // Create the Laplacian matrix
+  const laplacian = graph.toLaplacianMatrix();
+  
+  // Calculate eigenvalues
+  const result = MathAdapter.eigenDecomposition(laplacian);
+  const eigenvalues = result.values;
+  
+  // Filter and sort eigenvalues
+  const sortedEigenvalues = eigenvalues
+    .filter(v => Number.isFinite(v) && Math.abs(v) > 1e-10)
+    .sort((a, b) => a - b);
+  
+  // Take a sample of the smallest eigenvalues
+  const sampleSize = Math.min(10, Math.floor(sortedEigenvalues.length / 3));
+  
+  // Calculate log eigenvalues and log cumulative counts
+  const logEigenvalues = [];
+  const logCumulative = [];
+  
+  for (let i = 0; i < sampleSize; i++) {
+    const eigenvalue = sortedEigenvalues[i];
+    if (eigenvalue <= 0) continue;
+    
+    const logValue = Math.log(eigenvalue);
+    logEigenvalues.push(logValue);
+    
+    const cumulative = (i + 1) / sortedEigenvalues.length;
+    const logCumul = Math.log(cumulative);
+    logCumulative.push(logCumul);
+  }
+  
+  // Calculate the slope using linear regression
+  let sumXY = 0, sumX = 0, sumY = 0, sumXX = 0;
+  
+  for (let i = 0; i < logEigenvalues.length; i++) {
+    sumXY += logEigenvalues[i] * logCumulative[i];
+    sumX += logEigenvalues[i];
+    sumY += logCumulative[i];
+    sumXX += logEigenvalues[i] * logEigenvalues[i];
+  }
+  
+  const denominator = (logEigenvalues.length * sumXX - sumX * sumX);
+  const slope = (logEigenvalues.length * sumXY - sumX * sumY) / denominator;
+  
+  // d_s = -2 * slope
+  const dimension = -2 * slope;
+  
+  return Math.max(0, Math.min(10, dimension));
+}</code></pre>
+      </div>
+    </div>
+    
+    <h3>5.4 Volume Entropy</h3>
+    
+    <p>The volume entropy measures how uniformly the volume is distributed across the network. It's calculated using the Shannon entropy formula:</p>
+    
+    <p class="equation">
+      \(S_V = -\sum_i \frac{v_i}{V_{total}} \log\left(\frac{v_i}{V_{total}}\right)\)
+    </p>
+    
+    <p>Where \(v_i = |\psi_i|^2\) is the volume contribution of node \(i\).</p>
+    
+    <p>A high entropy indicates that the volume is spread evenly across many nodes, while a low entropy suggests it's concentrated in a few nodes. This can be interpreted as a measure of how "localized" or "delocalized" the quantum state is.</p>
+    
+    <div class="implementation-note">
+      <h4>Code Implementation:</h4>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From SpinNetworkGeometryCalculator
+calculateVolumeEntropy(state: StateVector): number {
+  const totalVolume = this.calculateTotalVolume(state);
+  
+  // If total volume is 0, return 0 to avoid division by zero
+  if (totalVolume === 0) {
+    return 0;
+  }
+  
+  let entropy = 0;
+  
+  // Calculate entropy based on volume distribution
+  for (let i = 0; i < state.size; i++) {
+    const stateValue = state.getValueAtIndex(i);
+    const volumeContribution = Math.abs(stateValue) ** 2;
+    
+    // Skip nodes with zero volume
+    if (volumeContribution === 0) {
+      continue;
+    }
+    
+    // Calculate the volume fraction
+    const volumeFraction = volumeContribution / totalVolume;
+    
+    // Add to entropy: -p * ln(p)
+    entropy -= volumeFraction * Math.log(volumeFraction);
+  }
+  
+  return entropy;
+}</code></pre>
+      </div>
+    </div>
+  </div>
+  
+  <!-- SECTION 7: Statistical Analysis -->
+  <div class="notebook-section" id="section-7">
+    <div class="notebook-section-header">
+      <h2>7. Statistical Analysis</h2>
+    </div>
+    
+    <p>In addition to the geometric properties, we also calculate statistical measures of the state vector to understand its distribution properties. These statistics help characterize the behavior of the quantum state as it evolves.</p>
+    
+    <h3>6.1 Mean</h3>
+    
+    <p>The mean (average) value of the state:</p>
+    
+    <p class="equation">
+      \(\mu = \frac{1}{n} \sum_i \psi_i\)
+    </p>
+    
+    <p>The mean represents the average amplitude across all nodes. In a physical context, this can indicate whether the state has a bias toward positive or negative values, which might be relevant for certain quantum phenomena.</p>
+    
+    <h3>6.2 Variance</h3>
+    
+    <p>The variance measures the spread of values around the mean:</p>
+    
+    <p class="equation">
+      \(\sigma^2 = \frac{1}{n} \sum_i (\psi_i - \mu)^2\)
+    </p>
+    
+    <p>This can be calculated more efficiently as:</p>
+    
+    <p class="equation">
+      \(\sigma^2 = \frac{1}{n} \sum_i \psi_i^2 - \mu^2\)
+    </p>
+    
+    <p>A high variance indicates that the amplitudes vary significantly across different nodes, which might suggest an uneven or "lumpy" quantum state.</p>
+    
+    <h3>6.3 Standard Deviation</h3>
+    
+    <p>The standard deviation is the square root of the variance:</p>
+    
+    <p class="equation">
+      \(\sigma = \sqrt{\sigma^2}\)
+    </p>
+    
+    <p>This gives a measure of the typical deviation from the mean in the same units as the state values themselves.</p>
+    
+    <div class="implementation-note">
+      <h4>Code Implementation:</h4>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From SimulationAnalyzer
+static calculateStatistics(state: StateVector, time: number): SimulationStatistics {
+  const nodeValues: Record<string, number> = {};
+  let sum = 0;
+  let sumSquared = 0;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  let validValueCount = 0;
+  
+  // Calculate basic statistics
+  for (let i = 0; i < state.size; i++) {
+    const nodeId = state.nodeIds[i];
+    let value = state.getValueAtIndex(i);
+    
+    // Store valid value and update statistics
+    nodeValues[nodeId] = value;
+    sum += value;
+    sumSquared += value * value;
+    validValueCount++;
+    
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  
+  // Calculate statistics
+  const mean = sum / validValueCount;
+  
+  // Calculate variance with validation
+  let variance = (sumSquared / validValueCount) - (mean * mean);
+  // Variance should never be negative due to floating point errors
+  variance = Math.max(0, variance);
+  
+  // Calculate standard deviation
+  let standardDeviation = Math.sqrt(variance);
+  
+  return {
+    mean,
+    variance,
+    standardDeviation,
+    min,
+    max,
+    nodeValues,
+    time
+  };
+}</code></pre>
+      </div>
+    </div>
+    
+    <h3>6.4 Minimum and Maximum Values</h3>
+    
+    <p>We also track the minimum and maximum values of the state vector:</p>
+    
+    <p class="equation">
+      \(\text{min} = \min_i \{\psi_i\} \quad \text{and} \quad \text{max} = \max_i \{\psi_i\}\)
+    </p>
+    
+    <p>These values help us understand the range of the state and can indicate if there are extreme values or outliers in the distribution.</p>
+    
+    <h3>6.5 Physical Interpretation</h3>
+    
+    <p>These statistical measures provide insights into the behavior of the quantum state:</p>
+    
+    <ul>
+      <li><strong>Mean near zero with high variance</strong>: State is oscillating or has positive and negative regions that balance out</li>
+      <li><strong>Mean far from zero</strong>: State has a bias in a particular direction (may indicate non-conservation of probability)</li>
+      <li><strong>Decreasing variance over time</strong>: State is becoming more uniform (typical in diffusion)</li>
+      <li><strong>Periodic changes in statistics</strong>: May indicate wave-like behavior (especially in telegraph diffusion)</li>
+    </ul>
+    
+    <p>By tracking these statistics over time, we can gain insights into the dynamics of the quantum state on the spin network.</p>
+  </div>
+  
+  <!-- SECTION 8: Conservation Laws -->
+  <div class="notebook-section" id="section-8">
+    <div class="notebook-section-header">
+      <h2>8. Conservation Laws</h2>
+    </div>
+    
+    <p>Our simulation checks several conservation laws to ensure the numerical evolution is stable and physically meaningful. In quantum mechanics, certain quantities should be conserved during evolution, and violations can indicate numerical instabilities or physical inconsistencies.</p>
+    
+    <h3>7.1 L2 Norm Conservation</h3>
+    
+    <p>The L2 norm (Euclidean length) of the state vector should be conserved during evolution:</p>
+    
+    <p class="equation">
+      \(\|\psi\|_2 = \sqrt{\sum_i |\psi_i|^2}\)
+    </p>
+    
+    <p>We calculate the variation in this norm as:</p>
+    
+    <p class="equation">
+      \(\text{normVariation} = \frac{|\|\psi(t)\|_2 - \|\psi(0)\|_2|}{\|\psi(0)\|_2}\)
+    </p>
+    
+    <p>In quantum mechanics, this conservation corresponds to the conservation of total probability. The sum of probabilities of finding a particle anywhere in the system should always equal 1.</p>
+    
+    <h3>7.2 Positivity Check</h3>
+    
+    <p>In some physical interpretations, the state values should remain positive. We check this by ensuring:</p>
+    
+    <p class="equation">
+      \(\psi_i \geq 0 \quad \forall i\)
+    </p>
+    
+    <p>This is particularly important in models where the state represents a probability amplitude rather than a complex quantum amplitude.</p>
+    
+    <div class="implementation-note">
+      <h4>Code Implementation:</h4>
+      
+      <div class="notebook-cell-code">
+<pre><code>// From SpinNetworkSimulationEngineImpl
+getConservationLaws() {
+  // Calculate L2 norm (sqrt of sum of squares)
+  let initialNorm = 0;
+  let currentNorm = 0;
+  
+  // Calculate norms directly
+  for (let i = 0; i < this.state.size; i++) {
+    const initialValue = this.initialState.getValueAtIndex(i);
+    const currentValue = this.state.getValueAtIndex(i);
+    
+    initialNorm += initialValue * initialValue;
+    currentNorm += currentValue * currentValue;
+  }
+  
+  // Take square root to get actual norms
+  initialNorm = Math.sqrt(initialNorm);
+  currentNorm = Math.sqrt(currentNorm);
+  
+  // Calculate the variation
+  const normVariation = Math.abs(currentNorm - initialNorm) / 
+                         (initialNorm > 1e-10 ? initialNorm : 1.0);
+  
+  // Check positivity
+  let positivity = true;
+  for (let i = 0; i < this.state.size; i++) {
+    if (this.state.getValueAtIndex(i) < -1e-10) {
+      positivity = false;
+      break;
+    }
+  }
+  
+  return {
+    totalProbability: currentNorm,
+    normVariation,
+    positivity,
+  };
+}</code></pre>
+      </div>
+    </div>
+    
+    <h3>7.3 Physical Significance</h3>
+    
+    <p>Conservation laws play several important roles in our simulation:</p>
+    
+    <ul>
+      <li><strong>Validation</strong>: They help validate that our numerical methods are stable and accurate</li>
+      <li><strong>Physical Consistency</strong>: They ensure the simulation respects physical principles</li>
+      <li><strong>Boundary Detection</strong>: Violations can signal when the simulation has reached regimes where our approximations break down</li>
+    </ul>
+    
+    <p>In particular, norm conservation (through the <code>normVariation</code> value) provides a key indicator of how well our numerical methods are preserving fundamental quantum mechanical principles during the simulation.</p>
+  </div>
+  
+  <!-- SECTION 9: Simulation Steps and Execution Flow -->
+  <div class="notebook-section" id="section-9">
+    <div class="notebook-section-header">
+      <h2>9. Simulation Steps and Execution Flow</h2>
+    </div>
+    
+    <p>Now that we've explored the underlying physics and calculations, let's examine how the simulation actually executes in the code. This section breaks down the step-by-step process of the simulation.</p>
+    
+    <h3>8.1 Initialization Process</h3>
+    
+    <p>When the simulation starts, the following steps are performed:</p>
+    
+    <ol>
+      <li>Create a simulation graph from the network</li>
+      <li>Create a simulation engine</li>
+      <li>Create visualization adapter</li>
+      <li>Set parameters (diffusion rate, time step, etc.)</li>
+      <li>Initialize the engine with the graph and parameters</li>
+      <li>Create the initial state vector</li>
+      <li>Calculate initial geometric properties and statistics</li>
+    </ol>
+    
+    <div class="notebook-cell-code">
+<pre><code>// Creating a simulation graph from the network
+const graph = createSimulationGraph(testNetwork);
+
+// Creating a simulation engine
+const engine = createSimulationEngine();
+
+// Initialize the engine
+engine.initialize(graph, parameters);
+
+// Get the initial state
+const initialState = engine.getCurrentState();</code></pre>
+    </div>
+    
+    <p>In the context of the randomized network version in <code>test-simulation.html</code>, we generate a new random network each time using <code>generateRandomNetwork()</code>, which creates varied network topologies for testing.</p>
+    
+    <h3>8.2 Simulation Steps</h3>
+    
+    <p>For each time step of the simulation, we:</p>
+    
+    <ol>
+      <li>Evolve the state using the diffusion model</li>
+      <li>Update the current time</li>
+      <li>Record the state in the history (if enabled)</li>
+      <li>Calculate geometric properties</li>
+      <li>Calculate statistics</li>
+      <li>Check conservation laws</li>
+      <li>Update visualization (if enabled)</li>
+    </ol>
+    
+    <div class="notebook-cell-code">
+<pre><code>// Step the simulation a few times
+for (let i = 0; i < 10; i++) {
+  engine.step();
+  const currentTime = engine.getCurrentTime();
+  
+  // Get the current state
+  const state = engine.getCurrentState();
+  
+  // Get conservation laws
+  const conservation = engine.getConservationLaws();
+  
+  // Calculate geometric properties
+  const geometric = {
+    totalVolume: geometryCalculator.calculateTotalVolume(state),
+    totalArea: geometryCalculator.calculateTotalArea(graph),
+    effectiveDimension: geometryCalculator.calculateEffectiveDimension(graph, state),
+    volumeEntropy: geometryCalculator.calculateVolumeEntropy(state)
+  };
+  
+  // Calculate statistics
+  const stats = SimulationAnalyzer.calculateStatistics(state, currentTime);
+}</code></pre>
+    </div>
+    
+    <h3>8.3 Key Classes and Their Roles</h3>
+    
+    <p>The simulation is structured around several key classes with specific responsibilities:</p>
+    
+    <table>
+      <tr>
+        <th>Class</th>
+        <th>Responsibility</th>
+      </tr>
+      <tr>
+        <td><code>SpinNetworkGraph</code></td>
+        <td>Represents the network structure and topology</td>
+      </tr>
+      <tr>
+        <td><code>SimulationStateVector</code></td>
+        <td>Manages the quantum state and its operations</td>
+      </tr>
+      <tr>
+        <td><code>SpinNetworkSimulationEngineImpl</code></td>
+        <td>Coordinates the overall simulation process</td>
+      </tr>
+      <tr>
+        <td><code>OrdinaryDiffusionModel / TelegraphDiffusionModel</code></td>
+        <td>Implements specific diffusion equations</td>
+      </tr>
+      <tr>
+        <td><code>SpinNetworkGeometryCalculator</code></td>
+        <td>Calculates geometric properties</td>
+      </tr>
+      <tr>
+        <td><code>SimulationAnalyzer</code></td>
+        <td>Calculates statistical properties</td>
+      </tr>
+    </table>
+    
+    <h3>8.4 Visualization Update Process</h3>
+    
+    <p>The simulation results are visualized in the testing interface:</p>
+    
+    <ol>
+      <li>Geometric properties (volume, area, dimension, entropy) are displayed in the "Geometric Properties" panel</li>
+      <li>Statistical measures (mean, variance, etc.) are shown in the "Distribution Statistics" panel</li>
+      <li>Progress logs and debugging information appear in the console output</li>
+    </ol>
+    
+    <p>This visualization is automatically updated when the simulation runs or when a new random network is generated using the "Generate New Random Network" button.</p>
+  </div>
+  
+  <!-- SECTION 10: Comparing Different Parameters -->
+  <div class="notebook-section" id="section-10">
+    <div class="notebook-section-header">
+      <h2>10. Comparing Different Initial States and Parameters</h2>
+    </div>
+    
+    <p>The simulation behavior can vary dramatically depending on the initial state and parameters. Here's how different choices affect the results, and what physical insights we can gain from these comparisons.</p>
+    
+    <h3>9.1 Initial State Types</h3>
+    
+    <table>
+      <tr>
+        <th>Initial State</th>
+        <th>Characteristics</th>
+        <th>Physical Interpretation</th>
+      </tr>
+      <tr>
+        <td>Delta Function</td>
+        <td>Concentrated at a single node</td>
+        <td>Localized particle/excitation</td>
+      </tr>
+      <tr>
+        <td>Uniform</td>
+        <td>Equal value at all nodes</td>
+        <td>Maximally delocalized state</td>
+      </tr>
+      <tr>
+        <td>Gaussian</td>
+        <td>Bell curve centered at a node</td>
+        <td>Partially localized wavepacket</td>
+      </tr>
+    </table>
+    
+    <p>Different initial states lead to different evolution patterns:</p>
+    
+    <ul>
+      <li><strong>Delta Function</strong>: Shows the most dramatic spreading behavior, starting from a fully localized state and gradually diffusing throughout the network. Ideal for studying diffusion rates.</li>
+      <li><strong>Uniform</strong>: Remains relatively stable over time with ordinary diffusion, but may show oscillations with telegraph diffusion. Useful for studying stability properties.</li>
+      <li><strong>Gaussian</strong>: Provides a middle ground, with gradual spreading from a partially localized state. Good for studying how the "width" of a quantum excitation evolves.</li>
+    </ul>
+    
+    <h3>9.2 Diffusion Models</h3>
+    
+    <table>
+      <tr>
+        <th>Diffusion Model</th>
+        <th>Key Parameters</th>
+        <th>Behavior</th>
+      </tr>
+      <tr>
+        <td>Ordinary (Heat Equation)</td>
+        <td>α (diffusion rate)</td>
+        <td>Smooth spreading from high to low concentration</td>
+      </tr>
+      <tr>
+        <td>Telegraph Equation</td>
+        <td>β (damping), c (wave speed)</td>
+        <td>Wave-like propagation with dampening</td>
+      </tr>
+    </table>
+    
+    <p>The key differences between the diffusion models include:</p>
+    
+    <ul>
+      <li><strong>Ordinary Diffusion</strong>: Always leads to a uniform state if run long enough, regardless of initial conditions. The diffusion is smooth and monotonic.</li>
+      <li><strong>Telegraph Diffusion</strong>: Can show oscillatory behavior and wave-like propagation before eventually settling into a diffusive pattern. Can maintain structure for longer periods.</li>
+    </ul>
+    
+    <h3>9.3 Parameter Effects</h3>
+    
+    <ul>
+      <li><strong>α (Diffusion Rate)</strong>: Higher values cause faster spreading
+        <ul>
+          <li>Low α: Slow, gradual diffusion - useful for studying fine details of the process</li>
+          <li>High α: Rapid diffusion - reaches equilibrium quickly</li>
+        </ul>
+      </li>
+      <li><strong>β (Damping)</strong>: Higher values reduce oscillations
+        <ul>
+          <li>Low β: More pronounced wave-like behavior, stronger oscillations</li>
+          <li>High β: More diffusion-like behavior, oscillations quickly dampen out</li>
+        </ul>
+      </li>
+      <li><strong>c (Wave Speed)</strong>: Higher values increase propagation speed
+        <ul>
+          <li>Low c: Slower wave propagation, effects take longer to reach distant nodes</li>
+          <li>High c: Faster wave propagation, effects quickly reach all parts of the network</li>
+        </ul>
+      </li>
+      <li><strong>timeStep</strong>: Smaller values improve numerical stability but increase computation time
+        <ul>
+          <li>Too large: Can lead to numerical instabilities and violation of conservation laws</li>
+          <li>Too small: Computationally inefficient, may take too long to see significant changes</li>
+        </ul>
+      </li>
+    </ul>
+    
+    <h3>9.4 Network Topology Effects</h3>
+    
+    <p>With our randomized network generation in <code>test-simulation.html</code>, we can observe how different network structures affect diffusion behavior:</p>
+    
+    <ul>
+      <li><strong>Node Count</strong>: More nodes provide a finer-grained discretization of space, potentially showing more complex patterns</li>
+      <li><strong>Connectivity</strong>: Higher connectivity allows faster global diffusion, while lower connectivity can lead to "bottleneck" effects</li>
+      <li><strong>Spin Values</strong>: Higher spin values create "preferred pathways" for diffusion, affecting the effective dimension</li>
+    </ul>
+    
+    <p>These effects can be observed by repeatedly regenerating the network and running the simulation to see how the geometric properties and statistics vary with different random network configurations.</p>
+    
+    <h3>9.5 Observable Patterns</h3>
+    
+    <p>When comparing different configurations, several patterns are typically observable:</p>
+    
+    <ul>
+      <li><strong>Volume Evolution</strong>: Total volume tends to remain constant in well-behaved simulations, verifying probability conservation</li>
+      <li><strong>Dimension Variation</strong>: The effective dimension depends significantly on network connectivity and can change as the state evolves</li>
+      <li><strong>Entropy Increase</strong>: Volume entropy typically increases over time as the state spreads out, reflecting the second law of thermodynamics</li>
+      <li><strong>Variance Decrease</strong>: Variance typically decreases over time with ordinary diffusion as the state becomes more uniform</li>
+    </ul>
+    
+    <p>By varying parameters and initial conditions with each run, these patterns can be verified and explored in the test simulation.</p>
+  </div>
+  
+  <!-- SECTION 11: Conclusion and Further Exploration -->
+  <div class="notebook-section" id="section-11">
+    <div class="notebook-section-header">
+      <h2>11. Conclusion and Further Exploration</h2>
+    </div>
+    
+    <p>This notebook has provided an overview of the physics behind the spin network simulation, explaining how the network is represented, how states evolve over time, and how various geometric and statistical properties are calculated.</p>
+    
+    <h3>10.1 Key Concepts Explored</h3>
+    
+    <p>Throughout this notebook, we've explored several important concepts:</p>
+    
+    <ul>
+      <li>The representation of quantum geometry using spin networks</li>
+      <li>Different approaches to modeling quantum state evolution (diffusion models)</li>
+      <li>Geometric properties like volume, area, dimension, and entropy</li>
+      <li>Statistical measures that characterize the state behavior</li>
+      <li>Conservation laws that validate our numerical approaches</li>
+      <li>The effects of different parameters and network structures</li>
+    </ul>
+    
+    <p>These concepts provide a foundation for understanding how quantum information might propagate through a discrete quantum spacetime.</p>
+    
+    <h3>10.2 Further Exploration</h3>
+    
+    <p>To further explore the physics of spin networks and loop quantum gravity, you can experiment with:</p>
+    
+    <ul>
+      <li><strong>Different network topologies</strong>: Try networks with different numbers of nodes, connectivity patterns, or specialized structures (like lattices or tree-like arrangements)</li>
+      <li><strong>Different initial states</strong>: Combine delta functions to create interference patterns, or try structured initial distributions</li>
+      <li><strong>Different diffusion models</strong>: Adjust parameters to observe transitions between diffusive and wave-like behavior</li>
+      <li><strong>Longer-term evolution</strong>: Run simulations for more steps to observe asymptotic behavior</li>
+      <li><strong>Alternative Laplacian constructions</strong>: Experiment with different weight functions to see how they affect diffusion patterns</li>
+    </ul>
+    
+    <p>The randomized network generation feature in <code>test-simulation.html</code> is particularly useful for these explorations, as it allows you to quickly test different network structures.</p>
+    
+    <h3>10.3 Physical Interpretations</h3>
+    
+    <p>The simulation results can be interpreted in several ways, depending on your perspective on quantum gravity:</p>
+    
+    <ul>
+      <li><strong>Information Flow</strong>: As a model of how quantum information propagates through quantum spacetime</li>
+      <li><strong>Emergent Geometry</strong>: As a study of how classical geometric properties emerge from quantum degrees of freedom</li>
+      <li><strong>Quantum Decoherence</strong>: As an exploration of how quantum states evolve and potentially "classicalize" through interaction with their environment</li>
+      <li><strong>Quantum Computing</strong>: As a model for quantum information processing on networks with constrained connectivity</li>
+    </ul>
+    
+    <p>By observing patterns in the geometric properties and statistics as the simulation evolves, you can gain insights into these different interpretations.</p>
+    
+    <div class="note">
+      <p>For the interested reader, the full mathematical details of loop quantum gravity and spin networks can be found in textbooks on quantum gravity, such as "Quantum Gravity" by Carlo Rovelli or "Loop Quantum Gravity: The First 30 Years" edited by Abhay Ashtekar and Jorge Pullin.</p>
+    </div>
+  </div>
+
+  </div> <!-- End of main-content div -->
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Render math equations
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: "\\(", right: "\\)", display: false},
+          {left: "\\[", right: "\\]", display: true},
+          {left: "\\begin{equation}", right: "\\end{equation}", display: true},
+        ],
+        throwOnError: false
+      });
+      
+      // Make sections collapsible
+      const sections = document.querySelectorAll('.notebook-section-header h2');
+      
+      sections.forEach(section => {
+        // Add section-header class
+        section.classList.add('section-header');
+        
+        // Get parent section
+        const sectionDiv = section.closest('.notebook-section');
+        const content = sectionDiv.querySelector('.notebook-section-header').nextElementSibling;
+        
+        // Create a container for all content after the header
+        const contentContainer = document.createElement('div');
+        contentContainer.classList.add('section-content');
+        
+        // Move all content after the header into the container
+        while (content && content.nextElementSibling) {
+          contentContainer.appendChild(content.nextElementSibling);
+        }
+        
+        // Move the first content element into the container
+        if (content && content !== section) {
+          contentContainer.insertBefore(content, contentContainer.firstChild);
+        }
+        
+        // Append the content container to the section
+        sectionDiv.appendChild(contentContainer);
+        
+        // Add click event to toggle collapse
+        section.addEventListener('click', () => {
+          section.classList.toggle('collapsed');
+          contentContainer.classList.toggle('collapsed');
+          
+          // Update the section's hash in the URL for direct linking to sections
+          if (!section.classList.contains('collapsed')) {
+            const sectionId = section.textContent.trim().split('.')[0];
+            window.location.hash = sectionId;
+          }
+        });
+      });
+      
+      // Generate Table of Contents
+      const tocList = document.getElementById('toc-list');
+      const topTocList = document.getElementById('top-toc-list');
+      
+      // Clear existing content
+      tocList.innerHTML = '';
+      topTocList.innerHTML = '';
+      
+      // Get all section headings
+      const sectionHeadings = document.querySelectorAll('.notebook-section-header h2');
+      
+      sectionHeadings.forEach(heading => {
+        const sectionNum = heading.textContent.split('.')[0].trim();
+        const sectionTitle = heading.textContent.substring(heading.textContent.indexOf('.') + 1).trim();
+        const sectionId = sectionNum;
+        
+        // Assign an ID to the section heading for navigation
+        heading.id = sectionId;
+        
+        // Create sidebar TOC entry
+        const sectionItem = document.createElement('li');
+        sectionItem.classList.add('toc-section');
+        sectionItem.innerHTML = `<a href="#${sectionId}">${heading.textContent}</a>`;
+        
+        // Create subsection list
+        const subsectionList = document.createElement('ul');
+        subsectionList.classList.add('toc-subsection');
+        
+        // Get all subsection headings in this section
+        const section = heading.closest('.notebook-section');
+        const subsectionHeadings = section.querySelectorAll('h3');
+        
+        subsectionHeadings.forEach((subheading, index) => {
+          const subheadingTitle = subheading.textContent;
+          const subheadingId = `${sectionId}-${index + 1}`;
+          
+          // Assign an ID to the subsection heading
+          subheading.id = subheadingId;
+          
+          // Create sidebar TOC subsection entry
+          const subsectionItem = document.createElement('li');
+          subsectionItem.innerHTML = `<a href="#${subheadingId}">${subheadingTitle}</a>`;
+          subsectionList.appendChild(subsectionItem);
+        });
+        
+        // Add subsections to sidebar TOC
+        if (subsectionHeadings.length > 0) {
+          sectionItem.appendChild(subsectionList);
+        }
+        
+        tocList.appendChild(sectionItem);
+        
+        // Create top TOC entry
+        const topTocItem = document.createElement('li');
+        topTocItem.innerHTML = `<a href="#${sectionId}">${heading.textContent}</a>`;
+        topTocList.appendChild(topTocItem);
+      });
+      
+      // Add click handlers to all TOC links to ensure sections expand properly
+      document.querySelectorAll('#toc-list a, #top-toc-list a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Get the target ID
+          const targetId = this.getAttribute('href').substring(1);
+          const targetElement = document.getElementById(targetId);
+          
+          if (targetElement) {
+            e.preventDefault();
+            
+            // Find the section containing this element
+            const section = targetElement.closest('.notebook-section');
+            
+            if (section) {
+              // Find the section header
+              const sectionHeader = section.querySelector('.section-header');
+              
+              // If the section is collapsed, expand it
+              if (sectionHeader && sectionHeader.classList.contains('collapsed')) {
+                sectionHeader.click();
+              }
+              
+              // After a short delay to allow expansion, scroll to the target
+              setTimeout(() => {
+                targetElement.scrollIntoView({
+                  behavior: 'smooth'
+                });
+                
+                // Update the URL hash
+                history.pushState(null, null, `#${targetId}`);
+              }, 300);
+            }
+          }
+        });
+      });
+      
+      // Mobile TOC toggle
+      const tocToggle = document.getElementById('toc-toggle');
+      const tocSidebar = document.getElementById('toc-sidebar');
+      
+      tocToggle.addEventListener('click', () => {
+        tocSidebar.classList.toggle('visible');
+      });
+      
+      // Handle hash-based navigation
+      if (window.location.hash) {
+        const id = window.location.hash.substring(1);
+        const targetElement = document.getElementById(id);
+        
+        if (targetElement) {
+          // If the target is a section heading, make sure it's expanded
+          if (targetElement.classList.contains('section-header') && targetElement.classList.contains('collapsed')) {
+            targetElement.click();
+          }
+          
+          // Or if it's a subsection, make sure its parent section is expanded
+          const parentSection = targetElement.closest('.notebook-section');
+          if (parentSection) {
+            const sectionHeader = parentSection.querySelector('.section-header');
+            if (sectionHeader && sectionHeader.classList.contains('collapsed')) {
+              sectionHeader.click();
+            }
+          }
+          
+          // Scroll to the target element with a slight delay to ensure content is expanded
+          setTimeout(() => {
+            targetElement.scrollIntoView({
+              behavior: 'smooth'
+            });
+          }, 300);
+        }
+      }
+      
+      // Add active class highlighting for TOC based on scroll position
+      function updateTOCActiveState() {
+        // Get all section elements
+        const sections = document.querySelectorAll('.notebook-section');
+        let currentSectionId = null;
+        let currentSubsectionId = null;
+        
+        // Find which section is currently in the viewport
+        sections.forEach(section => {
+          const rect = section.getBoundingClientRect();
+          // Check if the top of the section is within the viewport or above it
+          // but still has content visible (not completely scrolled past)
+          if (rect.top <= 100 && rect.bottom > 0) {
+            currentSectionId = section.id;
+            
+            // Check for subsections
+            const subsections = section.querySelectorAll('h3');
+            subsections.forEach(subsection => {
+              const subRect = subsection.getBoundingClientRect();
+              if (subRect.top <= 100 && subRect.bottom > 0) {
+                currentSubsectionId = subsection.id;
+              }
+            });
+          }
+        });
+        
+        // Update TOC active states for sections
+        document.querySelectorAll('.toc-section > a').forEach(link => {
+          const href = link.getAttribute('href').substring(1);
+          if (href === currentSectionId) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+        
+        // Update TOC active states for subsections
+        document.querySelectorAll('.toc-subsection a').forEach(link => {
+          const href = link.getAttribute('href').substring(1);
+          if (href === currentSubsectionId) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+      
+      // Listen for scroll events
+      window.addEventListener('scroll', function() {
+        updateTOCActiveState();
+      });
+      
+      // Initial call to set the correct active states
+      updateTOCActiveState();
+    });
+  </script>
+</body>
+</html>

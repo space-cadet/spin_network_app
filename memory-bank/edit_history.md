@@ -9,6 +9,45 @@
 - Created `scripts/build-docs.js` - Added documentation build script
 - Moved `tensor-sandbox.html` from public/ to src/
 - Reorganized public/ directory structure
+
+### 11:30 - T44: Documentation Structure Migration
+- Created new documentation directory structure in /docs with physics, implementation, and static subdirectories
+- Moved HTML files from /public/docs to appropriate /docs subdirectories
+- Relocated script files to /docs/static/scripts
+- Updated script references in all HTML files to use new relative paths
+- Updated all script and library paths to maintain compatibility
+
+### Files Modified
+- Moved and updated the following files:
+  ```
+  /docs/physics/
+  ├── physics-notebook.html
+  ├── intertwiner-spaces.html
+  ├── unified-dynamics.html
+  └── mathematical-roadmap.html
+
+  /docs/implementation/
+  ├── standalone-guide.html
+  ├── simulation-test.html
+  └── tensor-sandbox.html
+
+  /docs/static/scripts/
+  ├── tensor-sandbox.js
+  ├── tensor-bridge.js
+  ├── spin-network-adapter.js
+  └── standalone-test.js
+  ```
+
+### Script Reference Updates
+- Updated paths in HTML files to use relative path "../../dist/lib/spin-network.umd.js"
+- Updated script references to point to new /docs/static/scripts/ location
+- Maintained served URLs in DocsPage.tsx
+- Modified `vite.config.ts` - Updated build configuration and output settings
+- Modified `lib-bundle.config.js` - Optimized library build settings
+- Modified `package.json` - Updated build scripts
+- Created `scripts/build-docs.js` - Added documentation build script
+- Moved `tensor-sandbox.html` from public/ to src/
+- Reorganized public/ directory structure
 *Updated: 2025-04-28*
 
 ## 2025-04-28
