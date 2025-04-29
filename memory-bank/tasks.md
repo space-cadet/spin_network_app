@@ -4,8 +4,8 @@
 ## Tasks Overview
 - **Active Tasks:** 15
 - **Paused Tasks:** 3
-- **Completed Tasks:** 21
-- **Latest Task ID:** T44
+- **Completed Tasks:** 22
+- **Latest Task ID:** T45
 
 ## Task Registry
 ### Active Tasks
@@ -41,6 +41,7 @@
 ### Completed Tasks
 | ID | Title | Completed | Task File |
 |----|-------|-----------|-----------|
+| T45 | Fix Documentation Page Deployment | 2025-04-29 | [tasks/T45.md] |
 | T44 | Clean Up Build Configuration and Fix Directory Structure | 2025-04-29 | [tasks/T44.md] |
 | T41 | Fix Multiple Dist Folders Issue | 2025-04-29 | [tasks/T41.md] |
 | T40 | Memory Bank Hierarchical Restructure | 2025-04-24 | [tasks/T40.md] |

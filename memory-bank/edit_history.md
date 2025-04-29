@@ -1,5 +1,12 @@
 # Edit History
-*Last Updated: 2025-04-29 13:42:00*
+*Last Updated: 2025-04-29 14:15:00*
+
+## 2025-04-29
+### 14:15 - T45: Fix Documentation Page Deployment Issues
+- Modified `package.json` - Added cp command to copy docs directory during build
+- Modified `firebase.json` - Updated rewrites to properly handle static HTML files
+- Modified `vercel.json` - Updated configuration to handle both SPA and static files
+- Fixes "No routes matched location" errors for documentation pages in production*Last Updated: 2025-04-29 13:42:00*
 
 ## 2025-04-29
 ### 13:42 - T41/T44: Vercel Deployment and Build Configuration Fixes
