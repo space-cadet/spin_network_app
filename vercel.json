@@ -5,8 +5,23 @@
       "destination": "/docs/:path*"
     },
     {
+      "source": "/dist/lib/:path*",
+      "destination": "/dist/lib/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/dist/lib/(.*)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
     }
   ]
 }

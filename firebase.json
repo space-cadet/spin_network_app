@@ -12,8 +12,23 @@
         "destination": "/docs/**/*.html"
       },
       {
+        "source": "/dist/lib/**",
+        "destination": "/dist/lib/**"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/dist/lib/**",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/javascript"
+          }
+        ]
       }
     ]
   }
