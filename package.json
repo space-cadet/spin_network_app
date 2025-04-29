@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "prebuild": "mkdir -p public/vendor && cp node_modules/browserfs/dist/browserfs.min.js public/vendor/",
-    "build": "rm -rf dist && tsc && vite build && npm run build:docs",
+    "build": "rm -rf dist && tsc && vite build",
     "build:lib": "vite build --config lib-bundle.config.js",
-    "build:docs": "node scripts/build-docs.js",
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

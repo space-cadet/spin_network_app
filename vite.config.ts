@@ -19,8 +19,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html'),
-        sandbox: path.resolve(__dirname, 'src/tensor-sandbox.html')
+        main: path.resolve(__dirname, 'index.html')
       },
       output: {
         manualChunks(id) {
