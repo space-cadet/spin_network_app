@@ -2,24 +2,17 @@
 *Last Updated: 2025-04-24 14:45:16*
 
 ## Tasks Overview
-- **Active Tasks:** 17
+- **Active Tasks:** 15
 - **Paused Tasks:** 3
-- **Completed Tasks:** 19
-- **Latest Task ID:** T42
+- **Completed Tasks:** 21
+- **Latest Task ID:** T44
 
 ## Task Registry
 ### Active Tasks
 | ID | Title | Status | Priority | Started | Task File |
 |----|-------|--------|----------|---------|-----------|
-| T44 | Clean Up Build Configuration and Fix Directory Structure | 🔄 | HIGH | 2025-04-28 | [tasks/T44.md] |
-- Modified build configuration for better organization ✅ 
-- Created scripts/build-docs.js for documentation builds ✅
-- Moved documentation to /docs with organized structure ✅
-- Updated script references to new locations ✅
-- Testing and cleanup remaining 🔄
 | T43 | Convert tensorNode to TypeScript | 🔄 | HIGH | 2025-04-28 | [tasks/T43.md] |
 | T42 | Fix Simulation Test Page Library Usage | 🔄 | HIGH | 2025-04-28 | [tasks/T42.md] |
-| T41 | Fix Multiple Dist Folders Issue | 🔄 | HIGH | 2025-04-24 | [tasks/T41.md] |
 | T40 | Memory Bank Hierarchical Restructure | ✅ | HIGH | 2025-04-24 | [tasks/T40.md] |
 
 | ID | Title | Status | Priority | Started | Task File |
@@ -48,6 +41,8 @@
 ### Completed Tasks
 | ID | Title | Completed | Task File |
 |----|-------|-----------|-----------|
+| T44 | Clean Up Build Configuration and Fix Directory Structure | 2025-04-29 | [tasks/T44.md] |
+| T41 | Fix Multiple Dist Folders Issue | 2025-04-29 | [tasks/T41.md] |
 | T40 | Memory Bank Hierarchical Restructure | 2025-04-24 | [tasks/T40.md] |
 | T28 | Fix Documentation Path Issues **Descr… | 2025-04-21 | [tasks/T28.md] |
 | T32 | Fix Library Build Errors **Descriptio… | 2025-04-20 | [tasks/T32.md] |

@@ -59,12 +59,17 @@ This document tracks both accomplished objectives and planned tasks for the proj
 
 ## Current Focus
 
-### 1. Enhance Log Explorer Component
-- [ ] Implement state persistence between page reloads
-- [ ] Add detailed file information view
-- [ ] Implement sortable file list with multiple sort options
-- [ ] Enhance the UI with column headers and sort indicators
-- [ ] Add view mode toggle between content and details view
+### 1. TypeScript Conversion (T43)
+- [ ] Convert tensorNode.js to TypeScript
+- [ ] Update type imports from core/tensor.ts
+- [ ] Remove duplicate type definitions
+- [ ] Update documentation
+
+### 2. Library Test Page Fix (T42)
+- [ ] Fix GeometricPropertiesCalculator class references
+- [ ] Fix createRandomGraph direct access
+- [ ] Fix SimulationAnalyzer.calculateStatistics access
+- [ ] Centralize simulation parameters
 
 ### 2. Simulation Logs Panel Fix
 - [ ] Fix null values in geometric and statistics tabs

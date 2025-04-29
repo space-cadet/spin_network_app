@@ -1,5 +1,13 @@
 # Edit History
-*Last Updated: 2025-04-28 15:30:00*
+*Last Updated: 2025-04-29 13:42:00*
+
+## 2025-04-29
+### 13:42 - T41/T44: Vercel Deployment and Build Configuration Fixes
+- Removed `vercel.json` to use default Vercel settings
+- Modified `package.json` to remove `rm -rf dist` from build script
+- Successfully redeployed project on Vercel with clean configuration
+- Completed reorganization of public/ directory structure (T44)
+- Successfully merged public branch back into main
 
 ## 2025-04-28
 ### 15:30 - T44: Build Configuration Cleanup

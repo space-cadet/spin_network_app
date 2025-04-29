@@ -2,6 +2,14 @@
 
 This document tracks key decisions, major milestones, and pivots in the project's development.
 
+## [2025-04-29] Build Configuration and Deployment Fix
+
+- Successfully fixed Vercel deployment by simplifying build configuration
+- Removed vercel.json and rm -rf dist command for cleaner builds
+- Reorganized public directory structure and documentation files
+- Merged documentation structure changes back to main branch
+- Achieved successful deployment with clean configuration
+
 ## [2025-04-18] Intertwiner Space Implementation and Physics Documentation
 
 - Added comprehensive implementation of intertwiner space calculations for spin networks
