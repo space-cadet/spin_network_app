@@ -15,7 +15,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     cssCodeSplit: true,
-    target: 'esnext',
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13'],
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       input: {
@@ -31,6 +31,8 @@ export default defineConfig({
           }
         }
       }
-    }
+    },
+    copyPublicDir: true,
+    sourcemap: true
   }
 });
