@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/docs/:path*",
-      "destination": "/docs/:path*"
-    },
-    {
       "source": "/dist/lib/:path*",
       "destination": "/dist/lib/:path*"
     },

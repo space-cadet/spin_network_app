@@ -8,10 +8,6 @@
     ],
     "rewrites": [
       {
-        "source": "/docs/**/*.html",
-        "destination": "/docs/**/*.html"
-      },
-      {
         "source": "/dist/lib/**",
         "destination": "/dist/lib/**"
       },
