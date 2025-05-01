@@ -11,7 +11,7 @@ export default defineConfig({
     }
   },
   build: {
-    emptyOutDir: true,
+    emptyOutDir: false, // do not remove dist folder
     outDir: 'dist',
     assetsDir: 'assets',
     cssCodeSplit: true,
