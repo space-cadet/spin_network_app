@@ -44,6 +44,7 @@
 | T45 | Fix Documentation Page Deployment | 2025-04-29 | [tasks/T45.md] |
 | T44 | Clean Up Build Configuration and Fix Directory Structure | 2025-04-29 | [tasks/T44.md] |
 | T41 | Fix Multiple Dist Folders Issue | 2025-04-29 | [tasks/T41.md] |
+| T46 | Implement state persistence for documentation and testing pages | 2025-05-01 | [tasks/T46.md] |
 | T40 | Memory Bank Hierarchical Restructure | 2025-04-24 | [tasks/T40.md] |
 | T28 | Fix Documentation Path Issues **Descr… | 2025-04-21 | [tasks/T28.md] |
 | T32 | Fix Library Build Errors **Descriptio… | 2025-04-20 | [tasks/T32.md] |

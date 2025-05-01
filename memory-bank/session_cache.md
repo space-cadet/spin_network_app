@@ -76,6 +76,7 @@
 | T38 | Implement Intertwiner Tensor Initiali… | 🔄 | HIGH | [sessions/T38_20250424.md] |
 | T39 | Fix Tensor Module Browser Compatibili… | ✅ | HIGH | [sessions/T39_20250424.md] |
 | T5 | Enhanced Simulation Test Pages **Stat… | 🔄 | HIGH | [sessions/T5_20250424.md] |
+| T46 | Implement state persistence for documentation and testing pages | ✅ | MEDIUM | [sessions/T46_20250501.md] |
 | T6 | Fix Database Service Errors **Status:… | 🔄 | HIGH | [sessions/T6_20250424.md] |
 | T8 | Implement Edit History File Rotation … | ✅ | MEDIUM   | [sessions/T8_20250424.md] |
 | T9 | Fix UI and Simulation TypeScript Erro… | 🔄 | HIGH | [sessions/T9_20250424.md] |

@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaFileAlt } from 'react-icons/fa';
+import { useSelector, useDispatch } from 'react-redux';
+import { setSelectedResourceId } from '../../store/slices/testingSlice';
+import { RootState } from '../../store';
 
 type TestResource = {
   id: string;
@@ -30,7 +33,9 @@ const testResources: TestResource[] = [
 ];
 
 const TestingPage: React.FC = () => {
-  const [selectedResource, setSelectedResource] = useState<TestResource>(testResources[0]);
+  const dispatch = useDispatch();
+  const selectedResourceId = useSelector((state: RootState) => state.testing.selectedResourceId);
+  const selectedResource = testResources.find(resource => resource.id === selectedResourceId) || testResources[0];
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeHeight, setIframeHeight] = useState('calc(100vh - 180px)');
 
@@ -64,7 +69,7 @@ const TestingPage: React.FC = () => {
               className={`w-full text-left px-4 py-3 flex items-start hover:bg-gray-100 ${
                 selectedResource.id === resource.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
               }`}
-              onClick={() => setSelectedResource(resource)}
+              onClick={() => dispatch(setSelectedResourceId(resource.id))}
             >
               <FaFileAlt className={`mt-1 mr-3 ${selectedResource.id === resource.id ? 'text-blue-500' : 'text-gray-500'}`} />
               <div>

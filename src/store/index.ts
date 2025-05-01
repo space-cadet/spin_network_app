@@ -1,13 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { 
-  persistStore, 
-  persistReducer, 
-  FLUSH, 
-  REHYDRATE, 
-  PAUSE, 
-  PERSIST, 
-  PURGE, 
-  REGISTER 
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER
 } from 'redux-persist';
 
 import localforage from 'localforage';
@@ -18,7 +18,9 @@ import recentNetworksReducer from './slices/recentNetworksSlice';
 import typeReducer from './slices/typeSlice';
 import simulationReducer from './slices/simulationSlice';
 import logsReducer from './slices/logsSlice';
-import logExplorerReducer from './slices/logExplorerSlice'; // Import the new slice reducer
+import logExplorerReducer from './slices/logExplorerSlice';
+import docsReducer from './slices/docsSlice'; // Import the docs slice reducer
+import testingReducer from './slices/testingSlice'; // Import the testing slice reducer
 import typeUsageMiddleware from './middleware/typeUsageMiddleware';
 import { migrationFunction } from '../utils/migrations';
 
@@ -75,13 +77,6 @@ const simulationPersistConfig = {
   whitelist: ['parameters', 'geometricData', 'statisticsData', 'conservationData']
 };
 
-// Create persisted reducers
-const persistedNetworkReducer = persistReducer(persistConfig, networkReducer);
-const persistedUiReducer = persistReducer(uiPersistConfig, uiReducer);
-const persistedRecentNetworksReducer = persistReducer(recentNetworksPersistConfig, recentNetworksReducer);
-const persistedTypeReducer = persistReducer(typesPersistConfig, typeReducer);
-const persistedSimulationReducer = persistReducer(simulationPersistConfig, simulationReducer);
-
 // Configure logs persist options
 const logsPersistConfig = {
   key: 'logs',
@@ -102,9 +97,36 @@ const logExplorerPersistConfig = {
   whitelist: ['currentPath', 'selectedFile', 'splitPosition', 'sortField', 'sortDirection', 'viewMode']
 };
 
+// Configure docs persist options
+const docsPersistConfig = {
+  key: 'docs',
+  version: 1, // Initial version
+  storage: localforage,
+  migrate: migrationFunction,
+  // Persist the selected resource ID
+  whitelist: ['selectedResourceId']
+};
+
+// Configure testing persist options
+const testingPersistConfig = {
+  key: 'testing',
+  version: 1, // Initial version
+  storage: localforage,
+  migrate: migrationFunction,
+  // Persist the selected resource ID
+  whitelist: ['selectedResourceId']
+};
+
 // Create persisted reducers
+const persistedNetworkReducer = persistReducer(persistConfig, networkReducer);
+const persistedUiReducer = persistReducer(uiPersistConfig, uiReducer);
+const persistedRecentNetworksReducer = persistReducer(recentNetworksPersistConfig, recentNetworksReducer);
+const persistedTypeReducer = persistReducer(typesPersistConfig, typeReducer);
+const persistedSimulationReducer = persistReducer(simulationPersistConfig, simulationReducer);
 const persistedLogsReducer = persistReducer(logsPersistConfig, logsReducer);
 const persistedLogExplorerReducer = persistReducer(logExplorerPersistConfig, logExplorerReducer);
+const persistedDocsReducer = persistReducer(docsPersistConfig, docsReducer);
+const persistedTestingReducer = persistReducer(testingPersistConfig, testingReducer);
 
 /**
  * Configure the Redux store with persisted reducers
@@ -117,7 +139,9 @@ const store = configureStore({
     types: persistedTypeReducer,
     simulation: persistedSimulationReducer,
     logs: persistedLogsReducer,
-    logExplorer: persistedLogExplorerReducer, // Add the persisted log explorer reducer
+    logExplorer: persistedLogExplorerReducer,
+    docs: persistedDocsReducer, // Add the persisted docs reducer
+    testing: persistedTestingReducer, // Add the persisted testing reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

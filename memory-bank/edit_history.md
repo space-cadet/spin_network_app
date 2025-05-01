@@ -1,5 +1,12 @@
 # Edit History
-*Last Updated: 2025-04-29 14:15:00*
+*Last Updated: 2025-05-01 09:40*
+
+## 2025-05-01
+### 09:38 - TBD: Implement state persistence for documentation and testing pages
+- Created `src/store/slices/testingSlice.ts` - Added Redux slice for managing testing page state.
+- Modified `src/store/index.ts` - Added testing reducer and persistence configuration.
+- Modified `src/components/testing/TestingPage.tsx` - Switched to Redux for state management.
+- Modified `src/components/documentation/DocsPage.tsx` - Switched to Redux for state management.
 
 ## 2025-04-29
 ### 14:15 - T45: Fix Documentation Page Deployment Issues

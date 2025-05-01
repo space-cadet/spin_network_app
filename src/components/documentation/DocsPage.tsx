@@ -5,10 +5,11 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-// import rehypeKatex from 'rehype-katex';
 import rehypeMathJax from 'rehype-mathjax';
-// import 'katex/dist/katex.min.css';
 import 'github-markdown-css/github-markdown.css';
+import { useSelector, useDispatch } from 'react-redux';
+import { setSelectedResourceId } from '../../store/slices/docsSlice';
+import { RootState } from '../../store';
 
 // Add MathJax configuration after imports
 const mathJaxConfig = {
@@ -63,7 +64,9 @@ const docResources: DocResource[] = [
 ];
 
 const DocsPage: React.FC = () => {
-  const [selectedResource, setSelectedResource] = useState<DocResource>(docResources[0]);
+  const dispatch = useDispatch();
+  const selectedResourceId = useSelector((state: RootState) => state.docs.selectedResourceId);
+  const selectedResource = docResources.find(resource => resource.id === selectedResourceId) || docResources[0];
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeHeight, setIframeHeight] = useState('calc(100vh - 180px)');
   const [markdownContent, setMarkdownContent] = useState<string>('');
@@ -104,16 +107,16 @@ const DocsPage: React.FC = () => {
           setIsLoading(false);
         });
     }
-  }, [selectedResource]);
+  }, [selectedResourceId, selectedResource]);
 
   const renderContent = () => {
     return (
       <iframe
         ref={iframeRef}
-        src={selectedResource.path}
+        src={selectedResource?.path}
         className="w-full border-0"
         style={{ height: iframeHeight }}
-        title={selectedResource.title}
+        title={selectedResource?.title}
         sandbox="allow-same-origin allow-scripts allow-forms"
       />
     );
@@ -136,7 +139,7 @@ const DocsPage: React.FC = () => {
               className={`w-full text-left px-4 py-3 flex items-start hover:bg-gray-100 ${
                 selectedResource.id === resource.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
               }`}
-              onClick={() => setSelectedResource(resource)}
+              onClick={() => dispatch(setSelectedResourceId(resource.id))}
             >
               <FaFileAlt className={`mt-1 mr-3 ${selectedResource.id === resource.id ? 'text-blue-500' : 'text-gray-500'}`} />
               <div>
