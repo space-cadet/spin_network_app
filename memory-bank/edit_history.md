@@ -8,6 +8,19 @@
 - Modified `src/components/testing/TestingPage.tsx` - Switched to Redux for state management.
 - Modified `src/components/documentation/DocsPage.tsx` - Switched to Redux for state management.
 
+### 14:30 - T36: Enhanced Tensor Test Output
+- Modified `/docs/implementation/tensor-tests.html`:
+  - Added detailed output for 2-valent nodes with spin values and tensor validation
+  - Added triangle inequality checks and tensor details for 3-valent nodes
+  - Added intermediate coupling and normalization info for 4-valent nodes
+  - Enhanced test readability and organization
+
+### 14:45 - T36: Documentation Updates
+- Updated `/memory-bank/tasks/T36.md` with latest progress
+- Created new session file `/memory-bank/sessions/T36_20250501.md`
+- Updated master task registry and active context
+- Added entry to edit history
+
 ## 2025-04-29
 ### 14:15 - T45: Fix Documentation Page Deployment Issues
 - Modified `package.json` - Added cp command to copy docs directory during build

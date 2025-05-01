@@ -1,40 +1,47 @@
-# Active Context
-*Last Updated: 2025-04-29 13:42:00*
+# Active Development Context
+*Last Updated: 2025-05-01*
 
-## Current Task
-**ID:** T43
-**Title:** Convert tensorNode to TypeScript
-**Status:** 🔄 In Progress
-**Phase:** Implementation
+## Current Focus
+- Enhancing tensor test output in T36 (Tensor and State Vector Sandbox)
+- Adding detailed validation of tensor properties and physical constraints
+- Preparing for tensor operations module implementation
 
-## Current Context
-- Moved HTML documentation files from /public to /docs directory
-- Moved script files to /docs/static/scripts
-- Updated script references in HTML files
-- Documentation structure now follows:
-  ```
-  /docs/
-  ├── physics/              # Physics documentation
-  ├── implementation/       # Implementation documentation
-  └── static/              # Static assets for docs
-      ├── scripts/         # JavaScript files
-      └── styles/          # CSS (if needed)
-  ```
+## Active Components
+### Tensor Tests (T36)
+- Enhanced output showing detailed tensor properties
+- Added triangle inequality validation for 3-valent nodes
+- Added intermediate coupling range checks for 4-valent nodes
+- Implemented tensor normalization verification
+- Working on core tensor operations module
 
-## Next Steps
-1. Test documentation pages with new file structure
-2. Update any remaining references to old file locations
-3. Remove old files from public directory after verifying changes
+### Recent Changes
+- Added element-by-element tensor verification
+- Improved visualization of physical constraints
+- Enhanced test readability and organization
+- Updated progress tracking in task documentation
 
-## Related Files
-- /docs/physics/*.html
-- /docs/implementation/*.html
-- /docs/static/scripts/*.js
-- /src/components/documentation/DocsPage.tsx
+### Next Steps
+1. Complete tensor operations module implementation
+2. Implement state vector operations
+3. Add visualization components
+4. Connect with intertwinerSpace.ts
 
 ## Dependencies
-None
+- T20 (Intertwiner Space Implementation)
+- T35 (Enhanced Node/Edge Data Structures)
+- T38 (Intertwiner Tensor Initialization) ✅
+- T39 (Browser Compatibility Fix) ✅
 
-## Notes
-- File moves and reference updates completed
-- Preserving served URLs in DocsPage.tsx for compatibility
+## Critical Files
+1. `/docs/implementation/tensor-tests.html`
+   - Main test implementation
+   - Added detailed validation output
+   - Enhanced test organization
+
+2. `/lib/quantum/tensorOperations.ts`
+   - Core tensor operations
+   - Next focus for implementation
+
+3. `/lib/core/intertwinerSpace.ts`
+   - Integration target for tensor operations
+   - Provides basis calculations
