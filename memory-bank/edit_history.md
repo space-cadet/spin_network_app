@@ -1,4 +1,15 @@
 # Edit History
+*Last Updated: 2025-05-01*
+
+## 2025-05-01
+### 14:30 - T47: Fix Tensor Validation Tests
+- Modified `docs/static/scripts/tensorValidation.test.js`
+  - Fixed 2-valent node test inputs from [2,2] to [0.5,0.5]
+  - Fixed 2-valent mismatch test from [2,3] to [0.5,1.0]
+  - Fixed 3-valent valid test from [2,2,3] to [0.5,0.5,1.0]
+  - Fixed 3-valent invalid test from [2,2,5] to [0.5,0.5,2.0]
+  - Fixed 4-valent test from [2,2,2,2] to [0.5,0.5,0.5,0.5]
+  - Updated test comments for clarity
 *Last Updated: 2025-05-01 18:32*
 
 ## 2025-05-01

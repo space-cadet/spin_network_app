@@ -8,6 +8,22 @@
 - **Latest Task ID:** T47
 
 ## Task Registry
+*Last Updated: 2025-05-01*
+
+## Active Tasks
+| ID | Title | Status | Priority | Started | Dependencies |
+|----|-------|--------|----------|---------|--------------|
+| T47 | Fix Tensor Validation Tests | ✓ | HIGH | 2025-05-01 | - |
+
+## Task Details
+### T47: Fix Tensor Validation Tests
+**Description**: Fix incorrect spin value handling in tensor validation tests
+**Status**: ✓ **Last**: 2025-05-01
+**Criteria**: Fix dimension vs spin value inputs, maintain test coverage
+**Files**: `docs/static/scripts/tensorValidation.test.js`
+**Notes**: Critical for tensor initialization correctness
+
+## Completed Tasks
 ### Active Tasks
 | ID | Title | Status | Priority | Started | Task File |
 |----|-------|--------|----------|---------|-----------|

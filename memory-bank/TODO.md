@@ -1,4 +1,5 @@
-# Spin Network Visualization and Diffusion App - TODO
+- Review all tensor dimension calculations across library after tensor validation test fixes [T47]
+- Consider adding validation checks for spin vs dimension inputs# Spin Network Visualization and Diffusion App - TODO
 
 This document tracks both accomplished objectives and planned tasks for the project. Items are organized by priority and development phase according to the revised plan.
 
