@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Tensor Operations Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="/dist/lib/spin-network.umd.js"></script>
+    <script src="../../scripts/modules/testRunner.js" type="module"></script>
+    <script src="../../scripts/modules/uiElements.js" type="module"></script>
+    <script src="../../scripts/modules/visualizer.js" type="module"></script>
+    <script src="../../scripts/modules/testLogger.js" type="module"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+
+        #root {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        #test-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background: #4a90e2;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        #test-results {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        #visualization {
+            margin: 20px 0;
+        }
+
+        canvas {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: white;
+        }
+
+        #console-output {
+            margin: 20px 0;
+            padding: 15px;
+            background: #1e1e1e;
+            color: #fff;
+            font-family: monospace;
+            border-radius: 4px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .test-container {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .tensor-visualization {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        h3, h4 {
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <h1>React Tensor Operations Test</h1>
+        <div id="test-controls"></div>
+        <div id="test-results"></div>
+        <div id="visualization"></div>
+        <div id="console-output"></div>
+    </div>
+
+    <script type="module">
+        console.log('Script starting...');
+        
+        import { testRunner } from '../../scripts/modules/testRunner.js';
+        import { uiElements } from '../../scripts/modules/uiElements.js';
+        import { testLogger } from '../../scripts/modules/testLogger.js';
+        import NetworkVisualizer from '../../scripts/modules/visualizer.js';
+
+        console.log('Modules imported successfully');
+
+        // Initialize UI components
+        try {
+            console.log('Initializing UI components...');
+            uiElements.applyDefaultStyles();
+            testLogger.startSession();
+            console.log('Basic UI initialization complete');
+
+            // Create test control panel
+            console.log('Creating control panel...');
+            const controlPanel = uiElements.createControlPanel('test-controls');
+            const runButton = uiElements.createButton('Run All Tests', () => {
+                console.log('Running all tests...');
+                testRunner.runAllTests();
+            });
+            console.log('Adding run button to control panel...');
+            controlPanel.appendChild(runButton);
+            console.log('Control panel setup complete');
+
+            // Create visualization canvas
+            console.log('Setting up visualization...');
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 400;
+            document.getElementById('visualization').appendChild(canvas);
+            const visualizer = new NetworkVisualizer(canvas);
+            console.log('Visualization setup complete');
+
+            // Initialize results panel
+            console.log('Setting up results panel...');
+            const resultsPanel = uiElements.createResultsPanel('test-results', 'Test Results');
+            document.getElementById('test-results').appendChild(resultsPanel);
+            console.log('Results panel setup complete');
+
+            // Initialize console output
+            console.log('Setting up console output...');
+            const consoleOutput = uiElements.createConsoleOutput('console-output');
+            document.getElementById('console-output').appendChild(consoleOutput);
+            console.log('Console output setup complete');
+
+            console.log('All UI components initialized successfully');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+        }
+
+        // Test Suite Definition
+        testRunner.registerTest('2-valent-identity-tensor', async () => {
+            const spin = 0.5;
+            const node = new SpinNetwork.TensorNode({ valence: 2, defaultSpin: spin });
+            
+            // Test identity tensor for matching spins
+            const tensor = node.getTensor([spin, spin]);
+            testRunner.assertEquals(
+                tensor.get([0, 0]), 
+                1.0, 
+                'Identity tensor should have 1.0 at [0,0]'
+            );
+            testRunner.assertEquals(
+                tensor.get([1, 1]), 
+                1.0, 
+                'Identity tensor should have 1.0 at [1,1]'
+            );
+            testRunner.assertEquals(
+                tensor.get([0, 1]), 
+                0.0, 
+                'Identity tensor should have 0.0 at [0,1]'
+            );
+            testRunner.assertEquals(
+                tensor.get([1, 0]), 
+                0.0, 
+                'Identity tensor should have 0.0 at [1,0]'
+            );
+
+            // Visualize the tensor
+            const container = document.createElement('div');
+            visualizer.drawTensor(tensor, container);
+            resultsPanel.appendChild(container);
+        });
+
+        testRunner.registerTest('2-valent-mismatched-spins', async () => {
+            const node = new SpinNetwork.TensorNode({ valence: 2 });
+            
+            // Test zero tensor for mismatched spins
+            const tensor = node.getTensor([0.5, 1.0]);
+            const dimensions = tensor.getDimensions();
+            
+            // Verify all elements are zero
+            for (let i = 0; i < dimensions[0]; i++) {
+                for (let j = 0; j < dimensions[1]; j++) {
+                    testRunner.assertEquals(
+                        tensor.get([i, j]), 
+                        0.0,
+                        `Mismatched spins should give zero at [${i},${j}]`
+                    );
+                }
+            }
+
+            // Visualize the zero tensor
+            const container = document.createElement('div');
+            visualizer.drawTensor(tensor, container);
+            resultsPanel.appendChild(container);
+        });
+
+        testRunner.registerTest('3-valent-triangle-inequalities', async () => {
+            const node = new SpinNetwork.TensorNode({ valence: 3 });
+            
+            // Test valid triangle inequality configuration
+            const validSpins = [0.5, 1.0, 0.5];
+            const validTensor = node.getTensor(validSpins);
+            testRunner.assertTrue(
+                validTensor.hasNonZeroElements(),
+                'Valid spin configuration should produce non-zero tensor'
+            );
+
+            // Test invalid triangle inequality configuration
+            const invalidSpins = [0.5, 2.0, 0.5];
+            const invalidTensor = node.getTensor(invalidSpins);
+            testRunner.assertTrue(
+                !invalidTensor.hasNonZeroElements(),
+                'Invalid spin configuration should produce zero tensor'
+            );
+
+            // Visualize both tensors
+            const validContainer = document.createElement('div');
+            validContainer.innerHTML = '<h3>Valid Triangle Inequality</h3>';
+            visualizer.drawTensor(validTensor, validContainer);
+            resultsPanel.appendChild(validContainer);
+
+            const invalidContainer = document.createElement('div');
+            invalidContainer.innerHTML = '<h3>Invalid Triangle Inequality</h3>';
+            visualizer.drawTensor(invalidTensor, invalidContainer);
+            resultsPanel.appendChild(invalidContainer);
+        });
+
+        testRunner.registerTest('3-valent-normalization', async () => {
+            const node = new SpinNetwork.TensorNode({ valence: 3 });
+            const spins = [0.5, 0.5, 1.0];
+            const tensor = node.getTensor(spins);
+            
+            // Calculate sum of squares of all elements
+            let sumSquared = 0;
+            const dimensions = tensor.getDimensions();
+            for (let i = 0; i < dimensions[0]; i++) {
+                for (let j = 0; j < dimensions[1]; j++) {
+                    for (let k = 0; k < dimensions[2]; k++) {
+                        const value = tensor.get([i, j, k]);
+                        sumSquared += value * value;
+                    }
+                }
+            }
+            
+            testRunner.assertEquals(
+                Math.abs(sumSquared - 1.0) < 1e-10,
+                true,
+                'Tensor should be normalized (sum of squares = 1)'
+            );
+
+            // Visualize normalized tensor
+            const container = document.createElement('div');
+            container.innerHTML = '<h3>Normalized 3-Valent Tensor</h3>';
+            visualizer.drawTensor(tensor, container);
+            resultsPanel.appendChild(container);
+        });
+
+        testRunner.registerTest('4-valent-intertwiner-space', async () => {
+            const node = new SpinNetwork.TensorNode({ valence: 4 });
+            
+            // Test intertwiner space dimensions
+            const spins = [0.5, 0.5, 0.5, 0.5];
+            const tensor = node.getTensor(spins);
+            const dimensions = tensor.getDimensions();
+            
+            // For four spin-1/2 edges, expect 2 independent intertwiners
+            testRunner.assertEquals(
+                node.getIntertwinerDimension(spins),
+                2,
+                'Four spin-1/2 edges should have 2-dimensional intertwiner space'
+            );
+
+            // Test orthonormality of basis
+            const basis = node.getIntertwinerBasis(spins);
+            for (let i = 0; i < basis.length; i++) {
+                for (let j = 0; j < basis.length; j++) {
+                    const product = basis[i].innerProduct(basis[j]);
+                    const expected = i === j ? 1.0 : 0.0;
+                    testRunner.assertEquals(
+                        Math.abs(product - expected) < 1e-10,
+                        true,
+                        `Basis vectors ${i},${j} should have inner product ${expected}`
+                    );
+                }
+            }
+
+            // Visualize intertwiner basis
+            const container = document.createElement('div');
+            container.innerHTML = '<h3>4-Valent Intertwiner Basis</h3>';
+            for (let i = 0; i < basis.length; i++) {
+                const basisContainer = document.createElement('div');
+                basisContainer.innerHTML = `<h4>Basis Vector ${i+1}</h4>`;
+                visualizer.drawTensor(basis[i], basisContainer);
+                container.appendChild(basisContainer);
+            }
+            resultsPanel.appendChild(container);
+        });
+
+        testRunner.registerTest('tensor-factorization', async () => {
+            const node = new SpinNetwork.TensorNode({ valence: 4 });
+            const spins = [0.5, 0.5, 0.5, 0.5];
+            const tensor = node.getTensor(spins);
+            
+            // Test factorization into 3-valent nodes
+            const factorization = node.factorize();
+            testRunner.assertEquals(
+                factorization.nodes.length,
+                2,
+                'Should decompose into two 3-valent nodes'
+            );
+            
+            // Test preservation of external spins
+            const externalEdges = factorization.getExternalEdges();
+            for (let i = 0; i < spins.length; i++) {
+                testRunner.assertEquals(
+                    externalEdges[i].spin,
+                    spins[i],
+                    'External spins should be preserved'
+                );
+            }
+
+            // Verify intermediate spin satisfies triangle inequalities
+            const intermediateSpin = factorization.getIntermediateEdge().spin;
+            testRunner.assertTrue(
+                node.isValidIntermediateSpin(spins, intermediateSpin),
+                'Intermediate spin should satisfy triangle inequalities'
+            );
+
+            // Visualize factorization
+            const container = document.createElement('div');
+            container.innerHTML = '<h3>4-Valent Node Factorization</h3>';
+            visualizer.setGraph(factorization);
+            resultsPanel.appendChild(container);
+        });
+
+        // Add individual test buttons
+        const runTwoValentButton = uiElements.createButton(
+            'Run 2-Valent Tests', 
+            async () => {
+                await testRunner.runTest('2-valent-identity-tensor');
+                await testRunner.runTest('2-valent-mismatched-spins');
+            }
+        );
+        controlPanel.appendChild(runTwoValentButton);
+
+        // Add 3-valent test button
+        const runThreeValentButton = uiElements.createButton(
+            'Run 3-Valent Tests',
+            async () => {
+                await testRunner.runTest('3-valent-triangle-inequalities');
+                await testRunner.runTest('3-valent-normalization');
+            }
+        );
+        controlPanel.appendChild(runThreeValentButton);
+
+        // Add 4-valent test button
+        const runFourValentButton = uiElements.createButton(
+            'Run 4-Valent Tests',
+            async () => {
+                await testRunner.runTest('4-valent-intertwiner-space');
+                await testRunner.runTest('tensor-factorization');
+            }
+        );
+        controlPanel.appendChild(runFourValentButton);
+
+        // Add clear results button
+        const clearButton = uiElements.createButton(
+            'Clear Results',
+            () => {
+                resultsPanel.innerHTML = '';
+                testLogger.clearLogs();
+                uiElements.clearConsole('console-output');
+            }
+        );
+        controlPanel.appendChild(clearButton);
+    </script>
+</body>
+</html>

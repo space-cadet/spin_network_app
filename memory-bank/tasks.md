@@ -51,6 +51,7 @@
 | T5 | Enhanced Simulation Test Pages | 🔄 | HIGH | 2025-04-14 | [tasks/T5.md] |
 | T6 | Fix Database Service Errors | 🔄 | HIGH | 2025-04-15 | [tasks/T6.md] |
 | T9 | Fix UI and Simulation TypeScript Errors | 🔄 | HIGH | 2025-04-15 | [tasks/T9.md] |
+| T48 | Test Files Reorganization | 🔄 | HIGH | 2025-05-01 | [tasks/T48.md] |
 
 ### Completed Tasks
 | ID | Title | Completed | Task File |
@@ -91,6 +92,7 @@
 - **T12** → Depends on → **T10**
 - **T14** → Depends on → **T13, T1**
 - **T20** → Depends on → **T1**
+- **T48** → None
 
 ## Priority Queue
 1. **T47**: Implement mobile responsive enhancements
@@ -101,4 +103,5 @@
 - 2025-05-01: Enhanced tensor test output in T36 with detailed validation
 - 2025-05-01: Added physical constraint checks and normalization verification
 - 2025-05-01: Updated progress tracking for tensor operations module
+- 2025-05-01: Added T48 for test files reorganization
 - 2025-04-24: Restructured tasks into individual files
