@@ -70,7 +70,7 @@ export class SimulationStateVector implements StateVector {
     centerNodeId: string, 
     sigma: number,
     nodePositions: Map<string, {x: number, y: number, z?: number}>
-  ): SimulationStateVector {
+  ): StateVector {
     if (!nodeIds.includes(centerNodeId)) {
       throw new Error(`Center node ID "${centerNodeId}" not found in provided node IDs`);
     }
@@ -101,20 +101,42 @@ export class SimulationStateVector implements StateVector {
     
     // Create and normalize the state vector
     const stateVector = new SimulationStateVector(nodeIds, values);
-    return stateVector.normalize() as SimulationStateVector;
+    return stateVector.normalize();
   }
   
   /**
    * Create a state vector from math.js array
    */
   static fromMathArray(array: math.MathArray, nodeIds: string[]): StateVector {
-    const values = math.flatten(array).toArray() as number[];
+    let values: number[];
+    
+    if (math.isMatrix(array)) {
+      // Handle math.js matrix
+      values = (math.flatten(array) as math.Matrix).valueOf() as number[];
+    } else if (Array.isArray(array)) {
+      // Handle regular array
+      values = [...array] as number[];
+    } else {
+      // Try to convert other formats
+      try {
+        values = Array.from(array as any);
+      } catch (e) {
+        throw new Error('Could not convert MathArray to regular array: ' + e);
+      }
+    }
     
     if (values.length !== nodeIds.length) {
       throw new Error(`Array size (${values.length}) does not match number of node IDs (${nodeIds.length})`);
     }
     
     return new SimulationStateVector(nodeIds, values);
+  }
+
+  /**
+   * Instance method to create from math array (required by StateVector interface)
+   */
+  fromMathArray(array: math.MathArray, nodeIds: string[]): StateVector {
+    return SimulationStateVector.fromMathArray(array, nodeIds);
   }
 
   // StateVector interface implementation
@@ -233,26 +255,15 @@ export class SimulationStateVector implements StateVector {
    * Convert to a math.js array
    */
   toMathArray(): math.MathArray {
-    return math.matrix(this._values) as unknown as math.MathArray;
-  }
-  
-  /**
-   * Create a new state vector from a math.js array
-   */
-  fromMathArray(array: math.MathArray, nodeIds: string[]): StateVector {
-    if (nodeIds.length !== (array as any).size()[0]) {
-      throw new Error('Number of node IDs must match array size');
-    }
-    
-    const values = math.flatten(array).toArray() as number[];
-    return new SimulationStateVector(nodeIds, values);
+    return math.matrix(this._values).valueOf() as math.MathArray;
   }
   
   /**
    * Normalize the state vector (returns a new vector)
    */
   normalize(): StateVector {
-    const norm = math.norm(this._values);
+    const normSquared = this._values.reduce((sum, value) => sum + value * value, 0);
+    const norm = Math.sqrt(normSquared);
     
     // Avoid division by zero
     if (norm === 0) {
@@ -297,5 +308,13 @@ export class SimulationStateVector implements StateVector {
       nodeIds: this._nodeIds,
       values: this._values
     };
+  }
+
+  /**
+   * Convert to simple array of values
+   * @returns Array of state vector values
+   */
+  toArray(): number[] {
+    return [...this._values];
   }
 }

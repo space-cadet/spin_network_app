@@ -13,7 +13,10 @@
     "clean": "rm -rf dist node_modules .turbo",
     "clean:dist": "rm -rf dist",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "generate:index": "NODE_OPTIONS='--loader ts-node/esm' node scripts/generate-component-index.ts",
+    "generate:map": "NODE_OPTIONS='--loader ts-node/esm' node scripts/generate_project_map.ts",
+    "convert:md": "NODE_OPTIONS='--loader ts-node/esm' node scripts/convert-md-to-html.ts"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",

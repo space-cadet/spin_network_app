@@ -1,29 +1,39 @@
 # Active Context
-*Last Updated: 2025-05-02 14:30 IST*
+*Last Updated: 2025-05-03 16:45 IST*
 
-## Current Task Focus
-**Task:** T48 - Test Files Reorganization
-**Status:** 🔄 Standalone test implementation in progress
-**Current Step:** Implementing consolidated test suite with state persistence
+## Current Focus
+**Task:** T51 - Fix Docusaurus API Documentation
+**Status:** 🔄 IN PROGRESS
 
-## Implementation State
-- Created consolidated spin-network-suite.html test file
-- Implemented basic test infrastructure in test-suite.js
-- Added graph configuration panel with multiple graph types
-- Added results display panel for geometric properties and statistics
-- Implemented state persistence using localStorage
+## Implementation Context
+- Docusaurus documentation site created in /website folder
+- TypeDoc plugin configured for API documentation
+- SimulationStateVector interface implementation fixed
+- Working on filesystem-related TypeScript errors
+- Next: Fix broken links and test documentation build
+
+## Active Changes
+- Created initial Docusaurus site structure
+- Set up documentation versioning support
+- Configured TypeDoc integration
+- Added initial custom styling
+- Fixed core TypeScript errors
 
 ## Critical Files
-1. Test Suite:
-   - `/docs/implementation/spin-network-suite.html`
-   - `/docs/static/scripts/test-suite.js`
+- `/website/docusaurus.config.ts`
+- `/website/sidebars.ts`
+- `/website/docs/`
+- `lib/core/stateVector.ts`
+- `lib/io/*`
+- `lib/utils/*`
 
-## Next Actions
-1. Complete tensor operations test suite
-2. Begin simulation methods test implementation
-3. Validate React test functionality
+## Implementation Notes
+- Using TypeDoc for API documentation generation
+- Docusaurus provides versioning, search, and MDX support
+- Need to resolve filesystem type conflicts between Node.js and BrowserFS
+- Consider adding @types/browserfs as dev dependency
 
-## Recent Decisions
-- Using shared modules to maintain consistency across test types
-- Implementing visualization for better test result understanding
-- Following phased approach to minimize disruption
+## Next Steps
+1. Fix remaining TypeScript errors in filesystem operations
+2. Update Docusaurus configuration for proper link handling
+3. Test documentation build and content
