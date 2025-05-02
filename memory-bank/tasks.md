@@ -1,18 +1,19 @@
 # Tasks Master Reference
-*Last Updated: 2025-05-02*
+*Last Updated: 2025-05-03*
 
 ## Tasks Overview
-- **Active Tasks:** 13
+- **Active Tasks:** 14
 - **Paused Tasks:** 4
-- **Completed Tasks:** 26
-- **Latest Task ID:** T48
+- **Completed Tasks:** 27
+- **Latest Task ID:** T49
 
 ## Task Registry
-*Last Updated: 2025-05-02 15:45 IST*
+*Last Updated: 2025-05-03 15:45 IST*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies |
 |----|-------|--------|----------|---------|--------------|
+| T49 | Simplify Development Scripts | ✅ | LOW | 2025-05-03 | - |
 | T48 | Test Files Reorganization | 🔄 | HIGH | 2025-05-01 | - |
 | T47 | Mobile Responsive Enhancement | 🔄 | HIGH | 2025-05-01 | - |
 | T36 | Tensor Operations Implementation | 🔄 | MEDIUM | 2025-04-24 | - |
@@ -20,6 +21,19 @@
 | T34 | Engine Migration | 🔄 | MEDIUM | 2025-04-24 | - |
 
 ## Task Details
+### T49: Simplify Development Scripts
+**Description**: Added simplified shell script wrapper and npm scripts for running TypeScript utilities
+**Status**: ✅ **Last**: 2025-05-03
+**Progress**: 
+- ✅ Added run.sh shell script wrapper
+- ✅ Added npm scripts for common operations
+- ✅ Updated scripts README.md
+**Files**: 
+- `scripts/run.sh`
+- `scripts/README.md`
+- `package.json`
+**Notes**: Improved developer experience by simplifying TypeScript script execution
+
 ### T48: Test Files Reorganization
 **Description**: Reorganize test files and implement visualization features
 **Status**: 🔄 **Last**: 2025-05-02 15:45 IST
@@ -33,23 +47,11 @@
 [Other task details remain unchanged]
 *Last Updated: 2025-05-01*
 
-## Active Tasks
-| ID | Title | Status | Priority | Started | Dependencies |
-|----|-------|--------|----------|---------|--------------|
-| T47 | Fix Tensor Validation Tests | ✓ | HIGH | 2025-05-01 | - |
-
-## Task Details
-### T47: Fix Tensor Validation Tests
-**Description**: Fix incorrect spin value handling in tensor validation tests
-**Status**: ✓ **Last**: 2025-05-01
-**Criteria**: Fix dimension vs spin value inputs, maintain test coverage
-**Files**: `docs/static/scripts/tensorValidation.test.js`
-**Notes**: Critical for tensor initialization correctness
-
 ## Completed Tasks
 ### Active Tasks
 | ID | Title | Status | Priority | Started | Task File |
 |----|-------|--------|----------|---------|-----------|
+| T49 | Simplify Development Scripts | ✅ | LOW | 2025-05-03 | [tasks/T49.md] |
 | T47 | Mobile Responsive Enhancement Implementation | 🔄 | HIGH | 2025-05-01 | [tasks/T47.md] |
 | T43 | Convert tensorNode to TypeScript | 🔄 | HIGH | 2025-04-28 | [tasks/T43.md] |
 | T42 | Fix Simulation Test Page Library Usage | 🔄 | HIGH | 2025-04-28 | [tasks/T42.md] |
@@ -122,6 +124,7 @@
 2. **T37**: Implement Testing and Documentation Pages
 
 ## Recent Updates
+- 2025-05-03: Added T49 for simplifying development scripts
 - 2025-05-01: Added T47 for mobile responsive enhancements
 - 2025-05-01: Enhanced tensor test output in T36 with detailed validation
 - 2025-05-01: Added physical constraint checks and normalization verification

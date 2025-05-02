@@ -1,5 +1,11 @@
 # Edit History
-*Last Edit: 2025-05-02*
+*Last Edit: 2025-05-03*
+
+## 2025-05-03
+### 15:45 - T49: Script Execution Improvements
+- Created `scripts/run.sh` - Shell script wrapper for TypeScript utilities
+- Updated `scripts/README.md` - Added comprehensive documentation
+- Modified `package.json` - Added npm scripts for common operations
 
 ## 2025-05-02
 ### 15:45 - T48: Network Visualization Implementation
