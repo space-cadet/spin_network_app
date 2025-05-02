@@ -8,6 +8,29 @@
 - **Latest Task ID:** T48
 
 ## Task Registry
+*Last Updated: 2025-05-02 15:45 IST*
+
+## Active Tasks
+| ID | Title | Status | Priority | Started | Dependencies |
+|----|-------|--------|----------|---------|--------------|
+| T48 | Test Files Reorganization | 🔄 | HIGH | 2025-05-01 | - |
+| T47 | Mobile Responsive Enhancement | 🔄 | HIGH | 2025-05-01 | - |
+| T36 | Tensor Operations Implementation | 🔄 | MEDIUM | 2025-04-24 | - |
+| T35 | Data Structure Enhancement | 🔄 | MEDIUM | 2025-04-24 | - |
+| T34 | Engine Migration | 🔄 | MEDIUM | 2025-04-24 | - |
+
+## Task Details
+### T48: Test Files Reorganization
+**Description**: Reorganize test files and implement visualization features
+**Status**: 🔄 **Last**: 2025-05-02 15:45 IST
+**Progress**: 
+- ✅ Core infrastructure complete
+- ✅ Network visualization implemented
+- ✅ Layout algorithms working
+- 🔄 Advanced features in progress
+**Next**: Tensor operations panel implementation
+
+[Other task details remain unchanged]
 *Last Updated: 2025-05-01*
 
 ## Active Tasks
