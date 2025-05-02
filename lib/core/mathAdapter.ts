@@ -114,26 +114,42 @@ export class MathAdapter {
   } {
     const eigs = math.eigs(matrix);
     
-    // Extract the eigenvalues
-    const values = Array.isArray(eigs.values) 
-      ? eigs.values as number[] 
-      : (eigs.values as math.Matrix).valueOf() as number[];
+    // Extract the eigenvalues and ensure they are numbers
+    let values: number[];
+    if (math.isMatrix(eigs.values)) {
+      values = (math.flatten(eigs.values).valueOf() as (number | math.BigNumber)[])
+        .map(v => typeof v === 'number' ? v : v.toNumber());
+    } else if (Array.isArray(eigs.values)) {
+      values = (eigs.values as (number | math.BigNumber)[])
+        .map(v => typeof v === 'number' ? v : v.toNumber());
+    } else {
+      const v = eigs.values as (number | math.BigNumber);
+      values = [typeof v === 'number' ? v : v.toNumber()];
+    }
     
     // Create a matrix for the eigenvectors
     const size = matrix.size();
     const eigenvectors = math.zeros(size[0], size[1]) as math.Matrix;
     
-    // Handle the case where eigenvectors are provided (old API)
-    if (eigs.eigenvectors) {
-      // Manually build the matrix
-      eigs.eigenvectors.forEach((item: any, index: number) => {
-        const vector = item.vector;
+    // Handle the case where eigenvectors are provided
+    if (eigs.eigenvectors && Array.isArray(eigs.eigenvectors)) {
+      // Convert eigenvectors to matrix format
+      eigs.eigenvectors.forEach((item, index) => {
+        const vector = Array.isArray(item.vector) ? item.vector : [item.vector];
         for (let i = 0; i < vector.length; i++) {
-          eigenvectors.set([i, index], vector[i]);
+          const value = vector[i];
+          eigenvectors.set([i, index], 
+            typeof value === 'number' ? value : 
+            math.isBigNumber(value) ? value.toNumber() :
+            Array.isArray(value) ? value[0] :
+            math.isComplex(value) ? value.re :
+            math.isFraction(value) ? value.n / value.d :
+            0 // fallback for unknown types
+          );
         }
       });
     }
-    
+
     return {
       values,
       vectors: eigenvectors

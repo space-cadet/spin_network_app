@@ -16,12 +16,12 @@ const testResources: TestResource[] = [
     id: 'standalone-guide',
     title: 'Standalone Implementation Guide',
     description: 'Comprehensive guide for implementing and using the standalone spin network library.',
-    path: '/docs/implementation/standalone-guide.html'
+    path: '/docs/implementation/standalone-test.html'
   },
   {
     id: 'simulation-test',
-    title: 'Simulation Test Page',
-    description: 'Interactive testing environment for the spin network simulation with visualizations.',
+    title: 'React App Library Test Page',
+    description: 'Interactive testing environment for the react app spin network library with visualizations.',
     path: '/docs/implementation/simulation-test.html'
   },
   {
@@ -29,6 +29,12 @@ const testResources: TestResource[] = [
     title: 'Tensor Sandbox',
     description: 'Experimental sandbox for working with tensors and state vectors in spin networks.',
     path: '/docs/implementation/tensor-sandbox.html'
+  },
+  {
+    id: 'tensor-tests',
+    title: 'Tensor Tests',
+    description: 'Test suite for tensor operations including creation, manipulation, and validation.',
+    path: '/docs/implementation/tensor-tests.html'
   }
 ];
 

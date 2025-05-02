@@ -9,7 +9,7 @@ export * from './core';
 // Models
 export * from './models';
 
-// Analysis tools
+// Analysis tools - this needs to come before other exports
 export * from './analysis';
 
 // Adapters (optional, for visualization)
@@ -31,48 +31,33 @@ import { SpinNetworkSimulationEngine } from './core/engineImplementation';
 import { 
   SimulationParameters, 
   SimulationEngine, 
-  SimulationGraph 
+  SimulationGraph,
+  StateVector 
 } from './core/types';
+import { GeometricPropertiesCalculator } from './analysis/geometricProps';
 
-// Import core tensor functions
-import {
-  createTensorNode as createCoreTensorNode,
-  setTensorElement,
-  getTensorElement,
-  createTensorNodeFromBasisState,
-  calculateNodeVolume,
-  createStateVectorEdge,
-  setStateVectorAmplitude,
-  getStateVectorAmplitude,
-  normalizeStateVector,
-  calculateEdgeArea,
-  createComplex,
-  addComplex,
-  multiplyComplex
-} from './core/tensor';
+// Create shorthand Analysis property
+export const Analysis = {
+  calculateTotalVolume: (state: StateVector): number => {
+    return new GeometricPropertiesCalculator().calculateTotalVolume(state);
+  },
+  calculateTotalArea: (graph: SimulationGraph): number => {
+    return new GeometricPropertiesCalculator().calculateTotalArea(graph);
+  },
+  calculateEffectiveDimension: (graph: SimulationGraph, state: StateVector): number => {
+    return new GeometricPropertiesCalculator().calculateEffectiveDimension(graph, state);
+  },
+  calculateVolumeEntropy: (state: StateVector): number => {
+    return new GeometricPropertiesCalculator().calculateVolumeEntropy(state);
+  }
+};
 
-// Import enhanced tensor functionality
-import {
-  createTensorNode as createEnhancedTensorNode,
-  calculateIntertwinerDimension
-} from './tensor';
-
-// Export tensor functions directly - these will be available in UMD as SpinNetwork.[functionName]
-export const createTensorNode = createEnhancedTensorNode;
-export { 
-  setTensorElement,
-  getTensorElement,
-  createTensorNodeFromBasisState,
-  calculateNodeVolume,
-  createStateVectorEdge,
-  setStateVectorAmplitude,
-  getStateVectorAmplitude,
-  normalizeStateVector,
-  calculateEdgeArea,
-  createComplex,
-  addComplex,
-  multiplyComplex,
-  calculateIntertwinerDimension
+// Export the core types and classes
+export {
+  SpinNetworkGraph,
+  SimulationStateVector,
+  SpinNetworkSimulationEngine,
+  GeometricPropertiesCalculator
 };
 
 /**

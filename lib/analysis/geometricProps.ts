@@ -6,6 +6,7 @@
  */
 
 import { SimulationGraph, StateVector, GeometricCalculator } from '../core/types';
+import { MathAdapter } from '../core/mathAdapter';
 import * as math from 'mathjs';
 
 /**
@@ -200,6 +201,10 @@ export class GeometricPropertiesCalculator implements GeometricCalculator {
       let laplacian;
       try {
         laplacian = graph.toLaplacianMatrix();
+        if (!laplacian || !math.isMatrix(laplacian)) {
+          console.warn('Invalid Laplacian matrix:', laplacian);
+          return 0;
+        }
       } catch (error) {
         console.error('Error creating Laplacian matrix:', error);
         return 0;
@@ -208,10 +213,10 @@ export class GeometricPropertiesCalculator implements GeometricCalculator {
       // Calculate eigenvalues with error handling
       let eigenvalues;
       try {
-        const eigs = math.eigs(laplacian);
-        eigenvalues = eigs.values as number[];
+        const result = MathAdapter.eigenDecomposition(laplacian);
+        eigenvalues = result.values;
         
-        // Validate eigenvalues
+        // Validate eigenvalues array
         if (!eigenvalues || !Array.isArray(eigenvalues) || eigenvalues.length === 0) {
           console.warn('Invalid eigenvalues:', eigenvalues);
           return 0;
@@ -248,7 +253,7 @@ export class GeometricPropertiesCalculator implements GeometricCalculator {
         }
         
         // Calculate log eigenvalues with validation
-        const logEigenvalues = [];
+        const logEigenvalues: number[] = [];
         for (let i = 0; i < sampleSize; i++) {
           const eigenvalue = sortedEigenvalues[i];
           if (eigenvalue <= 0) continue;
@@ -270,7 +275,7 @@ export class GeometricPropertiesCalculator implements GeometricCalculator {
         }
         
         // Generate log(N(λ)) data points with validation
-        const logCumulative = [];
+        const logCumulative: number[] = [];
         for (let i = 0; i < logEigenvalues.length; i++) {
           try {
             const cumulative = (i + 1) / sortedEigenvalues.length;

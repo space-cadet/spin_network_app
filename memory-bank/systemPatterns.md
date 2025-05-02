@@ -127,7 +127,32 @@ The application uses a centralized state management approach:
                     └──────────────┘
 ```
 
-### 4. Event-Driven Interaction
+### 4. Test Suite Pattern
+
+The consolidated test suite follows a standardized pattern:
+
+```
+┌─────────────────────────────────────┐
+│            Test Suite               │
+├─────────────────────────────────────┤
+│ ┌─────────────┐ ┌─────────────────┐ │
+│ │   Config    │ │    Results      │ │
+│ │   Panel     │ │    Panel        │ │
+│ └─────────────┘ └─────────────────┘ │
+│ ┌─────────────────────────────────┐ │
+│ │         Console Output          │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+```
+
+Key components:
+- Configuration Panel for test setup
+- Results Panel for test outputs
+- Console Output for detailed logging
+- State persistence for configurations
+- Reusable test infrastructure
+
+### 5. Event-Driven Interaction
 
 User interactions follow an event-driven pattern:
 
