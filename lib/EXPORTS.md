@@ -24,6 +24,13 @@ SpinNetwork.core:
     MathAdapter.matrixExponential
     MathAdapter.eigenDecomposition
 
+SpinNetwork.templates:
+    createLineGraph
+    createRingGraph
+    createGridGraph
+    createRandomGraph
+    createGraphTemplate
+
 SpinNetwork.quantum:
     createTensor
     tensorNodeToTensor

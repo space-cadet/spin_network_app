@@ -2,6 +2,19 @@
 
 This document tracks key decisions, major milestones, and pivots in the project's development.
 
+## [2025-05-03]
+
+### Added
+- Collapsible panel system with smooth animations - T36
+- Comprehensive tensor operations test panel - T36
+- Advanced simulation controls panel - T36
+- Template-based graph creation system - T36
+
+### Enhanced
+- Test suite UI with better organization and space management - T36
+- Simulation control granularity with advanced options - T36
+- Library exports documentation with templates namespace - T36
+
 ## [2025-05-02] Test Suite Consolidation and State Persistence
 
 - Created consolidated spin-network-suite.html to replace multiple standalone test files

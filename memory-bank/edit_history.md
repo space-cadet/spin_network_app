@@ -2,6 +2,29 @@
 *Last Edit: 2025-05-03*
 
 ## 2025-05-03
+### [18:30] - Task Updates for T36 and T48
+- Updated `/memory-bank/tasks/T36.md` - Added collapsible panel implementation and recent progress
+- Updated `/memory-bank/tasks/T48.md` - Updated progress on test reorganization and new features
+- Updated `/memory-bank/techContext.md` - Added documentation of test suite architecture updates
+
+Progress notes:
+- T36: Added collapsible panel system, comprehensive tensor operations testing, and advanced simulation controls
+- T48: Completed UI organization phase with collapsible panels and state persistence
+- Updated technical documentation to reflect latest test suite architecture
+
+## 2025-05-03
+### [17:00] - T36: Enhanced UI and Testing Infrastructure
+- Modified `/docs/implementation/spin-network-suite.html`:
+  - Added collapsible panel functionality with smooth animations
+  - Added Tensor Operations panel with 2,3,4-valent node tests
+  - Added Advanced Simulation Controls panel
+  - Enhanced existing panels with collapsible headers
+- Created `/docs/static/scripts/tensor-operations.js` - New tensor testing module
+- Created `/docs/static/scripts/simulation-controls.js` - Advanced simulation controls
+- Modified `/docs/static/scripts/test-suite.js` - Updated to use template-based graph creation
+- Modified `/lib/EXPORTS.md` - Added templates namespace documentation
+
+## 2025-05-03
 ### [16:45] - T51: Create Docusaurus Documentation Site
 - Created `/website` folder with Docusaurus boilerplate
 - Modified `/website/docusaurus.config.ts` - Configured TypeDoc plugin for API documentation
@@ -13,7 +36,7 @@
 Created initial Docusaurus documentation site setup with TypeDoc integration for API documentation generation. This provides a modern documentation system with features like versioning, search, and MDX support.
 
 ## 2025-05-03
-### [16:30] - T52: Library API Reorganization
+### 16:30 - T52: Library API Reorganization
 - Created `/lib/EXPORTS.md` - Comprehensive listing of all public exports
 - Created `/lib/README.md` - Detailed API reference documentation
 - Modified `/lib/index.ts` - Reorganized exports into modular namespaces

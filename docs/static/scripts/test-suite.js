@@ -164,18 +164,21 @@ function createBasicNetwork() {
         // Clear the current network
         currentNetwork = null;
         
+        // Create an empty graph instance
+        const emptyGraph = window.SpinNetwork.createGraph();
+        
         switch(graphTypeSelect.value) {
             case 'line':
-                currentNetwork = window.SpinNetwork.createLineGraph(options);
+                currentNetwork = window.SpinNetwork.templates.createLineGraph(emptyGraph, options);
                 break;
             case 'ring':
-                currentNetwork = window.SpinNetwork.createRingGraph(options);
+                currentNetwork = window.SpinNetwork.templates.createRingGraph(emptyGraph, options);
                 break;
             case 'grid':
-                currentNetwork = window.SpinNetwork.createGridGraph(options);
+                currentNetwork = window.SpinNetwork.templates.createGridGraph(emptyGraph, options);
                 break;
             case 'random':
-                currentNetwork = window.SpinNetwork.createRandomGraph({
+                currentNetwork = window.SpinNetwork.templates.createRandomGraph(emptyGraph, {
                     ...options,
                     edgeProbability: 0.5
                 });
@@ -257,19 +260,17 @@ function updateResults(state) {
             return;
         }
 
-        const geometryCalculator = new window.SpinNetwork.GeometricPropertiesCalculator();
-        
-        // Calculate and display geometric properties
-        const totalVolume = geometryCalculator.calculateTotalVolume(state);
-        const totalArea = geometryCalculator.calculateTotalArea(currentNetwork);
-        const effectiveDim = geometryCalculator.calculateEffectiveDimension(currentNetwork, state);
+        // Calculate and display geometric properties using Analysis namespace
+        const totalVolume = window.SpinNetwork.Analysis.calculateTotalVolume(state);
+        const totalArea = window.SpinNetwork.Analysis.calculateTotalArea(currentNetwork);
+        const effectiveDim = window.SpinNetwork.Analysis.calculateEffectiveDimension(currentNetwork, state);
 
         totalVolumeElem.textContent = totalVolume.toFixed(4);
         totalAreaElem.textContent = totalArea.toFixed(4);
         effectiveDimensionElem.textContent = effectiveDim.toFixed(4);
 
         // Calculate and display statistics
-        const stats = window.SpinNetwork.SimulationAnalyzer.calculateStatistics(state);
+        const stats = window.SpinNetwork.analysis.SimulationAnalyzer.calculateStatistics(state);
         
         meanElem.textContent = stats.mean.toFixed(4);
         varianceElem.textContent = stats.variance.toFixed(4);

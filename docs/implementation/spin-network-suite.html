@@ -52,6 +52,38 @@
             display: block;
         }
         
+        /* Collapsible Panel Styles */
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+        }
+
+        .panel-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .panel.collapsed .panel-content {
+            max-height: 0;
+        }
+
+        .collapse-icon {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .panel.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
         /* Range Input Styling */
         input[type="range"] {
             width: 100%;
@@ -154,7 +186,13 @@
         
         <!-- Graph Configuration Panel -->
         <div class="panel">
-            <h2>Network Configuration</h2>
+            <div class="panel-header">
+                <h2>Network Configuration</h2>
+                <svg class="collapse-icon" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5H7z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="panel-content">
             <div class="config-form">
                 <div class="form-group">
                     <label for="graph-type">Graph Type:</label>
@@ -182,11 +220,168 @@
             <div class="state-info">
                 <small>Last saved: <span id="last-saved">Never</span></small>
             </div>
+            </div>
+        </div>
+
+        <!-- Tensor Operations Panel -->
+        <div class="panel" id="tensor-operations-panel">
+            <div class="panel-header">
+                <h2>Tensor Operations</h2>
+                <svg class="collapse-icon" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5H7z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="panel-content">
+                <div class="results-grid">
+                    <!-- 2-Valent Node Tests -->
+                    <div class="results-section">
+                        <h3>2-Valent Node Tests</h3>
+                        <div class="form-group">
+                            <label for="spin-2v">Spin Value:</label>
+                            <input type="number" id="spin-2v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="control-panel">
+                            <button id="run-2v-test">Run Test</button>
+                        </div>
+                        <div class="data-row">
+                            <span>Normalization:</span>
+                            <span id="norm-2v" class="value">0.0000</span>
+                        </div>
+                        <div class="data-row">
+                            <span>Unitarity:</span>
+                            <span id="unit-2v" class="value">0.0000</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 3-Valent Node Tests -->
+                    <div class="results-section">
+                        <h3>3-Valent Node Tests</h3>
+                        <div class="form-group">
+                            <label for="spin1-3v">Spin 1:</label>
+                            <input type="number" id="spin1-3v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="spin2-3v">Spin 2:</label>
+                            <input type="number" id="spin2-3v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="spin3-3v">Spin 3:</label>
+                            <input type="number" id="spin3-3v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="control-panel">
+                            <button id="run-3v-test">Run Test</button>
+                        </div>
+                        <div class="data-row">
+                            <span>Angular Momentum:</span>
+                            <span id="angmom-3v" class="value">0.0000</span>
+                        </div>
+                        <div class="data-row">
+                            <span>Triangle Inequality:</span>
+                            <span id="triangle-3v" class="value">Valid</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 4-Valent Node Tests -->
+                    <div class="results-section">
+                        <h3>4-Valent Node Tests</h3>
+                        <div class="form-group">
+                            <label for="spin1-4v">Spin 1:</label>
+                            <input type="number" id="spin1-4v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="spin2-4v">Spin 2:</label>
+                            <input type="number" id="spin2-4v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="spin3-4v">Spin 3:</label>
+                            <input type="number" id="spin3-4v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="spin4-4v">Spin 4:</label>
+                            <input type="number" id="spin4-4v" min="0.5" max="2.0" step="0.5" value="0.5">
+                        </div>
+                        <div class="control-panel">
+                            <button id="run-4v-test">Run Test</button>
+                        </div>
+                        <div class="data-row">
+                            <span>Recoupling Consistency:</span>
+                            <span id="recouple-4v" class="value">0.0000</span>
+                        </div>
+                        <div class="data-row">
+                            <span>Closure Relations:</span>
+                            <span id="closure-4v" class="value">Valid</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Simulation Controls Panel -->
+        <div class="panel" id="advanced-simulation-panel">
+            <div class="panel-header">
+                <h2>Advanced Simulation Controls</h2>
+                <svg class="collapse-icon" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5H7z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="panel-content">
+                <div class="config-form">
+                    <!-- Diffusion Model Selection -->
+                    <div class="form-group">
+                        <label for="diffusion-model">Diffusion Model:</label>
+                        <select id="diffusion-model">
+                            <option value="simple">Simple Diffusion</option>
+                            <option value="fokker-planck">Fokker-Planck</option>
+                            <option value="langevin">Langevin Dynamics</option>
+                            <option value="custom">Custom Model</option>
+                        </select>
+                    </div>
+                    <!-- Numerical Method Selection -->
+                    <div class="form-group">
+                        <label for="numerical-method">Numerical Method:</label>
+                        <select id="numerical-method">
+                            <option value="euler">Euler Method</option>
+                            <option value="rk4">4th Order Runge-Kutta</option>
+                            <option value="adaptive-rk">Adaptive Runge-Kutta</option>
+                            <option value="symplectic">Symplectic Integrator</option>
+                        </select>
+                    </div>
+                    <!-- Time Step Configuration -->
+                    <div class="form-group">
+                        <label for="time-step">Time Step (dt):</label>
+                        <input type="number" id="time-step" min="0.001" max="1.0" step="0.001" value="0.01">
+                    </div>
+                    <!-- Integration Settings -->
+                    <div class="form-group">
+                        <label for="error-tolerance">Error Tolerance:</label>
+                        <input type="number" id="error-tolerance" min="1e-6" max="1e-2" step="1e-6" value="1e-4">
+                    </div>
+                    <div class="form-group">
+                        <label for="max-iterations">Max Iterations:</label>
+                        <input type="number" id="max-iterations" min="100" max="10000" step="100" value="1000">
+                    </div>
+                </div>
+                <!-- State Vector Operations -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <h3>State Vector Operations</h3>
+                    <div class="control-panel">
+                        <button id="normalize-state">Normalize State</button>
+                        <button id="randomize-state">Randomize State</button>
+                        <button id="reset-state">Reset State</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Results Panel -->
         <div class="panel" id="results-panel">
-            <h2>Results</h2>
+            <div class="panel-header">
+                <h2>Results</h2>
+                <svg class="collapse-icon" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5H7z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="panel-content">
             <div class="results-grid">
                 <div class="results-section">
                     <h3>Geometric Properties</h3>
@@ -215,11 +410,18 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- Visualization Panel -->
         <div class="panel" id="visualization-panel">
-            <h2>Network Visualization</h2>
+            <div class="panel-header">
+                <h2>Network Visualization</h2>
+                <svg class="collapse-icon" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5H7z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="panel-content">
             <div class="visualization-controls">
                 <div class="control-group">
                     <h3>Display Options</h3>
@@ -252,11 +454,18 @@
             <div class="canvas-container">
                 <canvas id="network-canvas"></canvas>
             </div>
+            </div>
         </div>
 
         <!-- Console Output -->
         <div class="panel">
-            <h2>Console Output</h2>
+            <div class="panel-header">
+                <h2>Console Output</h2>
+                <svg class="collapse-icon" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5H7z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="panel-content">
             <pre id="console-output"></pre>
         </div>
     </div>
@@ -264,6 +473,34 @@
     <!-- Load dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <script src="/dist/lib/spin-network.umd.js"></script>
+    <script src="../static/scripts/tensor-operations.js"></script>
+    <script src="../static/scripts/simulation-controls.js"></script>
     <script src="../static/scripts/test-suite.js"></script>
+
+    <script>
+
+        // Initialize collapsible panels
+        document.querySelectorAll('.panel-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const panel = header.parentElement;
+                panel.classList.toggle('collapsed');
+                
+                // Get the content div
+                const content = panel.querySelector('.panel-content');
+                
+                // Set max-height for smooth animation
+                if (panel.classList.contains('collapsed')) {
+                    content.style.maxHeight = '0';
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+        });
+
+        // Initialize panels to be expanded
+        document.querySelectorAll('.panel-content').forEach(content => {
+            content.style.maxHeight = content.scrollHeight + 'px';
+        });
+    </script>
 </body>
 </html>
