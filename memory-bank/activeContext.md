@@ -2,38 +2,39 @@
 *Last Updated: 2025-05-03 16:45 IST*
 
 ## Current Focus
-**Task:** T51 - Fix Docusaurus API Documentation
+**Task:** T52 - Document Library API Reorganization
 **Status:** 🔄 IN PROGRESS
 
 ## Implementation Context
-- Docusaurus documentation site created in /website folder
-- TypeDoc plugin configured for API documentation
-- SimulationStateVector interface implementation fixed
-- Working on filesystem-related TypeScript errors
-- Next: Fix broken links and test documentation build
+- Library exports reorganized into modular namespaces
+- Added browser global support via window.SpinNetwork
+- Created comprehensive API documentation
+- Updating memory bank documentation to reflect changes
 
 ## Active Changes
-- Created initial Docusaurus site structure
-- Set up documentation versioning support
-- Configured TypeDoc integration
-- Added initial custom styling
-- Fixed core TypeScript errors
+- Created EXPORTS.md and README.md for API documentation
+- Reorganized index.ts export structure
+- Added browser global type support
+- Updating system documentation files
 
 ## Critical Files
-- `/website/docusaurus.config.ts`
-- `/website/sidebars.ts`
-- `/website/docs/`
-- `lib/core/stateVector.ts`
-- `lib/io/*`
-- `lib/utils/*`
+- `/lib/EXPORTS.md`
+- `/lib/README.md`
+- `/lib/index.ts`
+- `/src/types/global.d.ts`
+- `memory-bank/systemPatterns.md`
+- `memory-bank/techContext.md`
+- `memory-bank/edit_history.md`
 
 ## Implementation Notes
-- Using TypeDoc for API documentation generation
-- Docusaurus provides versioning, search, and MDX support
-- Need to resolve filesystem type conflicts between Node.js and BrowserFS
-- Consider adding @types/browserfs as dev dependency
+- Namespaces organized by functionality (core, quantum, analysis, models, io)
+- Both module imports and browser global access supported
+- Factory functions exposed globally
+- Convenience Analysis object provided
+- Storage adapters follow consistent interface pattern
 
 ## Next Steps
-1. Fix remaining TypeScript errors in filesystem operations
-2. Update Docusaurus configuration for proper link handling
-3. Test documentation build and content
+1. Review documentation updates for completeness
+2. Validate API organization against best practices
+3. Test browser global functionality
+4. Update related documentation

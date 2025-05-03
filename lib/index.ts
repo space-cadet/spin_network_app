@@ -3,28 +3,33 @@
  * Main entry point that exports all public APIs
  */
 
-// Core exports
+// Declare global SpinNetwork type
+declare global {
+  interface Window {
+    SpinNetwork: any;
+  }
+}
+
+import * as coreModule from './core';
+import * as modelsModule from './models';
+import * as analysisModule from './analysis';
+import * as quantumModule from './quantum';
+import * as adaptersModule from './adapters';
+import * as utilsModule from './utils';
+import * as templatesModule from './templates';
+import * as ioModule from './io';
+
+// Export all modules for use in Node/module environments
 export * from './core';
-
-// Models
 export * from './models';
-
-// Analysis tools - this needs to come before other exports
 export * from './analysis';
-
-// Adapters (optional, for visualization)
+export * as quantum from './quantum';
 export * from './adapters';
-
-// Utilities
 export * from './utils';
-
-// Graph Templates
 export * from './templates';
-
-// I/O and Serialization
 export * from './io';
 
-// Factory functions for easy instantiation
+// Import specific types and classes needed for factory functions
 import { SpinNetworkGraph } from './core/graph';
 import { SimulationStateVector } from './core/stateVector';
 import { SpinNetworkSimulationEngine } from './core/engineImplementation';
@@ -52,80 +57,38 @@ export const Analysis = {
   }
 };
 
-// Export the core types and classes
-export {
-  SpinNetworkGraph,
-  SimulationStateVector,
-  SpinNetworkSimulationEngine,
-  GeometricPropertiesCalculator
-};
-
-/**
- * Creates a new simulation engine with default configuration
- * @returns A new simulation engine instance
- */
+// Export factory functions
 export function createSimulationEngine(): SimulationEngine {
   return new SpinNetworkSimulationEngine();
 }
 
-/**
- * Creates a new spin network graph
- * @returns A new graph instance
- */
 export function createGraph(): SimulationGraph {
   return new SpinNetworkGraph();
 }
 
-/**
- * Creates a new state vector with the specified node IDs
- * @param nodeIds Array of node IDs in the graph
- * @returns A new state vector instance
- */
 export function createStateVector(nodeIds: string[]): SimulationStateVector {
   return new SimulationStateVector(nodeIds);
 }
 
-// Import template functionality
-import { 
-  createGraphTemplate,
-  LineGraphOptions,
-  RingGraphOptions,
-  GridGraphOptions,
-  RandomGraphOptions
-} from './templates';
-
-/**
- * Creates a line graph with the specified configuration
- * @param options Configuration options for the line graph
- * @returns A new graph with a line structure
- */
-export function createLineGraph(options: LineGraphOptions = {}): SimulationGraph {
-  return createGraphTemplate('line', createGraph(), options);
-}
-
-/**
- * Creates a ring graph with the specified configuration
- * @param options Configuration options for the ring graph
- * @returns A new graph with a ring structure
- */
-export function createRingGraph(options: RingGraphOptions = {}): SimulationGraph {
-  return createGraphTemplate('ring', createGraph(), options);
-}
-
-/**
- * Creates a grid graph with the specified configuration
- * @param options Configuration options for the grid graph
- * @returns A new graph with a grid structure
- */
-export function createGridGraph(options: GridGraphOptions = {}): SimulationGraph {
-  return createGraphTemplate('grid', createGraph(), options);
-}
-
-/**
- * Creates a random graph with the specified configuration
- * @param options Configuration options for the random graph
- * @returns A new graph with a random structure
- */
-export function createRandomGraph(options: RandomGraphOptions = {}): SimulationGraph {
-  return createGraphTemplate('random', createGraph(), options);
+// For browser environments, attach to window.SpinNetwork
+if (typeof window !== 'undefined') {
+  window.SpinNetwork = {
+    // Attach all modules
+    core: coreModule,
+    models: modelsModule,
+    analysis: analysisModule,
+    quantum: quantumModule,
+    adapters: adaptersModule,
+    utils: utilsModule,
+    templates: templatesModule,
+    io: ioModule,
+    
+    // Attach factory functions
+    createSimulationEngine,
+    createGraph,
+    createStateVector,
+    
+    // Attach Analysis object
+    Analysis,
+  };
 }

@@ -132,6 +132,84 @@ Features:
 - Multiple data series visualization
 - Interactive elements (tooltips, zoom)
 
+## API Organization
+
+### Standalone Library Structure
+
+The library is organized into focused namespaces with clear responsibilities:
+
+1. **Core Module** (`SpinNetwork.core`)
+   - Complex number operations
+   - Tensor node operations
+   - State vector operations
+   - Math adapter functions
+   - Intertwiner space utilities
+
+2. **Quantum Module** (`SpinNetwork.quantum`)
+   - Tensor operations
+   - State vector operations
+   - Quantum operator functions
+
+3. **Analysis Module** (`SpinNetwork.analysis`)
+   - Geometric property calculations
+   - Conservation law checking
+   - Statistical analysis tools
+   - Dimensionality analysis
+
+4. **Models Module** (`SpinNetwork.models`)
+   - Diffusion model implementations
+   - Weight function factories
+   - Numerical solver implementations
+
+5. **IO Module** (`SpinNetwork.io`)
+   - Export functions
+   - Import functions
+   - Storage adapters
+
+### Dual Access Patterns
+
+The library supports two primary access patterns:
+
+1. **Module-based Access** (Node.js/bundlers):
+   ```typescript
+   import { createSimulationEngine } from 'spin-network';
+   import * as quantum from 'spin-network/quantum';
+   ```
+
+2. **Browser Global Access**:
+   ```javascript
+   const engine = window.SpinNetwork.createSimulationEngine();
+   const tensor = window.SpinNetwork.quantum.createTensor([2, 2]);
+   ```
+
+### Factory Function Pattern
+
+Core objects are created through factory functions:
+```typescript
+const engine = createSimulationEngine();
+const graph = createGraph();
+const stateVector = createStateVector(nodeIds);
+```
+
+### Storage Adapter Pattern
+
+The IO module uses an adapter pattern for storage:
+```typescript
+interface StorageAdapter {
+  save(key: string, data: any): Promise<void>;
+  load(key: string): Promise<any>;
+  delete(key: string): Promise<void>;
+  clear(): Promise<void>;
+}
+```
+
+Implementations include:
+- MemoryStorageAdapter
+- LocalStorageAdapter
+- IndexedDBAdapter
+- BrowserFSAdapter
+- NodeFSAdapter
+
 ## Technical Constraints
 
 ### Performance Considerations

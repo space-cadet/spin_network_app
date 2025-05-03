@@ -13,6 +13,17 @@
 Created initial Docusaurus documentation site setup with TypeDoc integration for API documentation generation. This provides a modern documentation system with features like versioning, search, and MDX support.
 
 ## 2025-05-03
+### [16:30] - T52: Library API Reorganization
+- Created `/lib/EXPORTS.md` - Comprehensive listing of all public exports
+- Created `/lib/README.md` - Detailed API reference documentation
+- Modified `/lib/index.ts` - Reorganized exports into modular namespaces
+- Modified `/src/types/global.d.ts` - Added SpinNetwork global type for browser support
+- Modified `/memory-bank/systemPatterns.md` - Documented new library architecture
+- Modified `/memory-bank/techContext.md` - Updated API organization documentation
+
+Changes focused on organizing the library into clear namespaces (core, quantum, analysis, models, io) and adding proper browser global support through window.SpinNetwork. Added comprehensive API documentation and export listings.
+
+## 2025-05-03
 ### 16:30 IST - T50: TypeScript Implementation Fixes
 - Modified `lib/core/stateVector.ts`:
   - Added missing toArray() method to SimulationStateVector class

@@ -376,3 +376,73 @@ The 3D visualization would follow this component structure:
 │ └─────────────────────┘ │
 └─────────────────────────┘
 ```
+
+## Library Architecture
+
+### Namespace Organization
+
+The standalone library is organized into modular namespaces with clear separation of concerns:
+
+```
+SpinNetwork
+├── core/           # Core types and implementations
+│   ├── Complex number operations
+│   ├── Tensor node operations
+│   ├── State vector operations
+│   ├── Math adapter
+│   └── Intertwiner space utilities
+│
+├── quantum/        # Quantum mechanical operations
+│   ├── Tensor operations
+│   └── State vector operations
+│
+├── analysis/       # Analysis tools
+│   ├── Geometric properties
+│   ├── Conservation laws
+│   └── Statistical analysis
+│
+├── models/         # Simulation models
+│   ├── Diffusion models
+│   ├── Weight functions
+│   └── Numerical solvers
+│
+├── io/            # Input/Output functionality
+│   ├── Export functions
+│   ├── Import functions
+│   └── Storage adapters
+│
+├── utils/         # Utility functions
+├── templates/     # Graph templates
+└── adapters/      # Visualization adapters
+```
+
+### Global Access Pattern
+
+The library supports both module imports and global browser access:
+
+1. **Module Environment**:
+   ```typescript
+   import { createSimulationEngine } from 'spin-network';
+   import * as quantum from 'spin-network/quantum';
+   ```
+
+2. **Browser Environment**:
+   ```javascript
+   const engine = window.SpinNetwork.createSimulationEngine();
+   const tensor = window.SpinNetwork.quantum.createTensor([2, 2]);
+   ```
+
+### Factory Functions
+
+Core functionality is exposed through global factory functions:
+- `createSimulationEngine()`: Creates new simulation engine
+- `createGraph()`: Creates new spin network graph
+- `createStateVector()`: Creates new state vector
+
+### Analysis Object
+
+Common analysis functions are provided through a convenience object:
+- `Analysis.calculateTotalVolume()`
+- `Analysis.calculateTotalArea()`
+- `Analysis.calculateEffectiveDimension()`
+- `Analysis.calculateVolumeEntropy()`

@@ -71,6 +71,7 @@ declare global {
     BrowserFS?: BrowserFSModule;
     fs?: FileSystem;
     path?: any;
+    SpinNetwork: any; // Add SpinNetwork global
   }
 }
 

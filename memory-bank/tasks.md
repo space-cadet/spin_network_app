@@ -2,10 +2,10 @@
 *Last Updated: 2025-05-03*
 
 ## Tasks Overview
-- **Active Tasks:** 16
+- **Active Tasks:** 17
 - **Paused Tasks:** 4  
 - **Completed Tasks:** 27
-- **Latest Task ID:** T51
+- **Latest Task ID:** T52
 
 ## Task Registry
 *Last Updated: 2025-05-03 16:45 IST*
@@ -13,6 +13,7 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | Dependencies |
 |----|-------|--------|----------|---------|--------------|
+| T52 | Document Library API Reorganization | 🔄 | HIGH | 2025-05-03 | - |
 | T51 | Fix Docusaurus API Documentation | 🔄 | HIGH | 2025-05-03 | T25, T28, T33, T45 |
 | T50 | Fix StateVector TypeScript Implementation | 🔄 | HIGH | 2025-05-03 | - |
 | T49 | Simplify Development Scripts | ✅ | LOW | 2025-05-03 | - |
@@ -23,6 +24,17 @@
 | T34 | Engine Migration | 🔄 | MEDIUM | 2025-04-24 | - |
 
 ## Task Details
+### T52: Document Library API Reorganization
+**Description**: Document the new modular namespace organization and browser global support in the standalone library, including updates to systemPatterns.md, techContext.md, and related files.
+**Status**: 🔄 **Last**: 2025-05-03 16:45 IST
+**Criteria**: 
+- Document modular namespace organization
+- Document browser global support
+- Update all related memory bank files
+- Validate API organization
+**Files**: `lib/EXPORTS.md`, `lib/README.md`, `lib/index.ts`, `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`
+**Notes**: Library reorganized into core, quantum, analysis, models, and io namespaces with browser global support via window.SpinNetwork.
+
 ### T51: Fix Docusaurus API Documentation 
 **Description**: Fix TypeScript errors in API documentation generation and resolve broken links in Docusaurus build
 **Status**: 🔄 **Last**: 2025-05-03 16:45 IST
@@ -80,6 +92,7 @@
 ### Active Tasks
 | ID | Title | Status | Priority | Started | Task File |
 |----|-------|--------|----------|---------|-----------|
+| T52 | Document Library API Reorganization | 🔄 | HIGH | 2025-05-03 | [tasks/T52.md] |
 | T51 | Fix Docusaurus API Documentation | 🔄 | HIGH | 2025-05-03 | [tasks/T51.md] |
 | T50 | Fix StateVector TypeScript Implementation | 🔄 | HIGH | 2025-05-03 | [tasks/T50.md] |
 | T49 | Simplify Development Scripts | ✅ | LOW | 2025-05-03 | [tasks/T49.md] |
@@ -136,6 +149,7 @@
 | T0 | Fix Simulation Play/Pause & Redux Sync | 2025-04-13 | [tasks/T0.md] |
 
 ## Dependencies
+- **T52** → None
 - **T51** → Depends on → **T25, T28, T33, T45**
 - **T39** → Depends on → **T38**
 - **T38** → Depends on → **T36, T20**
@@ -156,6 +170,7 @@
 2. **T37**: Implement Testing and Documentation Pages
 
 ## Recent Updates
+- 2025-05-03: Added T52 for documenting library API reorganization
 - 2025-05-03: Added T51 for fixing Docusaurus API documentation
 - 2025-05-03: Added T50 for fixing StateVector TypeScript implementation
 - 2025-05-03: Added T49 for simplifying development scripts
