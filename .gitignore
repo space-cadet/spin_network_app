@@ -56,4 +56,6 @@ screen.log
 .env*.local
 
 tmp/*
-
+__pycache__
+__marimo__
+.ipynb*

@@ -5,7 +5,7 @@
 import { Complex, StateVector, Operator, OperatorType } from './types';
 import { 
   createComplex, multiplyComplex, addComplex, conjugateComplex,
-  isZeroComplex 
+  isZeroComplex, subtractComplex 
 } from './complex';
 
 /**
