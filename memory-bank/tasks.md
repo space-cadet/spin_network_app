@@ -13,9 +13,9 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
-| T55 | Enhance Quantum Features of Standalone Library | 🔄 | HIGH | 2025-05-05 | [tasks/T55.md] |
+| T55 | Enhance Quantum Features of Standalone Library | 🔄 | HIGH | 2025-05-05 | [tasks/T55.md] | Started implementation of core types and operators |
 | T54 | Python WebAssembly Integration | 🔄 | HIGH | 2025-05-03 | [tasks/T54.md] |
-| T36 | Implement Tensor and State Vector Sandbox | 🔄 | MEDIUM | 2025-04-22 | [tasks/T36.md] |
+| T36 | Implement Tensor and State Vector Sandbox | 🔄 | MEDIUM | 2025-04-22 | ✅ Core modules complete, testing in progress | [tasks/T36.md] |
 | T48 | Test Files Reorganization | 🔄 | HIGH | 2025-05-01 | [tasks/T48.md] |
 | T52 | Document Library API Reorganization | 🔄 | HIGH | 2025-05-03 | [tasks/T52.md] |
 
@@ -134,7 +134,7 @@
 | T33 | Fix Documentation Rendering and Interaction | 🔄 | HIGH | 2025-04-21 | [tasks/T33.md] |
 | T34 | Complete Simulation Engine Migration | 🔄 | HIGH | 2025-04-21 | [tasks/T34.md] |
 | T35 | Enhance Node and Edge Data Structures | 🔄 | MEDIUM | 2025-04-21 | [tasks/T35.md] |
-| T36 | Implement Tensor and State Vector Sandbox | 🔄 | MEDIUM | 2025-04-22 | [tasks/T36.md] |
+| T36 | Implement Tensor and State Vector Sandbox | 🔄 | MEDIUM | 2025-04-22 | [tasks/T36.md] | Core modules complete, testing in progress |
 | T37 | Implement Testing and Documentation Pages | 🔄 | MEDIUM | 2025-04-24 | [tasks/T37.md] |
 | T38 | Implement Intertwiner Tensor Initialization | ✅ | HIGH | 2025-04-22 | [tasks/T38.md] |
 | T39 | Fix Tensor Module Browser Compatibility | ✅ | HIGH | 2025-04-24 | [tasks/T39.md] |

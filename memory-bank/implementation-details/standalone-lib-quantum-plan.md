@@ -264,18 +264,17 @@ export class QuantumCircuit {
 
 ```
 lib/quantum/
-├── index.ts                    # Main quantum module exports
-├── operator.ts                 # Base operator interfaces/classes
-├── hamiltonian.ts             # Hamiltonian implementations
-├── matrixOperations.ts        # Advanced matrix operations
-├── measurement.ts             # Measurement operators and simulation
-├── gates.ts                   # Quantum gate definitions
-├── circuit.ts                 # Simple quantum circuit
-└── __tests__/                 # Test suite
-    ├── core.test.ts
-    ├── operator.test.ts
-    ├── hamiltonian.test.ts
-    └── measurement.test.ts
+├── __tests__/                # Test directory
+├── complex.ts               # Enhanced complex number operations
+├── types.ts                # Core quantum types
+├── stateVector.ts          # Core state vector operations
+├── operator.ts             # Operator interface & base classes
+├── hamiltonian.ts          # Hamiltonian implementation
+├── matrixOperations.ts     # Matrix operations
+├── measurement.ts          # Measurement operators
+├── gates.ts               # Quantum gates
+├── circuit.ts             # Quantum circuit
+└── index.ts               # Main exports
 ```
 
 ## Success Criteria
