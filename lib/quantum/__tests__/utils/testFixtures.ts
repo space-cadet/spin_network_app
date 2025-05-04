@@ -32,7 +32,7 @@ export const BASIS_STATES = {
     amplitudes: [createComplex(0, 0), createComplex(1, 0)],
     basis: '|1⟩'
   },
-  
+
   // Qutrit basis states |0⟩, |1⟩, |2⟩
   QUTRIT_0: {
     dimension: 3,
@@ -55,7 +55,7 @@ export const BASIS_STATES = {
  * Common quantum states
  */
 export const TEST_STATES = {
-  // Qubit states
+  // Single qubit states
   PLUS: {
     dimension: 2,
     amplitudes: [
@@ -133,12 +133,6 @@ export const TEST_OPERATORS = {
   HADAMARD: [
     [createComplex(1/Math.sqrt(2), 0), createComplex(1/Math.sqrt(2), 0)],
     [createComplex(1/Math.sqrt(2), 0), createComplex(-1/Math.sqrt(2), 0)]
-  ],
-
-  // Phase gate
-  PHASE: [
-    [createComplex(1, 0), createComplex(0, 0)],
-    [createComplex(0, 0), createComplex(0, 1)]
   ],
   
   // CNOT gate

@@ -9,7 +9,7 @@ import {
   scaleOperator,
   addOperators
 } from '../operator';
-import { TEST_DIMS, TEST_OPERATORS, TEST_STATES } from './utils/testFixtures';
+import { TEST_DIMS, TEST_OPERATORS, TEST_STATES, BASIS_STATES } from './utils/testFixtures';
 import { createRandomUnitary, createRandomHermitian, complexApproxEqual } from './utils/testHelpers';
 import { OperatorType } from '../types';
 
@@ -204,8 +204,8 @@ describe('Quantum Operators', () => {
   describe('Common Quantum Operations', () => {
     it('correctly implements Pauli X gate', () => {
       const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-      const zero = TEST_STATES.BASIS_STATES.QUBIT_0;
-      const one = TEST_STATES.BASIS_STATES.QUBIT_1;
+      const zero = BASIS_STATES.QUBIT_0;
+      const one = BASIS_STATES.QUBIT_1;
       
       const result0 = X.apply(zero);
       const result1 = X.apply(one);
@@ -216,7 +216,7 @@ describe('Quantum Operators', () => {
 
     it('correctly implements Hadamard gate', () => {
       const H = new MatrixOperator(TEST_OPERATORS.HADAMARD);
-      const zero = TEST_STATES.BASIS_STATES.QUBIT_0;
+      const zero = BASIS_STATES.QUBIT_0;
       
       const result = H.apply(zero);
       expect(result).toEqual(TEST_STATES.PLUS);

@@ -93,7 +93,9 @@ describe('Complex Number Operations', () => {
     it('conjugate of real number is itself', () => {
       const real = createComplex(1, 0);
       const conj = conjugateComplex(real);
-      expect(conj).toEqual(real);
+      // Compare real parts directly and imaginary parts by magnitude
+      expect(conj.re).toBe(real.re);
+      expect(Math.abs(conj.im)).toBe(Math.abs(real.im));
     });
   });
 

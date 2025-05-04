@@ -10,7 +10,25 @@ const config: Config.InitialOptions = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/lib/$1'
-  }
+  },
+  // Test reporting configuration
+  reporters: [
+    'default',
+    ['jest-html-reporters', {
+      publicPath: './coverage/html-report',
+      filename: 'report.html',
+      pageTitle: 'Test Report'
+    }],
+    ['jest-junit', {
+      outputDirectory: './coverage/junit',
+      outputName: 'junit.xml',
+      classNameTemplate: '{classname}',
+      titleTemplate: '{title}'
+    }]
+  ],
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html']
 };
 
 export default config;

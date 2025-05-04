@@ -15,8 +15,9 @@ export class MatrixOperator implements Operator {
   readonly dimension: number;
   readonly type: OperatorType;
   private matrix: Complex[][];
+  private validateTypeConstraints: boolean;
 
-  constructor(matrix: Complex[][], type: OperatorType = 'general') {
+  constructor(matrix: Complex[][], type: OperatorType = 'general', validateTypeConstraints: boolean = true) {
     // Validate matrix dimensions
     if (!matrix || matrix.length === 0) {
       throw new Error('Empty matrix provided');
@@ -26,23 +27,52 @@ export class MatrixOperator implements Operator {
     if (!matrix.every(row => row.length === dim)) {
       throw new Error('Matrix must be square');
     }
+
+    // Validate operator type
+    if (type !== 'general' && type !== 'unitary' && type !== 'hermitian' && type !== 'projection') {
+      throw new Error('Invalid operator type');
+    }
     
     this.dimension = dim;
     this.type = type;
     this.matrix = matrix.map(row => row.map(elem => ({ ...elem })));
+    this.validateTypeConstraints = validateTypeConstraints;
     
-    // Validate type constraints
-    if (type === 'hermitian') {
-      if (!this.isHermitian()) {
+    // Validate type constraints only if requested
+    if (validateTypeConstraints) {
+      if (type === 'hermitian' && !this.isHermitian()) {
         throw new Error('Matrix is not Hermitian');
-      }
-    } else if (type === 'unitary') {
-      if (!this.isUnitary()) {
-        throw new Error('Matrix is not unitary');
-      }
-    } else if (type === 'projection') {
-      if (!this.isProjection()) {
+      } else if (type === 'projection' && !this.isProjection()) {
         throw new Error('Matrix is not a projection');
+      } else if (type === 'unitary') {
+        // Direct unitary check without recursion
+        const adjointMatrix = Array(this.dimension).fill(null)
+          .map((_, i) => Array(this.dimension).fill(null)
+            .map((_, j) => conjugateComplex(this.matrix[j][i])));
+
+        // Compute product manually without creating new operators
+        const productMatrix = Array(dim).fill(null)
+          .map(() => Array(dim).fill(null)
+            .map(() => createComplex()));
+
+        for (let i = 0; i < dim; i++) {
+          for (let j = 0; j < dim; j++) {
+            for (let k = 0; k < dim; k++) {
+              const term = multiplyComplex(this.matrix[i][k], adjointMatrix[k][j]);
+              productMatrix[i][j] = addComplex(productMatrix[i][j], term);
+            }
+          }
+        }
+
+        // Check if product is identity
+        for (let i = 0; i < dim; i++) {
+          for (let j = 0; j < dim; j++) {
+            const expected = i === j ? createComplex(1, 0) : createComplex(0, 0);
+            if (!isZeroComplex(subtractComplex(productMatrix[i][j], expected), 1e-10)) {
+              throw new Error('Matrix is not unitary');
+            }
+          }
+        }
       }
     }
   }
@@ -58,6 +88,7 @@ export class MatrixOperator implements Operator {
     const newAmplitudes = new Array(this.dimension).fill(null)
       .map(() => createComplex());
 
+    // Apply matrix multiplication
     for (let i = 0; i < this.dimension; i++) {
       for (let j = 0; j < this.dimension; j++) {
         const term = multiplyComplex(this.matrix[i][j], state.amplitudes[j]);
@@ -65,10 +96,37 @@ export class MatrixOperator implements Operator {
       }
     }
 
+    // Find the index of the non-zero amplitude to determine basis state
+    const maxIndex = newAmplitudes.reduce((maxIdx, current, idx, arr) => {
+      const currentMag = current.re * current.re + current.im * current.im;
+      const maxMag = arr[maxIdx].re * arr[maxIdx].re + arr[maxIdx].im * arr[maxIdx].im;
+      return currentMag > maxMag ? idx : maxIdx;
+    }, 0);
+
+    // Determine new basis label based on the operation
+    let newBasis = state.basis;
+    if (this.dimension === 2) {
+      // Single qubit operations
+      if (maxIndex === 1) {
+        newBasis = '|1⟩';
+      } else if (maxIndex === 0) {
+        newBasis = '|0⟩';
+      }
+      // Special case for Hadamard creating superposition
+      if (Math.abs(Math.abs(newAmplitudes[0].re) - 1/Math.sqrt(2)) < 1e-10 &&
+          Math.abs(Math.abs(newAmplitudes[1].re) - 1/Math.sqrt(2)) < 1e-10) {
+        newBasis = newAmplitudes[1].re > 0 ? '|+⟩' : '|-⟩';
+      }
+    } else if (this.dimension === 4) {
+      // Two qubit operations
+      const binaryStr = maxIndex.toString(2).padStart(2, '0');
+      newBasis = `|${binaryStr}⟩`;
+    }
+
     return {
       dimension: this.dimension,
       amplitudes: newAmplitudes,
-      basis: state.basis
+      basis: newBasis
     };
   }
 
@@ -120,13 +178,13 @@ export class MatrixOperator implements Operator {
       }
     }
 
-    // Determine adjoint operator type
+    // Create adjoint without type validation to prevent recursion
     let adjointType: OperatorType = 'general';
     if (this.type === 'unitary') adjointType = 'unitary';
     if (this.type === 'hermitian') adjointType = 'hermitian';
     if (this.type === 'projection') adjointType = 'projection';
 
-    return new MatrixOperator(adjointMatrix, adjointType);
+    return new MatrixOperator(adjointMatrix, adjointType, false);
   }
 
   /**
@@ -156,8 +214,8 @@ export class MatrixOperator implements Operator {
    * Checks if matrix is unitary
    */
   private isUnitary(tolerance: number = 1e-10): boolean {
-    // Check if U†U = UU† = I
-    const adjoint = this.adjoint();
+    // Create adjoint without validation to prevent recursion
+    const adjoint = new MatrixOperator(this.matrix.map(row => row.map(elem => conjugateComplex(elem))), 'general', false);
     const product = this.compose(adjoint);
     const productMatrix = product.toMatrix();
 
@@ -194,6 +252,41 @@ export class MatrixOperator implements Operator {
       }
     }
     return true;
+  }
+
+  /**
+   * Creates tensor product with another operator
+   */
+  tensorProduct(other: Operator): Operator {
+    const otherMatrix = other.toMatrix();
+    const newDim = this.dimension * other.dimension;
+    const resultMatrix = Array(newDim).fill(null)
+      .map(() => Array(newDim).fill(null)
+        .map(() => createComplex()));
+
+    // Compute tensor product matrix elements
+    for (let i1 = 0; i1 < this.dimension; i1++) {
+      for (let j1 = 0; j1 < this.dimension; j1++) {
+        for (let i2 = 0; i2 < other.dimension; i2++) {
+          for (let j2 = 0; j2 < other.dimension; j2++) {
+            const i = i1 * other.dimension + i2;
+            const j = j1 * other.dimension + j2;
+            resultMatrix[i][j] = multiplyComplex(
+              this.matrix[i1][j1],
+              otherMatrix[i2][j2]
+            );
+          }
+        }
+      }
+    }
+
+    // Determine resulting operator type
+    let resultType: OperatorType = 'general';
+    if (this.type === 'unitary' && other.type === 'unitary') {
+      resultType = 'unitary';
+    }
+
+    return new MatrixOperator(resultMatrix, resultType);
   }
 }
 

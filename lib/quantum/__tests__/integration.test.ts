@@ -75,7 +75,11 @@ describe('Quantum Integration Tests', () => {
         basis: '|10⟩'
       };
       
-      const result = X.compose(I).apply(initialState);
+      // Create X⊗I using tensor product
+      const XI = X.tensorProduct(I);
+      
+      // Apply the operator
+      const result = XI.apply(initialState);
       expect(stateVectorApproxEqual(result, expected)).toBe(true);
     });
 
@@ -130,15 +134,31 @@ describe('Quantum Integration Tests', () => {
         { re: 1/Math.sqrt(2), im: 0 }
       ]);
       
-      // Apply local operations
+      // Apply local operations (X⊗Z)
       const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
       const Z = new MatrixOperator(TEST_OPERATORS.PAULI_Z);
+      const I = new MatrixOperator(TEST_OPERATORS.IDENTITY_2);
       
-      // Verify entanglement preserved
-      const result = X.compose(Z).apply(state);
+      // Create X⊗I and I⊗Z
+      const XI = X.tensorProduct(I);
+      const IZ = I.tensorProduct(Z);
       
-      // Check that result is still maximally entangled
-      // (Would typically check reduced density matrix)
+      // Apply the operators
+      const result = XI.compose(IZ).apply(state);
+      
+      // Expected state: (|10⟩ - |01⟩)/√2
+      const expected = {
+        dimension: 4,
+        amplitudes: [
+          { re: 0, im: 0 },
+          { re: -1/Math.sqrt(2), im: 0 },
+          { re: 1/Math.sqrt(2), im: 0 },
+          { re: 0, im: 0 }
+        ],
+        basis: '|ψ⟩'
+      };
+      
+      expect(stateVectorApproxEqual(result, expected)).toBe(true);
     });
   });
 
