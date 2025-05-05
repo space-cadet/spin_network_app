@@ -1,35 +1,40 @@
 /**
  * Quantum module for the Spin Network simulation library
  * 
- * Provides tensor and state vector operations for quantum calculations
+ * Provides quantum mechanical operations for spin network simulations
  */
 
-// Export tensor operations
+// Core types
+export * from './types';
+export { StateVector as StateVectorImpl } from './stateVector';
+
+// Core operations
+export * from './complex';
+export * from './hilbertSpace';
+export * from './states';
+
+// Operators and quantum gates 
+export * from './operator';
+export * from './gates';
+
+// Measurement and mixed states
+export * from './measurement';
+export * from './densityMatrix';
+
+// Export individual operators
 export {
-  createTensor,
-  setTensorElement,
-  getTensorElement,
-  tensorNodeToTensor,
-  contractTensors,
-  tensorNorm,
-  normalizeTensor,
-  createIntertwinerTensor,
-  tensorExpectationValue
-} from './tensorOperations';
+    PauliX,
+    PauliY,
+    PauliZ,
+    Hadamard
+} from './gates';
 
-export type { Tensor } from './tensorOperations';
-
-// Export state vector operations
+// Export standard states
 export {
-  createStateVector,
-  initializeSpinState,
-  edgeToStateVector,
-  innerProduct,
-  normSquared,
-  normalizeStateVector,
-  applyOperator,
-  createSpinOperators,
-  expectationValue
-} from './stateVectorOperations';
-
-export type { StateVector } from './stateVectorOperations';
+    createBasisState,
+    createPlusState,
+    createMinusState,
+    createBellState,
+    createGHZState,
+    createWState
+} from './states';

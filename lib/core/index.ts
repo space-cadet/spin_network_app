@@ -6,8 +6,8 @@
 export * from './types';
 
 // Export implementations
-export { SpinNetworkGraph } from './graph';
-export { SimulationStateVector } from './stateVector';
+export { SpinNetworkGraph } from '../graph/graph';
+export { SimulationStateVector } from '../graph/graphState';
 export { MathAdapter } from './mathAdapter';
 export { 
   SpinNetworkSimulationEngine,

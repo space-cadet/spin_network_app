@@ -6,8 +6,8 @@
  */
 
 import * as math from 'mathjs';
-import { SimulationGraph, SimulationNode, SimulationEdge, WeightFunction } from './types';
-import { MathAdapter } from './mathAdapter';
+import { SimulationGraph, SimulationNode, SimulationEdge, WeightFunction } from '../core/types';
+import { MathAdapter } from '../core/mathAdapter';
 
 /**
  * Implementation of the SimulationGraph interface

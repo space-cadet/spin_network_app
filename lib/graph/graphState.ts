@@ -6,7 +6,7 @@
  */
 
 import * as math from 'mathjs';
-import { StateVector } from './types';
+import { StateVector } from '../core/types';
 
 /**
  * Implementation of the StateVector interface

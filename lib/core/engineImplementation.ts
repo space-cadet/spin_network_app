@@ -15,7 +15,7 @@ import {
   SimulationEvent,
   SimulationEdge // <-- Add this line
 } from './types';
-import { SimulationStateVector } from './stateVector';
+import { SimulationStateVector } from '../graph/graphState';
 import { MathAdapter } from './mathAdapter';
 import { 
   SimulationLogger, 

@@ -2,8 +2,8 @@
  * Density matrix implementation for mixed quantum states and operations
  */
 
-import { Complex, StateVector, OperatorType, DensityMatrix, QuantumChannel } from './types';
-import { Operator, MatrixOperator } from './operator';
+import { Complex, StateVector, OperatorType, DensityMatrix, QuantumChannel, Operator } from './types';
+import { MatrixOperator } from './operator';
 import { createComplex, multiplyComplex, addComplex, conjugateComplex, isZeroComplex, subtractComplex } from './complex';
 
 /**
@@ -179,6 +179,13 @@ export class DensityMatrixOperator implements DensityMatrix {
     }
 
     return new DensityMatrixOperator(matrix);
+  }
+
+  /**
+   * Returns tensor product with another operator
+   */
+  tensorProduct(other: Operator): Operator {
+    return this.operator.tensorProduct(other);
   }
 }
 

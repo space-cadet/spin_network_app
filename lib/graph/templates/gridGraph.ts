@@ -2,7 +2,7 @@
  * Grid graph template implementation
  */
 
-import { SimulationGraph } from '../core/types';
+import { SimulationGraph } from '../../core/types';
 import { GridGraphOptions } from './types';
 
 /**

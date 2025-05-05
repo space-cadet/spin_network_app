@@ -7,7 +7,7 @@
 
 import * as math from 'mathjs';
 import { SimulationGraph, SimulationEdge, StateVector, WeightFunction } from './types';
-import { SimulationStateVector } from './stateVector';
+import { SimulationStateVector } from '../graph/graphState';
 
 /**
  * Math.js adapter for simulation operations
