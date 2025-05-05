@@ -2,11 +2,21 @@
  * Quantum operator implementations
  */
 
-import { Complex, StateVector, Operator, OperatorType } from './types';
+import { Complex, StateVector, OperatorType } from './types';
 import { 
   createComplex, multiplyComplex, addComplex, conjugateComplex,
   isZeroComplex, subtractComplex 
 } from './complex';
+
+export interface Operator {
+  readonly dimension: number;
+  readonly type: OperatorType;
+  apply(state: StateVector): StateVector;
+  compose(other: Operator): Operator;
+  adjoint(): Operator;
+  toMatrix(): Complex[][];
+  tensorProduct?(other: Operator): Operator;
+}
 
 /**
  * Implementation of operator using matrix representation
