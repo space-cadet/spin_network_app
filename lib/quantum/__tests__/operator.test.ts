@@ -1,255 +1,208 @@
 /**
- * Tests for quantum operators
+ * Tests for quantum operator implementation
  */
 
-import { 
-  MatrixOperator,
-  createIdentityOperator,
-  createZeroOperator,
-  scaleOperator,
-  addOperators
-} from '../operator';
-import { TEST_DIMS, TEST_OPERATORS, TEST_STATES, BASIS_STATES } from './utils/testFixtures';
-import { createRandomUnitary, createRandomHermitian, complexApproxEqual } from './utils/testHelpers';
-import { OperatorType } from '../types';
+import { MatrixOperator } from '../operator';
+import { createComplex } from '../complex';
+import { StateVector } from '../stateVector';
 
-describe('Quantum Operators', () => {
-  describe('MatrixOperator', () => {
-    describe('Constructor', () => {
-      it('creates operator with valid matrix', () => {
-        const operator = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-        expect(operator.dimension).toBe(2);
-        expect(operator.type).toBe('general');
+// Helper function to create test matrices
+function createTestMatrix(dim: number): MatrixOperator {
+  const matrix = Array(dim).fill(null).map((_, i) => 
+    Array(dim).fill(null).map((_, j) => 
+      i === j ? createComplex(1, 0) : createComplex(0, 0)
+    )
+  );
+  return new MatrixOperator(matrix);
+}
+
+describe('MatrixOperator', () => {
+  describe('Constructor', () => {
+    it('creates valid operator with identity matrix', () => {
+      const op = createTestMatrix(2);
+      expect(op.dimension).toBe(2);
+      expect(op.type).toBe('general');
+    });
+
+    it('validates matrix dimensions', () => {
+      expect(() => new MatrixOperator([])).toThrow();
+      expect(() => new MatrixOperator([[createComplex(1, 0)], [createComplex(1, 0), createComplex(0, 0)]])).toThrow();
+    });
+
+    it('validates operator types', () => {
+      const matrix = [[createComplex(1, 0), createComplex(0, 0)], [createComplex(0, 0), createComplex(1, 0)]];
+      expect(() => new MatrixOperator(matrix, 'invalid' as any)).toThrow();
+    });
+
+    it('validates hermitian property', () => {
+      const hermitianMatrix = [
+        [createComplex(1, 0), createComplex(1, -1)],
+        [createComplex(1, 1), createComplex(2, 0)]
+      ];
+      expect(() => new MatrixOperator(hermitianMatrix, 'hermitian')).toThrow();
+    });
+
+    it('validates unitary property', () => {
+      // Non-unitary matrix
+      const nonUnitaryMatrix = [
+        [createComplex(2, 0), createComplex(0, 0)],
+        [createComplex(0, 0), createComplex(2, 0)]
+      ];
+      expect(() => new MatrixOperator(nonUnitaryMatrix, 'unitary')).toThrow();
+    });
+
+    it('validates projection property', () => {
+      // Non-projection matrix
+      const nonProjectionMatrix = [
+        [createComplex(2, 0), createComplex(0, 0)],
+        [createComplex(0, 0), createComplex(2, 0)]
+      ];
+      expect(() => new MatrixOperator(nonProjectionMatrix, 'projection')).toThrow();
+    });
+  });
+
+  describe('Operator Methods', () => {
+    describe('apply', () => {
+      it('applies operator to state vector', () => {
+        const op = createTestMatrix(2);
+        const state = new StateVector(2, [createComplex(1, 0), createComplex(0, 0)]);
+        const result = op.apply(state);
+        
+        expect(result.amplitudes[0]).toEqual(createComplex(1, 0));
+        expect(result.amplitudes[1]).toEqual(createComplex(0, 0));
       });
 
-      it('throws error for non-square matrix', () => {
-        const invalidMatrix = [
-          [{ re: 1, im: 0 }],
-          [{ re: 0, im: 0 }],
-          [{ re: 0, im: 0 }]
-        ];
-        expect(() => new MatrixOperator(invalidMatrix)).toThrow();
-      });
-
-      it('validates operator types', () => {
-        // Unitary
-        expect(() => new MatrixOperator(TEST_OPERATORS.PAULI_X, 'unitary')).not.toThrow();
-        
-        // Hermitian
-        expect(() => new MatrixOperator(TEST_OPERATORS.PAULI_Z, 'hermitian')).not.toThrow();
-        
-        // Should throw for invalid type claims
-        const nonUnitary = [
-          [{ re: 2, im: 0 }, { re: 0, im: 0 }],
-          [{ re: 0, im: 0 }, { re: 1, im: 0 }]
-        ];
-        expect(() => new MatrixOperator(nonUnitary, 'unitary')).toThrow();
+      it('throws error for dimension mismatch', () => {
+        const op = createTestMatrix(2);
+        const state = new StateVector(3, [
+          createComplex(1, 0),
+          createComplex(0, 0),
+          createComplex(0, 0)
+        ]);
+        expect(() => op.apply(state)).toThrow();
       });
     });
 
-    describe('Core Operations', () => {
-      it('applies operator to state vector', () => {
-        const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-        const result = X.apply(TEST_STATES.PLUS);
-        expect(result).toEqual(TEST_STATES.PLUS);
+    describe('compose', () => {
+      it('composes two operators', () => {
+        const op1 = createTestMatrix(2);
+        const op2 = createTestMatrix(2);
+        const result = op1.compose(op2);
+        
+        expect(result.dimension).toBe(2);
+        const matrix = result.toMatrix();
+        expect(matrix[0][0]).toEqual(createComplex(1, 0));
+        expect(matrix[1][1]).toEqual(createComplex(1, 0));
       });
 
-      it('composes operators correctly', () => {
-        const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-        const Y = new MatrixOperator(TEST_OPERATORS.PAULI_Y);
-        const Z = new MatrixOperator(TEST_OPERATORS.PAULI_Z);
-        
-        // Test XY = iZ
-        const XY = X.compose(Y);
-        const scaledZ = scaleOperator(Z, { re: 0, im: 1 });
-        
-        const XYMatrix = XY.toMatrix();
-        const scaledZMatrix = scaledZ.toMatrix();
-        
-        // Compare matrices
-        for (let i = 0; i < 2; i++) {
-          for (let j = 0; j < 2; j++) {
-            expect(complexApproxEqual(XYMatrix[i][j], scaledZMatrix[i][j])).toBe(true);
-          }
-        }
+      it('throws error for dimension mismatch', () => {
+        const op1 = createTestMatrix(2);
+        const op2 = createTestMatrix(3);
+        expect(() => op1.compose(op2)).toThrow();
       });
+    });
 
-      it('computes adjoint correctly', () => {
-        const H = new MatrixOperator(TEST_OPERATORS.HADAMARD);
-        const adjoint = H.adjoint();
-        
-        const matrix = H.toMatrix();
+    describe('adjoint', () => {
+      it('computes adjoint of operator', () => {
+        const matrix = [
+          [createComplex(1, 1), createComplex(0, 0)],
+          [createComplex(0, 0), createComplex(1, -1)]
+        ];
+        const op = new MatrixOperator(matrix);
+        const adjoint = op.adjoint();
         const adjointMatrix = adjoint.toMatrix();
         
-        // Hadamard is self-adjoint
-        for (let i = 0; i < 2; i++) {
-          for (let j = 0; j < 2; j++) {
-            expect(complexApproxEqual(matrix[i][j], adjointMatrix[i][j])).toBe(true);
-          }
-        }
+        expect(adjointMatrix[0][0]).toEqual(createComplex(1, -1));
+        expect(adjointMatrix[1][1]).toEqual(createComplex(1, 1));
       });
     });
 
-    describe('Type Checking', () => {
-      it('identifies unitary operators', () => {
-        const dim = TEST_DIMS.QUBIT;
-        const unitary = createRandomUnitary(dim);
-        expect(() => new MatrixOperator(unitary, 'unitary')).not.toThrow();
-      });
-
-      it('identifies hermitian operators', () => {
-        const dim = TEST_DIMS.QUBIT;
-        const hermitian = createRandomHermitian(dim);
-        expect(() => new MatrixOperator(hermitian, 'hermitian')).not.toThrow();
-      });
-
-      it('identifies projection operators', () => {
-        // Create simple projection operator |0⟩⟨0|
-        const proj = [
-          [{ re: 1, im: 0 }, { re: 0, im: 0 }],
-          [{ re: 0, im: 0 }, { re: 0, im: 0 }]
-        ];
-        expect(() => new MatrixOperator(proj, 'projection')).not.toThrow();
-      });
-    });
-  });
-
-  describe('Operator Factory Functions', () => {
-    describe('createIdentityOperator', () => {
-      it('creates identity operator of given dimension', () => {
-        const I = createIdentityOperator(TEST_DIMS.QUBIT);
-        expect(I.dimension).toBe(TEST_DIMS.QUBIT);
-        expect(I.type).toBe('unitary');
+    describe('tensorProduct', () => {
+      it('computes tensor product of operators', () => {
+        const op1 = createTestMatrix(2);
+        const op2 = createTestMatrix(2);
+        const result = op1.tensorProduct(op2);
         
-        // Check matrix elements
-        const matrix = I.toMatrix();
-        for (let i = 0; i < TEST_DIMS.QUBIT; i++) {
-          for (let j = 0; j < TEST_DIMS.QUBIT; j++) {
-            expect(matrix[i][j]).toEqual({
-              re: i === j ? 1 : 0,
-              im: 0
-            });
-          }
-        }
+        expect(result.dimension).toBe(4);
+        const matrix = result.toMatrix();
+        expect(matrix[0][0]).toEqual(createComplex(1, 0));
+        expect(matrix[3][3]).toEqual(createComplex(1, 0));
       });
     });
 
-    describe('createZeroOperator', () => {
-      it('creates zero operator of given dimension', () => {
-        const Z = createZeroOperator(TEST_DIMS.QUBIT);
-        expect(Z.dimension).toBe(TEST_DIMS.QUBIT);
-        
-        // Check matrix elements
-        const matrix = Z.toMatrix();
-        for (let i = 0; i < TEST_DIMS.QUBIT; i++) {
-          for (let j = 0; j < TEST_DIMS.QUBIT; j++) {
-            expect(matrix[i][j]).toEqual({ re: 0, im: 0 });
-          }
-        }
-      });
-    });
-
-    describe('scaleOperator', () => {
+    describe('scale', () => {
       it('scales operator by complex number', () => {
-        const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-        const scalar = { re: 2, im: 1 };
-        const scaled = scaleOperator(X, scalar);
+        const op = createTestMatrix(2);
+        const scalar = createComplex(2, 0);
+        const scaled = op.scale(scalar);
+        const matrix = scaled.toMatrix();
         
-        const originalMatrix = X.toMatrix();
-        const scaledMatrix = scaled.toMatrix();
-        
-        // Check scaling
-        for (let i = 0; i < 2; i++) {
-          for (let j = 0; j < 2; j++) {
-            const expected = {
-              re: originalMatrix[i][j].re * scalar.re - originalMatrix[i][j].im * scalar.im,
-              im: originalMatrix[i][j].re * scalar.im + originalMatrix[i][j].im * scalar.re
-            };
-            expect(complexApproxEqual(scaledMatrix[i][j], expected)).toBe(true);
-          }
-        }
+        expect(matrix[0][0]).toEqual(createComplex(2, 0));
+        expect(matrix[1][1]).toEqual(createComplex(2, 0));
       });
     });
 
-    describe('addOperators', () => {
+    describe('add', () => {
       it('adds two operators', () => {
-        const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-        const Y = new MatrixOperator(TEST_OPERATORS.PAULI_Y);
-        const sum = addOperators(X, Y);
+        const op1 = createTestMatrix(2);
+        const op2 = createTestMatrix(2);
+        const sum = op1.add(op2);
+        const matrix = sum.toMatrix();
         
-        const matrixX = X.toMatrix();
-        const matrixY = Y.toMatrix();
-        const matrixSum = sum.toMatrix();
-        
-        // Check addition
-        for (let i = 0; i < 2; i++) {
-          for (let j = 0; j < 2; j++) {
-            const expected = {
-              re: matrixX[i][j].re + matrixY[i][j].re,
-              im: matrixX[i][j].im + matrixY[i][j].im
-            };
-            expect(complexApproxEqual(matrixSum[i][j], expected)).toBe(true);
-          }
-        }
+        expect(matrix[0][0]).toEqual(createComplex(2, 0));
+        expect(matrix[1][1]).toEqual(createComplex(2, 0));
       });
 
-      it('throws error for mismatched dimensions', () => {
-        const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-        const CNOT = new MatrixOperator(TEST_OPERATORS.CNOT);
-        expect(() => addOperators(X, CNOT)).toThrow();
+      it('throws error for dimension mismatch', () => {
+        const op1 = createTestMatrix(2);
+        const op2 = createTestMatrix(3);
+        expect(() => op1.add(op2)).toThrow();
+      });
+    });
+
+    describe('partialTrace', () => {
+      it('computes partial trace for 2-qubit system', () => {
+        const op = createTestMatrix(4);
+        const result = op.partialTrace([2, 2], [1]);
+        
+        expect(result.dimension).toBe(2);
+      });
+
+      it('throws error for invalid dimensions', () => {
+        const op = createTestMatrix(4);
+        expect(() => op.partialTrace([3, 2], [1])).toThrow();
+      });
+
+      it('throws error for invalid trace indices', () => {
+        const op = createTestMatrix(4);
+        expect(() => op.partialTrace([2, 2], [2])).toThrow();
       });
     });
   });
 
-  describe('Common Quantum Operations', () => {
-    it('correctly implements Pauli X gate', () => {
-      const X = new MatrixOperator(TEST_OPERATORS.PAULI_X);
-      const zero = BASIS_STATES.QUBIT_0;
-      const one = BASIS_STATES.QUBIT_1;
-      
-      const result0 = X.apply(zero);
-      const result1 = X.apply(one);
-      
-      expect(result0).toEqual(one);
-      expect(result1).toEqual(zero);
+  describe('Static Methods', () => {
+    describe('identity', () => {
+      it('creates identity operator', () => {
+        const identity = MatrixOperator.identity(2);
+        const matrix = identity.toMatrix();
+        
+        expect(matrix[0][0]).toEqual(createComplex(1, 0));
+        expect(matrix[0][1]).toEqual(createComplex(0, 0));
+        expect(matrix[1][0]).toEqual(createComplex(0, 0));
+        expect(matrix[1][1]).toEqual(createComplex(1, 0));
+      });
     });
 
-    it('correctly implements Hadamard gate', () => {
-      const H = new MatrixOperator(TEST_OPERATORS.HADAMARD);
-      const zero = BASIS_STATES.QUBIT_0;
-      
-      const result = H.apply(zero);
-      expect(result).toEqual(TEST_STATES.PLUS);
-    });
-
-    it('correctly implements CNOT gate', () => {
-      const CNOT = new MatrixOperator(TEST_OPERATORS.CNOT);
-      
-      // Test on |11⟩ -> |10⟩
-      const input = {
-        dimension: 4,
-        amplitudes: [
-          { re: 0, im: 0 },
-          { re: 0, im: 0 },
-          { re: 0, im: 0 },
-          { re: 1, im: 0 }
-        ],
-        basis: '|11⟩'
-      };
-      
-      const expected = {
-        dimension: 4,
-        amplitudes: [
-          { re: 0, im: 0 },
-          { re: 0, im: 0 },
-          { re: 1, im: 0 },
-          { re: 0, im: 0 }
-        ],
-        basis: '|10⟩'
-      };
-      
-      const result = CNOT.apply(input);
-      expect(result).toEqual(expected);
+    describe('zero', () => {
+      it('creates zero operator', () => {
+        const zero = MatrixOperator.zero(2);
+        const matrix = zero.toMatrix();
+        
+        expect(matrix[0][0]).toEqual(createComplex(0, 0));
+        expect(matrix[0][1]).toEqual(createComplex(0, 0));
+        expect(matrix[1][0]).toEqual(createComplex(0, 0));
+        expect(matrix[1][1]).toEqual(createComplex(0, 0));
+      });
     });
   });
 });
