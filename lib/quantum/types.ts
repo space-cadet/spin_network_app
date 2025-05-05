@@ -36,6 +36,8 @@ export interface Operator {
   compose(other: Operator): Operator;      // Compose with another operator  
   adjoint(): Operator;                     // Hermitian conjugate
   toMatrix(): Complex[][];                 // Matrix representation
+  tensorProduct(other: Operator): Operator; // Tensor product with another operator
+  partialTrace(dims: number[], traceOutIndices: number[]): Operator; // Partial trace over subsystems
 }
 
 /**

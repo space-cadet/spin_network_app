@@ -2,8 +2,9 @@
  * Hilbert space implementation supporting composition and tensor products
  */
 
-import { Complex, StateVector } from './types';
+import { Complex, StateVector as IStateVector } from './types';
 import { createComplex, multiplyComplex } from './complex';
+import { StateVector } from './stateVector';
 
 /**
  * Represents a quantum Hilbert space with dimension and optional basis labels
@@ -27,16 +28,16 @@ export class HilbertSpace {
   }
 
   /**
-   * Creates tensor product of two Hilbert spaces: H₁ ⊗ H₂
+   * Composes this Hilbert space with another via tensor product: this ⊗ other
    */
-  static compose(space1: HilbertSpace, space2: HilbertSpace): HilbertSpace {
-    const newDimension = space1.dimension * space2.dimension;
+  compose(other: HilbertSpace): HilbertSpace {
+    const newDimension = this.dimension * other.dimension;
     
     // Generate basis labels for product space
     const newBasis: string[] = [];
-    for (let i = 0; i < space1.dimension; i++) {
-      for (let j = 0; j < space2.dimension; j++) {
-        newBasis.push(`${space1.basis[i]}⊗${space2.basis[j]}`);
+    for (let i = 0; i < this.dimension; i++) {
+      for (let j = 0; j < other.dimension; j++) {
+        newBasis.push(`${this.basis[i]}⊗${other.basis[j]}`);
       }
     }
 
@@ -44,14 +45,13 @@ export class HilbertSpace {
   }
 
   /**
-   * Decomposes a Hilbert space into tensor product factors
-   * @param space The space to decompose
+   * Decomposes this Hilbert space into tensor product factors
    * @param dims Array of dimensions that should multiply to space dimension
    */
-  static decompose(space: HilbertSpace, dims: number[]): HilbertSpace[] {
+  decompose(dims: number[]): HilbertSpace[] {
     // Validate dimensions
     const product = dims.reduce((a, b) => a * b, 1);
-    if (product !== space.dimension) {
+    if (product !== this.dimension) {
       throw new Error('Product of dimensions must equal space dimension');
     }
 
@@ -59,7 +59,7 @@ export class HilbertSpace {
     return dims.map((dim, i) => {
       // Extract relevant basis labels if possible
       const basisStart = i * dim;
-      const basis = space.basis.slice(basisStart, basisStart + dim);
+      const basis = this.basis.slice(basisStart, basisStart + dim);
       return new HilbertSpace(dim, basis);
     });
   }
@@ -68,7 +68,7 @@ export class HilbertSpace {
    * Creates tensor product with another space: this ⊗ other
    */
   tensorProduct(other: HilbertSpace): HilbertSpace {
-    return HilbertSpace.compose(this, other);
+    return this.compose(other);
   }
 
   /**
@@ -94,32 +94,25 @@ export class HilbertSpace {
   /**
    * Checks if a state vector belongs to this Hilbert space
    */
-  containsState(state: StateVector): boolean {
+  containsState(state: IStateVector): boolean {
     return state.dimension === this.dimension;
   }
 
   /**
    * Creates a computational basis state |i⟩
    */
-  computationalBasisState(i: number): StateVector {
+  computationalBasisState(i: number): IStateVector {
     if (i < 0 || i >= this.dimension) {
       throw new Error('Basis state index out of range');
     }
 
-    const amplitudes = Array(this.dimension).fill(null)
-      .map((_, j) => i === j ? createComplex(1, 0) : createComplex(0, 0));
-
-    return {
-      dimension: this.dimension,
-      amplitudes,
-      basis: this.basis[i]
-    };
+    return StateVector.computationalBasis(this.dimension, i);
   }
 
   /**
    * Returns array of all computational basis states
    */
-  computationalBasis(): StateVector[] {
+  computationalBasis(): IStateVector[] {
     return Array(this.dimension).fill(null)
       .map((_, i) => this.computationalBasisState(i));
   }
@@ -127,30 +120,12 @@ export class HilbertSpace {
   /**
    * Creates normalized superposition of basis states with given coefficients
    */
-  superposition(coefficients: Complex[]): StateVector {
+  superposition(coefficients: Complex[]): IStateVector {
     if (coefficients.length !== this.dimension) {
       throw new Error('Number of coefficients must match dimension');
     }
 
-    // Calculate normalization factor
-    let normSquared = 0;
-    for (const coeff of coefficients) {
-      const { re, im } = coeff;
-      normSquared += re * re + im * im;
-    }
-    const normFactor = Math.sqrt(normSquared);
-
-    // Create normalized amplitudes
-    const amplitudes = coefficients.map(coeff => ({
-      re: coeff.re / normFactor,
-      im: coeff.im / normFactor
-    }));
-
-    return {
-      dimension: this.dimension,
-      amplitudes,
-      basis: 'superposition'
-    };
+    return StateVector.superposition(coefficients);
   }
 
   /**
@@ -171,9 +146,8 @@ export class HilbertSpace {
   /**
    * Creates an equally weighted superposition of all basis states
    */
-  equalSuperposition(): StateVector {
-    const coefficient = createComplex(1 / Math.sqrt(this.dimension), 0);
-    return this.superposition(Array(this.dimension).fill(coefficient));
+  equalSuperposition(): IStateVector {
+    return StateVector.equalSuperposition(this.dimension);
   }
 
   /**

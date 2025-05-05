@@ -2,21 +2,13 @@
  * Quantum operator implementations
  */
 
-import { Complex, StateVector, OperatorType } from './types';
+import { Complex, StateVector as IStateVector, OperatorType, Operator } from './types';
 import { 
   createComplex, multiplyComplex, addComplex, conjugateComplex,
   isZeroComplex, subtractComplex 
 } from './complex';
-
-export interface Operator {
-  readonly dimension: number;
-  readonly type: OperatorType;
-  apply(state: StateVector): StateVector;
-  compose(other: Operator): Operator;
-  adjoint(): Operator;
-  toMatrix(): Complex[][];
-  tensorProduct?(other: Operator): Operator;
-}
+import { StateVector } from './stateVector';
+import { validateMatDims, validateMatchDims } from './utils/validation';
 
 /**
  * Implementation of operator using matrix representation
@@ -28,16 +20,9 @@ export class MatrixOperator implements Operator {
   private validateTypeConstraints: boolean;
 
   constructor(matrix: Complex[][], type: OperatorType = 'general', validateTypeConstraints: boolean = true) {
-    // Validate matrix dimensions
-    if (!matrix || matrix.length === 0) {
-      throw new Error('Empty matrix provided');
-    }
+    validateMatDims(matrix);
     
     const dim = matrix.length;
-    if (!matrix.every(row => row.length === dim)) {
-      throw new Error('Matrix must be square');
-    }
-
     // Validate operator type
     if (type !== 'general' && type !== 'unitary' && type !== 'hermitian' && type !== 'projection') {
       throw new Error('Invalid operator type');
@@ -90,10 +75,8 @@ export class MatrixOperator implements Operator {
   /**
    * Applies operator to state vector: |ψ'⟩ = O|ψ⟩
    */
-  apply(state: StateVector): StateVector {
-    if (state.dimension !== this.dimension) {
-      throw new Error('State vector dimension mismatch');
-    }
+  apply(state: IStateVector): IStateVector {
+    validateMatchDims(state.dimension, this.dimension);
 
     const newAmplitudes = new Array(this.dimension).fill(null)
       .map(() => createComplex());
@@ -133,20 +116,14 @@ export class MatrixOperator implements Operator {
       newBasis = `|${binaryStr}⟩`;
     }
 
-    return {
-      dimension: this.dimension,
-      amplitudes: newAmplitudes,
-      basis: newBasis
-    };
+    return new StateVector(this.dimension, newAmplitudes, newBasis);
   }
 
   /**
    * Composes with another operator: O₁O₂
    */
   compose(other: Operator): Operator {
-    if (other.dimension !== this.dimension) {
-      throw new Error('Operator dimensions do not match');
-    }
+    validateMatchDims(other.dimension, this.dimension);
 
     // Convert other operator to matrix form
     const otherMatrix = other.toMatrix();
@@ -298,54 +275,143 @@ export class MatrixOperator implements Operator {
 
     return new MatrixOperator(resultMatrix, resultType);
   }
-}
 
-/**
- * Creates the identity operator of given dimension
- */
-export function createIdentityOperator(dimension: number): Operator {
-  const matrix = Array(dimension).fill(null)
-    .map((_, i) => Array(dimension).fill(null)
-      .map((_, j) => i === j ? createComplex(1, 0) : createComplex(0, 0))
-    );
-  return new MatrixOperator(matrix, 'unitary');
-}
-
-/**
- * Creates a zero operator of given dimension
- */
-export function createZeroOperator(dimension: number): Operator {
-  const matrix = Array(dimension).fill(null)
-    .map(() => Array(dimension).fill(null)
-      .map(() => createComplex(0, 0))
-    );
-  return new MatrixOperator(matrix);
-}
-
-/**
- * Scales an operator by a complex number
- */
-export function scaleOperator(operator: Operator, scalar: Complex): Operator {
-  const matrix = operator.toMatrix();
-  const scaledMatrix = matrix.map(row => 
-    row.map(elem => multiplyComplex(elem, scalar))
-  );
-  return new MatrixOperator(scaledMatrix);
-}
-
-/**
- * Adds two operators of the same dimension
- */
-export function addOperators(a: Operator, b: Operator): Operator {
-  if (a.dimension !== b.dimension) {
-    throw new Error('Operator dimensions do not match');
+  /**
+   * Creates the identity operator of given dimension
+   */
+  static identity(dimension: number): MatrixOperator {
+    const matrix = Array(dimension).fill(null)
+      .map((_, i) => Array(dimension).fill(null)
+        .map((_, j) => i === j ? createComplex(1, 0) : createComplex(0, 0))
+      );
+    return new MatrixOperator(matrix, 'unitary');
   }
 
-  const matrixA = a.toMatrix();
-  const matrixB = b.toMatrix();
-  const sumMatrix = matrixA.map((row, i) =>
-    row.map((elem, j) => addComplex(elem, matrixB[i][j]))
-  );
+  /**
+   * Creates a zero operator of given dimension
+   */
+  static zero(dimension: number): MatrixOperator {
+    const matrix = Array(dimension).fill(null)
+      .map(() => Array(dimension).fill(null)
+        .map(() => createComplex(0, 0))
+      );
+    return new MatrixOperator(matrix);
+  }
 
-  return new MatrixOperator(sumMatrix);
+  /**
+   * Scales operator by a complex number
+   */
+  scale(scalar: Complex): MatrixOperator {
+    const scaledMatrix = this.matrix.map(row => 
+      row.map(elem => multiplyComplex(elem, scalar))
+    );
+    return new MatrixOperator(scaledMatrix);
+  }
+
+  /**
+   * Adds this operator with another operator
+   */
+  add(other: Operator): MatrixOperator {
+    validateMatchDims(other.dimension, this.dimension);
+
+    const otherMatrix = other.toMatrix();
+    const sumMatrix = this.matrix.map((row, i) =>
+      row.map((elem, j) => addComplex(elem, otherMatrix[i][j]))
+    );
+
+    return new MatrixOperator(sumMatrix);
+  }
+
+  /**
+   * Performs partial trace over specified subsystems
+   */
+  partialTrace(dims: number[], traceOutIndices: number[]): Operator {
+    // Validate dimensions
+    const totalDim = dims.reduce((a, b) => a * b, 1);
+    if (totalDim !== this.dimension) {
+      throw new Error('Product of subsystem dimensions must equal total dimension');
+    }
+
+    // Validate trace indices
+    if (!traceOutIndices.every(i => i >= 0 && i < dims.length)) {
+      throw new Error('Invalid trace out indices');
+    }
+
+    // Calculate remaining dimension after trace
+    const remainingDim = dims.filter((_, i) => !traceOutIndices.includes(i))
+      .reduce((a, b) => a * b, 1);
+
+    // Initialize result matrix
+    const resultMatrix = Array(remainingDim).fill(null)
+      .map(() => Array(remainingDim).fill(null)
+        .map(() => createComplex(0, 0)));
+
+    // Perform partial trace
+    const traceRange = Array(this.dimension).fill(0)
+      .map((_, i) => i);
+
+    // Implementation of partial trace operation...
+    // This is a simplified version - would need to be expanded for full functionality
+    for (let i = 0; i < remainingDim; i++) {
+      for (let j = 0; j < remainingDim; j++) {
+        for (const k of traceRange) {
+          // Map indices to multi-dimensional coordinates
+          const iCoords = indexToCoords(i, dims.filter((_, idx) => !traceOutIndices.includes(idx)));
+          const jCoords = indexToCoords(j, dims.filter((_, idx) => !traceOutIndices.includes(idx)));
+          const kCoords = indexToCoords(k, dims.filter((_, idx) => traceOutIndices.includes(idx)));
+          
+          // Combine coordinates
+          const fullICoords = combineCoords(iCoords, kCoords, traceOutIndices);
+          const fullJCoords = combineCoords(jCoords, kCoords, traceOutIndices);
+          
+          // Map back to flat indices
+          const fullI = coordsToIndex(fullICoords, dims);
+          const fullJ = coordsToIndex(fullJCoords, dims);
+          
+          // Add to result
+          resultMatrix[i][j] = addComplex(
+            resultMatrix[i][j],
+            this.matrix[fullI][fullJ]
+          );
+        }
+      }
+    }
+
+    return new MatrixOperator(resultMatrix);
+  }
+}
+
+// Helper functions for partial trace implementation
+function indexToCoords(index: number, dims: number[]): number[] {
+  const coords: number[] = [];
+  let remainder = index;
+  for (let i = dims.length - 1; i >= 0; i--) {
+    coords.unshift(remainder % dims[i]);
+    remainder = Math.floor(remainder / dims[i]);
+  }
+  return coords;
+}
+
+function coordsToIndex(coords: number[], dims: number[]): number {
+  let index = 0;
+  let factor = 1;
+  for (let i = coords.length - 1; i >= 0; i--) {
+    index += coords[i] * factor;
+    factor *= dims[i];
+  }
+  return index;
+}
+
+function combineCoords(coords1: number[], coords2: number[], traceIndices: number[]): number[] {
+  const result: number[] = [];
+  let i1 = 0;
+  let i2 = 0;
+  for (let i = 0; i < coords1.length + coords2.length; i++) {
+    if (traceIndices.includes(i)) {
+      result.push(coords2[i2++]);
+    } else {
+      result.push(coords1[i1++]);
+    }
+  }
+  return result;
 }

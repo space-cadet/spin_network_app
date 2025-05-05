@@ -1,8 +1,8 @@
 /**
- * Core state vector operations
+ * Quantum state vector implementation
  */
 
-import { Complex, StateVector } from './types';
+import { Complex, StateVector as IStateVector } from './types';
 import { 
   createComplex, 
   addComplex, 
@@ -11,112 +11,196 @@ import {
   modulusComplex,
   isZeroComplex 
 } from './complex';
+import { 
+  validatePosDim, 
+  validateIdx, 
+  validateAmps 
+} from './utils/validation';
 
-/**
- * Creates a quantum state vector of given dimension
- */
-export function createState(dimension: number): StateVector {
-  if (dimension < 1) {
-    throw new Error('Dimension must be positive');
-  }
-  return {
-    dimension,
-    amplitudes: Array(dimension).fill(null).map(() => createComplex(0, 0))
-  };
-}
+export class StateVector implements IStateVector {
+  readonly dimension: number;
+  readonly amplitudes: Complex[];
+  readonly basis?: string;
 
-/**
- * Sets amplitude at specified index in state vector
- */
-export function setState(state: StateVector, index: number, value: Complex): void {
-  if (index < 0 || index >= state.dimension) {
-    throw new Error(`Index ${index} out of bounds for dimension ${state.dimension}`);
-  }
-  state.amplitudes[index] = { ...value };
-}
+  constructor(dimension: number, amplitudes?: Complex[], basis?: string) {
+    validatePosDim(dimension);
+    
+    this.dimension = dimension;
+    this.amplitudes = amplitudes || Array(dimension).fill(null)
+      .map(() => createComplex(0, 0));
+    this.basis = basis;
 
-/**
- * Gets amplitude at specified index from state vector
- */
-export function getState(state: StateVector, index: number): Complex {
-  if (index < 0 || index >= state.dimension) {
-    throw new Error(`Index ${index} out of bounds for dimension ${state.dimension}`);
-  }
-  return { ...state.amplitudes[index] };
-}
-
-/**
- * Calculates inner product ⟨ψ|φ⟩ between two state vectors
- */
-export function innerProduct(state1: StateVector, state2: StateVector): Complex {
-  if (state1.dimension !== state2.dimension) {
-    throw new Error('States must have same dimension for inner product');
-  }
-
-  let result = createComplex(0, 0);
-  for (let i = 0; i < state1.dimension; i++) {
-    const conj = conjugateComplex(state1.amplitudes[i]);  // Take complex conjugate of first state
-    const prod = multiplyComplex(conj, state2.amplitudes[i]); // Multiply by second state
-    result = addComplex(result, prod); // Add to running sum
-  }
-  return result;
-}
-
-/**
- * Calculates norm of state vector
- */
-export function norm(state: StateVector): number {
-  const normSquared = modulusComplex(innerProduct(state, state));
-  return Math.sqrt(normSquared);
-}
-
-/**
- * Normalizes state vector to unit norm
- */
-export function normalize(state: StateVector): StateVector {
-  const currentNorm = norm(state);
-  if (isZeroComplex({ re: currentNorm, im: 0 })) {
-    throw new Error('Cannot normalize zero state vector');
-  }
-
-  const normalized = createState(state.dimension);
-  for (let i = 0; i < state.dimension; i++) {
-    normalized.amplitudes[i] = {
-      re: state.amplitudes[i].re / currentNorm,
-      im: state.amplitudes[i].im / currentNorm
-    };
-  }
-  return normalized;
-}
-
-/**
- * Computes tensor product of two state vectors
- */
-export function tensorProduct(state1: StateVector, state2: StateVector): StateVector {
-  const newDimension = state1.dimension * state2.dimension;
-  const result = createState(newDimension);
-
-  for (let i = 0; i < state1.dimension; i++) {
-    for (let j = 0; j < state2.dimension; j++) {
-      const index = i * state2.dimension + j;
-      result.amplitudes[index] = multiplyComplex(
-        state1.amplitudes[i],
-        state2.amplitudes[j]
-      );
+    if (amplitudes) {
+      validateAmps(amplitudes, dimension);
     }
   }
-  return result;
-}
 
-/**
- * Returns an array of basis states for a Hilbert space of given dimension
- */
-export function getBasis(dimension: number): StateVector[] {
-  const basis: StateVector[] = [];
-  for (let i = 0; i < dimension; i++) {
-    const state = createState(dimension);
-    setState(state, i, createComplex(1, 0));
-    basis.push(state);
+  /**
+   * Sets amplitude at specified index
+   */
+  setState(index: number, value: Complex): void {
+    validateIdx(index, this.dimension);
+    this.amplitudes[index] = { ...value };
   }
-  return basis;
+
+  /**
+   * Gets amplitude at specified index
+   */
+  getState(index: number): Complex {
+    validateIdx(index, this.dimension);
+    return { ...this.amplitudes[index] };
+  }
+
+  /**
+   * Calculates inner product ⟨ψ|φ⟩ with another state
+   */
+  innerProduct(other: StateVector): Complex {
+    if (this.dimension !== other.dimension) {
+      throw new Error('States must have same dimension for inner product');
+    }
+
+    let result = createComplex(0, 0);
+    for (let i = 0; i < this.dimension; i++) {
+      const conj = conjugateComplex(this.amplitudes[i]);
+      const prod = multiplyComplex(conj, other.amplitudes[i]);
+      result = addComplex(result, prod);
+    }
+    return result;
+  }
+
+  /**
+   * Calculates norm of state vector
+   */
+  norm(): number {
+    const normSquared = modulusComplex(this.innerProduct(this));
+    return Math.sqrt(normSquared);
+  }
+
+  /**
+   * Returns normalized version of state vector
+   */
+  normalize(): StateVector {
+    const currentNorm = this.norm();
+    if (isZeroComplex({ re: currentNorm, im: 0 })) {
+      throw new Error('Cannot normalize zero state vector');
+    }
+
+    const normalizedAmplitudes = this.amplitudes.map(amp => ({
+      re: amp.re / currentNorm,
+      im: amp.im / currentNorm
+    }));
+
+    return new StateVector(this.dimension, normalizedAmplitudes, this.basis);
+  }
+
+  /**
+   * Computes tensor product with another state vector
+   */
+  tensorProduct(other: StateVector): StateVector {
+    const newDimension = this.dimension * other.dimension;
+    const newAmplitudes: Complex[] = [];
+
+    for (let i = 0; i < this.dimension; i++) {
+      for (let j = 0; j < other.dimension; j++) {
+        newAmplitudes.push(multiplyComplex(
+          this.amplitudes[i],
+          other.amplitudes[j]
+        ));
+      }
+    }
+
+    // Generate new basis label if both states have basis labels
+    let newBasis: string | undefined;
+    if (this.basis && other.basis) {
+      newBasis = `${this.basis}⊗${other.basis}`;
+    }
+
+    return new StateVector(newDimension, newAmplitudes, newBasis);
+  }
+
+  /**
+   * Returns true if state is zero vector
+   */
+  isZero(tolerance: number = 1e-10): boolean {
+    return this.amplitudes.every(amp => 
+      Math.abs(amp.re) < tolerance && Math.abs(amp.im) < tolerance
+    );
+  }
+
+  /**
+   * Returns array representation of state vector
+   */
+  toArray(): Complex[] {
+    return [...this.amplitudes];
+  }
+
+  /**
+   * Returns string representation of state vector
+   */
+  toString(): string {
+    const components = this.amplitudes
+      .map((amp, i) => {
+        const { re, im } = amp;
+        if (Math.abs(re) < 1e-10 && Math.abs(im) < 1e-10) {
+          return '';
+        }
+        const sign = i === 0 ? '' : (re >= 0 || im >= 0 ? ' + ' : ' - ');
+        if (Math.abs(im) < 1e-10) {
+          return `${sign}${Math.abs(re)}|${i}⟩`;
+        }
+        if (Math.abs(re) < 1e-10) {
+          return `${sign}${Math.abs(im)}i|${i}⟩`;
+        }
+        return `${sign}(${re}${im >= 0 ? '+' : '-'}${Math.abs(im)}i)|${i}⟩`;
+      })
+      .filter(s => s !== '')
+      .join('');
+
+    return components || '0';
+  }
+
+  /**
+   * Creates a computational basis state |i⟩
+   */
+  static computationalBasis(dimension: number, index: number): StateVector {
+    validatePosDim(dimension);
+    validateIdx(index, dimension);
+
+    const amplitudes = Array(dimension).fill(null)
+      .map((_, i) => i === index ? createComplex(1, 0) : createComplex(0, 0));
+    
+    return new StateVector(dimension, amplitudes, `|${index}⟩`);
+  }
+
+  /**
+   * Returns array of all computational basis states
+   */
+  static computationalBasisStates(dimension: number): StateVector[] {
+    validatePosDim(dimension);
+    
+    return Array(dimension).fill(null)
+      .map((_, i) => StateVector.computationalBasis(dimension, i));
+  }
+
+  /**
+   * Creates normalized superposition of basis states with given coefficients
+   */
+  static superposition(coefficients: Complex[]): StateVector {
+    const dimension = coefficients.length;
+    validatePosDim(dimension);
+
+    return new StateVector(dimension, coefficients, 'superposition').normalize();
+  }
+
+  /**
+   * Creates an equally weighted superposition of all basis states
+   */
+  static equalSuperposition(dimension: number): StateVector {
+    validatePosDim(dimension);
+
+    const coefficient = createComplex(1 / Math.sqrt(dimension), 0);
+    const coefficients = Array(dimension).fill(coefficient);
+    
+    return new StateVector(dimension, coefficients, '|+⟩');
+  }
 }
