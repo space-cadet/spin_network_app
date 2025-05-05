@@ -1,38 +1,38 @@
 import { HilbertSpace } from '../../hilbertSpace';
-import { createStateVector } from '../../stateVectorOperations';
-import { MatrixOperator } from '../../operator';
-import { createComplex } from '../../complex';
+import { createPlusState, createBasisState } from '../../states';
+import { ProjectionOperator } from '../../measurement';
+import { measureState } from '../../measurement';
+import { Complex, MeasurementOutcome, Operator } from '../../types';
 
 // Demonstrates quantum measurement operations
 function demoMeasurement() {
     // Create a qubit in superposition
     const qubitSpace = new HilbertSpace(2, ['|0⟩', '|1⟩']);
-    
-    // Create |+⟩ state
-    const plusState = createStateVector(qubitSpace, [
-        createComplex(1/Math.sqrt(2), 0),
-        createComplex(1/Math.sqrt(2), 0)
-    ]);
+    const plusState = createPlusState();
     
     console.log('Initial state |+⟩:', plusState.amplitudes);
     
-    // Create measurement operator (Z basis)
-    const zProjector0 = new MatrixOperator([
-        [createComplex(1, 0), createComplex(0, 0)],
-        [createComplex(0, 0), createComplex(0, 0)]
-    ], 'projection');
+    // Create measurement operators
+    const basis0 = createBasisState(2, 0);
+    const basis1 = createBasisState(2, 1);
     
-    const zProjector1 = new MatrixOperator([
-        [createComplex(0, 0), createComplex(0, 0)],
-        [createComplex(0, 0), createComplex(1, 0)]
-    ], 'projection');
+    const projector0 = new ProjectionOperator(basis0);
+    const projector1 = new ProjectionOperator(basis1);
     
-    // Perform measurement
-    const outcome0 = zProjector0.apply(plusState);
-    const outcome1 = zProjector1.apply(plusState);
+    // Perform measurement projections
+    const outcome0 = projector0.apply(plusState);
+    const outcome1 = projector1.apply(plusState);
     
-    console.log('\nProbability of |0⟩:', outcome0.amplitudes);
-    console.log('Probability of |1⟩:', outcome1.amplitudes);
+    console.log('\nProjection onto |0⟩:', outcome0.amplitudes);
+    console.log('\nProjection onto |1⟩:', outcome1.amplitudes);
+    
+    // Demonstrate complete measurement
+    const result: MeasurementOutcome = measureState(plusState, projector0);
+    console.log('\nMeasurement result:', {
+        value: result.value,
+        probability: result.probability,
+        state: result.state.amplitudes
+    });
 }
 
 // Run the demonstration

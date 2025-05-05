@@ -36,11 +36,11 @@ describe('HilbertSpace', () => {
     });
   });
 
-  describe('Static Composition Methods', () => {
+  describe('Composition Methods', () => {
     it('composes two spaces with tensor product', () => {
       const space1 = TEST_SPACES.QUBIT;
       const space2 = TEST_SPACES.QUBIT;
-      const composed = HilbertSpace.compose(space1, space2);
+      const composed = space1.tensorProduct(space2);
       
       expect(composed.dimension).toBe(space1.dimension * space2.dimension);
       expect(composed.basis).toHaveLength(composed.dimension);
@@ -49,7 +49,7 @@ describe('HilbertSpace', () => {
 
     it('decomposes space into tensor factors', () => {
       const original = TEST_SPACES.TWO_QUBIT;
-      const factors = HilbertSpace.decompose(original, [2, 2]);
+      const factors = original.decompose([2, 2]);
       
       expect(factors).toHaveLength(2);
       expect(factors[0].dimension).toBe(2);
@@ -58,7 +58,7 @@ describe('HilbertSpace', () => {
 
     it('throws error for invalid decomposition dimensions', () => {
       const space = TEST_SPACES.TWO_QUBIT;
-      expect(() => HilbertSpace.decompose(space, [2, 3])).toThrow();
+      expect(() => space.decompose([2, 3])).toThrow();
     });
   });
 

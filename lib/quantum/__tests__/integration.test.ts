@@ -12,7 +12,7 @@ describe('Quantum Integration Tests', () => {
     it('handles tensor products of states correctly', () => {
       const space1 = TEST_SPACES.QUBIT;
       const space2 = TEST_SPACES.QUBIT;
-      const composedSpace = HilbertSpace.compose(space1, space2);
+      const composedSpace = space1.tensorProduct(space2);
       
       // Create states in individual spaces
       const state1 = space1.computationalBasisState(0);  // |0⟩

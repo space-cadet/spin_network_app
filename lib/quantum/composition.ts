@@ -6,7 +6,7 @@ import { HilbertSpace } from './hilbertSpace';
 import { Operator } from './types';
 import { StateVector as IStateVector } from './types';
 import { StateVector } from './stateVector';
-import { validateMatchingDimensions } from './utils/validation';
+import { validateMatchDims } from './utils/validation';
 
 /**
  * Composes multiple Hilbert spaces via tensor product
@@ -16,7 +16,7 @@ export function composeSpaces(spaces: HilbertSpace[]): HilbertSpace {
     throw new Error('Empty spaces array');
   }
   
-  return spaces.reduce((acc, space) => acc.compose(space));
+  return spaces.reduce((acc, space) => acc.tensorProduct(space));
 }
 
 /**
@@ -73,7 +73,7 @@ export function partialTrace(
 ): Operator {
   // Total dimension should match operator dimension
   const totalDim = dims.reduce((a, b) => a * b, 1);
-  validateMatchingDimensions(totalDim, operator.dimension);
+  validateMatchDims(totalDim, operator.dimension);
 
   // Validation and implementation handled by operator's partialTrace
   return operator.partialTrace(dims, traceOutIndices);

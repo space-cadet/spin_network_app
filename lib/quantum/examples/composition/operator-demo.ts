@@ -1,24 +1,47 @@
 import { HilbertSpace } from '../../hilbertSpace';
-import { PauliX } from '../../gates';
+import { MatrixOperator } from '../../operator';
+import { PauliX, PauliY, PauliZ } from '../../gates';
+import { createBasisState } from '../../states';
+import { Complex, Operator } from '../../types';
 
 // Demonstrates basic quantum operator operations
 function demoOperators() {
-    // Create a simple qubit space
-    const qubitSpace = new HilbertSpace(2, ['|0⟩', '|1⟩']);
+    // Create operators
+    const X = PauliX;
+    const Y = PauliY;
+    const Z = PauliZ;
     
-    // Show Pauli X (bit flip) operation
+    // Show basic properties
     console.log('Pauli X matrix:');
-    console.log(PauliX.toMatrix());
+    console.log(X.toMatrix());
     
-    // Create and apply adjoint (X is self-adjoint)
-    const Xadj = PauliX.adjoint();
-    console.log('\nX adjoint equals X:');
-    console.log(Xadj.toMatrix());
+    // Create and apply adjoint
+    const Xadj = X.adjoint();
+    console.log('\nX adjoint equals X:', 
+        matrixEquals(X.toMatrix(), Xadj.toMatrix()));
     
-    // Compose X with itself (should give identity)
-    const X2 = PauliX.compose(PauliX);
-    console.log('\nX composed with X (identity):');
-    console.log(X2.toMatrix());
+    // Compose operators
+    const XY = X.compose(Y);
+    console.log('\nX⋅Y = iZ:', XY.toMatrix());
+    
+    // Tensor product
+    const X2 = X.tensorProduct(X);
+    console.log('\nX⊗X:', X2.toMatrix());
+    
+    // Apply to states
+    const state0 = createBasisState(2, 0);
+    const flipped = X.apply(state0);
+    console.log('\nX|0⟩ = |1⟩:', flipped.amplitudes);
+}
+
+// Helper to compare matrices
+function matrixEquals(m1: Complex[][], m2: Complex[][]): boolean {
+    return m1.every((row, i) =>
+        row.every((val, j) =>
+            Math.abs(val.re - m2[i][j].re) < 1e-10 &&
+            Math.abs(val.im - m2[i][j].im) < 1e-10
+        )
+    );
 }
 
 // Run the demonstration

@@ -16,7 +16,7 @@ function demoHilbertComposition() {
     console.log('Composed space basis:', twoQubitSpace.basis);
     
     // Demonstrate decomposition
-    const [space1, space2] = HilbertSpace.decompose(twoQubitSpace, [2, 2]);
+    const [space1, space2] = twoQubitSpace.decompose([2, 2]);
     
     console.log('\nDecomposed space 1 dimension:', space1.dimension);
     console.log('Decomposed space 2 dimension:', space2.dimension);

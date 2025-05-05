@@ -2,14 +2,15 @@
  * Common quantum states implementation
  */
 
-import { StateVector } from './types';
+// import { StateVector } from './types';
 import { createComplex } from './complex';
-import { 
-  createState, 
-  setState, 
-  normalize,
-  tensorProduct 
-} from './stateVector';
+import { StateVector } from './stateVector';
+// import { 
+//   new StateVector, 
+//   setState, 
+//   normalize,
+//   tensorProduct 
+// } from './stateVector';
 
 /**
  * Creates computational basis states for multi-qubit system
@@ -23,8 +24,8 @@ export function computationalBasis(numQubits: number): StateVector[] {
   const basis: StateVector[] = [];
 
   for (let i = 0; i < dimension; i++) {
-    const state = createState(dimension);
-    setState(state, i, createComplex(1, 0));
+    const state = new StateVector(dimension);
+    state.setState(i, createComplex(1, 0));
     basis.push(state);
   }
 
@@ -39,8 +40,8 @@ export function createBasisState(dimension: number, index: number): StateVector 
     throw new Error(`Index ${index} out of bounds for dimension ${dimension}`);
   }
 
-  const state = createState(dimension);
-  setState(state, index, createComplex(1, 0));
+  const state = new StateVector(dimension);
+  state.setState(index, createComplex(1, 0));
   return state;
 }
 
@@ -49,24 +50,24 @@ export function createBasisState(dimension: number, index: number): StateVector 
  */
 export function createBellState(type: 'Phi+' | 'Phi-' | 'Psi+' | 'Psi-'): StateVector {
   // Create two-qubit state space
-  const state = createState(4);
+  const state = new StateVector(4);
   
   switch (type) {
     case 'Phi+': // |00⟩ + |11⟩)/√2
-      setState(state, 0, createComplex(1/Math.sqrt(2), 0));
-      setState(state, 3, createComplex(1/Math.sqrt(2), 0));
+      state.setState(0, createComplex(1/Math.sqrt(2), 0));
+      state.setState(3, createComplex(1/Math.sqrt(2), 0));
       break;
     case 'Phi-': // |00⟩ - |11⟩)/√2
-      setState(state, 0, createComplex(1/Math.sqrt(2), 0));
-      setState(state, 3, createComplex(-1/Math.sqrt(2), 0));
+      state.setState(0, createComplex(1/Math.sqrt(2), 0));
+      state.setState(3, createComplex(-1/Math.sqrt(2), 0));
       break;
     case 'Psi+': // |01⟩ + |10⟩)/√2
-      setState(state, 1, createComplex(1/Math.sqrt(2), 0));
-      setState(state, 2, createComplex(1/Math.sqrt(2), 0));
+      state.setState(1, createComplex(1/Math.sqrt(2), 0));
+      state.setState(2, createComplex(1/Math.sqrt(2), 0));
       break;
     case 'Psi-': // |01⟩ - |10⟩)/√2
-      setState(state, 1, createComplex(1/Math.sqrt(2), 0));
-      setState(state, 2, createComplex(-1/Math.sqrt(2), 0));
+      state.setState(1, createComplex(1/Math.sqrt(2), 0));
+      state.setState(2, createComplex(-1/Math.sqrt(2), 0));
       break;
   }
 
@@ -82,11 +83,11 @@ export function createGHZState(numQubits: number): StateVector {
   }
 
   const dimension = 2 ** numQubits;
-  const state = createState(dimension);
+  const state = new StateVector(dimension);
 
   // Set first and last computational basis states
-  setState(state, 0, createComplex(1/Math.sqrt(2), 0));
-  setState(state, dimension - 1, createComplex(1/Math.sqrt(2), 0));
+  state.setState(0, createComplex(1/Math.sqrt(2), 0));
+  state.setState(dimension - 1, createComplex(1/Math.sqrt(2), 0));
 
   return state;
 }
@@ -100,13 +101,13 @@ export function createWState(numQubits: number): StateVector {
   }
 
   const dimension = 2 ** numQubits;
-  const state = createState(dimension);
+  const state = new StateVector(dimension);
   const amplitude = createComplex(1/Math.sqrt(numQubits), 0);
 
   // Set states with exactly one 1
   for (let i = 0; i < numQubits; i++) {
     const index = 2 ** i;  // Position of single 1 in binary representation
-    setState(state, index, amplitude);
+    state.setState(index, amplitude);
   }
 
   return state;
@@ -116,10 +117,10 @@ export function createWState(numQubits: number): StateVector {
  * Creates a single-qubit |+⟩ state (|0⟩ + |1⟩)/√2
  */
 export function createPlusState(): StateVector {
-  const state = createState(2);
+  const state = new StateVector(2);
   const amplitude = createComplex(1/Math.sqrt(2), 0);
-  setState(state, 0, amplitude);
-  setState(state, 1, amplitude);
+  state.setState(0, amplitude);
+  state.setState(1, amplitude);
   return state;
 }
 
@@ -127,8 +128,8 @@ export function createPlusState(): StateVector {
  * Creates a single-qubit |-⟩ state (|0⟩ - |1⟩)/√2
  */
 export function createMinusState(): StateVector {
-  const state = createState(2);
-  setState(state, 0, createComplex(1/Math.sqrt(2), 0));
-  setState(state, 1, createComplex(-1/Math.sqrt(2), 0));
+  const state = new StateVector(2);
+  state.setState(0, createComplex(1/Math.sqrt(2), 0));
+  state.setState(1, createComplex(-1/Math.sqrt(2), 0));
   return state;
 }
