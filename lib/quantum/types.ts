@@ -46,3 +46,20 @@ export interface MeasurementOutcome {
   state: StateVector;     // Post-measurement state
   probability: number;    // Measurement probability
 }
+
+/**
+ * Interface for density matrix operations
+ */
+export interface DensityMatrix extends Operator {
+  trace(): Complex;                                    // Calculate trace
+  partialTrace(subsystemDimensions: number[]): DensityMatrix;  // Partial trace
+  purity(): number;                                    // Calculate purity
+  vonNeumannEntropy(): number;                        // Calculate entropy
+}
+
+/**
+ * Interface for quantum channels
+ */
+export interface QuantumChannel {
+  apply(state: DensityMatrix): DensityMatrix;         // Apply channel to state
+}

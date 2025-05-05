@@ -144,7 +144,65 @@ export function measureState(state: StateVector,
 }
 ```
 
-## Phase 3: Quantum Algorithms Support
+## Phase 3: Mixed States and Quantum Channels
+**Priority: HIGH**
+**Current Status**: No support for mixed states or quantum channels.
+
+### 3.1 Density Matrix Operations
+**Required Extensions**:
+- Implement `DensityMatrix` interface extending `Operator`
+- Add density matrix construction from pure and mixed states
+- Add partial trace operations for subsystems
+- Add purity and von Neumann entropy calculations
+
+**Implementation:**
+```typescript
+// Create quantum/densityMatrix.ts
+export interface DensityMatrix extends Operator {
+  trace(): Complex;
+  partialTrace(subsystemDimensions: number[]): DensityMatrix;
+  purity(): number;
+  vonNeumannEntropy(): number;
+}
+
+export class DensityMatrixOperator implements DensityMatrix {
+  constructor(matrix: Complex[][]);
+  
+  // Static factory methods
+  static fromPureState(state: StateVector): DensityMatrix;
+  static mixedState(states: StateVector[], probabilities: number[]): DensityMatrix;
+}
+```
+
+### 3.2 Quantum Channels
+**Required Extensions**:
+- Implement quantum channel interface
+- Add Kraus operator representation
+- Include common quantum channels (depolarizing, amplitude damping, etc.)
+- Add entanglement measures
+
+**Implementation:**
+```typescript
+export interface QuantumChannel {
+  apply(state: DensityMatrix): DensityMatrix;
+}
+
+export class KrausChannel implements QuantumChannel {
+  constructor(krausOperators: Operator[]);
+}
+
+// Common channels
+export function createDepolarizingChannel(dimension: number, p: number): QuantumChannel;
+export function createAmplitudeDampingChannel(gamma: number): QuantumChannel;
+export function createPhaseDampingChannel(gamma: number): QuantumChannel;
+
+// Entanglement measures
+export function traceFidelity(rho: DensityMatrix, sigma: DensityMatrix): number;
+export function concurrence(rho: DensityMatrix): number;
+export function negativity(rho: DensityMatrix, subsystemDimensions: number[]): number;
+```
+
+## Phase 4: Quantum Algorithms Support
 
 ### 3.1 Quantum Gates
 **Priority: LOW**
@@ -274,6 +332,7 @@ lib/quantum/
 ├── measurement.ts          # Measurement operators
 ├── gates.ts               # Quantum gates
 ├── circuit.ts             # Quantum circuit
+├── densityMatrix.ts       # Density matrices and quantum channels
 └── index.ts               # Main exports
 ```
 
@@ -301,7 +360,13 @@ lib/quantum/
    - Simple circuits
    - Multi-qubit operations
 
-4. Complete test coverage
+4. Mixed state and channel operations
+   - Density matrix manipulations
+   - Quantum channel simulations
+   - Entanglement measures
+   - Partial trace operations
+
+5. Complete test coverage
    - All operations
    - Edge cases
    - Numerical stability

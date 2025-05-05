@@ -1,23 +1,22 @@
-import { Operator } from '../../operator';
 import { HilbertSpace } from '../../hilbertSpace';
+import { PauliX } from '../../gates';
 
 // Demonstrates basic quantum operator operations
 function demoOperators() {
     // Create a simple qubit space
     const qubitSpace = new HilbertSpace(2, ['|0⟩', '|1⟩']);
     
-    // Create Pauli X operator (bit flip)
-    const X = Operator.pauliX(qubitSpace);
+    // Show Pauli X (bit flip) operation
     console.log('Pauli X matrix:');
-    console.log(X.toMatrix());
+    console.log(PauliX.toMatrix());
     
-    // Create and apply adjoint
-    const Xadj = X.adjoint();
+    // Create and apply adjoint (X is self-adjoint)
+    const Xadj = PauliX.adjoint();
     console.log('\nX adjoint equals X:');
     console.log(Xadj.toMatrix());
     
     // Compose X with itself (should give identity)
-    const X2 = X.compose(X);
+    const X2 = PauliX.compose(PauliX);
     console.log('\nX composed with X (identity):');
     console.log(X2.toMatrix());
 }

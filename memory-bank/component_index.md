@@ -1,5 +1,5 @@
 # Component Index
-*Last Updated: 2025-05-02T18:25:54.793Z (Auto-generated)*
+*Last Updated: 2025-05-05T04:03:16.591Z (Auto-generated)*
 
 This file maps conceptual component names to their primary file locations. Paths are relative to the project root (`/Users/deepak/code/spin_network_app`).
 
