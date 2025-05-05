@@ -41,6 +41,49 @@ export function modulusComplex(c: Complex): number
 export function isZeroComplex(c: Complex, tolerance: number = 1e-10): boolean
 ```
 
+### 1.3 State Vector Foundation
+**Priority: HIGH**
+**Current Status**: Basic state vector interface exists but core operations missing.
+
+**Required Extensions**:
+- Add createState() - Core state initialization
+- Add setState/getState - State manipulation
+- Add innerProduct() - Foundation for all quantum operations
+- Add norm() and normalize() - State normalization
+- Add tensorProduct() for state vectors - Multi-particle states
+
+**Implementation:**
+```typescript
+// Add to quantum/stateVector.ts
+export function createState(dimension: number): StateVector
+export function setState(state: StateVector, indices: number[], value: Complex): void
+export function getState(state: StateVector, indices: number[]): Complex
+export function innerProduct(state1: StateVector, state2: StateVector): Complex
+export function norm(state: StateVector): number
+export function normalize(state: StateVector): StateVector
+export function tensorProduct(state1: StateVector, state2: StateVector): StateVector
+```
+
+### 1.4 Common Quantum States
+**Priority: MEDIUM**
+**Current Status**: No standard state preparation functions.
+
+**Required Extensions**:
+- Add computational basis states - Foundation for circuits
+- Add Bell states - Essential entangled states
+- Add GHZ and W states - Multi-qubit entangled states
+- Add support for arbitrary basis states with indices
+
+**Implementation:**
+```typescript
+// Add to quantum/states.ts
+export function computationalBasis(numQubits: number): StateVector[]
+export function createBasisState(dimension: number, index: number): StateVector
+export function createBellState(type: 'Phi+' | 'Phi-' | 'Psi+' | 'Psi-'): StateVector
+export function createGHZState(numQubits: number): StateVector
+export function createWState(numQubits: number): StateVector
+```
+
 ### 1.2 Operator Base Class
 **Priority: HIGH**
 **Current Status**: Operator operations exist but are scattered across stateVectorOperations.ts without a unified interface.
@@ -326,6 +369,7 @@ lib/quantum/
 ├── complex.ts               # Enhanced complex number operations
 ├── types.ts                # Core quantum types
 ├── stateVector.ts          # Core state vector operations
+├── states.ts               # Common quantum state preparation
 ├── operator.ts             # Operator interface & base classes
 ├── hamiltonian.ts          # Hamiltonian implementation
 ├── matrixOperations.ts     # Matrix operations
@@ -339,36 +383,40 @@ lib/quantum/
 ## Success Criteria
 
 ### Current Capabilities
-1. State vector operations with arbitrary dimensions
+1. Complex number operations with robust numerical handling
 2. Tensor operations with sparse storage
-3. Spin-j operator generation
-4. Basic measurement functionality
+3. Unified operator interface with matrix implementation
+4. Core quantum gates (Pauli X/Y/Z, Hadamard, CNOT)
 5. 4-valent intertwiner support
 
 ### Required Extensions
-1. Enhanced quantum state manipulation
-   - Improved complex operations
-   - Unified operator framework
+1. Core Quantum State Operations
+   - State vector creation and manipulation
+   - Inner products and norms
+   - State tensor products
+   - Common quantum states (Bell, GHZ, W states)
    
-2. Advanced quantum operations
+2. Advanced Quantum Operations
    - Time evolution
    - State collapse
-   - Measurement simulation
+   - Measurement simulation with probabilities
+   - Projective measurements
    
-3. Quantum computation support
-   - Basic quantum gates
-   - Simple circuits
+3. Quantum Computation Support
+   - Quantum circuit framework
    - Multi-qubit operations
+   - State tomography
 
-4. Mixed state and channel operations
+4. Mixed State and Channel Operations
    - Density matrix manipulations
    - Quantum channel simulations
    - Entanglement measures
    - Partial trace operations
 
-5. Complete test coverage
-   - All operations
-   - Edge cases
-   - Numerical stability
+5. Complete Test Coverage
+   - State vector operations
+   - Measurement operations
+   - Multi-qubit system tests
+   - Numerical stability and edge cases
 
 This enhanced foundation will provide a robust quantum simulation toolkit while maintaining the library's efficiency and usability.
