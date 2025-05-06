@@ -6,6 +6,7 @@
  */
 
 import { Matrix, MathArray } from 'mathjs';
+import { StateVector as QuantumStateVector } from '../quantum/types';
 
 /**
  * Represents a graph structure for simulation
@@ -75,42 +76,49 @@ export interface SimulationEdge {
 }
 
 /**
- * State vector representing the quantum state of the network
+ * Represents a quantum state vector that lives on a graph structure.
+ * Composes with quantum StateVector rather than extending it to handle
+ * different array types (real numbers for graph vs complex for quantum).
  */
-export interface StateVector {
+export interface GraphStateVector {
   // Core properties
   readonly size: number;
   readonly nodeIds: string[]; // Maps indices to node IDs
   
   // Access methods
   getValue(nodeId: string): number;
-  setValue(nodeId: string, value: number): StateVector;
+  setValue(nodeId: string, value: number): GraphStateVector;
   getValueAtIndex(index: number): number;
-  setValueAtIndex(index: number, value: number): StateVector;
+  setValueAtIndex(index: number, value: number): GraphStateVector;
   
   // Vector operations - all return new vectors
-  add(other: StateVector): StateVector;
-  subtract(other: StateVector): StateVector;
-  multiply(scalar: number): StateVector;
+  add(other: GraphStateVector): GraphStateVector;
+  subtract(other: GraphStateVector): GraphStateVector;
+  multiply(scalar: number): GraphStateVector;
   
   // Math.js integration
   toMathArray(): MathArray;
-  fromMathArray(array: MathArray, nodeIds: string[]): StateVector;
+  fromMathArray(array: MathArray, nodeIds: string[]): GraphStateVector;
   
   // Utility methods
-  normalize(): StateVector;
-  clone(): StateVector;
-  equals(other: StateVector): boolean;
+  normalize(): GraphStateVector;
+  clone(): GraphStateVector;
+  equals(other: GraphStateVector): boolean;
   
   // Serialization
   toJSON(): Record<string, any>;
   toArray(): number[]; // Convert to simple array of values
+  
+  // Bridge to quantum operations
+  toQuantumState(): QuantumStateVector;
+  fromQuantumState(state: QuantumStateVector): GraphStateVector;
 }
 
 /**
- * Extension of StateVector for serialization/deserialization
+ * Implementation of the GraphStateVector interface that combines quantum
+ * state vector behavior with graph structure mapping
  */
-export class SimulationStateVector implements StateVector {
+export class SimulationStateVector implements GraphStateVector {
   readonly size: number;
   readonly nodeIds: string[];
   private values: number[];
@@ -126,7 +134,7 @@ export class SimulationStateVector implements StateVector {
     return index >= 0 ? this.values[index] : 0;
   }
   
-  setValue(nodeId: string, value: number): StateVector {
+  setValue(nodeId: string, value: number): GraphStateVector {
     const index = this.nodeIds.indexOf(nodeId);
     if (index >= 0) {
       const newValues = [...this.values];
@@ -140,7 +148,7 @@ export class SimulationStateVector implements StateVector {
     return index >= 0 && index < this.size ? this.values[index] : 0;
   }
   
-  setValueAtIndex(index: number, value: number): StateVector {
+  setValueAtIndex(index: number, value: number): GraphStateVector {
     if (index >= 0 && index < this.size) {
       const newValues = [...this.values];
       newValues[index] = value;
@@ -149,7 +157,7 @@ export class SimulationStateVector implements StateVector {
     return this;
   }
   
-  add(other: StateVector): StateVector {
+  add(other: GraphStateVector): GraphStateVector {
     if (this.size !== other.size) {
       throw new Error('Cannot add vectors of different sizes');
     }
@@ -157,7 +165,7 @@ export class SimulationStateVector implements StateVector {
     return new SimulationStateVector(this.nodeIds, newValues);
   }
   
-  subtract(other: StateVector): StateVector {
+  subtract(other: GraphStateVector): GraphStateVector {
     if (this.size !== other.size) {
       throw new Error('Cannot subtract vectors of different sizes');
     }
@@ -165,7 +173,7 @@ export class SimulationStateVector implements StateVector {
     return new SimulationStateVector(this.nodeIds, newValues);
   }
   
-  multiply(scalar: number): StateVector {
+  multiply(scalar: number): GraphStateVector {
     const newValues = this.values.map(v => v * scalar);
     return new SimulationStateVector(this.nodeIds, newValues);
   }
@@ -174,21 +182,21 @@ export class SimulationStateVector implements StateVector {
     return this.values as unknown as MathArray;
   }
   
-  fromMathArray(array: MathArray, nodeIds: string[]): StateVector {
+  fromMathArray(array: MathArray, nodeIds: string[]): GraphStateVector {
     return new SimulationStateVector(nodeIds, array as unknown as number[]);
   }
   
-  normalize(): StateVector {
+  normalize(): GraphStateVector {
     const norm = Math.sqrt(this.values.reduce((sum, v) => sum + v * v, 0));
     if (norm === 0) return this;
     return this.multiply(1 / norm);
   }
   
-  clone(): StateVector {
+  clone(): GraphStateVector {
     return new SimulationStateVector(this.nodeIds.slice(), this.values.slice());
   }
   
-  equals(other: StateVector): boolean {
+  equals(other: GraphStateVector): boolean {
     if (this.size !== other.size) return false;
     return this.values.every((v, i) => Math.abs(v - other.getValueAtIndex(i)) < 1e-10);
   }
@@ -202,6 +210,17 @@ export class SimulationStateVector implements StateVector {
   
   toArray(): number[] {
     return this.values.slice();
+  }
+  
+  toQuantumState(): QuantumStateVector {
+    return {
+      size: this.size,
+      values: this.values
+    };
+  }
+  
+  fromQuantumState(state: QuantumStateVector): GraphStateVector {
+    return new SimulationStateVector(this.nodeIds, state.values);
   }
 }
 
@@ -236,16 +255,16 @@ export interface DiffusionModel {
   initialize(graph: SimulationGraph, parameters: SimulationParameters): void;
   
   // Set initial state
-  setInitialState(state: StateVector): void;
+  setInitialState(state: GraphStateVector): void;
   
   // Evolve the state by one time step
-  evolveStep(dt: number): StateVector;
+  evolveStep(dt: number): GraphStateVector;
   
   // Evolve to a specific time
-  evolveTo(t: number, dt: number): StateVector;
+  evolveTo(t: number, dt: number): GraphStateVector;
   
   // Current state access
-  getCurrentState(): StateVector;
+  getCurrentState(): GraphStateVector;
   getCurrentTime(): number;
   
   // Reset the simulation
@@ -260,10 +279,10 @@ export interface NumericalSolver {
   // y' = f(t, y), from t to t+dt
   step(
     t: number,
-    y: StateVector,
+    y: GraphStateVector,
     dt: number,
-    f: (t: number, y: StateVector) => StateVector
-  ): StateVector;
+    f: (t: number, y: GraphStateVector) => GraphStateVector
+  ): GraphStateVector;
 }
 
 /**
@@ -271,19 +290,19 @@ export interface NumericalSolver {
  */
 export interface GeometricCalculator {
   // Calculate total volume
-  calculateTotalVolume(state: StateVector): number;
+  calculateTotalVolume(state: GraphStateVector): number;
   
   // Calculate volume entropy (a measure of volume distribution)
-  calculateVolumeEntropy(state: StateVector): number;
+  calculateVolumeEntropy(state: GraphStateVector): number;
   
   // Calculate total area (based on edge spins)
   calculateTotalArea(graph: SimulationGraph): number;
   
   // Calculate effective dimension
-  calculateEffectiveDimension(graph: SimulationGraph, state: StateVector): number;
+  calculateEffectiveDimension(graph: SimulationGraph, state: GraphStateVector): number;
   
   // Calculate other geometric properties
-  calculateProperty(name: string, graph: SimulationGraph, state: StateVector): number;
+  calculateProperty(name: string, graph: SimulationGraph, state: GraphStateVector): number;
 }
 
 /**
@@ -324,13 +343,13 @@ export interface SimulationParameters {
  */
 export interface SimulationHistory {
   // Add a state to the history
-  addState(time: number, state: StateVector): void;
+  addState(time: number, state: GraphStateVector): void;
   
   // Get a state at a specific time
-  getStateAtTime(time: number): StateVector | undefined;
+  getStateAtTime(time: number): GraphStateVector | undefined;
   
   // Get the closest state to a specific time
-  getClosestState(time: number): { time: number; state: StateVector } | undefined;
+  getClosestState(time: number): { time: number; state: GraphStateVector } | undefined;
   
   // Get all recorded times
   getTimes(): number[];
@@ -370,7 +389,7 @@ export interface SimulationEngine {
   reset(): void;
   
   // Access current state
-  getCurrentState(): StateVector;
+  getCurrentState(): GraphStateVector;
   getCurrentTime(): number;
   
   // Access simulation history

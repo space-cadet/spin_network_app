@@ -1,0 +1,742 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="216" failures="14" errors="0" time="0.448">
+  <testsuite name="Matrix Operations" errors="0" failures="4" skipped="0" timestamp="2025-05-06T04:21:21" time="0.098" tests="22">
+    <testcase classname="Matrix Operations multiplyMatrices multiplies 2x2 matrices correctly" name="Matrix Operations multiplyMatrices multiplies 2x2 matrices correctly" time="0.002">
+    </testcase>
+    <testcase classname="Matrix Operations multiplyMatrices handles complex matrix multiplication" name="Matrix Operations multiplyMatrices handles complex matrix multiplication" time="0.002">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 2
++ Received  + 2
+
+  Object {
+-   &quot;im&quot;: 1,
+-   &quot;re&quot;: 1,
++   &quot;im&quot;: 0,
++   &quot;re&quot;: 0,
+  }
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/matrixOperations.test.ts:52:28)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Matrix Operations multiplyMatrices throws error for invalid dimensions" name="Matrix Operations multiplyMatrices throws error for invalid dimensions" time="0.004">
+    </testcase>
+    <testcase classname="Matrix Operations matrixExponential computes exponential of zero matrix" name="Matrix Operations matrixExponential computes exponential of zero matrix" time="0.001">
+    </testcase>
+    <testcase classname="Matrix Operations matrixExponential computes exponential of diagonal matrix" name="Matrix Operations matrixExponential computes exponential of diagonal matrix" time="0.001">
+      <failure>Error: expect(received).toBeLessThan(expected)
+
+Expected: &lt; 1e-10
+Received:   2.7312660577649694e-8
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/matrixOperations.test.ts:84:50)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Matrix Operations matrixExponential throws error for non-square matrix" name="Matrix Operations matrixExponential throws error for non-square matrix" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations tensorProduct computes tensor product of 2x2 matrices" name="Matrix Operations tensorProduct computes tensor product of 2x2 matrices" time="0.001">
+    </testcase>
+    <testcase classname="Matrix Operations tensorProduct throws error for invalid dimensions" name="Matrix Operations tensorProduct throws error for invalid dimensions" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations adjoint computes adjoint of real matrix" name="Matrix Operations adjoint computes adjoint of real matrix" time="0.001">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 1
++ Received  + 1
+
+  Object {
+-   &quot;im&quot;: 0,
++   &quot;im&quot;: -0,
+    &quot;re&quot;: 3,
+  }
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/matrixOperations.test.ts:125:28)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Matrix Operations adjoint computes adjoint of complex matrix" name="Matrix Operations adjoint computes adjoint of complex matrix" time="0.001">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 1
++ Received  + 1
+
+  Object {
+-   &quot;im&quot;: 0,
++   &quot;im&quot;: -0,
+    &quot;re&quot;: 1,
+  }
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/matrixOperations.test.ts:137:28)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Matrix Operations adjoint throws error for invalid matrix" name="Matrix Operations adjoint throws error for invalid matrix" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations addMatrices adds matrices correctly" name="Matrix Operations addMatrices adds matrices correctly" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations addMatrices throws error for mismatched dimensions" name="Matrix Operations addMatrices throws error for mismatched dimensions" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations scaleMatrix scales matrix by real number" name="Matrix Operations scaleMatrix scales matrix by real number" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations scaleMatrix scales matrix by complex number" name="Matrix Operations scaleMatrix scales matrix by complex number" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations scaleMatrix throws error for invalid matrix" name="Matrix Operations scaleMatrix throws error for invalid matrix" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations isHermitian identifies Hermitian matrix" name="Matrix Operations isHermitian identifies Hermitian matrix" time="0.001">
+    </testcase>
+    <testcase classname="Matrix Operations isHermitian identifies non-Hermitian matrix" name="Matrix Operations isHermitian identifies non-Hermitian matrix" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations isHermitian handles numerical tolerance" name="Matrix Operations isHermitian handles numerical tolerance" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations isUnitary identifies unitary matrix" name="Matrix Operations isUnitary identifies unitary matrix" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations isUnitary identifies non-unitary matrix" name="Matrix Operations isUnitary identifies non-unitary matrix" time="0">
+    </testcase>
+    <testcase classname="Matrix Operations isUnitary handles numerical tolerance" name="Matrix Operations isUnitary handles numerical tolerance" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="DensityMatrix" errors="0" failures="3" skipped="0" timestamp="2025-05-06T04:21:21" time="0.037" tests="15">
+    <testcase classname="DensityMatrix Constructor creates valid density matrix from pure state" name="DensityMatrix Constructor creates valid density matrix from pure state" time="0">
+    </testcase>
+    <testcase classname="DensityMatrix Constructor validates trace equals 1" name="DensityMatrix Constructor validates trace equals 1" time="0.003">
+    </testcase>
+    <testcase classname="DensityMatrix Constructor validates hermiticity" name="DensityMatrix Constructor validates hermiticity" time="0.001">
+    </testcase>
+    <testcase classname="DensityMatrix Constructor validates positive semidefiniteness via purity" name="DensityMatrix Constructor validates positive semidefiniteness via purity" time="0">
+    </testcase>
+    <testcase classname="DensityMatrix Mixed States creates valid mixed state" name="DensityMatrix Mixed States creates valid mixed state" time="0.001">
+    </testcase>
+    <testcase classname="DensityMatrix Mixed States validates probability sum equals 1" name="DensityMatrix Mixed States validates probability sum equals 1" time="0">
+    </testcase>
+    <testcase classname="DensityMatrix Mixed States validates matching dimensions" name="DensityMatrix Mixed States validates matching dimensions" time="0">
+    </testcase>
+    <testcase classname="DensityMatrix Operations calculates purity correctly" name="DensityMatrix Operations calculates purity correctly" time="0.001">
+    </testcase>
+    <testcase classname="DensityMatrix Operations calculates trace correctly" name="DensityMatrix Operations calculates trace correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Channels KrausChannel validates completeness relation" name="Quantum Channels KrausChannel validates completeness relation" time="0">
+    </testcase>
+    <testcase classname="Quantum Channels Channel Creation validates probability parameters" name="Quantum Channels Channel Creation validates probability parameters" time="0.003">
+    </testcase>
+    <testcase classname="Quantum Channels Channel Creation validates damping parameters" name="Quantum Channels Channel Creation validates damping parameters" time="0.001">
+    </testcase>
+    <testcase classname="Entanglement Measures Trace Fidelity equals 1 for identical states" name="Entanglement Measures Trace Fidelity equals 1 for identical states" time="0">
+      <failure>Error: expect(received).toBeCloseTo(expected)
+
+Expected: 1
+Received: 0
+
+Expected precision:    2
+Expected difference: &lt; 0.005
+Received difference:   1
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/densityMatrix.test.ts:162:39)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Entanglement Measures Concurrence validates two-qubit requirement" name="Entanglement Measures Concurrence validates two-qubit requirement" time="0">
+      <failure>Error: Density matrix must have trace 1
+    at new DensityMatrixOperator (/Users/deepak/code/spin_network_app/lib/quantum/densityMatrix.ts:35:13)
+    at Function.fromPureState (/Users/deepak/code/spin_network_app/lib/quantum/densityMatrix.ts:138:12)
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/densityMatrix.test.ts:169:41)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Entanglement Measures Negativity validates bipartite requirement" name="Entanglement Measures Negativity validates bipartite requirement" time="0">
+      <failure>Error: Density matrix must have trace 1
+    at new DensityMatrixOperator (/Users/deepak/code/spin_network_app/lib/quantum/densityMatrix.ts:35:13)
+    at Function.fromPureState (/Users/deepak/code/spin_network_app/lib/quantum/densityMatrix.ts:138:12)
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/densityMatrix.test.ts:178:41)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Hamiltonian" errors="0" failures="5" skipped="0" timestamp="2025-05-06T04:21:21" time="0.026" tests="9">
+    <testcase classname="Hamiltonian Basic Hamiltonian operations should construct correctly" name="Hamiltonian Basic Hamiltonian operations should construct correctly" time="0.001">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: &quot;spin&quot;
+Received: &quot;hermitian&quot;
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/hamiltonian.test.ts:25:22)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Hamiltonian Basic Hamiltonian operations should compute correct expectation values" name="Hamiltonian Basic Hamiltonian operations should compute correct expectation values" time="0">
+    </testcase>
+    <testcase classname="Hamiltonian Basic Hamiltonian operations should correctly evolve states" name="Hamiltonian Basic Hamiltonian operations should correctly evolve states" time="0.001">
+      <failure>Error: Matrix is not unitary
+    at new MatrixOperator (/Users/deepak/code/spin_network_app/lib/quantum/operator.ts:67:21)
+    at Hamiltonian.getEvolutionOperator (/Users/deepak/code/spin_network_app/lib/quantum/hamiltonian.ts:85:12)
+    at Hamiltonian.evolveState (/Users/deepak/code/spin_network_app/lib/quantum/hamiltonian.ts:96:20)
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/hamiltonian.test.ts:51:25)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Hamiltonian Spin Hamiltonian should create correct spin Hamiltonian" name="Hamiltonian Spin Hamiltonian should create correct spin Hamiltonian" time="0.001">
+      <failure>Error: Matrix is not unitary
+    at new MatrixOperator (/Users/deepak/code/spin_network_app/lib/quantum/operator.ts:67:21)
+    at Hamiltonian.getEvolutionOperator (/Users/deepak/code/spin_network_app/lib/quantum/hamiltonian.ts:85:12)
+    at Hamiltonian.evolveState (/Users/deepak/code/spin_network_app/lib/quantum/hamiltonian.ts:96:20)
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/hamiltonian.test.ts:68:25)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Hamiltonian Spin Hamiltonian should give correct energy levels" name="Hamiltonian Spin Hamiltonian should give correct energy levels" time="0">
+    </testcase>
+    <testcase classname="Hamiltonian Heisenberg Hamiltonian should create correct Heisenberg Hamiltonian" name="Hamiltonian Heisenberg Hamiltonian should create correct Heisenberg Hamiltonian" time="0.001">
+    </testcase>
+    <testcase classname="Hamiltonian Heisenberg Hamiltonian should conserve total spin" name="Hamiltonian Heisenberg Hamiltonian should conserve total spin" time="0.002">
+      <failure>Error: Matrix is not unitary
+    at new MatrixOperator (/Users/deepak/code/spin_network_app/lib/quantum/operator.ts:67:21)
+    at Hamiltonian.getEvolutionOperator (/Users/deepak/code/spin_network_app/lib/quantum/hamiltonian.ts:85:12)
+    at Hamiltonian.evolveState (/Users/deepak/code/spin_network_app/lib/quantum/hamiltonian.ts:96:20)
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/hamiltonian.test.ts:120:27)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Hamiltonian Error handling should throw on dimension mismatch" name="Hamiltonian Error handling should throw on dimension mismatch" time="0.001">
+    </testcase>
+    <testcase classname="Hamiltonian Error handling should throw on non-Hermitian terms" name="Hamiltonian Error handling should throw on non-Hermitian terms" time="0">
+      <failure>Error: expect(received).toThrow()
+
+Received function did not throw
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/hamiltonian.test.ts:155:12)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Quantum Composition" errors="0" failures="1" skipped="0" timestamp="2025-05-06T04:21:21" time="0.023" tests="14">
+    <testcase classname="Quantum Composition composeSpaces composes two qubit spaces correctly" name="Quantum Composition composeSpaces composes two qubit spaces correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition composeSpaces composes multiple spaces correctly" name="Quantum Composition composeSpaces composes multiple spaces correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition composeSpaces throws error for empty spaces array" name="Quantum Composition composeSpaces throws error for empty spaces array" time="0.002">
+    </testcase>
+    <testcase classname="Quantum Composition composeStates composes two qubit states correctly" name="Quantum Composition composeStates composes two qubit states correctly" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Composition composeStates composes multiple states correctly" name="Quantum Composition composeStates composes multiple states correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition composeStates throws error for empty states array" name="Quantum Composition composeStates throws error for empty states array" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition composeOperators composes two single-qubit operators correctly" name="Quantum Composition composeOperators composes two single-qubit operators correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition composeOperators composes multiple operators correctly" name="Quantum Composition composeOperators composes multiple operators correctly" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Composition composeOperators throws error for empty operators array" name="Quantum Composition composeOperators throws error for empty operators array" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition bipartiteSplit splits two-qubit space correctly" name="Quantum Composition bipartiteSplit splits two-qubit space correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition bipartiteSplit throws error for invalid split dimensions" name="Quantum Composition bipartiteSplit throws error for invalid split dimensions" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Composition partialTrace computes partial trace correctly for two-qubit system" name="Quantum Composition partialTrace computes partial trace correctly for two-qubit system" time="0">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 1
++ Received  + 1
+
+  Object {
+    &quot;im&quot;: 0,
+-   &quot;re&quot;: 2,
++   &quot;re&quot;: 4,
+  }
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/composition.test.ts:134:28)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Quantum Composition partialTrace validates dimensions match" name="Quantum Composition partialTrace validates dimensions match" time="0">
+    </testcase>
+    <testcase classname="Quantum Composition partialTrace validates trace indices" name="Quantum Composition partialTrace validates trace indices" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="MatrixOperator" errors="0" failures="1" skipped="0" timestamp="2025-05-06T04:21:21" time="0.02" tests="20">
+    <testcase classname="MatrixOperator Constructor creates valid operator with identity matrix" name="MatrixOperator Constructor creates valid operator with identity matrix" time="0.001">
+    </testcase>
+    <testcase classname="MatrixOperator Constructor validates matrix dimensions" name="MatrixOperator Constructor validates matrix dimensions" time="0.002">
+    </testcase>
+    <testcase classname="MatrixOperator Constructor validates operator types" name="MatrixOperator Constructor validates operator types" time="0.001">
+    </testcase>
+    <testcase classname="MatrixOperator Constructor validates hermitian property" name="MatrixOperator Constructor validates hermitian property" time="0">
+      <failure>Error: expect(received).toThrow()
+
+Received function did not throw
+    at Object.&lt;anonymous&gt; (/Users/deepak/code/spin_network_app/lib/quantum/__tests__/operator.test.ts:42:70)
+    at Promise.then.completed (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:316:40)
+    at async _runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:252:3)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:126:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async _runTestsForDescribeBlock (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:121:9)
+    at async run (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/run.js:71:3)
+    at async runAndTransformResultsToJestFormat (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at async jestAdapter (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-circus@29.7.0/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at async runTestInternal (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:367:16)
+    at async runTest (/Users/deepak/Library/pnpm/global/5/.pnpm/jest-runner@29.7.0/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="MatrixOperator Constructor validates unitary property" name="MatrixOperator Constructor validates unitary property" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Constructor validates projection property" name="MatrixOperator Constructor validates projection property" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods apply applies operator to state vector" name="MatrixOperator Operator Methods apply applies operator to state vector" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods apply throws error for dimension mismatch" name="MatrixOperator Operator Methods apply throws error for dimension mismatch" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods compose composes two operators" name="MatrixOperator Operator Methods compose composes two operators" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods compose throws error for dimension mismatch" name="MatrixOperator Operator Methods compose throws error for dimension mismatch" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods adjoint computes adjoint of operator" name="MatrixOperator Operator Methods adjoint computes adjoint of operator" time="0.001">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods tensorProduct computes tensor product of operators" name="MatrixOperator Operator Methods tensorProduct computes tensor product of operators" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods scale scales operator by complex number" name="MatrixOperator Operator Methods scale scales operator by complex number" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods add adds two operators" name="MatrixOperator Operator Methods add adds two operators" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods add throws error for dimension mismatch" name="MatrixOperator Operator Methods add throws error for dimension mismatch" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods partialTrace computes partial trace for 2-qubit system" name="MatrixOperator Operator Methods partialTrace computes partial trace for 2-qubit system" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods partialTrace throws error for invalid dimensions" name="MatrixOperator Operator Methods partialTrace throws error for invalid dimensions" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Operator Methods partialTrace throws error for invalid trace indices" name="MatrixOperator Operator Methods partialTrace throws error for invalid trace indices" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Static Methods identity creates identity operator" name="MatrixOperator Static Methods identity creates identity operator" time="0">
+    </testcase>
+    <testcase classname="MatrixOperator Static Methods zero creates zero operator" name="MatrixOperator Static Methods zero creates zero operator" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="StateVector" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:21" time="0.02" tests="29">
+    <testcase classname="StateVector Constructor creates zero state of given dimension" name="StateVector Constructor creates zero state of given dimension" time="0">
+    </testcase>
+    <testcase classname="StateVector Constructor creates state with given amplitudes" name="StateVector Constructor creates state with given amplitudes" time="0.001">
+    </testcase>
+    <testcase classname="StateVector Constructor creates state with basis label" name="StateVector Constructor creates state with basis label" time="0">
+    </testcase>
+    <testcase classname="StateVector Constructor validates dimension" name="StateVector Constructor validates dimension" time="0.002">
+    </testcase>
+    <testcase classname="StateVector Constructor validates amplitudes length" name="StateVector Constructor validates amplitudes length" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods setState/getState sets and gets state amplitudes" name="StateVector State Methods setState/getState sets and gets state amplitudes" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods setState/getState validates index bounds" name="StateVector State Methods setState/getState validates index bounds" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods innerProduct computes inner product correctly" name="StateVector State Methods innerProduct computes inner product correctly" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods innerProduct computes self inner product" name="StateVector State Methods innerProduct computes self inner product" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods innerProduct throws error for mismatched dimensions" name="StateVector State Methods innerProduct throws error for mismatched dimensions" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods norm computes norm correctly" name="StateVector State Methods norm computes norm correctly" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods norm computes norm of zero state" name="StateVector State Methods norm computes norm of zero state" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods normalize normalizes state vector" name="StateVector State Methods normalize normalizes state vector" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods normalize throws error for zero state" name="StateVector State Methods normalize throws error for zero state" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods tensorProduct computes tensor product correctly" name="StateVector State Methods tensorProduct computes tensor product correctly" time="0.001">
+    </testcase>
+    <testcase classname="StateVector State Methods tensorProduct handles basis labels in tensor product" name="StateVector State Methods tensorProduct handles basis labels in tensor product" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods isZero identifies zero state" name="StateVector State Methods isZero identifies zero state" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods isZero identifies non-zero state" name="StateVector State Methods isZero identifies non-zero state" time="0">
+    </testcase>
+    <testcase classname="StateVector State Methods isZero handles numerical tolerance" name="StateVector State Methods isZero handles numerical tolerance" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods computationalBasis creates valid computational basis state" name="StateVector Static Methods computationalBasis creates valid computational basis state" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods computationalBasis creates correct basis label" name="StateVector Static Methods computationalBasis creates correct basis label" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods computationalBasis validates index bounds" name="StateVector Static Methods computationalBasis validates index bounds" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods computationalBasisStates creates all basis states" name="StateVector Static Methods computationalBasisStates creates all basis states" time="0.001">
+    </testcase>
+    <testcase classname="StateVector Static Methods computationalBasisStates creates orthogonal states" name="StateVector Static Methods computationalBasisStates creates orthogonal states" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods superposition creates normalized superposition state" name="StateVector Static Methods superposition creates normalized superposition state" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods superposition validates coefficient dimensions" name="StateVector Static Methods superposition validates coefficient dimensions" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods equalSuperposition creates equal superposition state" name="StateVector Static Methods equalSuperposition creates equal superposition state" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods equalSuperposition creates correct basis label" name="StateVector Static Methods equalSuperposition creates correct basis label" time="0">
+    </testcase>
+    <testcase classname="StateVector Static Methods equalSuperposition validates dimension" name="StateVector Static Methods equalSuperposition validates dimension" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="HilbertSpace" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:21" time="0.02" tests="20">
+    <testcase classname="HilbertSpace Constructor creates space with given dimension" name="HilbertSpace Constructor creates space with given dimension" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Constructor creates default basis labels" name="HilbertSpace Constructor creates default basis labels" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Constructor accepts custom basis labels" name="HilbertSpace Constructor accepts custom basis labels" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Constructor throws error for invalid dimension" name="HilbertSpace Constructor throws error for invalid dimension" time="0.002">
+    </testcase>
+    <testcase classname="HilbertSpace Constructor throws error for mismatched basis labels" name="HilbertSpace Constructor throws error for mismatched basis labels" time="0.001">
+    </testcase>
+    <testcase classname="HilbertSpace Composition Methods composes two spaces with tensor product" name="HilbertSpace Composition Methods composes two spaces with tensor product" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Composition Methods decomposes space into tensor factors" name="HilbertSpace Composition Methods decomposes space into tensor factors" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Composition Methods throws error for invalid decomposition dimensions" name="HilbertSpace Composition Methods throws error for invalid decomposition dimensions" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods tensorProduct creates tensor product with another space" name="HilbertSpace Instance Methods tensorProduct creates tensor product with another space" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods partialTrace performs partial trace over subsystems" name="HilbertSpace Instance Methods partialTrace performs partial trace over subsystems" time="0.001">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods partialTrace throws error for invalid subsystem dimensions" name="HilbertSpace Instance Methods partialTrace throws error for invalid subsystem dimensions" time="0.002">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods computationalBasisState creates valid basis states" name="HilbertSpace Instance Methods computationalBasisState creates valid basis states" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods computationalBasisState throws error for invalid basis index" name="HilbertSpace Instance Methods computationalBasisState throws error for invalid basis index" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods computationalBasis returns all basis states" name="HilbertSpace Instance Methods computationalBasis returns all basis states" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods superposition creates normalized superposition state" name="HilbertSpace Instance Methods superposition creates normalized superposition state" time="0.001">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods superposition throws error for invalid coefficients" name="HilbertSpace Instance Methods superposition throws error for invalid coefficients" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods equalSuperposition creates equal superposition state" name="HilbertSpace Instance Methods equalSuperposition creates equal superposition state" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods extendToLargerSpace extends space by tensoring with auxiliary space" name="HilbertSpace Instance Methods extendToLargerSpace extends space by tensoring with auxiliary space" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace Instance Methods extendToLargerSpace handles different positions for extension" name="HilbertSpace Instance Methods extendToLargerSpace handles different positions for extension" time="0">
+    </testcase>
+    <testcase classname="HilbertSpace State Management validates states belong to space" name="HilbertSpace State Management validates states belong to space" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Quantum States" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:21" time="0.024" tests="17">
+    <testcase classname="Quantum States computationalBasis creates valid basis for single qubit" name="Quantum States computationalBasis creates valid basis for single qubit" time="0">
+    </testcase>
+    <testcase classname="Quantum States computationalBasis creates valid basis for two qubits" name="Quantum States computationalBasis creates valid basis for two qubits" time="0">
+    </testcase>
+    <testcase classname="Quantum States computationalBasis throws error for invalid number of qubits" name="Quantum States computationalBasis throws error for invalid number of qubits" time="0.002">
+    </testcase>
+    <testcase classname="Quantum States createBasisState creates valid computational basis states" name="Quantum States createBasisState creates valid computational basis states" time="0">
+    </testcase>
+    <testcase classname="Quantum States createBasisState throws error for invalid index" name="Quantum States createBasisState throws error for invalid index" time="0">
+    </testcase>
+    <testcase classname="Quantum States Bell States creates normalized Phi+ Bell state" name="Quantum States Bell States creates normalized Phi+ Bell state" time="0.001">
+    </testcase>
+    <testcase classname="Quantum States Bell States creates normalized Phi- Bell state" name="Quantum States Bell States creates normalized Phi- Bell state" time="0">
+    </testcase>
+    <testcase classname="Quantum States Bell States creates normalized Psi+ Bell state" name="Quantum States Bell States creates normalized Psi+ Bell state" time="0">
+    </testcase>
+    <testcase classname="Quantum States Bell States creates normalized Psi- Bell state" name="Quantum States Bell States creates normalized Psi- Bell state" time="0">
+    </testcase>
+    <testcase classname="Quantum States GHZ States creates valid 2-qubit GHZ state" name="Quantum States GHZ States creates valid 2-qubit GHZ state" time="0">
+    </testcase>
+    <testcase classname="Quantum States GHZ States creates valid 3-qubit GHZ state" name="Quantum States GHZ States creates valid 3-qubit GHZ state" time="0">
+    </testcase>
+    <testcase classname="Quantum States GHZ States throws error for invalid number of qubits" name="Quantum States GHZ States throws error for invalid number of qubits" time="0.001">
+    </testcase>
+    <testcase classname="Quantum States W States creates valid 2-qubit W state" name="Quantum States W States creates valid 2-qubit W state" time="0">
+    </testcase>
+    <testcase classname="Quantum States W States creates valid 3-qubit W state" name="Quantum States W States creates valid 3-qubit W state" time="0">
+    </testcase>
+    <testcase classname="Quantum States W States throws error for invalid number of qubits" name="Quantum States W States throws error for invalid number of qubits" time="0.001">
+    </testcase>
+    <testcase classname="Quantum States Plus/Minus States creates normalized |+⟩ state" name="Quantum States Plus/Minus States creates normalized |+⟩ state" time="0">
+    </testcase>
+    <testcase classname="Quantum States Plus/Minus States creates normalized |-⟩ state" name="Quantum States Plus/Minus States creates normalized |-⟩ state" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Validation Utilities" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:21" time="0.014" tests="15">
+    <testcase classname="Validation Utilities validateMatDims accepts valid square matrix" name="Validation Utilities validateMatDims accepts valid square matrix" time="0.001">
+    </testcase>
+    <testcase classname="Validation Utilities validateMatDims rejects empty matrix" name="Validation Utilities validateMatDims rejects empty matrix" time="0.001">
+    </testcase>
+    <testcase classname="Validation Utilities validateMatDims rejects non-square matrix" name="Validation Utilities validateMatDims rejects non-square matrix" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validatePosDim accepts positive dimensions" name="Validation Utilities validatePosDim accepts positive dimensions" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validatePosDim rejects zero dimension" name="Validation Utilities validatePosDim rejects zero dimension" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validatePosDim rejects negative dimensions" name="Validation Utilities validatePosDim rejects negative dimensions" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateIdx accepts valid indices" name="Validation Utilities validateIdx accepts valid indices" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateIdx rejects negative indices" name="Validation Utilities validateIdx rejects negative indices" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateIdx rejects out of bounds indices" name="Validation Utilities validateIdx rejects out of bounds indices" time="0.001">
+    </testcase>
+    <testcase classname="Validation Utilities validateAmps accepts matching dimensions" name="Validation Utilities validateAmps accepts matching dimensions" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateAmps rejects mismatched dimensions" name="Validation Utilities validateAmps rejects mismatched dimensions" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateNorm accepts normalized amplitudes" name="Validation Utilities validateNorm accepts normalized amplitudes" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateNorm rejects non-normalized amplitudes" name="Validation Utilities validateNorm rejects non-normalized amplitudes" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateMatchDims accepts matching dimensions" name="Validation Utilities validateMatchDims accepts matching dimensions" time="0">
+    </testcase>
+    <testcase classname="Validation Utilities validateMatchDims rejects mismatched dimensions" name="Validation Utilities validateMatchDims rejects mismatched dimensions" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Quantum Measurements" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:21" time="0.014" tests="8">
+    <testcase classname="Quantum Measurements ProjectionOperator creates valid projection operator from state" name="Quantum Measurements ProjectionOperator creates valid projection operator from state" time="0">
+    </testcase>
+    <testcase classname="Quantum Measurements ProjectionOperator projects state correctly" name="Quantum Measurements ProjectionOperator projects state correctly" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Measurements ProjectionOperator is idempotent (P² = P)" name="Quantum Measurements ProjectionOperator is idempotent (P² = P)" time="0">
+    </testcase>
+    <testcase classname="Quantum Measurements ProjectionOperator is hermitian (P† = P)" name="Quantum Measurements ProjectionOperator is hermitian (P† = P)" time="0">
+    </testcase>
+    <testcase classname="Quantum Measurements expectationValue calculates expectation value correctly" name="Quantum Measurements expectationValue calculates expectation value correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Measurements expectationValue gives real expectation values for hermitian operators" name="Quantum Measurements expectationValue gives real expectation values for hermitian operators" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Measurements measureState performs projective measurement correctly" name="Quantum Measurements measureState performs projective measurement correctly" time="0">
+    </testcase>
+    <testcase classname="Quantum Measurements measureState preserves measurement statistics" name="Quantum Measurements measureState preserves measurement statistics" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Quantum Gates" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:21" time="0.017" tests="18">
+    <testcase classname="Quantum Gates Pauli X (NOT) Gate flips basis states" name="Quantum Gates Pauli X (NOT) Gate flips basis states" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli X (NOT) Gate is self-inverse (X² = I)" name="Quantum Gates Pauli X (NOT) Gate is self-inverse (X² = I)" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli X (NOT) Gate is unitary" name="Quantum Gates Pauli X (NOT) Gate is unitary" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli Y Gate rotates basis states with imaginary phase" name="Quantum Gates Pauli Y Gate rotates basis states with imaginary phase" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli Y Gate is self-inverse (Y² = I)" name="Quantum Gates Pauli Y Gate is self-inverse (Y² = I)" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli Y Gate is unitary" name="Quantum Gates Pauli Y Gate is unitary" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli Z Gate applies phase flip to |1⟩" name="Quantum Gates Pauli Z Gate applies phase flip to |1⟩" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli Z Gate leaves |0⟩ unchanged" name="Quantum Gates Pauli Z Gate leaves |0⟩ unchanged" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli Z Gate is self-inverse (Z² = I)" name="Quantum Gates Pauli Z Gate is self-inverse (Z² = I)" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Pauli Z Gate is unitary" name="Quantum Gates Pauli Z Gate is unitary" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Hadamard Gate creates equal superposition from |0⟩" name="Quantum Gates Hadamard Gate creates equal superposition from |0⟩" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Gates Hadamard Gate creates opposite phase superposition from |1⟩" name="Quantum Gates Hadamard Gate creates opposite phase superposition from |1⟩" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Gates Hadamard Gate is self-inverse (H² = I)" name="Quantum Gates Hadamard Gate is self-inverse (H² = I)" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates Hadamard Gate is unitary" name="Quantum Gates Hadamard Gate is unitary" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates CNOT Gate flips target qubit when control is |1⟩" name="Quantum Gates CNOT Gate flips target qubit when control is |1⟩" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates CNOT Gate leaves target unchanged when control is |0⟩" name="Quantum Gates CNOT Gate leaves target unchanged when control is |0⟩" time="0">
+    </testcase>
+    <testcase classname="Quantum Gates CNOT Gate is self-inverse (CNOT² = I)" name="Quantum Gates CNOT Gate is self-inverse (CNOT² = I)" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Gates CNOT Gate is unitary" name="Quantum Gates CNOT Gate is unitary" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Quantum Integration Tests" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:22" time="0.015" tests="8">
+    <testcase classname="Quantum Integration Tests Space and State Integration handles tensor products of states correctly" name="Quantum Integration Tests Space and State Integration handles tensor products of states correctly" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Integration Tests Space and State Integration preserves normalization through operations" name="Quantum Integration Tests Space and State Integration preserves normalization through operations" time="0">
+    </testcase>
+    <testcase classname="Quantum Integration Tests Operator and Space Integration correctly extends operators to larger spaces" name="Quantum Integration Tests Operator and Space Integration correctly extends operators to larger spaces" time="0">
+    </testcase>
+    <testcase classname="Quantum Integration Tests Operator and Space Integration maintains operator properties in composed spaces" name="Quantum Integration Tests Operator and Space Integration maintains operator properties in composed spaces" time="0">
+    </testcase>
+    <testcase classname="Quantum Integration Tests Complex Quantum Circuits implements basic quantum teleportation circuit" name="Quantum Integration Tests Complex Quantum Circuits implements basic quantum teleportation circuit" time="0">
+    </testcase>
+    <testcase classname="Quantum Integration Tests Complex Quantum Circuits creates and manipulates Bell states" name="Quantum Integration Tests Complex Quantum Circuits creates and manipulates Bell states" time="0.001">
+    </testcase>
+    <testcase classname="Quantum Integration Tests Error Handling and Edge Cases handles numerical precision in complex calculations" name="Quantum Integration Tests Error Handling and Edge Cases handles numerical precision in complex calculations" time="0">
+    </testcase>
+    <testcase classname="Quantum Integration Tests Error Handling and Edge Cases maintains consistency across equivalent operation sequences" name="Quantum Integration Tests Error Handling and Edge Cases maintains consistency across equivalent operation sequences" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Complex Number Operations" errors="0" failures="0" skipped="0" timestamp="2025-05-06T04:21:22" time="0.013" tests="21">
+    <testcase classname="Complex Number Operations createComplex creates complex number with zero imaginary part by default" name="Complex Number Operations createComplex creates complex number with zero imaginary part by default" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations createComplex creates complex number with given real and imaginary parts" name="Complex Number Operations createComplex creates complex number with given real and imaginary parts" time="0.001">
+    </testcase>
+    <testcase classname="Complex Number Operations addComplex adds two complex numbers" name="Complex Number Operations addComplex adds two complex numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations addComplex handles addition with zero" name="Complex Number Operations addComplex handles addition with zero" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations subtractComplex subtracts two complex numbers" name="Complex Number Operations subtractComplex subtracts two complex numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations subtractComplex handles subtraction with zero" name="Complex Number Operations subtractComplex handles subtraction with zero" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations multiplyComplex multiplies two complex numbers" name="Complex Number Operations multiplyComplex multiplies two complex numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations multiplyComplex handles multiplication by i" name="Complex Number Operations multiplyComplex handles multiplication by i" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations multiplyComplex handles multiplication by zero" name="Complex Number Operations multiplyComplex handles multiplication by zero" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations conjugateComplex conjugates a complex number" name="Complex Number Operations conjugateComplex conjugates a complex number" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations conjugateComplex conjugate of real number is itself" name="Complex Number Operations conjugateComplex conjugate of real number is itself" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations modulusComplex calculates modulus of complex number" name="Complex Number Operations modulusComplex calculates modulus of complex number" time="0.001">
+    </testcase>
+    <testcase classname="Complex Number Operations modulusComplex handles zero" name="Complex Number Operations modulusComplex handles zero" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations modulusComplex handles real numbers" name="Complex Number Operations modulusComplex handles real numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations modulusComplex handles purely imaginary numbers" name="Complex Number Operations modulusComplex handles purely imaginary numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations isZeroComplex identifies exact zero" name="Complex Number Operations isZeroComplex identifies exact zero" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations isZeroComplex identifies non-zero numbers" name="Complex Number Operations isZeroComplex identifies non-zero numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations isZeroComplex handles numerical tolerance" name="Complex Number Operations isZeroComplex handles numerical tolerance" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations complexApproxEqual identifies equal complex numbers" name="Complex Number Operations complexApproxEqual identifies equal complex numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations complexApproxEqual identifies unequal complex numbers" name="Complex Number Operations complexApproxEqual identifies unequal complex numbers" time="0">
+    </testcase>
+    <testcase classname="Complex Number Operations complexApproxEqual handles numerical tolerance" name="Complex Number Operations complexApproxEqual handles numerical tolerance" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

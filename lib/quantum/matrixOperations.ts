@@ -5,8 +5,44 @@
 import { Complex } from './types';
 import { createComplex, multiplyComplex, addComplex, conjugateComplex } from './complex';
 
+// Only clean up extreme numerical noise
+const NUMERICAL_THRESHOLD = 1e-15;
+
 /**
- * Multiplies two complex matrices
+ * Helper function for Kahan summation of complex numbers
+ */
+function kahanSum(numbers: Complex[]): Complex {
+    if (numbers.length === 0) {
+        return { re: 0, im: 0 };
+    }
+
+    let sum = { re: 0, im: 0 }; // Initialize to zero
+    let c = { re: 0, im: 0 };   // Compensation term
+
+    for (const num of numbers) {
+        const y = {
+            re: num.re - c.re,
+            im: num.im - c.im
+        };
+
+        const t = {
+            re: sum.re + y.re,
+            im: sum.im + y.im
+        };
+
+        c = {
+            re: (t.re - sum.re) - y.re,
+            im: (t.im - sum.im) - y.im
+        };
+
+        sum = t;
+    }
+
+    return sum;
+}
+
+/**
+ * Multiplies two complex matrices with enhanced numerical stability
  */
 export function multiplyMatrices(a: Complex[][], b: Complex[][]): Complex[][] {
     if (!a || !b || a.length === 0 || b.length === 0) {
@@ -26,10 +62,19 @@ export function multiplyMatrices(a: Complex[][], b: Complex[][]): Complex[][] {
 
     for (let i = 0; i < m; i++) {
         for (let j = 0; j < n; j++) {
+            const products: Complex[] = [];
+            
             for (let k = 0; k < p; k++) {
-                const prod = multiplyComplex(a[i][k], b[k][j]);
-                result[i][j] = addComplex(result[i][j], prod);
+                products.push(multiplyComplex(a[i][k], b[k][j]));
             }
+            
+            const sum = kahanSum(products);
+            
+            // Only clean up extremely small values that are likely numerical noise
+            result[i][j] = {
+                re: Math.abs(sum.re) < NUMERICAL_THRESHOLD ? 0 : sum.re,
+                im: Math.abs(sum.im) < NUMERICAL_THRESHOLD ? 0 : sum.im
+            };
         }
     }
 
@@ -37,16 +82,33 @@ export function multiplyMatrices(a: Complex[][], b: Complex[][]): Complex[][] {
 }
 
 /**
- * Computes matrix exponential using Taylor series
+ * Computes matrix exponential using Taylor series with scaling and squaring
  */
 export function matrixExponential(
     matrix: Complex[][],
-    terms: number = 10
+    maxTerms: number = 30,
+    tolerance: number = 1e-12
 ): Complex[][] {
     const dim = matrix.length;
     if (!matrix[0] || matrix[0].length !== dim) {
         throw new Error('Matrix must be square');
     }
+
+    // Compute matrix norm to determine scaling
+    let maxNorm = 0;
+    for (let i = 0; i < dim; i++) {
+        for (let j = 0; j < dim; j++) {
+            const elem = matrix[i][j];
+            maxNorm = Math.max(maxNorm, Math.sqrt(elem.re * elem.re + elem.im * elem.im));
+        }
+    }
+
+    // Determine scaling factor (power of 2)
+    const scalingPower = Math.max(0, Math.ceil(Math.log2(maxNorm)));
+    const scalingFactor = Math.pow(2, scalingPower);
+    
+    // Scale matrix
+    const scaledMatrix = scaleMatrix(matrix, createComplex(1/scalingFactor, 0));
 
     // Initialize result to identity matrix
     const result = Array(dim).fill(null).map((_, i) => 
@@ -62,25 +124,43 @@ export function matrixExponential(
         )
     );
 
-    // Compute sum of terms
-    for (let n = 1; n <= terms; n++) {
-        // Multiply term by matrix and divide by n
-        term = multiplyMatrices(term, matrix).map(row =>
+    let maxElement = 0;
+
+    // Compute sum of terms with convergence check
+    for (let n = 1; n <= maxTerms; n++) {
+        // Multiply term by scaled matrix and divide by n
+        term = multiplyMatrices(term, scaledMatrix).map(row =>
             row.map(element => ({
                 re: element.re / n,
                 im: element.im / n
             }))
         );
 
-        // Add to result
+        // Track largest element for convergence check
+        maxElement = 0;
+        
+        // Add to result and check convergence
         for (let i = 0; i < dim; i++) {
             for (let j = 0; j < dim; j++) {
+                const termElement = term[i][j];
+                maxElement = Math.max(maxElement, 
+                    Math.sqrt(termElement.re * termElement.re + termElement.im * termElement.im));
                 result[i][j] = addComplex(result[i][j], term[i][j]);
             }
         }
+
+        // Check for convergence
+        if (maxElement < tolerance) {
+            // Square the result scalingPower times
+            let finalResult = result;
+            for (let k = 0; k < scalingPower; k++) {
+                finalResult = multiplyMatrices(finalResult, finalResult);
+            }
+            return finalResult;
+        }
     }
 
-    return result;
+    throw new Error('Matrix exponential did not converge');
 }
 
 /**
@@ -127,9 +207,11 @@ export function adjoint(matrix: Complex[][]): Complex[][] {
     const n = matrix[0].length;
 
     return Array(n).fill(null).map((_, i) =>
-        Array(m).fill(null).map((_, j) =>
-            conjugateComplex(matrix[j][i])
-        )
+        Array(m).fill(null).map((_, j) => ({
+            re: matrix[j][i].re,
+            // Negate imaginary part when conjugating
+            im: matrix[j][i].im === 0 ? 0 : -matrix[j][i].im
+        }))
     );
 }
 
