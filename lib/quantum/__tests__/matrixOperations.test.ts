@@ -49,8 +49,14 @@ describe('Matrix Operations', () => {
       ];
       
       const result = multiplyMatrices(a, b);
-      expect(result[0][0]).toEqual(createComplex(1, 1));
-      expect(result[1][1]).toEqual(createComplex(1, -1));
+      // For [0][0]: (0+i)(1+0i) + (1+0i)(0-i) = i + (-i) = 0
+      expect(result[0][0]).toEqual(createComplex(0, 0));
+      // For [0][1]: (0+i)(0+i) + (1+0i)(1+0i) = -1 + 1 = 0
+      expect(result[0][1]).toEqual(createComplex(0, 0));
+      // For [1][0]: (1+0i)(1+0i) + (0-i)(0-i) = 1 - (-1) = 2
+      expect(result[1][0]).toEqual(createComplex(2, 0));
+      // For [1][1]: (1+0i)(0+i) + (0-i)(1+0i) = i + (-i) = 0 
+      expect(result[1][1]).toEqual(createComplex(0, 0));
     });
 
     it('throws error for invalid dimensions', () => {

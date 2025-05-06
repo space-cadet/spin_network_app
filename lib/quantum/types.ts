@@ -17,6 +17,21 @@ export interface StateVector {
   dimension: number;      // Hilbert space dimension
   amplitudes: Complex[];  // State vector amplitudes in computational basis
   basis?: string;        // Optional basis label
+
+  // State manipulation
+  setState(index: number, value: Complex): void;
+  getState(index: number): Complex;
+
+  // Quantum operations
+  innerProduct(other: StateVector): Complex;
+  norm(): number;
+  normalize(): StateVector;
+  tensorProduct(other: StateVector): StateVector;
+
+  // Utility methods
+  isZero(tolerance?: number): boolean;
+  toArray(): Complex[];
+  toString(): string;
 }
 
 /**
