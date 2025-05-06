@@ -416,6 +416,49 @@ SpinNetwork
 └── adapters/      # Visualization adapters
 ```
 
+### Template Architecture Pattern
+*Added: May 6, 2025*
+
+The application's UI architecture is being extracted into a reusable template system:
+
+```
+┌─────────────────────────────────────────────┐
+│              template-core                   │
+├─────────────────────────────────────────────┤
+│ ┌─────────────┐ ┌─────────────┐ ┌────────┐ │
+│ │  Layout     │ │   Panel     │ │ Common │ │
+│ │ Components  │ │  System     │ │  Utils │ │
+│ └─────────────┘ └─────────────┘ └────────┘ │
+└─────────────────────────────────────────────┘
+                    ▲
+                    │
+┌─────────────────────────────────────────────┐
+│              template-base                   │
+├─────────────────────────────────────────────┤
+│ ┌─────────────┐ ┌─────────────┐ ┌────────┐ │
+│ │   Base      │ │    Base     │ │  Base  │ │
+│ │    App      │ │   Panels    │ │ Config │ │
+│ └─────────────┘ └─────────────┘ └────────┘ │
+└─────────────────────────────────────────────┘
+                    ▲
+                    │
+┌─────────────────────────────────────────────┐
+│            simulation-app                    │
+├─────────────────────────────────────────────┤
+│ ┌─────────────┐ ┌─────────────┐ ┌────────┐ │
+│ │ Simulation  │ │ Simulation  │ │  Sim   │ │
+│ │    App      │ │   Panels    │ │ Config │ │
+│ └─────────────┘ └─────────────┘ └────────┘ │
+└─────────────────────────────────────────────┘
+```
+
+Key components:
+- Core layout and panel system
+- Base implementation components
+- Configuration interfaces
+- State management
+- Theme support
+
 ### Global Access Pattern
 
 The library supports both module imports and global browser access:

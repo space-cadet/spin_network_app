@@ -269,6 +269,69 @@ The proposed implementation would extend the current architecture while maintain
 - Optimizing workspace with hideable panels
 - Supporting keyboard shortcuts for important operations
 
+## Template Architecture
+*Added: May 6, 2025*
+
+### Package Organization
+The template system is organized into three main packages:
+
+1. **template-core**:
+   - Core layout components
+   - Panel system
+   - State management
+   - Common utilities
+   - TypeScript types and interfaces
+
+2. **template-base**:
+   - Base application components
+   - Panel implementations
+   - Configuration system
+   - Theme support
+
+3. **simulation-app**:
+   - Domain-specific implementation
+   - Custom panels and components
+   - Configuration customization
+
+### Architecture Features
+- Modular package structure
+- Type-safe interfaces
+- Configurable layouts
+- Theme customization
+- State persistence
+- Logging infrastructure
+
+### Component Hierarchy
+```typescript
+// Base configuration interfaces
+interface LayoutConfiguration {
+  panels: {
+    left?: PanelConfig;
+    right?: PanelConfig;
+    bottom?: PanelConfig;
+  };
+  workspace?: WorkspaceConfig;
+}
+
+// Panel configuration
+interface PanelConfig {
+  enabled: boolean;
+  minSize?: number;
+  maxSize?: number;
+  defaultContent?: React.ReactNode;
+}
+
+// Component structure
+const BaseApp: React.FC<BaseAppProps> = ({
+  config,
+  theme,
+  panels,
+  workspace
+}) => {
+  // Implementation
+};
+```
+
 ## Development Practices
 
 1. **Component Organization**:

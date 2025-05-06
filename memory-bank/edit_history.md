@@ -1,4 +1,12 @@
 # Edit History
+*Last Updated: May 6, 2025 15:35 IST*
+
+## May 6, 2025
+### 15:30 - T58: Template Extraction Setup
+- Created `/memory-bank/implementation-details/standalone-react-template-plan.md`
+- Updated `/memory-bank/tasks.md` with new task T58
+- Created `/memory-bank/tasks/T58.md`
+- Updated `/memory-bank/progress.md` with T58 status
 *Last Updated: 2025-05-05*
 
 ## 2025-05-06

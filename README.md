@@ -47,6 +47,34 @@ The Spin Network Visualization and Diffusion App enables users to:
   - Fallback mechanisms for missing or invalid data
   - Standalone simulation test page for debugging and verification
 
+## Template Architecture
+*Added: May 6, 2025*
+
+The application UI is being extracted into a reusable template system with three main packages:
+
+### template-core
+Core layout and functionality components:
+- Resizable panel system
+- Layout components
+- State management
+- Common utilities
+- TypeScript interfaces
+
+### template-base
+Base implementation and configuration:
+- Base application components
+- Panel implementations
+- Configuration system
+- Theme support
+- State persistence
+
+### simulation-app
+Domain-specific implementation:
+- Current app refactored as a package
+- Custom simulation components
+- Network visualization
+- Analysis tools
+
 ## Current Status (April 2025)
 
 - ✅ Redux integration for simulation state and UI
@@ -166,9 +194,13 @@ The application includes a powerful simulation engine for modeling diffusion pro
 
 ```
 spin_network_app/
-├── memory-bank/          # Project documentation and context
-├── public/               # Static assets
-├── resources/            # Technical documentation
+├── packages/            # Modular packages
+│   ├── template-core/   # Core template components
+│   ├── template-base/   # Base template implementation
+│   └── simulation-app/  # Current app as a package
+├── memory-bank/         # Project documentation and context
+├── public/              # Static assets
+├── resources/           # Technical documentation
 │   ├── architecture.md
 │   ├── data_structures.md
 │   ├── documentation.md
