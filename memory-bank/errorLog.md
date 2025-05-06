@@ -1,5 +1,49 @@
 # Error Log
 
+## 2025-05-06 17:45 IST: T58 - Package Installation Issues in React Template
+
+**Files:**
+- `/packages/template-base/package.json`
+- `/packages/template-core/package.json`
+
+**Error Messages:**
+```
+ERR_INVALID_URL Invalid URL
+ERR_PNPM_NO_MATCHING_VERSION No matching version found for @vitejs/plugin-react@^5.0.0
+ERR_PNPM_NO_MATCHING_VERSION No matching version found for @types/react-router-dom@^6.0.0
+```
+
+**Cause:**
+1. Incorrect workspace package reference format in template-base's package.json
+2. Version mismatches between specified and available package versions:
+   - @vitejs/plugin-react specified as ^5.0.0 when latest is 4.4.1
+   - @types/react-router-dom specified as ^6.0.0 when latest is 5.3.3
+
+**Fix:**
+1. Updated workspace package reference in template-base/package.json:
+```json
+"@template-core": "workspace:^0.1.0"
+```
+
+2. Updated package versions in template-base/package.json:
+```json
+"@vitejs/plugin-react": "^4.4.1"
+"@types/react-router-dom": "^5.3.3"
+```
+
+3. Updated package versions in template-core/package.json:
+```json
+"@vitejs/plugin-react": "^4.4.1"
+```
+
+**Affected Files:**
+- `/packages/template-base/package.json`
+- `/packages/template-core/package.json`
+
+**Related Task:** T58 - Extract Reusable React Template
+
+**Note:** After these fixes, pnpm install completes successfully in the workspace.
+
 ## 2025-05-06 16:09 - Matrix Operation Fixes
 
 ### Error 1: Complex Matrix Multiplication

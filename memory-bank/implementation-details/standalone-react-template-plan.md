@@ -54,11 +54,92 @@ The application is a sophisticated React-based interface designed for network vi
      - Debounced state updates
      - Smooth resize interactions
 
-### State Management
-- Redux implementation for global state
-- Persistent storage for panel sizes and visibility
-- Dedicated selectors for UI state
-- Debounced state updates to optimize performance
+### State Management & Persistence
+
+#### Core State Management
+1. **URL State**
+   - Route parameters
+   - Query string handling
+   - Navigation state
+
+2. **Layout State**
+   - Panel sizes
+   - Panel visibility
+   - Workspace configuration
+   - Component positions
+
+3. **User Preferences**
+   - Theme settings
+   - UI preferences
+   - Feature flags
+   - Display options
+
+#### State Persistence Mechanisms
+
+1. **Session Storage**
+```typescript
+interface SessionState {
+  panels: {
+    sizes: Record<string, number>;
+    visibility: Record<string, boolean>;
+  };
+  workspace: {
+    layout: LayoutConfig;
+    lastRoute: string;
+  };
+}
+```
+
+2. **Local Storage**
+```typescript
+interface LocalState {
+  preferences: UserPreferences;
+  theme: ThemeConfig;
+  features: FeatureFlags;
+}
+```
+
+3. **URL State**
+```typescript
+interface URLState {
+  view: string;
+  panel?: string;
+  tool?: string;
+  config?: string;
+}
+```
+
+#### Redux Integration Support
+
+1. **Store Configuration**
+```typescript
+interface StoreConfig {
+  reducers: Record<string, Reducer>;
+  middleware?: Middleware[];
+  enhancers?: StoreEnhancer[];
+  devTools?: boolean;
+}
+
+// Usage example:
+const store = createAppStore({
+  reducers: {
+    userFeature: userReducer
+  },
+  middleware: [...defaultMiddleware, userMiddleware]
+});
+```
+
+2. **Integration Utilities**
+- Store provider wrapper
+- Type-safe action creators
+- Selector utilities
+- Middleware setup
+
+3. **Development Tools**
+- Redux DevTools integration
+- Action logging
+- State snapshots
+- Time-travel debugging
 
 ### Navigation & Routing
 - React Router implementation with multiple views:
@@ -156,6 +237,28 @@ The application demonstrates a well-thought-out architecture with strong attenti
 *Plan Created: May 6, 2025 - 15:00 UTC*
 
 ## 1. Core Architecture Separation
+
+### Optional Components (template-base)
+
+1. **File Explorer**
+```typescript
+interface FileExplorerProps {
+  rootDir: string;
+  onFileSelect?: (file: FileInfo) => void;
+  filters?: FileFilter[];
+  view?: 'list' | 'grid' | 'tree';
+}
+```
+
+2. **Logging System**
+```typescript
+interface LogViewerProps {
+  source: string | LogSource;
+  filters?: LogFilter[];
+  onExport?: (format: 'json' | 'csv') => void;
+  view?: 'list' | 'table' | 'timeline';
+}
+```
 
 ### Template Core (`@template-core`)
 ```
