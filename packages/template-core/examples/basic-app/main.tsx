@@ -1,5 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { AppStateProvider } from '../../src/state';
 import App from './App';
 import './index.css';
 
@@ -11,6 +12,8 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <React.StrictMode>
-    <App />
+    <AppStateProvider>
+      <App />
+    </AppStateProvider>
   </React.StrictMode>
 );
