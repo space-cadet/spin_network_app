@@ -53,6 +53,11 @@ export interface Operator {
   toMatrix(): Complex[][];                 // Matrix representation
   tensorProduct(other: Operator): Operator; // Tensor product with another operator
   partialTrace(dims: number[], traceOutIndices: number[]): Operator; // Partial trace over subsystems
+  
+  // Added operations
+  scale(scalar: Complex): Operator;        // Scale operator by complex number
+  add(other: Operator): Operator;          // Add two operators
+  eigenDecompose(): { values: Complex[]; vectors: Operator[] };
 }
 
 /**

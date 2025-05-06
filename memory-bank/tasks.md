@@ -2,10 +2,10 @@
 *Last Updated: 2025-05-05 22:00 IST*
 
 ## Tasks Overview
-- **Active Tasks:** 20
+- **Active Tasks:** 21
 - **Paused Tasks:** 4  
 - **Completed Tasks:** 28
-- **Latest Task ID:** T56
+- **Latest Task ID:** T57
 
 ## Task Registry
 *Last Updated: 2025-05-05 22:00 IST*
@@ -13,6 +13,7 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
+| T57 | Quantum Library Examples Implementation | 🔄 | HIGH | 2025-05-06 | [tasks/T57.md] |
 | T56 | Quantum Library Code Reorganization | 🔄 | HIGH | 2025-05-05 | [tasks/T56.md] |
 | T55 | Enhance Quantum Features of Standalone Library | ⏸️ | HIGH | 2025-05-05 | [tasks/T55.md] | Blocked by T56 |
 | T54 | Python WebAssembly Integration | 🔄 | HIGH | 2025-05-03 | [tasks/T54.md] |
@@ -193,6 +194,7 @@
 | T38 | Implement Intertwiner Tensor Initialization | 2025-04-24 | T36, T20 |
 
 ## Dependencies
+- **T57** → Depends on → **T56**
 - **T56** → Depends on → **T55**
 - **T55** → Depends on → **T36, T53, T56**
 - **T54** → None

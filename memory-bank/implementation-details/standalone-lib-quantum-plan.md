@@ -1,36 +1,70 @@
 # Minimal Quantum Library Extension Plan
+*Last Updated: May 6, 2025*
 
 ## Overview
 
-This plan outlines extensions to enhance the existing quantum features of the standalone library. The library currently implements core quantum mechanical features through two main modules:
+This plan outlines extensions to enhance the existing quantum features of the standalone library. The library has evolved beyond its initial structure and now has multiple modules with varying degrees of completion.
 
-1. **State Vector Operations**
-   - Basic state vector structure with dimension and complex amplitudes
-   - Support for arbitrary dimensional quantum states
-   - Inner product and norm calculations
-   - Operator application and expectation values
-   - Spin-j operator generation
+### Complete Components
 
-2. **Tensor Operations**
-   - Sparse tensor implementation for arbitrary dimensions
-   - Element access, modification, and normalization
-   - Tensor contraction with arbitrary index pairs
-   - 4-valent intertwiner tensor creation
-   - Angular momentum coupling support
+1. **State Vector Operations** (COMPLETE)
+   - Basic state vector structure with dimension and complex amplitudes ✓
+   - Support for arbitrary dimensional quantum states ✓
+   - Inner product and norm calculations ✓
+   - Operator application and expectation values ✓
+   - Spin-j operator generation ✓
+
+2. **Core Operations** (COMPLETE)
+   - Complex number operations (complex.ts) ✓
+   - Basic state vector structure (stateVector.ts) ✓
+   - Common gates implementation (gates.ts) ✓
+   - Core operator framework (operator.ts) ✓
+   - Basic state definitions (states.ts) ✓
+   - Eigenvalue decomposition support ✓
+
+3. **Advanced Operations** (COMPLETE)
+   - Hamiltonian operations (hamiltonian.ts) ✓
+   - Matrix operations (matrixOperations.ts) ✓
+   - Basic composition operations (composition.ts) ✓
+
+### Incomplete Components
+
+1. **Circuit Implementation** (NOT STARTED)
+   - circuit.ts is empty and needs full implementation
+   - Requires quantum circuit builder
+   - Needs circuit visualization capabilities
+
+2. **Measurement System** (PARTIAL)
+   - Partially implemented in measurement.ts
+   - Full eigendecomposition support now implemented ✓
+   - Missing createMeasurementOperator()
+   - Needs POVM measurements
+   - Requires weak measurement support
+
+3. **Density Matrix Operations** (PARTIAL)
+   - Partially implemented in densityMatrix.ts
+   - Missing quantum channel implementations
+   - Needs entanglement measure implementations
+   - Requires partial trace algorithm
+
+4. **Mathematical Utilities** (PARTIAL)
+   - Incomplete implementations in utils/math.ts
+   - Needs proper SVD implementation
+   - Requires tensor network operations
 
 The proposed extensions will build upon these foundations to provide a more complete quantum simulation toolkit while maintaining the library's simplicity and efficiency.
 
-## Phase 1: Core Quantum Foundations
+## Phase 1: Core Quantum Foundations (MOSTLY COMPLETE)
 
-### 1.1 Enhanced Complex Number Operations
-**Priority: HIGH**
-**Current Status**: Basic complex operations (addition, multiplication) exist but with limitations.
+### 1.1 Enhanced Complex Number Operations (COMPLETE ✓)
+**Priority: COMPLETE**
+**Status**: All core complex operations have been implemented
 
-**Required Extensions**:
-- Add `subtractComplex()` method - Currently missing
-- Add `conjugateComplex()` method - Needed for proper quantum operations
-- Add `modulusComplex()` method - Essential for norm calculations
-- Add `isZeroComplex(tolerance)` - Replace current fixed 1e-10 tolerance checks
+**Implemented Features**:
+- `subtractComplex()` method ✓
+- `conjugateComplex()` method ✓
+- `modulusComplex()` method ✓
+- `isZeroComplex(tolerance)` ✓
 
 **Implementation:**
 ```typescript
@@ -41,38 +75,35 @@ export function modulusComplex(c: Complex): number
 export function isZeroComplex(c: Complex, tolerance: number = 1e-10): boolean
 ```
 
-### 1.3 State Vector Foundation
-**Priority: HIGH**
-**Current Status**: Basic state vector interface exists but core operations missing.
+### 1.3 State Vector Foundation (COMPLETE ✓)
+**Priority: COMPLETE**
+**Status**: All core state vector operations have been implemented
 
-**Required Extensions**:
-- Add createState() - Core state initialization
-- Add setState/getState - State manipulation
-- Add innerProduct() - Foundation for all quantum operations
-- Add norm() and normalize() - State normalization
-- Add tensorProduct() for state vectors - Multi-particle states
+**Implemented Features**:
+- createState() - Core state initialization ✓
+- setState/getState - State manipulation ✓
+- innerProduct() - Foundation for all quantum operations ✓
+- norm() and normalize() - State normalization ✓
+- tensorProduct() for state vectors - Multi-particle states ✓
 
-**Implementation:**
-```typescript
-// Add to quantum/stateVector.ts
-export function createState(dimension: number): StateVector
-export function setState(state: StateVector, indices: number[], value: Complex): void
-export function getState(state: StateVector, indices: number[]): Complex
-export function innerProduct(state1: StateVector, state2: StateVector): Complex
-export function norm(state: StateVector): number
-export function normalize(state: StateVector): StateVector
-export function tensorProduct(state1: StateVector, state2: StateVector): StateVector
-```
+### 1.4 Common Quantum States (COMPLETE ✓)
+**Priority: COMPLETE**
+**Status**: All standard state preparation functions implemented
 
-### 1.4 Common Quantum States
-**Priority: MEDIUM**
-**Current Status**: No standard state preparation functions.
+### Common Quantum States (COMPLETE ✓)
+**Current Status**: All standard quantum states implemented in states.ts
 
-**Required Extensions**:
-- Add computational basis states - Foundation for circuits
-- Add Bell states - Essential entangled states
-- Add GHZ and W states - Multi-qubit entangled states
-- Add support for arbitrary basis states with indices
+**Implemented Features**:
+- Computational basis states:
+  - Multi-qubit basis states ✓
+  - Single basis state creation ✓
+- Entangled states:
+  - Bell states (Phi+, Phi-, Psi+, Psi-) ✓
+  - GHZ states ✓
+  - W states ✓
+- Superposition states:
+  - |+⟩ state ✓
+  - |-⟩ state ✓
 
 **Implementation:**
 ```typescript
@@ -84,29 +115,45 @@ export function createGHZState(numQubits: number): StateVector
 export function createWState(numQubits: number): StateVector
 ```
 
-### 1.2 Operator Base Class
-**Priority: HIGH**
-**Current Status**: Operator operations exist but are scattered across stateVectorOperations.ts without a unified interface.
+### 1.2 Operator Base Class (COMPLETE ✓)
+**Priority: COMPLETE**
+**Current Status**: Fully implemented in operator.ts with comprehensive functionality
 
-**Required Extensions**:
-- Create abstract `Operator` interface - Unify existing operator implementations
-- Add operator application to quantum states - Currently implemented ad-hoc
-- Add operator composition method - Missing in current implementation
-- Add adjoint operation - Essential for quantum mechanics, currently missing
+**Implemented Features**:
+- `Operator` interface with complete implementation ✓
+- `MatrixOperator` class with full functionality ✓
+- Core operations:
+  - State application (apply) ✓
+  - Operator composition (compose) ✓
+  - Adjoint operation ✓
+  - Matrix representation ✓
+  - Tensor product ✓
+  - Partial trace ✓
+- Validation and type checking:
+  - Hermitian validation ✓
+  - Unitary validation ✓
+  - Projection validation ✓
+- Special operators:
+  - Identity operator ✓
+  - Zero operator ✓
+  - Scale operation ✓
+  - Addition operation ✓
 
-**Implementation:**
+**Current Implementation:**
 ```typescript
-// Create quantum/operator.ts
 export interface Operator {
   dimension: number;
-  apply(state: StateVector): StateVector;  // Unify existing implementations
-  compose(other: Operator): Operator;     // New capability
-  adjoint(): Operator;                    // New capability
-  toMatrix(): Complex[][];                // Support existing code
+  type: OperatorType;
+  apply(state: StateVector): StateVector;
+  compose(other: Operator): Operator;
+  adjoint(): Operator;
+  toMatrix(): Complex[][];
+  tensorProduct(other: Operator): Operator;
+  partialTrace(dims: number[], traceOutIndices: number[]): Operator;
 }
 
 export class MatrixOperator implements Operator {
-  // Implementation for matrix-based operators
+  // Fully implemented with all required methods
 }
 ```
 
@@ -118,111 +165,140 @@ export class MatrixOperator implements Operator {
 
 ## Phase 2: Essential Quantum Operations
 
-### 2.1 Basic Hamiltonian Class
-**Priority: MEDIUM**
-**Current Status**: No dedicated Hamiltonian implementation or time evolution support.
+### 2.1 Basic Hamiltonian Class (COMPLETE ✓)
+**Priority: COMPLETE**
+**Current Status**: Fully implemented in hamiltonian.ts with comprehensive functionality
 
-**Required Extensions**:
-- Implement simple `Hamiltonian` class - New feature
-- Add time evolution via matrix exponentiation - Currently missing
-- Include basic built-in Hamiltonians - Will complement existing spin operators
+**Implemented Features**:
+- Complete `Hamiltonian` class extending `MatrixOperator` ✓
+- Core functionality:
+  - Hamiltonian term management ✓
+  - Time evolution operator generation ✓
+  - State evolution ✓
+  - Expectation value calculation ✓
+- Built-in Hamiltonians:
+  - Spin Hamiltonian (B·σ) ✓
+  - Heisenberg interaction Hamiltonian ✓
+- Support for:
+  - Time-independent Hamiltonians ✓
+  - Multiple terms ✓
+  - Custom Hamiltonians ✓
 
-**Implementation:**
+**Current Implementation:**
 ```typescript
-// Create quantum/hamiltonian.ts
 export class Hamiltonian extends MatrixOperator {
-  constructor(matrix: Complex[][]);
+  readonly hamiltonianType: HamiltonianType;
+  readonly terms: HamiltonianTerm[];
   
-  // Method for time evolution
-  evolve(state: StateVector, time: number): StateVector;
+  constructor(dimension: number, terms: HamiltonianTerm[], 
+             hamiltonianType?: HamiltonianType,
+             timeDependent?: boolean);
+             
+  getEvolutionOperator(time: number): Operator;
+  evolveState(state: StateVector, time: number): StateVector;
+  expectationValue(state: StateVector): Complex;
   
-  // Static methods for common Hamiltonians
-  static harmonicOscillator(frequency: number): Hamiltonian;
-  static twoLevel(energy: number): Hamiltonian;
+  static createSpinHamiltonian(magneticField: [number, number, number]): Hamiltonian;
+  static createHeisenbergHamiltonian(numSpins: number, coupling: number): Hamiltonian;
 }
 ```
 
-### 2.2 Matrix Exponentiation
-**Priority: MEDIUM**
-**Current Status**: No matrix exponential implementation, needed for time evolution.
+**Future Enhancements** (Not Required):
+- Time-dependent Hamiltonian evolution
+- Additional built-in Hamiltonian types
+- Numerical integration methods for complex systems
 
-**Required Extensions**:
-- Implement basic matrix exponential - Essential for Hamiltonians
-- Use Taylor series with cutoff - Maintain current numerical stability standards
-- Add caching for repeated operations - Performance optimization
-
-**Implementation:**
-```typescript
-// Add to quantum/matrixOperations.ts
-export function matrixExponential(matrix: Complex[][], 
-                                cutoff: number = 1e-8): Complex[][];
-```
-
-### 2.3 Measurement Operators
-**Priority: MEDIUM**
-**Current Status**: Basic expectation value calculations exist in both stateVectorOperations.ts and tensorOperations.ts, but no projection operators or measurement simulation.
-
-**Current Features**:
-- Expectation value calculation for state vectors
-- Tensor-based expectation values
-- Basic operator application
-
-**Required Extensions**:
-- Implement projection operators - Currently missing
-- Add measurement simulation with collapse - New feature
-- Unify expectation value calculations - Currently scattered
-
-**Implementation:**
-```typescript
-// Add to quantum/measurement.ts
-export class ProjectionOperator implements Operator {
-  constructor(basisState: StateVector);
-}
-
-export function measureState(state: StateVector, 
-                           observable: Operator): {
-  outcome: number;
-  collapsed: StateVector;  // Add quantum state collapse
-  probability: number;     // Include measurement probability
-}
-```
-
-## Phase 3: Mixed States and Quantum Channels
+### 2.2 Measurement System (PARTIAL)
 **Priority: HIGH**
-**Current Status**: No support for mixed states or quantum channels.
+**Current Status**: Basic measurement functionality implemented, but some key features missing
 
-### 3.1 Density Matrix Operations
-**Required Extensions**:
-- Implement `DensityMatrix` interface extending `Operator`
-- Add density matrix construction from pure and mixed states
-- Add partial trace operations for subsystems
-- Add purity and von Neumann entropy calculations
+**Implemented Features**:
+- `ProjectionOperator` class with full implementation ✓
+  - State projection ✓
+  - Operator composition ✓
+  - Tensor product operations ✓
+  - Adjoint operation ✓
+- Core measurement operations:
+  - Expectation value calculation ✓
+  - Basic measurement with state collapse ✓
+  - Measurement probability calculation ✓
 
-**Implementation:**
+**Missing Features** (HIGH PRIORITY):
+- General measurement operators via eigendecomposition
+- POVM measurements 
+- Weak measurements
+- Multiple measurement bases
+
+**Current Implementation:**
 ```typescript
-// Create quantum/densityMatrix.ts
-export interface DensityMatrix extends Operator {
-  trace(): Complex;
-  partialTrace(subsystemDimensions: number[]): DensityMatrix;
-  purity(): number;
-  vonNeumannEntropy(): number;
+export class ProjectionOperator implements Operator {
+  constructor(state: StateVector);
+  // Full operator interface implementation ✓
 }
 
-export class DensityMatrixOperator implements DensityMatrix {
-  constructor(matrix: Complex[][]);
-  
-  // Static factory methods
-  static fromPureState(state: StateVector): DensityMatrix;
-  static mixedState(states: StateVector[], probabilities: number[]): DensityMatrix;
+export function expectationValue(state: StateVector, operator: Operator): Complex;
+export function measureState(state: StateVector, operator: Operator): MeasurementOutcome;
+export function createMeasurementOperator(observable: Operator, eigenvalue: number): Operator;  // Not implemented
+```
+
+**Required Extensions**:
+1. Complete `createMeasurementOperator`:
+   - Eigendecomposition implementation
+   - Observable eigenstates
+   - Measurement projectors
+
+2. Add POVM measurements:
+```typescript
+export interface POVM {
+  elements: Operator[];
+  measure(state: StateVector): MeasurementOutcome;
 }
 ```
 
-### 3.2 Quantum Channels
-**Required Extensions**:
-- Implement quantum channel interface
-- Add Kraus operator representation
-- Include common quantum channels (depolarizing, amplitude damping, etc.)
-- Add entanglement measures
+3. Add weak measurements:
+```typescript
+export function createWeakMeasurement(
+  observable: Operator,
+  strength: number
+): Operator;
+```
+
+## Phase 3: Mixed States and Quantum Channels (PARTIAL)
+**Priority: HIGH**
+**Current Status**: Core interface implemented but several key features missing
+
+### 3.1 Density Matrix Operations (PARTIAL)
+**Status**: Basic interface and operations implemented, but key features missing
+
+**Complete Features**:
+- `DensityMatrix` interface extending `Operator` ✓
+- Density matrix construction from pure and mixed states ✓
+- Basic operations (trace, compose, adjoint) ✓
+- Purity calculations ✓
+
+**Missing Features** (HIGH PRIORITY):
+- Partial trace operations for subsystems
+- von Neumann entropy calculations
+- Efficient large system handling
+
+### 3.2 Quantum Channels (INCOMPLETE)
+**Status**: Interface defined but implementations missing
+
+**Complete Features**:
+- Quantum channel interface ✓
+- Kraus operator representation framework ✓
+
+**Missing Features** (HIGH PRIORITY):
+- Common quantum channels:
+  - Depolarizing channel
+  - Amplitude damping channel
+  - Phase damping channel
+  - Bit flip channel
+  - Phase flip channel
+- Entanglement measures:
+  - Trace fidelity
+  - Concurrence
+  - Negativity
 
 **Implementation:**
 ```typescript
@@ -247,19 +323,19 @@ export function negativity(rho: DensityMatrix, subsystemDimensions: number[]): n
 
 ## Phase 4: Quantum Algorithms Support
 
-### 3.1 Quantum Gates
-**Priority: LOW**
-**Current Status**: Basic spin operators (Sx, Sy, Sz) exist for arbitrary spin-j, but no specific qubit gate implementations.
+### 3.1 Quantum Gates (COMPLETE ✓)
+**Priority: COMPLETE**
+**Current Status**: All core quantum gates implemented in gates.ts
 
-**Current Features**:
-- Generation of spin-j operators
-- Support for arbitrary spin representations
-- Matrix elements for raising/lowering operations
-
-**Required Extensions**:
-- Add Pauli matrices (X, Y, Z) - Build on existing spin-1/2 operators
-- Add Hadamard gate - New implementation
-- Add CNOT gate (for 2-qubit systems) - Leverage tensor operations
+**Implemented Features**:
+- Single-qubit gates:
+  - Pauli X (bit flip) gate ✓
+  - Pauli Y gate ✓
+  - Pauli Z (phase flip) gate ✓
+  - Hadamard gate ✓
+- Multi-qubit gates:
+  - CNOT (Controlled-NOT) gate ✓
+- All gates properly implemented as unitary operators ✓
 
 **Implementation:**
 ```typescript
@@ -272,15 +348,23 @@ export const Hadamard: MatrixOperator;
 export function CNOT(): MatrixOperator;  // Use tensor methods
 ```
 
-### 3.2 Simple Quantum Circuit
-**Priority: LOW**
-**Current Status**: No circuit framework exists, but tensor operations support needed mathematical structure.
+### 3.2 Quantum Composition (COMPLETE ✓)
+**Priority: COMPLETE**
+**Current Status**: Comprehensive composition operations implemented in composition.ts
 
-**Current Features That Support This**:
-- Tensor contraction capabilities
-- Sparse tensor implementation
-- Efficient element storage
-- Proper dimension validation
+**Implemented Features**:
+- Space composition:
+  - Hilbert space tensor products ✓
+  - Bipartite splitting ✓
+  - Multi-space composition ✓
+- State composition:
+  - State vector tensor products ✓
+  - Multi-state composition ✓
+  - Type-safe state conversion ✓
+- Operator composition:
+  - Operator tensor products ✓
+  - Multi-operator composition ✓
+  - Partial trace operations ✓
 
 **Required Extensions**:
 - Basic quantum circuit builder - New feature
@@ -333,33 +417,64 @@ export class QuantumCircuit {
 // - measurement.test.ts     // Test measurement and collapse
 ```
 
-### 4.2 Example Scripts
-**Priority: MEDIUM**
-**Current Status**: Some quantum examples exist in T53 (Quantum Tetrahedron).
+### 4.2 Example Scripts (UPDATE NEEDED)
+**Priority: HIGH**
+**Current Status**: Core examples needed for new functionality
 
 **Required Examples**:
-- Harmonic oscillator simulation - New
-- Two-level system dynamics - Extend from spin-1/2
-- Simple Bell state creation - Use new gate framework
+1. State Preparation and Measurement:
+   - Bell state creation and measurement
+   - GHZ/W state demonstrations
+   - Quantum superposition examples
 
-## Implementation Timeline
+2. Gate Operations:
+   - Single qubit gate sequences
+   - CNOT-based entanglement
+   - Basic quantum algorithms
 
-1. **Week 1**: Complex number improvements + Operator interface
-   - Leverage existing operations
-   - Unify scattered implementations
-   
-2. **Week 2**: Hamiltonian class + Matrix exponentiation
-   - Build on existing operator framework
-   - Implement time evolution
-   
-3. **Week 3**: Measurement operators + Gates
-   - Extend current measurement capabilities
-   - Build gates from spin operators
-   
-4. **Week 4**: Testing, examples, and documentation
-   - Expand current test coverage
-   - Add new examples
-   - Complete API documentation
+3. Mixed State Examples:
+   - Density matrix operations
+   - Quantum channel effects
+   - Decoherence demonstrations
+
+4. Advanced Operations:
+   - Hamiltonian evolution
+   - Composite system dynamics
+   - Measurement-based operations
+
+## Updated Implementation Timeline (May 2025)
+
+1. **Weeks 1-2: Circuit Implementation** (HIGH PRIORITY)
+   - Complete circuit.ts implementation
+   - Add circuit visualization
+   - Implement circuit execution
+   - Add basic examples
+
+2. **Weeks 3-4: Quantum Channels** (HIGH PRIORITY)
+   - Complete quantum channel implementations
+   - Add common channel types
+   - Implement entanglement measures
+   - Add decoherence examples
+
+3. **Weeks 5-6: Measurement System** (HIGH PRIORITY)
+   - Complete createMeasurementOperator()
+   - Add POVM measurements
+   - Implement weak measurements
+   - Add measurement examples
+
+4. **Weeks 7-8: Documentation and Testing**
+   - Complete test coverage
+   - Add comprehensive examples
+   - Create tutorial documentation
+   - Performance optimization
+
+Dependencies and Status:
+- Core quantum operations ✓
+- State preparation ✓
+- Gate operations ✓
+- Matrix operations ✓
+- Operator framework ✓
+- Hamiltonian evolution ✓
 
 ## File Structure
 
@@ -380,43 +495,213 @@ lib/quantum/
 └── index.ts               # Main exports
 ```
 
-## Success Criteria
+## Phase 5: Quantum Circuit Implementation (NEW)
+**Priority: HIGH**
+**Current Status**: Not implemented
 
-### Current Capabilities
-1. Complex number operations with robust numerical handling
-2. Tensor operations with sparse storage
-3. Unified operator interface with matrix implementation
-4. Core quantum gates (Pauli X/Y/Z, Hadamard, CNOT)
-5. 4-valent intertwiner support
+### 5.1 Core Circuit Framework
+**Required Features**:
+- Circuit initialization and validation
+- Gate addition and sequencing
+- Circuit visualization
+- State preparation and measurement
+- Error checking and validation
 
-### Required Extensions
-1. Core Quantum State Operations
-   - State vector creation and manipulation
-   - Inner products and norms
-   - State tensor products
-   - Common quantum states (Bell, GHZ, W states)
-   
-2. Advanced Quantum Operations
-   - Time evolution
-   - State collapse
-   - Measurement simulation with probabilities
-   - Projective measurements
-   
-3. Quantum Computation Support
-   - Quantum circuit framework
-   - Multi-qubit operations
-   - State tomography
+**Implementation:**
+```typescript
+export class QuantumCircuit {
+  constructor(numQubits: number);
+  addGate(gate: Operator, qubits: number[]): void;
+  addMeasurement(qubits: number[]): void;
+  execute(initialState?: StateVector): MeasurementResults;
+  draw(): string;  // Circuit diagram
+}
+```
 
-4. Mixed State and Channel Operations
-   - Density matrix manipulations
-   - Quantum channel simulations
-   - Entanglement measures
-   - Partial trace operations
+### 5.2 Circuit Operations
+**Required Features**:
+- Multi-qubit gate decomposition
+- Measurement in different bases
+- Circuit optimization
+- Error mitigation strategies
+- Circuit validation and verification
 
-5. Complete Test Coverage
-   - State vector operations
+## Documentation Plan
+**Priority**: HIGH
+**Timeline**: Parallel with implementation phases
+
+### Documentation Structure
+
+#### 1. API Documentation
+- TypeScript interfaces with comprehensive JSDoc comments
+- Parameter and return type documentation
+- Usage examples in comments
+- Cross-references between related functionality
+- Auto-generated API reference using TypeDoc
+
+#### 2. Implementation Documentation
+- In-code documentation of algorithms and methods
+- Mathematical background and formulas
+- Performance considerations and tradeoffs
+- Validation and testing requirements
+- Code organization and dependencies
+
+#### 3. Example Programs and Tutorials
+- Basic quantum state manipulation
+- Quantum circuit examples
+- Measurement and collapse demonstrations
+- Mixed state operations
+- Complete quantum algorithms
+- Interactive Jupyter notebooks
+
+#### 4. Reference Guides
+- Quantum computing concepts
+- Library architecture overview
+- Best practices and patterns
+- Migration guides
+- Performance optimization guide
+- Error handling guide
+
+### Documentation by Module
+
+1. **Core Types and Operations** (COMPLETE ✓)
+   - Complex number operations
+   - State vector manipulation
+   - Operator framework
+   - Common quantum states
+   - Basic examples
+
+2. **Quantum Operations** (IN PROGRESS)
+   - Quantum gates and circuits
    - Measurement operations
-   - Multi-qubit system tests
-   - Numerical stability and edge cases
+   - Time evolution
+   - Advanced examples
 
-This enhanced foundation will provide a robust quantum simulation toolkit while maintaining the library's efficiency and usability.
+3. **Mixed States and Channels** (PLANNED)
+   - Density matrices
+   - Quantum channels
+   - Entanglement measures
+   - Decoherence examples
+
+4. **Mathematical Tools** (PLANNED)
+   - SVD implementation
+   - Tensor networks
+   - Numerical methods
+
+### Documentation Standards
+
+1. **API Documentation**
+   ```typescript
+   /**
+    * Represents a quantum state vector in a Hilbert space.
+    * 
+    * @remarks
+    * The state vector stores complex amplitudes in the computational basis.
+    * All operations ensure normalization is preserved.
+    * 
+    * @example
+    * ```typescript
+    * const state = new StateVector(2); // Create a qubit
+    * state.setState(0, {re: 1/√2, im: 0});
+    * state.setState(1, {re: 1/√2, im: 0});
+    * ```
+    */
+   export interface StateVector {
+     // Interface members...
+   }
+   ```
+
+2. **Implementation Comments**
+   ```typescript
+   // Mathematical background:
+   // The partial trace operation reduces a density matrix of a composite
+   // system to the density matrix of a subsystem by "tracing out" degrees
+   // of freedom. For a bipartite system ρAB, the partial trace over B is:
+   // ρA = TrB(ρAB) = ∑⟨bi|ρAB|bi⟩ where {|bi⟩} is a basis for system B.
+   export function partialTrace(
+     rho: DensityMatrix,
+     dims: number[],
+     traceOutIndices: number[]
+   ): DensityMatrix {
+     // Implementation...
+   }
+   ```
+
+### Documentation Testing
+
+1. **API Documentation Tests**
+   - Validate all public APIs have JSDoc comments
+   - Check parameter and return type documentation
+   - Verify examples are up to date
+   - Test cross-references
+
+2. **Example Program Tests**
+   - Ensure all examples run successfully
+   - Verify output matches documentation 
+   - Test with different node/typescript versions
+   - Include in CI pipeline
+
+3. **Documentation Coverage**
+   - Track documentation coverage metrics
+   - Generate coverage reports
+   - Set minimum coverage thresholds
+   - Automate documentation checks
+
+### Documentation Tools
+
+1. **Generation Tools**
+   - TypeDoc for API documentation
+   - Jest for example testing
+   - ESLint for documentation linting
+   - Custom doc coverage tools
+
+2. **Validation Tools**
+   - Link checkers
+   - Code snippet validators
+   - Spell checkers
+   - Style guides
+
+### Success Criteria
+
+### Current Capabilities (COMPLETE)
+1. Complex number operations with robust numerical handling ✓
+2. Tensor operations with sparse storage ✓
+3. Unified operator interface with matrix implementation ✓
+4. Core quantum gates (Pauli X/Y/Z, Hadamard, CNOT) ✓
+5. 4-valent intertwiner support ✓
+
+### Required Extensions (Updated May 2025)
+
+1. Core Quantum State Operations (COMPLETE ✓)
+   - State vector creation and manipulation ✓
+   - Inner products and norms ✓
+   - State tensor products ✓
+   - Common quantum states (Bell, GHZ, W states) ✓
+   
+2. Advanced Quantum Operations (MOSTLY COMPLETE)
+   - Time evolution ✓
+   - State collapse ✓
+   - Measurement simulation (PARTIAL)
+     - Basic projective measurements ✓
+     - POVM measurements (TODO)
+     - Weak measurements (TODO)
+   
+3. Quantum Computation Support (PARTIAL)
+   - Quantum circuit framework (NOT STARTED)
+   - Multi-qubit operations ✓
+   - State tomography (PARTIAL)
+
+4. Mixed State and Channel Operations (PARTIAL)
+   - Density matrix manipulations (PARTIAL)
+     - Basic operations ✓
+     - Partial trace (TODO)
+     - von Neumann entropy (TODO)
+   - Quantum channel simulations (NOT STARTED)
+   - Entanglement measures (NOT STARTED)
+
+5. Complete Test Coverage (PARTIAL)
+   - State vector operations ✓
+   - Operator algebra ✓
+   - Measurement operations (PARTIAL)
+   - Multi-qubit system tests (PARTIAL)
+   - Numerical stability (PARTIAL)

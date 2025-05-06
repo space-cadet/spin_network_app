@@ -289,3 +289,107 @@ export function isUnitary(matrix: Complex[][], tolerance: number = 1e-10): boole
     }
     return true;
 }
+
+/**
+ * Computes eigenvalues and eigenvectors of a hermitian matrix
+ * Returns sorted eigenvalues and corresponding eigenvectors
+ */
+export function eigenDecomposition(matrix: Complex[][]): {
+    values: Complex[];
+    vectors: Complex[][];
+} {
+    const dim = matrix.length;
+    
+    // Validate hermiticity
+    if (!isHermitian(matrix)) {
+        throw new Error('Matrix must be Hermitian for real eigenvalues');
+    }
+
+    // Convert to real matrix if Hermitian
+    const realMatrix = matrix.map(row => 
+        row.map(elem => Math.abs(elem.im) < 1e-10 ? elem.re : NaN)
+    );
+
+    // Check if conversion was successful
+    if (realMatrix.some(row => row.some(elem => isNaN(elem)))) {
+        throw new Error('Matrix has significant imaginary components');
+    }
+
+    // Use power iteration with deflation for eigenvalues/vectors
+    const eigenvalues: Complex[] = [];
+    const eigenvectors: Complex[][] = [];
+
+    for (let i = 0; i < dim; i++) {
+        // Find largest remaining eigenvalue and vector
+        const { value, vector } = powerIteration(realMatrix);
+        
+        // Convert to complex
+        eigenvalues.push(createComplex(value, 0));
+        eigenvectors.push(vector.map(v => createComplex(v, 0)));
+
+        // Deflate matrix
+        deflateMatrix(realMatrix, value, vector);
+    }
+
+    // Sort by eigenvalue (descending)
+    const indices = eigenvalues
+        .map((_, i) => i)
+        .sort((a, b) => eigenvalues[b].re - eigenvalues[a].re);
+
+    return {
+        values: indices.map(i => eigenvalues[i]),
+        vectors: indices.map(i => eigenvectors[i])
+    };
+}
+
+/**
+ * Power iteration to find largest eigenvalue/vector
+ */
+function powerIteration(matrix: number[][]): { value: number; vector: number[] } {
+    const dim = matrix.length;
+    let vector = Array(dim).fill(0).map(() => Math.random());
+    
+    // Normalize initial vector
+    const norm = Math.sqrt(vector.reduce((sum, v) => sum + v * v, 0));
+    vector = vector.map(v => v / norm);
+
+    for (let iter = 0; iter < 100; iter++) {
+        // Apply matrix
+        const newVector = vector.map((_, i) => 
+            vector.reduce((sum, v, j) => sum + matrix[i][j] * v, 0)
+        );
+
+        // Normalize
+        const newNorm = Math.sqrt(newVector.reduce((sum, v) => sum + v * v, 0));
+        const normalized = newVector.map(v => v / newNorm);
+
+        // Check convergence
+        const diff = normalized.reduce((sum, v, i) => 
+            sum + Math.abs(v - vector[i]), 0
+        );
+        
+        if (diff < 1e-10) {
+            // Calculate eigenvalue using Rayleigh quotient
+            const value = vector.reduce((sum, v, i) => 
+                sum + v * newVector[i], 0
+            );
+            return { value, vector: normalized };
+        }
+
+        vector = normalized;
+    }
+
+    throw new Error('Power iteration did not converge');
+}
+
+/**
+ * Deflate matrix by removing contribution of found eigenvalue/vector
+ */
+function deflateMatrix(matrix: number[][], value: number, vector: number[]) {
+    const dim = matrix.length;
+    for (let i = 0; i < dim; i++) {
+        for (let j = 0; j < dim; j++) {
+            matrix[i][j] -= value * vector[i] * vector[j];
+        }
+    }
+}

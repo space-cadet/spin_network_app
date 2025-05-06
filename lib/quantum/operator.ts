@@ -9,8 +9,9 @@ import {
 } from './complex';
 import { StateVector } from './stateVector';
 import { validateMatDims, validateMatchDims } from './utils/validation';
+import { eigenDecomposition } from './matrixOperations';
 
-/**
+/** 
  * Implementation of operator using matrix representation
  */
 export class MatrixOperator implements Operator {
@@ -378,6 +379,42 @@ export class MatrixOperator implements Operator {
     }
 
     return new MatrixOperator(resultMatrix);
+  }
+
+  /**
+   * Returns eigenvalues and eigenvectors of the operator
+   * Only works for Hermitian operators
+   */
+  eigenDecompose(): { values: Complex[]; vectors: MatrixOperator[] } {
+    const { values, vectors } = eigenDecomposition(this.matrix);
+    return {
+      values,
+      vectors: vectors.map(v => new MatrixOperator([v], 'general'))
+    };
+  }
+
+  /**
+   * Projects onto eigenspace with given eigenvalue
+   */
+  projectOntoEigenspace(eigenvalue: Complex, tolerance: number = 1e-10): MatrixOperator {
+    const { values, vectors } = this.eigenDecompose();
+    
+    // Find eigenvectors for this eigenvalue
+    const matchingVectors = vectors.filter((_, i) => 
+      Math.abs(values[i].re - eigenvalue.re) < tolerance &&
+      Math.abs(values[i].im - eigenvalue.im) < tolerance
+    );
+
+    if (matchingVectors.length === 0) {
+      throw new Error('No eigenvectors found for given eigenvalue');
+    }
+
+    // Construct projection operator
+    return matchingVectors.reduce((sum, vector) => {
+      const vectorMatrix = vector.toMatrix()[0]; // Get the first row since vector is 1xN matrix
+      const proj = new MatrixOperator([vectorMatrix], 'projection');
+      return sum ? sum.add(proj) : proj;
+    });
   }
 }
 
