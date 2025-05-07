@@ -35,11 +35,23 @@ describe('MatrixOperator', () => {
     });
 
     it('validates hermitian property', () => {
-      const hermitianMatrix = [
+      // Non-Hermitian matrix:
+      // [1    1-i]
+      // [1-i   2]  // Note: for Hermitian, this should be [1+i  2]
+      const nonHermitianMatrix = [
+        [createComplex(1, 0), createComplex(1, -1)],
+        [createComplex(1, -1), createComplex(2, 0)]  // Wrong conjugate
+      ];
+      expect(() => new MatrixOperator(nonHermitianMatrix, 'hermitian')).toThrow();
+
+      // This is a valid Hermitian matrix for reference:
+      // [1    1-i]
+      // [1+i   2]
+      const validHermitianMatrix = [
         [createComplex(1, 0), createComplex(1, -1)],
         [createComplex(1, 1), createComplex(2, 0)]
       ];
-      expect(() => new MatrixOperator(hermitianMatrix, 'hermitian')).toThrow();
+      expect(() => new MatrixOperator(validHermitianMatrix, 'hermitian')).not.toThrow();
     });
 
     it('validates unitary property', () => {

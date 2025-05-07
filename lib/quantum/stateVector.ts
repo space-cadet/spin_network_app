@@ -3,6 +3,7 @@
  */
 
 import { Complex, StateVector as IStateVector } from './types';
+import * as math from 'mathjs';
 import { 
   createComplex, 
   addComplex, 
@@ -40,7 +41,7 @@ export class StateVector implements IStateVector {
    */
   setState(index: number, value: Complex): void {
     validateIdx(index, this.dimension);
-    this.amplitudes[index] = { ...value };
+    this.amplitudes[index] = value.clone();
   }
 
   /**
@@ -48,7 +49,7 @@ export class StateVector implements IStateVector {
    */
   getState(index: number): Complex {
     validateIdx(index, this.dimension);
-    return { ...this.amplitudes[index] };
+    return this.amplitudes[index].clone();
   }
 
   /**
@@ -81,14 +82,13 @@ export class StateVector implements IStateVector {
    */
   normalize(): StateVector {
     const currentNorm = this.norm();
-    if (isZeroComplex({ re: currentNorm, im: 0 })) {
+    if (currentNorm < 1e-10) {
       throw new Error('Cannot normalize zero state vector');
     }
 
-    const normalizedAmplitudes = this.amplitudes.map(amp => ({
-      re: amp.re / currentNorm,
-      im: amp.im / currentNorm
-    }));
+    const normalizedAmplitudes = this.amplitudes.map(amp => 
+      math.divide(amp, currentNorm) as Complex
+    );
 
     return new StateVector(this.dimension, normalizedAmplitudes, this.basis);
   }
@@ -122,9 +122,7 @@ export class StateVector implements IStateVector {
    * Returns true if state is zero vector
    */
   isZero(tolerance: number = 1e-10): boolean {
-    return this.amplitudes.every(amp => 
-      Math.abs(amp.re) < tolerance && Math.abs(amp.im) < tolerance
-    );
+    return this.amplitudes.every(amp => math.abs(amp) < tolerance);
   }
 
   /**
@@ -140,18 +138,11 @@ export class StateVector implements IStateVector {
   toString(): string {
     const components = this.amplitudes
       .map((amp, i) => {
-        const { re, im } = amp;
-        if (Math.abs(re) < 1e-10 && Math.abs(im) < 1e-10) {
+        if (math.abs(amp) < 1e-10) {
           return '';
         }
-        const sign = i === 0 ? '' : (re >= 0 || im >= 0 ? ' + ' : ' - ');
-        if (Math.abs(im) < 1e-10) {
-          return `${sign}${Math.abs(re)}|${i}⟩`;
-        }
-        if (Math.abs(re) < 1e-10) {
-          return `${sign}${Math.abs(im)}i|${i}⟩`;
-        }
-        return `${sign}(${re}${im >= 0 ? '+' : '-'}${Math.abs(im)}i)|${i}⟩`;
+        const sign = i === 0 ? '' : ' + ';
+        return `${sign}${amp.toString()}|${i}⟩`;
       })
       .filter(s => s !== '')
       .join('');

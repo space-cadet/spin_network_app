@@ -2,10 +2,10 @@
 *Last Updated: 2025-05-05 22:00 IST*
 
 ## Tasks Overview
-- **Active Tasks:** 22
+- **Active Tasks:** 23
 - **Paused Tasks:** 4  
 - **Completed Tasks:** 28
-- **Latest Task ID:** T58
+- **Latest Task ID:** T59
 
 ## Task Registry
 *Last Updated: 2025-05-06 15:30 IST*
@@ -13,6 +13,7 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
+| T59 | Math.js Complex Number Migration | 🔄 | HIGH | 2025-05-08 | [tasks/T59.md] | Core migration complete, module updates in progress |
 | T58 | Extract Reusable React Template | 🔄 | HIGH | 2025-05-06 | [tasks/T58.md] | Core components extracted, example app created, planning state management |
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
@@ -204,6 +205,7 @@
 | T38 | Implement Intertwiner Tensor Initialization | 2025-04-24 | T36, T20 |
 
 ## Dependencies
+- **T59** → Depends on → **T56**
 - **T57** → Depends on → **T56**
 - **T56** → Depends on → **T55**
 - **T55** → Depends on → **T36, T53, T56**

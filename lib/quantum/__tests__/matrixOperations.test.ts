@@ -14,6 +14,17 @@ import {
 } from '../matrixOperations';
 import { createComplex } from '../complex';
 import { Complex } from '../types';
+import * as math from 'mathjs';
+
+// Helper to compare complex numbers accounting for -0/0 differences
+function complexEqual(a: Complex, b: Complex, tolerance: number = 1e-10): boolean {
+  // For zero imaginary parts, treat 0 and -0 as equal
+  const imEqual = Math.abs(a.im) < tolerance && Math.abs(b.im) < tolerance
+    ? true
+    : Math.abs(a.im - b.im) < tolerance;
+  
+  return Math.abs(a.re - b.re) < tolerance && imEqual;
+}
 
 // Helper to create test matrices
 function createIdentityMatrix(size: number): Complex[][] {
@@ -53,8 +64,8 @@ describe('Matrix Operations', () => {
       expect(result[0][0]).toEqual(createComplex(0, 0));
       // For [0][1]: (0+i)(0+i) + (1+0i)(1+0i) = -1 + 1 = 0
       expect(result[0][1]).toEqual(createComplex(0, 0));
-      // For [1][0]: (1+0i)(1+0i) + (0-i)(0-i) = 1 - (-1) = 2
-      expect(result[1][0]).toEqual(createComplex(2, 0));
+      // For [1][0]: (1+0i)(1+0i) + (0-i)(0-i) = 1 + (-1) = 0
+      expect(result[1][0]).toEqual(createComplex(0, 0));
       // For [1][1]: (1+0i)(0+i) + (0-i)(1+0i) = i + (-i) = 0 
       expect(result[1][1]).toEqual(createComplex(0, 0));
     });
@@ -128,8 +139,8 @@ describe('Matrix Operations', () => {
       ];
       
       const result = adjoint(matrix);
-      expect(result[0][1]).toEqual(createComplex(3, 0));
-      expect(result[1][0]).toEqual(createComplex(2, 0));
+      expect(complexEqual(result[0][1], createComplex(3, 0))).toBe(true);
+      expect(complexEqual(result[1][0], createComplex(2, 0))).toBe(true);
     });
 
     it('computes adjoint of complex matrix', () => {
@@ -139,10 +150,10 @@ describe('Matrix Operations', () => {
       ];
       
       const result = adjoint(matrix);
-      expect(result[0][0]).toEqual(createComplex(1, -1));
-      expect(result[0][1]).toEqual(createComplex(1, 0));
-      expect(result[1][0]).toEqual(createComplex(0, -1));
-      expect(result[1][1]).toEqual(createComplex(1, 1));
+      expect(complexEqual(result[0][0], createComplex(1, -1))).toBe(true);
+      expect(complexEqual(result[0][1], createComplex(1, 0))).toBe(true);
+      expect(complexEqual(result[1][0], createComplex(0, -1))).toBe(true);
+      expect(complexEqual(result[1][1], createComplex(1, 1))).toBe(true);
     });
 
     it('throws error for invalid matrix', () => {

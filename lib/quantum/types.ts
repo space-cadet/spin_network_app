@@ -2,13 +2,12 @@
  * Core type definitions for quantum operations
  */
 
+import { Complex as MathJsComplex } from 'mathjs';
+
 /**
- * Represents a complex number
+ * Complex number type using math.js implementation
  */
-export interface Complex {
-  re: number;  // Real part
-  im: number;  // Imaginary part
-}
+export type Complex = MathJsComplex;
 
 /**
  * Represents a quantum state vector

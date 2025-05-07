@@ -1,5 +1,16 @@
-# Edit History
-*Last Updated: 2025-05-07 18:30 IST*
+# Edit History  
+*Last Updated: 2025-05-08 16:45 IST*
+
+## 2025-05-08
+### [16:45] - T59: Math.js Complex Number Migration
+- Modified `lib/quantum/types.ts` - Updated Complex type to use math.js
+- Modified `lib/quantum/complex.ts` - Created math.js compatibility layer
+- Modified `lib/quantum/matrixOperations.ts` - Updated to use math.js operations
+- Modified `lib/quantum/operator.ts` - Updated matrix operations to use math.js
+- Modified `lib/quantum/__tests__/operator.test.ts` - Fixed Hermitian matrix test
+- Created `/memory-bank/tasks/T59.md` - Added new task for math.js migration
+- Modified `/memory-bank/tasks.md` - Added T59 to task registry
+
 
 ## 2025-05-07
 ### [18:30] - T55: Implemented Quantum Foundational Tools
