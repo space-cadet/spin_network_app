@@ -1,5 +1,22 @@
 # Edit History
-*Last Updated: 2025-05-06 20:30 IST*
+*Last Updated: 2025-05-07 17:30 IST*
+
+## 2025-05-07
+### [17:30] - T58: Layout Components Implementation
+Created:
+- `/packages/template-core/src/components/layout/Container.tsx` - Container component
+- `/packages/template-core/src/components/layout/Grid.tsx` - Grid layout component
+- `/packages/template-core/src/components/layout/Flex.tsx` - Flexbox component
+- `/packages/template-core/src/components/layout/index.ts` - Layout exports
+
+Added tests:
+- `/packages/template-core/src/components/layout/__tests__/Container.test.tsx`
+- `/packages/template-core/src/components/layout/__tests__/Grid.test.tsx`
+- `/packages/template-core/src/components/layout/__tests__/Flex.test.tsx`
+
+Modified:
+- `/memory-bank/implementation-details/standalone-react-app/05-progress-update.md` - Added implementation notes
+- `/memory-bank/tasks/T58.md` - Updated progress and next steps
 
 ## 2025-05-06
 ### 20:30 - T58: Implemented State Management System

@@ -1,5 +1,27 @@
 # Spin Network Visualization and Diffusion App - Changelog
 
+## [2025-05-07]
+
+### Added
+- Created base layout components for template-core - T58
+  - Container component for content wrapping
+  - Grid component with tailwind-based grid system
+  - Flex component for flexbox layouts
+  - Comprehensive test coverage for all components
+
+### Enhanced
+- Extended Redux integration in template-core - T58
+  - Added UI and settings slices
+  - Implemented state persistence
+  - Added custom hooks
+  - Added comprehensive test coverage
+  - Created usage examples
+
+### Documentation
+- Added progress update document (05-progress-update.md)
+- Updated task documentation with latest progress
+- Updated implementation checklist
+
 This document tracks key decisions, major milestones, and pivots in the project's development.
 
 ## [2025-05-03]

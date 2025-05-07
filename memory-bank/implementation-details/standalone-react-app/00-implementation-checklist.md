@@ -49,13 +49,14 @@
 - [ ] Test package linking
 
 ## Phase 2: Core Implementation
-### Layout Components 🔄
+### Layout Components ✅
 - [x] Create component directories
 - [x] Extract AppLayout component
 - [x] Extract ResizablePanel component
+- [x] Create core layout primitives (Container, Grid, Flex)
 - [x] Set up component exports
 - [x] Add example application
-- [ ] Add tests
+- [x] Add comprehensive tests
 
 ### State Management & Persistence ✅
 - [x] Implement URL state management
