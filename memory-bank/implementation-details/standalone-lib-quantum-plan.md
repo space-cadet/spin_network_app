@@ -44,13 +44,21 @@ This plan outlines extensions to enhance the existing quantum features of the st
 3. **Density Matrix Operations** (PARTIAL)
    - Partially implemented in densityMatrix.ts
    - Missing quantum channel implementations
-   - Needs entanglement measure implementations
+   - Entanglement measures implemented in information.ts ✓
    - Requires partial trace algorithm
 
-4. **Mathematical Utilities** (PARTIAL)
-   - Incomplete implementations in utils/math.ts
+4. **Mathematical Utilities** (IMPROVED)
+   - Operator algebra implemented in operatorAlgebra.ts ✓
+   - Matrix functions implemented in matrixFunctions.ts ✓
+   - Quantum information tools implemented in information.ts ✓
    - Needs proper SVD implementation
    - Requires tensor network operations
+
+5. **Foundational Quantum Tools** (IMPLEMENTED ✓)
+   - Commutator and anti-commutator operations implemented ✓
+   - Operator algebra utilities (uncertainty relations, etc.) implemented ✓
+   - Schmidt decomposition implemented ✓
+   - Advanced matrix function calculations implemented ✓
 
 The proposed extensions will build upon these foundations to provide a more complete quantum simulation toolkit while maintaining the library's simplicity and efficiency.
 
@@ -387,6 +395,71 @@ export class QuantumCircuit {
 - Support for quantum algorithms
 - Foundation for future quantum computation features
 
+## Phase 3.3: Missing Foundational Quantum Tools (NEW)
+**Priority: HIGH**
+**Current Status**: Not implemented
+
+Several fundamental quantum mechanical operations and tools are missing from the current implementation but are essential for comprehensive quantum simulations.
+
+### 3.3.1 Operator Algebra Extensions
+**Required Features**:
+- Commutator operations [A,B] = AB - BA
+- Anti-commutator operations {A,B} = AB + BA
+- Lie algebraic structures and operations
+- Operator exponential improvements
+- Baker-Campbell-Hausdorff formula implementation
+
+**Implementation:**
+```typescript
+// Add to quantum/operatorAlgebra.ts
+export function commutator(A: Operator, B: Operator): Operator;
+export function antiCommutator(A: Operator, B: Operator): Operator;
+export function nestedCommutator(ops: Operator[], indices: number[][]): Operator;
+export function lieDerivative(A: Operator, B: Operator): Operator;
+export function BCHFormula(A: Operator, B: Operator, order: number): Operator;
+```
+
+### 3.3.2 Quantum Information Extensions
+**Required Features**:
+- Schmidt decomposition for bipartite systems
+- Advanced entropy calculations
+- Quantum state distance measures
+- Fidelity measures between states
+
+**Implementation:**
+```typescript
+// Add to quantum/information.ts
+export function schmidtDecomposition(state: StateVector, dimA: number, dimB: number): {
+  values: number[],
+  statesA: StateVector[],
+  statesB: StateVector[]
+};
+
+export function traceDistance(A: Operator, B: Operator): number;
+export function fidelity(stateA: StateVector, stateB: StateVector): number;
+export function quantumRelativeEntropy(rho: DensityMatrix, sigma: DensityMatrix): number;
+```
+
+### 3.3.3 Advanced Mathematical Utilities
+**Required Features**:
+- Additional numerical stability improvements
+- Support for sparse matrices and operators
+- Improved eigenvalue/eigenvector calculations
+- Matrix function calculations (sqrt, log, etc.)
+
+**Implementation:**
+```typescript
+// Add to quantum/matrixFunctions.ts
+export function matrixFunction(
+  matrix: Complex[][],
+  func: (x: Complex) => Complex
+): Complex[][];
+
+export function matrixLogarithm(matrix: Complex[][]): Complex[][];
+export function matrixSquareRoot(matrix: Complex[][]): Complex[][];
+export function matrixPower(matrix: Complex[][], power: number): Complex[][];
+```
+
 ## Phase 4: Testing and Validation
 
 ### 4.1 Test Suite
@@ -444,25 +517,31 @@ export class QuantumCircuit {
 
 ## Updated Implementation Timeline (May 2025)
 
-1. **Weeks 1-2: Circuit Implementation** (HIGH PRIORITY)
+1. **Weeks 1-2: Foundational Tools** (COMPLETED ✓)
+   - Implement commutator operations ✓
+   - Add anti-commutator operations ✓
+   - Implement Schmidt decomposition ✓
+   - Create quantum information extensions ✓
+   - Add matrix function calculations ✓
+
+2. **Weeks 3-4: Circuit Implementation** (HIGH PRIORITY)
    - Complete circuit.ts implementation
    - Add circuit visualization
    - Implement circuit execution
    - Add basic examples
 
-2. **Weeks 3-4: Quantum Channels** (HIGH PRIORITY)
+3. **Weeks 5-6: Quantum Channels** (HIGH PRIORITY)
    - Complete quantum channel implementations
    - Add common channel types
-   - Implement entanglement measures
    - Add decoherence examples
 
-3. **Weeks 5-6: Measurement System** (HIGH PRIORITY)
+4. **Weeks 7-8: Measurement System** (HIGH PRIORITY)
    - Complete createMeasurementOperator()
    - Add POVM measurements
    - Implement weak measurements
    - Add measurement examples
 
-4. **Weeks 7-8: Documentation and Testing**
+5. **Weeks 9-10: Documentation and Testing**
    - Complete test coverage
    - Add comprehensive examples
    - Create tutorial documentation
@@ -486,8 +565,11 @@ lib/quantum/
 ├── stateVector.ts          # Core state vector operations
 ├── states.ts               # Common quantum state preparation
 ├── operator.ts             # Operator interface & base classes
+├── operatorAlgebra.ts      # Extended operator algebra (commutators, etc.)
 ├── hamiltonian.ts          # Hamiltonian implementation
 ├── matrixOperations.ts     # Matrix operations
+├── matrixFunctions.ts      # Advanced matrix functions (sqrt, log, etc.)
+├── information.ts          # Quantum information tools (Schmidt, entropy)
 ├── measurement.ts          # Measurement operators
 ├── gates.ts               # Quantum gates
 ├── circuit.ts             # Quantum circuit
@@ -678,7 +760,15 @@ export class QuantumCircuit {
    - State tensor products ✓
    - Common quantum states (Bell, GHZ, W states) ✓
    
-2. Advanced Quantum Operations (MOSTLY COMPLETE)
+2. Foundational Quantum Tools (COMPLETE ✓)
+   - Commutator operations [A,B] = AB - BA ✓
+   - Anti-commutator operations {A,B} = AB + BA ✓
+   - Schmidt decomposition for entanglement analysis ✓
+   - Advanced operator algebra operations ✓
+   - Matrix function calculations (sqrt, log, power) ✓
+   - Uncertainty relations and operator commutation ✓
+   
+3. Advanced Quantum Operations (MOSTLY COMPLETE)
    - Time evolution ✓
    - State collapse ✓
    - Measurement simulation (PARTIAL)
@@ -686,20 +776,24 @@ export class QuantumCircuit {
      - POVM measurements (TODO)
      - Weak measurements (TODO)
    
-3. Quantum Computation Support (PARTIAL)
+4. Quantum Computation Support (PARTIAL)
    - Quantum circuit framework (NOT STARTED)
    - Multi-qubit operations ✓
    - State tomography (PARTIAL)
 
-4. Mixed State and Channel Operations (PARTIAL)
-   - Density matrix manipulations (PARTIAL)
+5. Mixed State and Channel Operations (IMPROVED)
+   - Density matrix manipulations (IMPROVED)
      - Basic operations ✓
      - Partial trace (TODO)
-     - von Neumann entropy (TODO)
+     - von Neumann entropy implemented ✓
    - Quantum channel simulations (NOT STARTED)
-   - Entanglement measures (NOT STARTED)
+   - Entanglement measures (COMPLETE ✓)
+     - Trace fidelity ✓
+     - Concurrence ✓
+     - Negativity ✓
+     - Quantum discord ✓
 
-5. Complete Test Coverage (PARTIAL)
+6. Complete Test Coverage (PARTIAL)
    - State vector operations ✓
    - Operator algebra ✓
    - Measurement operations (PARTIAL)

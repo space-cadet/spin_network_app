@@ -17,9 +17,22 @@ export * from './states';
 export * from './operator';
 export * from './gates';
 
+// Fundamental operator algebra
+export * from './operatorAlgebra';
+
+// Matrix operations and functions
+export * from './matrixOperations';
+export * from './matrixFunctions';
+
+// Quantum information theory tools
+export * from './information';
+
 // Measurement and mixed states
 export * from './measurement';
 export * from './densityMatrix';
+
+// Hamiltonian evolution
+export * from './hamiltonian';
 
 // Export individual operators
 export {
@@ -38,3 +51,20 @@ export {
     createGHZState,
     createWState
 } from './states';
+
+// Export fundamental operator algebra operations
+export {
+    commutator,
+    antiCommutator,
+    operatorsCommute,
+    uncertaintyProduct
+} from './operatorAlgebra';
+
+// Export quantum information tools
+export {
+    schmidtDecomposition,
+    fidelity,
+    traceFidelity,
+    vonNeumannEntropy,
+    entanglementEntropy
+} from './information';

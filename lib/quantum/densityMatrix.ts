@@ -357,37 +357,5 @@ function createZeroOperator(dimension: number): Operator {
   return new MatrixOperator(matrix);
 }
 
-// Entanglement measures
-
-/**
- * Calculates trace fidelity between two density matrices
- */
-export function traceFidelity(rho: DensityMatrix, sigma: DensityMatrix): number {
-  // TODO: Implement trace fidelity calculation
-  // F(ρ,σ) = Tr(√(√ρσ√ρ))
-  return 0;
-}
-
-/**
- * Calculates concurrence for 2-qubit density matrix
- */
-export function concurrence(rho: DensityMatrix): number {
-  if (rho.dimension !== 4) {
-    throw new Error('Concurrence only defined for 2-qubit states');
-  }
-
-  // TODO: Implement concurrence calculation
-  return 0;
-}
-
-/**
- * Calculates negativity for bipartite system
- */
-export function negativity(rho: DensityMatrix, subsystemDimensions: number[]): number {
-  if (subsystemDimensions.length !== 2) {
-    throw new Error('Negativity requires bipartite system');
-  }
-
-  // TODO: Implement negativity calculation
-  return 0;
-}
+// Note: Entanglement measures have been moved to information.ts
+// This allows better organization of quantum information metrics
