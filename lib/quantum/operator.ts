@@ -9,11 +9,23 @@ import { eigenDecomposition } from './matrixOperations';
 import * as math from 'mathjs';
 
 // Define ComplexMatrix type using math.js Complex type
-type ComplexMatrix = math.Complex[][];
+type ComplexMatrix = Complex[][];
+
+// Ensure proper type compatibility with math.js matrix operations
+type MathMatrix = math.Matrix;
 
 // Helper function to ensure math.js output is converted to Complex type
 function ensureComplex(value: math.MathType): Complex {
-  return value as unknown as Complex;
+  if (typeof value === 'number') {
+    return math.complex(value, 0);
+  }
+  if (math.typeOf(value) === 'Complex') {
+    return value as Complex;
+  }
+  if (typeof value === 'object' && value !== null && 're' in value && 'im' in value) {
+    return math.complex((value as any).re, (value as any).im);
+  }
+  throw new Error(`Cannot convert ${math.typeOf(value)} to Complex`);
 }
 
 /** 
@@ -133,16 +145,29 @@ export class MatrixOperator implements Operator {
   compose(other: Operator): Operator {
     validateMatchDims(other.dimension, this.dimension);
 
-    // Convert other operator to matrix form
+    // Get matrix representation of the other operator
     const otherMatrix = other.toMatrix();
     
-    // Convert to math.js matrices for multiplication
-    const matA = math.matrix(this.matrix);
-    const matB = math.matrix(otherMatrix);
-    
-    // Perform matrix multiplication
-    const resultMat = math.multiply(matA, matB);
-    const resultMatrix = resultMat.toArray() as ComplexMatrix;
+    // Initialize result matrix with zeros
+    const resultMatrix = Array(this.dimension).fill(null)
+      .map(() => Array(this.dimension).fill(null)
+        .map(() => math.complex(0, 0)));
+
+    // Manual matrix multiplication with explicit complex number handling
+    for (let i = 0; i < this.dimension; i++) {
+      for (let j = 0; j < this.dimension; j++) {
+        let sum = math.complex(0, 0);
+        for (let k = 0; k < this.dimension; k++) {
+          // Ensure proper complex multiplication
+          const term = math.multiply(
+            math.complex(this.matrix[i][k].re, this.matrix[i][k].im),
+            math.complex(otherMatrix[k][j].re, otherMatrix[k][j].im)
+          );
+          sum = math.add(sum, term) as Complex;
+        }
+        resultMatrix[i][j] = sum;
+      }
+    }
 
     // Determine resulting operator type with proper inheritance
     let resultType: OperatorType = 'general';
@@ -163,22 +188,27 @@ export class MatrixOperator implements Operator {
    * Returns the adjoint (Hermitian conjugate) of the operator
    */
   adjoint(): Operator {
+    // Initialize adjoint matrix with proper dimensions
     const adjointMatrix = Array(this.dimension).fill(null)
       .map(() => Array(this.dimension).fill(null)
-        .map(() => math.complex()));
+        .map(() => math.complex(0, 0)));
 
+    // Calculate adjoint elements with proper complex conjugate
     for (let i = 0; i < this.dimension; i++) {
       for (let j = 0; j < this.dimension; j++) {
-        adjointMatrix[i][j] = math.conj(this.matrix[j][i]) as Complex;
+        // Take complex conjugate and transpose
+        const elem = this.matrix[j][i];
+        adjointMatrix[i][j] = math.complex(elem.re, -elem.im);
       }
     }
 
-    // Create adjoint without type validation to prevent recursion
+    // Determine adjoint type
     let adjointType: OperatorType = 'general';
     if (this.type === 'unitary') adjointType = 'unitary';
     if (this.type === 'hermitian') adjointType = 'hermitian';
     if (this.type === 'projection') adjointType = 'projection';
 
+    // Create adjoint without validation to prevent recursion
     return new MatrixOperator(adjointMatrix, adjointType, false);
   }
 
@@ -327,11 +357,13 @@ export class MatrixOperator implements Operator {
     validateMatchDims(other.dimension, this.dimension);
 
     const otherMatrix = other.toMatrix();
-    const matA = math.matrix(this.matrix);
-    const matB = math.matrix(otherMatrix);
-    
-    const resultMat = math.add(matA, matB);
-    const sumMatrix = resultMat.toArray() as ComplexMatrix;
+    const sumMatrix = Array(this.dimension).fill(null)
+      .map((_, i) => Array(this.dimension).fill(null)
+        .map((_, j) => math.add(
+          math.complex(this.matrix[i][j].re, this.matrix[i][j].im),
+          math.complex(otherMatrix[i][j].re, otherMatrix[i][j].im)
+        ) as Complex)
+      );
 
     return new MatrixOperator(sumMatrix);
   }
@@ -400,10 +432,14 @@ export class MatrixOperator implements Operator {
   eigenDecompose(): { values: Complex[]; vectors: MatrixOperator[] } {
     const { values, vectors } = eigenDecomposition(this.matrix);
     
-    // Create operators from eigenvectors, ensuring proper cloning of complex numbers
+    // Create operators from eigenvectors
     const vectorOperators = vectors.map(v => {
-      const clonedVector = v.map(elem => math.clone(elem));
-      return new MatrixOperator([clonedVector], 'general');
+      // Create full matrix for the eigenvector operator
+      const matrix: ComplexMatrix = Array(this.dimension).fill(null)
+        .map((_, i) => Array(this.dimension).fill(null)
+          .map((_, j) => i === j ? math.clone(v[i]) : math.complex(0, 0)));
+      
+      return new MatrixOperator(matrix, 'general');
     });
     
     return {

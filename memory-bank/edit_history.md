@@ -2,25 +2,29 @@
 *Last Updated: 2025-05-08 16:45 IST*
 
 ## 2025-05-08
-### [17:30] - T60: Complete Math.js Direct Integration
-- Modified all quantum module files to use math.js directly:
-  - Updated types.ts - Direct math.js Complex type export
-  - Updated matrixOperations.ts - Direct math.js operations
-  - Updated operator.ts - Removed complex.ts dependency
-  - Updated stateVector.ts - Direct math.js complex operations
-  - Updated information.ts - Removed complex.ts imports
-  - Updated index.ts - Removed complex.ts exports
-  - Updated matrixFunctions.ts - Direct math.js usage
-  - Updated gates.ts - Direct math.js complex numbers
-  - Updated oscillator.ts - Direct math.js methods
-  - Updated measurement.ts - Removed complex.ts dependency
-  - Updated hilbertSpace.ts - Direct math.js usage
-  - Updated hamiltonian.ts - Removed complex.ts imports
-  - Updated densityMatrix.ts - Direct math.js operations
-  - Updated states.ts - Direct math.js complex numbers
-- Removed complex.ts - Functionality replaced by direct math.js usage
-- Created `/memory-bank/tasks/T60.md` - New task for complete math.js integration
-- Modified `/memory-bank/tasks.md` - Added T60 and updated T59 status
+### [18:30] - T60: Math.js Core Operations Fix
+- Modified `lib/quantum/matrixOperations.ts` - Fixed eigendecomposition DenseMatrix handling
+- Modified `lib/quantum/matrixOperations.ts` - Updated unitary validation for complex values
+- Modified `lib/quantum/__tests__/matrixOperations.test.ts` - Added eigendecomposition tests
+
+### [17:30] - T60: Math.js Integration Implementation
+- Modified `lib/quantum/types.ts` - Added math.js Complex type exports
+- Modified `lib/quantum/matrixOperations.ts` - Converted to math.js operations
+- Modified `lib/quantum/operator.ts` - Removed complex.ts dependency
+- Modified `lib/quantum/stateVector.ts` - Converted to math.js operations
+- Modified `lib/quantum/information.ts` - Converted to math.js operations
+- Modified `lib/quantum/index.ts` - Updated exports
+- Modified `lib/quantum/matrixFunctions.ts` - Converted to math.js operations
+- Modified `lib/quantum/gates.ts` - Converted to math.js operations
+- Modified `lib/quantum/oscillator.ts` - Converted to math.js operations
+- Modified `lib/quantum/measurement.ts` - Converted to math.js operations
+- Modified `lib/quantum/hilbertSpace.ts` - Converted to math.js operations
+- Modified `lib/quantum/hamiltonian.ts` - Converted to math.js operations
+- Modified `lib/quantum/densityMatrix.ts` - Converted to math.js operations
+- Modified `lib/quantum/states.ts` - Converted to math.js operations
+- Removed `lib/quantum/complex.ts` - Removed deprecated module
+- Modified `/memory-bank/tasks/T60.md` - Created new task
+- Modified `/memory-bank/tasks.md` - Updated task status
 
 ### [16:45] - T59: Math.js Complex Number Migration (Superseded by T60)
 - Initial work on math.js migration, superseded by more comprehensive T60 approach

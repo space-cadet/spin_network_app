@@ -423,7 +423,7 @@ export function concurrence(rho: DensityMatrix): number {
         for (let j2 = 0; j2 < 2; j2++) {
           const i = i1 * 2 + i2;
           const j = j1 * 2 + j2;
-          sigmaYY[i][j] = multiplyComplex(sigmaY[i1][j1], sigmaY[i2][j2]);
+          sigmaYY[i][j] = math.multiply(sigmaY[i1][j1], sigmaY[i2][j2]) as Complex;
         }
       }
     }

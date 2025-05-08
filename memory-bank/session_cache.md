@@ -2,9 +2,9 @@
 *Last Updated: 2025-05-08 16:45 IST*
 
 ## Overview
-*Last Updated: 2025-05-08 17:30 IST*
+*Last Updated: 2025-05-08 18:30 IST*
 
-Session completed comprehensive update of quantum library to use math.js directly, removing complex.ts compatibility layer. Updated all quantum modules to use math.js complex number operations directly, improving maintainability and numerical stability.
+Session completed fixes for core math.js operations in matrix handling. Fixed eigendecomposition to properly handle DenseMatrix return type from math.eigs() and corrected unitary validation to properly check complex absolute values. All related tests now passing.
 
 - Active Tasks: 22
 - Paused Tasks: 4
@@ -14,8 +14,8 @@ Session completed comprehensive update of quantum library to use math.js directl
 
 ### T60: Remove complex.ts and Direct Math.js Integration
 **Status**: 🔄 IN PROGRESS **Priority**: HIGH
-**Started**: 2025-05-08 **Last**: 2025-05-08 17:30 IST
-**Context**: Complete removal of complex.ts and direct integration of math.js
+**Started**: 2025-05-08 **Last**: 2025-05-08 18:30 IST
+**Context**: Complete removal of complex.ts and direct integration of math.js. Fixed core matrix operation issues.
 **Files**:
 - `lib/quantum/types.ts` - Updated to use math.js Complex type directly
 - `lib/quantum/matrixOperations.ts` - Direct math.js usage

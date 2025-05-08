@@ -47,7 +47,30 @@ export class ProjectionOperator implements Operator {
     }
 
     compose(other: Operator): Operator {
-        return this._operator.compose(other);
+        // Manually implement composition with proper complex number handling
+        const otherMatrix = other.toMatrix();
+        const thisMatrix = this.toMatrix();
+        const dim = this.dimension;
+
+        // Initialize result matrix
+        const resultMatrix = Array(dim).fill(null)
+            .map(() => Array(dim).fill(null)
+                .map(() => math.complex(0, 0)));
+
+        // Calculate matrix product
+        for (let i = 0; i < dim; i++) {
+            for (let j = 0; j < dim; j++) {
+                for (let k = 0; k < dim; k++) {
+                    const term = math.multiply(
+                        math.complex(thisMatrix[i][k].re, thisMatrix[i][k].im),
+                        math.complex(otherMatrix[k][j].re, otherMatrix[k][j].im)
+                    );
+                    resultMatrix[i][j] = math.add(resultMatrix[i][j], term) as Complex;
+                }
+            }
+        }
+
+        return new MatrixOperator(resultMatrix, 'general');
     }
 
     adjoint(): Operator {

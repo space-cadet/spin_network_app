@@ -53,12 +53,46 @@ export function commutator(A: Operator, B: Operator): Operator {
     throw new Error('Operators must have the same dimension for commutator');
   }
   
-  // Calculate AB and BA
-  const AB = A.compose(B);
-  const BA = B.compose(A);
-  
-  // Return AB - BA
-  return subtractOperators(AB, BA);
+  // Manually calculate the commutator with proper complex number handling
+  const matrixA = A.toMatrix();
+  const matrixB = B.toMatrix();
+  const dim = A.dimension;
+
+  // Initialize result matrix
+  const resultMatrix = Array(dim).fill(null)
+    .map(() => Array(dim).fill(null)
+      .map(() => math.complex(0, 0)));
+
+  // Calculate AB - BA directly with proper complex number handling
+  for (let i = 0; i < dim; i++) {
+    for (let j = 0; j < dim; j++) {
+      let ab = math.complex(0, 0);
+      let ba = math.complex(0, 0);
+
+      for (let k = 0; k < dim; k++) {
+        // Calculate AB term
+        ab = math.add(ab, 
+          math.multiply(
+            math.complex(matrixA[i][k].re, matrixA[i][k].im),
+            math.complex(matrixB[k][j].re, matrixB[k][j].im)
+          )
+        ) as Complex;
+
+        // Calculate BA term
+        ba = math.add(ba,
+          math.multiply(
+            math.complex(matrixB[i][k].re, matrixB[i][k].im),
+            math.complex(matrixA[k][j].re, matrixA[k][j].im)
+          )
+        ) as Complex;
+      }
+
+      // AB - BA for this element
+      resultMatrix[i][j] = math.subtract(ab, ba) as Complex;
+    }
+  }
+
+  return new MatrixOperator(resultMatrix);
 }
 
 /**
@@ -75,12 +109,46 @@ export function antiCommutator(A: Operator, B: Operator): Operator {
     throw new Error('Operators must have the same dimension for anti-commutator');
   }
   
-  // Calculate AB and BA
-  const AB = A.compose(B);
-  const BA = B.compose(A);
-  
-  // Return AB + BA
-  return addOperators(AB, BA);
+  // Manually calculate anti-commutator with proper complex number handling
+  const matrixA = A.toMatrix();
+  const matrixB = B.toMatrix();
+  const dim = A.dimension;
+
+  // Initialize result matrix
+  const resultMatrix = Array(dim).fill(null)
+    .map(() => Array(dim).fill(null)
+      .map(() => math.complex(0, 0)));
+
+  // Calculate AB + BA directly with proper complex number handling
+  for (let i = 0; i < dim; i++) {
+    for (let j = 0; j < dim; j++) {
+      let ab = math.complex(0, 0);
+      let ba = math.complex(0, 0);
+
+      for (let k = 0; k < dim; k++) {
+        // Calculate AB term
+        ab = math.add(ab, 
+          math.multiply(
+            math.complex(matrixA[i][k].re, matrixA[i][k].im),
+            math.complex(matrixB[k][j].re, matrixB[k][j].im)
+          )
+        ) as Complex;
+
+        // Calculate BA term
+        ba = math.add(ba,
+          math.multiply(
+            math.complex(matrixB[i][k].re, matrixB[i][k].im),
+            math.complex(matrixA[k][j].re, matrixA[k][j].im)
+          )
+        ) as Complex;
+      }
+
+      // AB + BA for this element
+      resultMatrix[i][j] = math.add(ab, ba) as Complex;
+    }
+  }
+
+  return new MatrixOperator(resultMatrix);
 }
 
 /**

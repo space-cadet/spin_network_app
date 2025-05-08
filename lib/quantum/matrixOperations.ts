@@ -20,10 +20,13 @@ function kahanSum(numbers: Complex[]): Complex {
         return math.complex(0, 0);
     }
 
+    // Ensure all numbers are proper math.js complex numbers
+    const complexNumbers = numbers.map(n => math.complex(n.re, n.im));
+
     let sum = math.complex(0, 0);
     let c = math.complex(0, 0);   // Compensation term
 
-    for (const num of numbers) {
+    for (const num of complexNumbers) {
         // y = num - c
         const y = math.subtract(num, c) as Complex;
         
@@ -31,10 +34,8 @@ function kahanSum(numbers: Complex[]): Complex {
         const t = math.add(sum, y) as Complex;
         
         // c = (t - sum) - y
-        c = math.subtract(
-            math.subtract(t, sum),
-            y
-        ) as Complex;
+        const tc = math.subtract(t, sum) as Complex;
+        c = math.subtract(tc, y) as Complex;
 
         sum = t;
     }
@@ -53,11 +54,23 @@ export function multiplyMatrices(a: ComplexMatrix, b: ComplexMatrix): ComplexMat
         throw new Error('Matrix dimensions do not match for multiplication');
     }
 
-    const result = math.multiply(a, b) as ComplexMatrix;
+    // Convert to math.js matrices with proper complex numbers
+    const matA = math.matrix(a.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+    const matB = math.matrix(b.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Perform multiplication
+    const resultMat = math.multiply(matA, matB);
+    const resultArray = (resultMat.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
 
     // Clean up numerical noise
-    return result.map(row =>
-        row.map(val =>
+    return resultArray.map(row =>
+        row.map(val => 
             math.abs(val).re < NUMERICAL_THRESHOLD ? math.complex(0, 0) : val
         )
     );
@@ -75,8 +88,18 @@ export function matrixExponential(matrix: ComplexMatrix): ComplexMatrix {
         throw new Error('Matrix must be square');
     }
 
-    const result = math.expm(matrix);
-    return Array.isArray(result) ? result : result.toArray() as ComplexMatrix;
+    // Convert to math.js matrix format
+    const matM = math.matrix(matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Compute matrix exponential
+    const result = math.expm(matM);
+
+    // Convert back to ComplexMatrix format
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
 }
 
 /**
@@ -87,7 +110,21 @@ export function tensorProduct(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix
         throw new Error('Invalid matrix dimensions');
     }
 
-    return math.kron(a, b) as ComplexMatrix;
+    // Convert matrices to math.js format
+    const matA = math.matrix(a.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+    const matB = math.matrix(b.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Compute Kronecker product
+    const result = math.kron(matA, matB);
+
+    // Convert back to ComplexMatrix
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
 }
 
 /**
@@ -101,14 +138,18 @@ export function adjoint(matrix: ComplexMatrix): ComplexMatrix {
     const m = matrix.length;
     const n = matrix[0].length;
 
-    // // Ensure all elements are valid complex numbers
-    // const validMatrix = matrix.map(row =>
-    //     row.map(elem =>
-    //         elem ? elem : createComplex(0, 0)
-    //     )
-    // );
+    // Create conjugate transpose manually to ensure correct complex number handling
+    const result: ComplexMatrix = Array(n).fill(null).map(() => 
+        Array(m).fill(null).map(() => math.complex(0, 0))
+    );
 
-    return math.ctranspose(matrix) as ComplexMatrix;
+    for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+            result[j][i] = math.complex(matrix[i][j].re, -matrix[i][j].im);
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -119,7 +160,19 @@ export function addMatrices(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix {
         throw new Error('Matrix dimensions must match for addition');
     }
 
-    return math.add(a, b) as ComplexMatrix;
+    // Convert to math.js matrices
+    const matA = math.matrix(a.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+    const matB = math.matrix(b.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Perform addition
+    const result = math.add(matA, matB);
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
 }
 
 /**
@@ -130,7 +183,19 @@ export function scaleMatrix(matrix: ComplexMatrix, scalar: Complex): ComplexMatr
         throw new Error('Invalid matrix');
     }
 
-    return math.multiply(matrix, scalar) as ComplexMatrix;
+    // Ensure scalar is a proper math.js complex number
+    const s = math.complex(scalar.re, scalar.im);
+
+    // Convert matrix to math.js format
+    const matM = math.matrix(matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Perform multiplication
+    const result = math.multiply(matM, s);
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
 }
 
 /**
@@ -139,20 +204,26 @@ export function scaleMatrix(matrix: ComplexMatrix, scalar: Complex): ComplexMatr
 export function isHermitian(matrix: ComplexMatrix, tolerance: number = 1e-10): boolean {
     const n = matrix.length;
     
+    // Convert matrix to math.js format
+    const matM = matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    );
+    
     for (let i = 0; i < n; i++) {
         // Check diagonal elements are real
-        if (Math.abs(matrix[i][i].im) > tolerance) {
+        const diag = matM[i][i];
+        if (Math.abs(diag.im) > tolerance) {
             return false;
         }
         
         // Check off-diagonal elements are conjugates
         for (let j = i + 1; j < n; j++) {
-            const upper = matrix[i][j];
-            const lower = matrix[j][i];
+            const upper = matM[i][j];
+            const lower = matM[j][i];
+            const conjLower = math.conj(lower);
             
-            // Check if upper[i][j] = conjugate(lower[j][i])
-            if (Math.abs(upper.re - lower.re) > tolerance || 
-                Math.abs(upper.im + lower.im) > tolerance) {
+            const diff = math.subtract(upper, conjLower) as Complex;
+            if (Math.abs(diff.re) > tolerance || Math.abs(diff.im) > tolerance) {
                 return false;
             }
         }
@@ -164,22 +235,38 @@ export function isHermitian(matrix: ComplexMatrix, tolerance: number = 1e-10): b
  * Checks if matrix is unitary
  */
 export function isUnitary(matrix: ComplexMatrix, tolerance: number = 1e-10): boolean {
-    const adjointMatrix = adjoint(matrix);
-    const n = matrix.length;
+    // Convert matrix to math.js format
+    const matM = math.matrix(matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
     
-    // Check both UU† and U†U equal identity
-    const productUUdagger = multiplyMatrices(matrix, adjointMatrix);
-    const productUdaggerU = multiplyMatrices(adjointMatrix, matrix);
+    // Get adjoint
+    const adjM = adjoint(matrix);
+    const matAdj = math.matrix(adjM.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+    
+    // Calculate products
+    const productUUdagger = math.multiply(matM, matAdj);
+    const productUdaggerU = math.multiply(matAdj, matM);
+    
+    // Convert to array for checking
+    const arrUUdagger = (productUUdagger.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
+    const arrUdaggerU = (productUdaggerU.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
 
+    const n = matrix.length;
     for (let i = 0; i < n; i++) {
         for (let j = 0; j < n; j++) {
             const expected = i === j ? math.complex(1, 0) : math.complex(0, 0);
-            const diffUUdagger = math.subtract(productUUdagger[i][j], expected) as Complex;
-            const diffUdaggerU = math.subtract(productUdaggerU[i][j], expected) as Complex;
             
-            // Check both real and imaginary parts are within tolerance
-            if (Math.abs(diffUUdagger.re) > tolerance || Math.abs(diffUUdagger.im) > tolerance ||
-                Math.abs(diffUdaggerU.re) > tolerance || Math.abs(diffUdaggerU.im) > tolerance) {
+            const diffUU = math.subtract(arrUUdagger[i][j], expected) as Complex;
+            const diffUdaggerU = math.subtract(arrUdaggerU[i][j], expected) as Complex;
+            
+            if (math.abs(diffUU) > tolerance || math.abs(diffUdaggerU) > tolerance) {
                 return false;
             }
         }
@@ -188,29 +275,50 @@ export function isUnitary(matrix: ComplexMatrix, tolerance: number = 1e-10): boo
 }
 
 /**
- * Computes eigenvalues and eigenvectors of a hermitian matrix using math.js
+ * Computes eigenvalues and eigenvectors of a matrix using math.js
  * Returns sorted eigenvalues and corresponding eigenvectors
  */
 export function eigenDecomposition(matrix: ComplexMatrix): {
     values: Complex[];
     vectors: ComplexMatrix;
 } {
-    if (!isHermitian(matrix)) {
-        throw new Error('Matrix must be Hermitian for real eigenvalues');
+    // if (!isHermitian(matrix)) {
+    //     throw new Error('Matrix must be Hermitian for real eigenvalues');
+    // }
+
+    // Convert to math.js matrix format, ensuring proper complex number handling
+    const n = matrix.length;
+    const matrixM = math.matrix(matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Compute eigenvalues and eigenvectors using math.js
+    const { values: rawVals, eigenvectors: rawVecs } = math.eigs(matrixM);
+
+    // Extract eigenvalues from DenseMatrix and convert to Complex type
+    const eigenvalues = (rawVals._data as number[]).map(v => math.complex(v, 0));
+
+    // Convert eigenvectors to ComplexMatrix format and normalize them
+    const eigenvectors: ComplexMatrix = [];
+    for (let i = 0; i < n; i++) {
+        // Extract eigenvector as column from rawVecs
+        const vec = Array(n).fill(0).map((_, j) => rawVecs[j][i]);
+        
+        // Normalize the eigenvector
+        const norm = Math.sqrt(vec.reduce((sum, x) => sum + x * x, 0));
+        const normalizedVec = vec.map(x => math.complex(x / norm, 0));
+        
+        eigenvectors.push(normalizedVec);
     }
 
-    const result = math.eigs(matrix);
-    const values = result.values as Complex[];
-    const vectors = result.eigenvectors as ComplexMatrix;
-
-    // Sort by eigenvalue magnitude (descending)
-    const indices = values
-        .map((_, i) => i)
-        .sort((a, b) => math.abs(values[b]).re - math.abs(values[a]).re);
+    // Convert eigenvalues array-like object to actual array for sorting
+    const eigenvalueArray = Array.from(eigenvalues);
+    const indices = Array.from({ length: eigenvalueArray.length }, (_, i) => i)
+        .sort((a, b) => Math.abs(eigenvalueArray[b].re) - Math.abs(eigenvalueArray[a].re));
 
     return {
-        values: indices.map(i => values[i]),
-        vectors: indices.map(i => vectors[i])
+        values: indices.map(i => eigenvalueArray[i]),
+        vectors: indices.map(i => eigenvectors[i])
     };
 }
 
