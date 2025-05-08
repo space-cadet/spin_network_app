@@ -5,14 +5,6 @@
 import { Complex, StateVector as IStateVector } from './types';
 import * as math from 'mathjs';
 import { 
-  createComplex, 
-  addComplex, 
-  multiplyComplex, 
-  conjugateComplex,
-  modulusComplex,
-  isZeroComplex 
-} from './complex';
-import { 
   validatePosDim, 
   validateIdx, 
   validateAmps 
@@ -28,7 +20,7 @@ export class StateVector implements IStateVector {
     
     this.dimension = dimension;
     this.amplitudes = amplitudes || Array(dimension).fill(null)
-      .map(() => createComplex(0, 0));
+      .map(() => math.complex(0, 0));
     this.basis = basis;
 
     if (amplitudes) {
@@ -41,7 +33,7 @@ export class StateVector implements IStateVector {
    */
   setState(index: number, value: Complex): void {
     validateIdx(index, this.dimension);
-    this.amplitudes[index] = value.clone();
+    this.amplitudes[index] = value;
   }
 
   /**
@@ -49,7 +41,7 @@ export class StateVector implements IStateVector {
    */
   getState(index: number): Complex {
     validateIdx(index, this.dimension);
-    return this.amplitudes[index].clone();
+    return this.amplitudes[index];
   }
 
   /**
@@ -60,11 +52,11 @@ export class StateVector implements IStateVector {
       throw new Error('States must have same dimension for inner product');
     }
 
-    let result = createComplex(0, 0);
+    let result = math.complex(0, 0);
     for (let i = 0; i < this.dimension; i++) {
-      const conj = conjugateComplex(this.amplitudes[i]);
-      const prod = multiplyComplex(conj, other.amplitudes[i]);
-      result = addComplex(result, prod);
+      const conj = math.conj(this.amplitudes[i]);
+      const prod = math.multiply(conj, other.amplitudes[i]);
+      result = math.add(result, prod);
     }
     return result;
   }
@@ -73,7 +65,7 @@ export class StateVector implements IStateVector {
    * Calculates norm of state vector
    */
   norm(): number {
-    const normSquared = modulusComplex(this.innerProduct(this));
+    const normSquared = math.abs(this.innerProduct(this));
     return Math.sqrt(normSquared);
   }
 
@@ -87,7 +79,7 @@ export class StateVector implements IStateVector {
     }
 
     const normalizedAmplitudes = this.amplitudes.map(amp => 
-      math.divide(amp, currentNorm) as Complex
+      math.divide(amp, math.complex(currentNorm, 0))
     );
 
     return new StateVector(this.dimension, normalizedAmplitudes, this.basis);
@@ -102,10 +94,10 @@ export class StateVector implements IStateVector {
 
     for (let i = 0; i < this.dimension; i++) {
       for (let j = 0; j < other.dimension; j++) {
-        newAmplitudes.push(multiplyComplex(
+        newAmplitudes.push(math.multiply(
           this.amplitudes[i],
           other.amplitudes[j]
-        ));
+        ) as Complex);
       }
     }
 
@@ -158,7 +150,7 @@ export class StateVector implements IStateVector {
     validateIdx(index, dimension);
 
     const amplitudes = Array(dimension).fill(null)
-      .map((_, i) => i === index ? createComplex(1, 0) : createComplex(0, 0));
+      .map((_, i) => i === index ? math.complex(1, 0) : math.complex(0, 0));
     
     return new StateVector(dimension, amplitudes, `|${index}⟩`);
   }
@@ -189,7 +181,7 @@ export class StateVector implements IStateVector {
   static equalSuperposition(dimension: number): StateVector {
     validatePosDim(dimension);
 
-    const coefficient = createComplex(1 / Math.sqrt(dimension), 0);
+    const coefficient = math.complex(1 / Math.sqrt(dimension), 0);
     const coefficients = Array(dimension).fill(coefficient);
     
     return new StateVector(dimension, coefficients, '|+⟩');

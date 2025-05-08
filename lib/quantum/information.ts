@@ -7,12 +7,12 @@
  */
 
 import { Complex, StateVector, DensityMatrix, Operator } from './types';
-import { createComplex, modulusComplex, conjugateComplex, multiplyComplex, addComplex } from './complex';
-import { StateVector as StateVectorImpl } from './stateVector';
+import { StateVector as StateVectorClass } from './stateVector';
 import { MatrixOperator } from './operator';
 import { DensityMatrixOperator } from './densityMatrix';
 import { eigenDecomposition, multiplyMatrices, scaleMatrix } from './matrixOperations';
 import { matrixSquareRoot } from './matrixFunctions';
+import * as math from 'mathjs';
 
 /**
  * Performs a Schmidt decomposition of a bipartite pure state
@@ -51,20 +51,19 @@ export function schmidtDecomposition(
     }
   }
   
-  // Calculate reduced density matrix for subsystem B
+  // Compute reduced density matrix ρB = TrA(|ψ⟩⟨ψ|)
   const reducedRhoB: Complex[][] = Array(dimB).fill(null).map(() => 
-    Array(dimB).fill(null).map(() => createComplex(0, 0))
+    Array(dimB).fill(null).map(() => math.complex(0, 0))
   );
   
-  // Compute ρB = TrA(|ψ⟩⟨ψ|)
   for (let i = 0; i < dimB; i++) {
     for (let j = 0; j < dimB; j++) {
       for (let k = 0; k < dimA; k++) {
-        const term = multiplyComplex(
-          conjugateComplex(matrix[k][i]),
+        const term = math.multiply(
+          math.conj(matrix[k][i]),
           matrix[k][j]
-        );
-        reducedRhoB[i][j] = addComplex(reducedRhoB[i][j], term);
+        ) as Complex;
+        reducedRhoB[i][j] = math.add(reducedRhoB[i][j], term) as Complex;
       }
     }
   }
@@ -72,47 +71,52 @@ export function schmidtDecomposition(
   // Get eigenvalues and eigenvectors of reduced density matrix
   const { values, vectors } = eigenDecomposition(reducedRhoB);
   
-  // Sort eigenvalues (Schmidt coefficients² are eigenvalues)
-  const indices = values.map((_, i) => i)
-    .sort((a, b) => values[b].re - values[a].re);
+  // Create paired indices and Schmidt values, then filter and sort
+  const indexValuePairs = values.map((val, idx) => ({
+    index: idx,
+    value: Math.sqrt(Math.max(0, val.re))
+  }))
+  .filter(pair => pair.value > 1e-14) // Filter before sorting
+  .sort((a, b) => b.value - a.value); // Sort by descending value
   
-  // Calculate Schmidt values (square roots of eigenvalues)
-  const schmidtValues = indices
-    .map(i => Math.sqrt(Math.max(0, values[i].re)))
-    .filter(v => v > 1e-10); // Filter out negligible values
+  // Extract sorted and filtered Schmidt values and indices
+  const schmidtValues = indexValuePairs.map(pair => pair.value);
+  const filteredIndices = indexValuePairs.map(pair => pair.index);
   
   // Get right Schmidt basis vectors (eigenvectors of ρB)
-  const statesB = indices
-    .slice(0, schmidtValues.length)
-    .map(i => {
-      const vector = vectors[i];
-      const amplitudes = vector.map(v => createComplex(v.re, v.im));
-      return new StateVectorImpl(dimB, amplitudes);
-    });
+  const statesB = filteredIndices.map(i => {
+    const vector = vectors[i];
+    // Ensure proper normalization
+    const norm = Math.sqrt(vector.reduce((sum, v) => 
+      sum + v.re * v.re + v.im * v.im, 0));
+    const amplitudes = vector.map(v => 
+      math.divide(v, math.complex(norm, 0)) as Complex
+    );
+    return new StateVectorClass(dimB, amplitudes);
+  });
   
-  // Calculate left Schmidt basis vectors
-  const statesA = indices
-    .slice(0, schmidtValues.length)
-    .map((i, idx) => {
-      const schmidt = schmidtValues[idx];
-      const v = vectors[i]; // Right eigenvector
-      
-      // Calculate M|v⟩/(Schmidt value)
-      const amplitudes = Array(dimA).fill(null).map(() => createComplex(0, 0));
-      
-      for (let j = 0; j < dimA; j++) {
-        for (let k = 0; k < dimB; k++) {
-          const term = multiplyComplex(matrix[j][k], v[k]);
-          const scaledTerm = {
-            re: term.re / schmidt,
-            im: term.im / schmidt
-          };
-          amplitudes[j] = addComplex(amplitudes[j], scaledTerm);
-        }
+  // Calculate left Schmidt basis vectors using M|v⟩/λ
+  const statesA = filteredIndices.map((i, idx) => {
+    const schmidt = schmidtValues[idx];
+    const v = vectors[i];
+    
+    const amplitudes = Array(dimA).fill(null).map(() => math.complex(0, 0));
+    
+    // Calculate M|v⟩ and normalize
+    for (let j = 0; j < dimA; j++) {
+      for (let k = 0; k < dimB; k++) {
+        const term = math.multiply(matrix[j][k], v[k]) as Complex;
+        amplitudes[j] = math.add(amplitudes[j], term) as Complex;
       }
-      
-      return new StateVectorImpl(dimA, amplitudes);
-    });
+    }
+    
+    // Normalize by Schmidt value
+    const finalAmps = amplitudes.map(a => 
+      math.divide(a, math.complex(schmidt, 0)) as Complex
+    );
+    
+    return new StateVectorClass(dimA, finalAmps);
+  });
   
   return {
     values: schmidtValues,
@@ -138,15 +142,25 @@ export function traceDistance(A: Operator, B: Operator): number {
     throw new Error('Operators must have the same dimension for trace distance');
   }
   
-  // Calculate A - B
-  const diff = A.add(B.scale(createComplex(-1, 0)));
+  // Get matrix representations
+  const matrixA = A.toMatrix();
+  const matrixB = B.toMatrix();
   
-  // Calculate |A - B| = √((A-B)†(A-B))
-  const diffMatrix = diff.toMatrix();
-  const adjointDiff = diff.adjoint().toMatrix();
+  // Calculate A - B directly using matrices
+  const diffMatrix = matrixA.map((row, i) => 
+    row.map((elem, j) => math.subtract(elem, matrixB[i][j]) as Complex)
+  );
+  
+  // Calculate adjoint of (A-B)
+  const adjointDiffMatrix = diffMatrix.map((row, i) => 
+    row.map((elem, j) => math.complex(
+      diffMatrix[j][i].re,
+      -diffMatrix[j][i].im
+    ))
+  );
   
   // Calculate (A-B)†(A-B)
-  const product = multiplyMatrices(adjointDiff, diffMatrix);
+  const product = multiplyMatrices(adjointDiffMatrix, diffMatrix);
   
   // Take positive square root of eigenvalues and sum diagonal elements
   const { values } = eigenDecomposition(product);
@@ -176,7 +190,7 @@ export function fidelity(stateA: StateVector, stateB: StateVector): number {
   const innerProduct = stateA.innerProduct(stateB);
   
   // Return |⟨ψ|φ⟩|²
-  return modulusComplex(innerProduct) ** 2;
+  return math.abs(innerProduct) ** 2;
 }
 
 /**
@@ -242,20 +256,20 @@ export function quantumRelativeEntropy(rho: DensityMatrix, sigma: DensityMatrix)
   
   // Convert eigenvalues to log values
   const logSigmaEigenvalues = sigmaEigenvalues.map(v => 
-    v.re > 1e-10 ? createComplex(Math.log(v.re), 0) : createComplex(-1000, 0) // Use a large negative number as approximation
+    v.re > 1e-10 ? math.complex(Math.log(v.re), 0) : math.complex(-1000, 0) // Use a large negative number as approximation
   );
   
   // Reconstruct log(σ) in the eigenbasis of σ
   const logSigma = Array(rho.dimension).fill(null).map(() => 
-    Array(rho.dimension).fill(null).map(() => createComplex(0, 0))
+    Array(rho.dimension).fill(null).map(() => math.complex(0, 0))
   );
   
   for (let i = 0; i < rho.dimension; i++) {
     for (let j = 0; j < rho.dimension; j++) {
       for (let k = 0; k < rho.dimension; k++) {
-        const term1 = multiplyComplex(sigmaEigenvectors[k][i], conjugateComplex(sigmaEigenvectors[k][j]));
-        const term2 = multiplyComplex(term1, logSigmaEigenvalues[k]);
-        logSigma[i][j] = addComplex(logSigma[i][j], term2);
+        const term1 = math.multiply(sigmaEigenvectors[k][i], math.conj(sigmaEigenvectors[k][j])) as Complex;
+        const term2 = math.multiply(term1, logSigmaEigenvalues[k]) as Complex;
+        logSigma[i][j] = math.add(logSigma[i][j], term2) as Complex;
       }
     }
   }
@@ -394,13 +408,13 @@ export function concurrence(rho: DensityMatrix): number {
   
   // Define σy⊗σy
   const sigmaY = [
-    [createComplex(0, 0), createComplex(0, -1)],
-    [createComplex(0, 1), createComplex(0, 0)]
+    [math.complex(0, 0), math.complex(0, -1)],
+    [math.complex(0, 1), math.complex(0, 0)]
   ];
   
   // Calculate σy⊗σy
   const sigmaYY = Array(4).fill(null).map(() => 
-    Array(4).fill(null).map(() => createComplex(0, 0))
+    Array(4).fill(null).map(() => math.complex(0, 0))
   );
   
   for (let i1 = 0; i1 < 2; i1++) {
@@ -420,18 +434,24 @@ export function concurrence(rho: DensityMatrix): number {
   
   // Calculate complex conjugate of ρ
   const rhoStar = rhoMatrix.map(row => 
-    row.map(elem => conjugateComplex(elem))
+    row.map(elem => math.conj(elem))
   );
   
   // Calculate ρ(σy⊗σy)ρ*(σy⊗σy)
   const rhoSigmaYYRhoStar = multiplyMatrices(rhoSigmaYY, rhoStar);
   const R = multiplyMatrices(rhoSigmaYYRhoStar, sigmaYY);
   
-  // Find eigenvalues of R
-  const { values } = eigenDecomposition(R);
+  // Calculate R†R which is guaranteed to be Hermitian
+  const RDagger = R.map((row, i) => 
+    row.map((_, j) => math.conj(R[j][i]))
+  );
+  const RRDagger = multiplyMatrices(R, RDagger);
+  
+  // Find eigenvalues of RR† which are guaranteed to be real and non-negative
+  const { values } = eigenDecomposition(RRDagger);
   
   // Take square roots and sort in descending order
-  const sqrtValues = values.map(v => Math.sqrt(Math.max(0, v.re)))
+  const sqrtValues = values.map(v => Math.sqrt(Math.sqrt(Math.max(0, v.re))))
     .sort((a, b) => b - a);
   
   // Calculate concurrence
@@ -460,7 +480,7 @@ export function negativity(rho: DensityMatrix, dimA: number, dimB: number): numb
   
   // Calculate partial transpose with respect to subsystem A
   const rhoTA = Array(dimA * dimB).fill(null).map(() => 
-    Array(dimA * dimB).fill(null).map(() => createComplex(0, 0))
+    Array(dimA * dimB).fill(null).map(() => math.complex(0, 0))
   );
   
   for (let i1 = 0; i1 < dimA; i1++) {

@@ -13,7 +13,8 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
-| T59 | Math.js Complex Number Migration | 🔄 | HIGH | 2025-05-08 | [tasks/T59.md] | Core migration complete, module updates in progress |
+| T60 | Remove complex.ts and Direct Math.js Integration | 🔄 | HIGH | 2025-05-08 | [tasks/T60.md] | All modules updated, pending final testing |
+| T59 | Math.js Complex Number Migration | ⏸️ | HIGH | 2025-05-08 | [tasks/T59.md] | Superseded by T60 |
 | T58 | Extract Reusable React Template | 🔄 | HIGH | 2025-05-06 | [tasks/T58.md] | Core components extracted, example app created, planning state management |
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|

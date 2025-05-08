@@ -9,7 +9,6 @@ export * from './types';
 export { StateVector as StateVectorImpl } from './stateVector';
 
 // Core operations
-export * from './complex';
 export * from './hilbertSpace';
 export * from './states';
 

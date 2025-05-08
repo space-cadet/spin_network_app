@@ -4,6 +4,7 @@
 
 import { Complex } from '../types';
 import { createComplex } from '../complex';
+import * as math from 'mathjs';
 
 /**
  * Computes matrix exponential using Taylor series
@@ -64,12 +65,8 @@ export function multiplyMatrices(a: Complex[][], b: Complex[][]): Complex[][] {
   for (let i = 0; i < dim; i++) {
     for (let j = 0; j < dim; j++) {
       for (let k = 0; k < dim; k++) {
-        const prod = {
-          re: a[i][k].re * b[k][j].re - a[i][k].im * b[k][j].im,
-          im: a[i][k].re * b[k][j].im + a[i][k].im * b[k][j].re
-        };
-        result[i][j].re += prod.re;
-        result[i][j].im += prod.im;
+        const prod = math.multiply(a[i][k], b[k][j]) as Complex;
+        result[i][j] = math.add(result[i][j], prod) as Complex;
       }
     }
   }

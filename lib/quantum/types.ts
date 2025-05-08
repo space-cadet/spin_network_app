@@ -4,10 +4,8 @@
 
 import { Complex as MathJsComplex } from 'mathjs';
 
-/**
- * Complex number type using math.js implementation
- */
-export type Complex = MathJsComplex;
+// Direct export of math.js Complex type
+export { Complex } from 'mathjs';
 
 /**
  * Represents a quantum state vector

@@ -3,8 +3,8 @@
  */
 
 import { Complex, StateVector as IStateVector } from './types';
-import { createComplex, multiplyComplex } from './complex';
 import { StateVector } from './stateVector';
+import * as math from 'mathjs';
 
 /**
  * Represents a quantum Hilbert space with dimension and optional basis labels

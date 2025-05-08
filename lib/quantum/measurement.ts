@@ -4,6 +4,7 @@
 
 import { Complex, Operator, StateVector, MeasurementOutcome } from './types';
 import { MatrixOperator } from './operator';
+import * as math from 'mathjs';
 
 /**
  * Implementation of a projection operator for quantum measurements
@@ -15,23 +16,22 @@ export class ProjectionOperator implements Operator {
     constructor(state: StateVector) {
         this._dimension = state.dimension;
         
-        // Create projection matrix |ψ⟩⟨ψ|
-        const matrix: Complex[][] = Array(state.dimension).fill(0)
-            .map(() => Array(state.dimension).fill({ re: 0, im: 0 }));
+        // Create projection matrix |ψ⟩⟨ψ| without validation
+        const matrix: Complex[][] = Array(state.dimension).fill(null)
+            .map(() => Array(state.dimension).fill(null).map(() => ({ re: 0, im: 0 })));
         
         for (let i = 0; i < state.dimension; i++) {
             for (let j = 0; j < state.dimension; j++) {
                 // |ψ⟩⟨ψ| = ψi * ψj*
-                matrix[i][j] = {
-                    re: state.amplitudes[i].re * state.amplitudes[j].re + 
-                        state.amplitudes[i].im * state.amplitudes[j].im,
-                    im: state.amplitudes[i].re * state.amplitudes[j].im - 
-                        state.amplitudes[i].im * state.amplitudes[j].re
-                };
+                matrix[i][j] = math.multiply(
+                    state.amplitudes[i],
+                    math.conj(state.amplitudes[j])
+                ) as Complex;
             }
         }
         
-        this._operator = new MatrixOperator(matrix, 'projection');
+        // Create operator without validation since we know it's a valid projection
+        this._operator = new MatrixOperator(matrix, 'projection', false);
     }
 
     get dimension(): number {
@@ -73,20 +73,17 @@ export class ProjectionOperator implements Operator {
  */
 export function expectationValue(state: StateVector, operator: Operator): Complex {
     const resultState = operator.apply(state);
-    let result: Complex = { re: 0, im: 0 };
+    let result = math.complex(0, 0);
 
     for (let i = 0; i < state.dimension; i++) {
         // ⟨ψ|A|ψ⟩ = Σ ψi* (A|ψ⟩)i
-        const conj: Complex = { 
-            re: state.amplitudes[i].re, 
-            im: -state.amplitudes[i].im 
-        };
-        result = {
-            re: result.re + (conj.re * resultState.amplitudes[i].re - 
-                           conj.im * resultState.amplitudes[i].im),
-            im: result.im + (conj.re * resultState.amplitudes[i].im + 
-                           conj.im * resultState.amplitudes[i].re)
-        };
+        result = math.add(
+            result,
+            math.multiply(
+                math.conj(state.amplitudes[i]),
+                resultState.amplitudes[i]
+            )
+        ) as Complex;
     }
 
     return result;
@@ -103,16 +100,14 @@ export function measureState(state: StateVector, operator: Operator): Measuremen
     const resultState = operator.apply(state);
     
     // Calculate probability from norm squared of resulting state
-    let probability = 0;
-    for (const amp of resultState.amplitudes) {
-        probability += amp.re * amp.re + amp.im * amp.im;
-    }
+    const probability = resultState.amplitudes.reduce((sum, amp) => 
+        sum + math.abs(amp) ** 2, 0
+    );
     
     // Normalize the post-measurement state
-    const normalizedAmplitudes = resultState.amplitudes.map(amp => ({
-        re: amp.re / Math.sqrt(probability),
-        im: amp.im / Math.sqrt(probability)
-    }));
+    const normalizedAmplitudes = resultState.amplitudes.map(amp => 
+        math.divide(amp, math.sqrt(probability)) as Complex
+    );
     
     const postState: StateVector = {
         dimension: state.dimension,

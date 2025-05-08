@@ -4,7 +4,7 @@
 
 import { Complex, Operator } from './types';
 import { MatrixOperator } from './operator';
-import { createComplex } from './complex';
+import * as math from 'mathjs';
 
 /**
  * Creates creation operator a† for dimension N
@@ -13,11 +13,11 @@ import { createComplex } from './complex';
 export function creationOp(dimension: number): Operator {
     const matrix = Array(dimension).fill(null)
         .map(() => Array(dimension).fill(null)
-            .map(() => createComplex(0, 0)));
+            .map(() => math.complex(0, 0)));
             
     // Fill matrix elements
     for (let m = 0; m < dimension - 1; m++) {
-        matrix[m + 1][m] = createComplex(Math.sqrt(m + 1), 0);
+        matrix[m + 1][m] = math.complex(Math.sqrt(m + 1), 0);
     }
     
     return new MatrixOperator(matrix);
@@ -30,11 +30,11 @@ export function creationOp(dimension: number): Operator {
 export function destructionOp(dimension: number): Operator {
     const matrix = Array(dimension).fill(null)
         .map(() => Array(dimension).fill(null)
-            .map(() => createComplex(0, 0)));
+            .map(() => math.complex(0, 0)));
             
     // Fill matrix elements
     for (let m = 1; m < dimension; m++) {
-        matrix[m - 1][m] = createComplex(Math.sqrt(m), 0);
+        matrix[m - 1][m] = math.complex(Math.sqrt(m), 0);
     }
     
     return new MatrixOperator(matrix);
@@ -44,15 +44,12 @@ export function destructionOp(dimension: number): Operator {
  * Creates number operator n = a†a for dimension N
  */
 export function numberOp(dimension: number): Operator {
+    // Create diagonal matrix for number operator
     const matrix = Array(dimension).fill(null)
-        .map(() => Array(dimension).fill(null)
-            .map(() => createComplex(0, 0)));
+        .map((_, i) => Array(dimension).fill(null)
+            .map((_, j) => i === j ? math.complex(i, 0) : math.complex(0, 0)));
             
-    // Fill diagonal elements
-    for (let n = 0; n < dimension; n++) {
-        matrix[n][n] = createComplex(n, 0);
-    }
-    
+    // Explicitly mark as hermitian since it's diagonal with real entries
     return new MatrixOperator(matrix, 'hermitian');
 }
 
@@ -62,9 +59,12 @@ export function numberOp(dimension: number): Operator {
 export function positionOp(dimension: number): Operator {
     const aOp = destructionOp(dimension);
     const aUpOp = creationOp(dimension);
-    const scale = createComplex(1/Math.sqrt(2), 0);
     
-    return aOp.add(aUpOp).scale(scale);
+    // Scale operator after addition to maintain hermiticity
+    const sumOp = aOp.add(aUpOp);
+    const finalOp = sumOp.scale(math.complex(1/Math.sqrt(2), 0));
+    
+    return new MatrixOperator(finalOp.toMatrix(), 'hermitian');
 }
 
 /**
@@ -73,9 +73,12 @@ export function positionOp(dimension: number): Operator {
 export function momentumOp(dimension: number): Operator {
     const aOp = destructionOp(dimension);
     const aUpOp = creationOp(dimension);
-    const scale = createComplex(0, 1/Math.sqrt(2));
     
-    return aUpOp.scale(scale).add(aOp.scale(createComplex(0, -1/Math.sqrt(2))));
+    // i(a† - a)/√2 
+    const diffOp = aUpOp.add(aOp.scale(math.complex(-1, 0)));
+    const finalOp = diffOp.scale(math.complex(0, 1/Math.sqrt(2)));
+    
+    return new MatrixOperator(finalOp.toMatrix(), 'hermitian');
 }
 
 /**
@@ -84,5 +87,8 @@ export function momentumOp(dimension: number): Operator {
  */
 export function harmonicOscillator(dimension: number): Operator {
     const n = numberOp(dimension);
-    return n.add(MatrixOperator.identity(dimension).scale(createComplex(0.5, 0)));
+    const halfId = MatrixOperator.identity(dimension).scale(math.complex(0.5, 0));
+    const hamiltonian = n.add(halfId);
+    
+    return new MatrixOperator(hamiltonian.toMatrix(), 'hermitian');
 }

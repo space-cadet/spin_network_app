@@ -6,11 +6,12 @@
 import { Complex, Operator, OperatorType } from './types';
 import { StateVector } from './stateVector';
 import { MatrixOperator } from './operator';
-import { createComplex, multiplyComplex, addComplex } from './complex';
 import { validatePosDim } from './utils/validation';
 import { matrixExponential, scaleMatrix } from './matrixOperations';
 import { PauliX, PauliY, PauliZ } from './gates';
 import { composeOperators } from './composition';
+import { isHermitian } from './matrixOperations';
+import * as math from 'mathjs';
 
 /**
  * Types of common Hamiltonians
@@ -43,23 +44,52 @@ export class Hamiltonian extends MatrixOperator {
     dimension: number,
     terms: HamiltonianTerm[],
     hamiltonianType: HamiltonianType = 'custom',
-    timeDependent: boolean = false
+    timeDependent: boolean = false,
+    requireHermitian: boolean = false
   ) {
-    // Validate and initialize base operator
     validatePosDim(dimension);
     
+    // Validate Hermiticity of individual terms and result if required
+    if (requireHermitian) {
+      for (const term of terms) {
+        const termMatrix = term.operator.toMatrix();
+        if (!isHermitian(termMatrix)) {
+          throw new Error('All terms must be Hermitian when requireHermitian is true');
+        }
+        if (Math.abs(term.coefficient.im) > 1e-10) {
+          throw new Error('All coefficients must be real when requireHermitian is true');
+        }
+      }
+
+      // Also check the final matrix
+      const matrix = terms.reduce((acc, term) => {
+        const termMatrix = term.operator.toMatrix();
+        const scaledTerm = scaleMatrix(termMatrix, term.coefficient);
+        return acc.map((row, i) => 
+          row.map((elem, j) => math.add(elem, scaledTerm[i][j]) as Complex)
+        );
+      }, Array(dimension).fill(null).map(() => 
+        Array(dimension).fill(null).map(() => math.complex(0, 0))
+      ));
+
+      if (!isHermitian(matrix)) {
+        throw new Error('Combined Hamiltonian must be Hermitian when requireHermitian is true');
+      }
+    }
+
     // Initialize operator with sum of terms
     const matrix = terms.reduce((acc, term) => {
       const termMatrix = term.operator.toMatrix();
       const scaledTerm = scaleMatrix(termMatrix, term.coefficient);
       return acc.map((row, i) => 
-        row.map((elem, j) => addComplex(elem, scaledTerm[i][j]))
+        row.map((elem, j) => math.add(elem, scaledTerm[i][j]))
       );
     }, Array(dimension).fill(null).map(() => 
-      Array(dimension).fill(null).map(() => createComplex(0, 0))
+      Array(dimension).fill(null).map(() => math.complex(0, 0))
     ));
     
-    super(matrix, 'hermitian');
+    // Always use 'general' as the operator type, store Hamiltonian type separately
+    super(matrix, 'general');
 
     this.hamiltonianType = hamiltonianType;
     this.terms = [...terms];
@@ -74,15 +104,19 @@ export class Hamiltonian extends MatrixOperator {
       throw new Error('Time-dependent Hamiltonians require numerical integration');
     }
 
+    // For a Hermitian matrix H, exp(-iHt) should be unitary
     // Create -iHt matrix
     const scaledMatrix = scaleMatrix(
       this.toMatrix(),
-      createComplex(0, -time)  // -i * t (ħ = 1 units)
+      math.complex(0, -time)  // -i * t (ħ = 1 units)
     );
     
     // Compute matrix exponential
     const evolutionMatrix = matrixExponential(scaledMatrix);
-    return new MatrixOperator(evolutionMatrix, 'unitary');
+
+    // Ensure the result is unitary (U†U = 1)
+    // The result should be unitary by construction, but numerical errors can accumulate
+    return new MatrixOperator(evolutionMatrix, 'unitary', false);
   }
 
   /**
@@ -120,15 +154,15 @@ export class Hamiltonian extends MatrixOperator {
     
     const terms: HamiltonianTerm[] = [
       {
-        coefficient: createComplex(Bx, 0),
+        coefficient: math.complex(Bx, 0),
         operator: PauliX
       },
       {
-        coefficient: createComplex(By, 0),
+        coefficient: math.complex(By, 0),
         operator: PauliY
       },
       {
-        coefficient: createComplex(Bz, 0),
+        coefficient: math.complex(Bz, 0),
         operator: PauliZ
       }
     ];
@@ -149,7 +183,7 @@ export class Hamiltonian extends MatrixOperator {
     }
 
     const terms: HamiltonianTerm[] = [];
-    const coeff = createComplex(coupling, 0);
+    const coeff = math.complex(coupling, 0);
 
     // For each pair of neighboring spins
     for (let i = 0; i < numSpins - 1; i++) {

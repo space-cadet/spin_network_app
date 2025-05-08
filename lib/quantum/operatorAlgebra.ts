@@ -6,9 +6,9 @@
  */
 
 import { Complex, Operator, StateVector } from './types';
-import { createComplex } from './complex';
 import { MatrixOperator } from './operator';
 import { matrixExponential } from './matrixOperations';
+import * as math from 'mathjs';
 
 /**
  * Adds two operators
@@ -35,7 +35,7 @@ export function subtractOperators(a: Operator, b: Operator): Operator {
   if (a.dimension !== b.dimension) {
     throw new Error('Operator dimensions do not match');
   }
-  return a.add(b.scale(createComplex(-1, 0)));
+  return a.add(b.scale(math.complex(-1, 0)));
 }
 
 /**
@@ -103,26 +103,21 @@ export function nestedCommutator(ops: Operator[], indices: number[][]): Operator
     throw new Error('All operators must have the same dimension');
   }
   
-  // Make a copy of the operators array to avoid modifying the original
-  const operatorsCopy = [...ops];
+  // Process nested commutators from innermost to outermost
+  let result = ops[indices[indices.length - 1][0]];
   
-  // Calculate the nested commutator structure
-  let result: Operator = null;
-  
-  // Start with the innermost commutator
-  for (const [i, j] of indices) {
-    if (i < 0 || j < 0 || i >= operatorsCopy.length || j >= operatorsCopy.length) {
+  // Work backwards through indices to compute nested structure
+  for (let i = indices.length - 1; i >= 0; i--) {
+    const [a, b] = indices[i];
+    if (a < 0 || b < 0 || a >= ops.length || b >= ops.length) {
       throw new Error('Invalid operator indices');
     }
     
-    const comm = commutator(operatorsCopy[i], operatorsCopy[j]);
+    // If we're not at the innermost level, use previous result as left operand
+    const A = i === indices.length - 1 ? ops[a] : result;
+    const B = ops[b];
     
-    if (result === null) {
-      result = comm;
-    } else {
-      // Replace the operators used in previous commutator with the result
-      operatorsCopy.push(result);
-    }
+    result = commutator(A, B);
   }
   
   return result;
@@ -166,15 +161,15 @@ export function BCHFormula(A: Operator, B: Operator, order: number = 2): Operato
   
   // First order: + 1/2[A,B]
   if (order >= 1) {
-    const firstOrder = commutator(A, B).scale(createComplex(0.5, 0));
+    const firstOrder = commutator(A, B).scale(math.complex(0.5, 0));
     result = addOperators(result, firstOrder);
   }
   
   // Second order: + 1/12[A,[A,B]] - 1/12[B,[A,B]]
   if (order >= 2) {
     const AB = commutator(A, B);
-    const AAB = commutator(A, AB).scale(createComplex(1/12, 0));
-    const BAB = commutator(B, AB).scale(createComplex(-1/12, 0));
+    const AAB = commutator(A, AB).scale(math.complex(1/12, 0));
+    const BAB = commutator(B, AB).scale(math.complex(-1/12, 0));
     
     result = addOperators(result, AAB);
     result = addOperators(result, BAB);
@@ -198,7 +193,7 @@ export function operatorsCommute(A: Operator, B: Operator, tolerance: number = 1
   // Check if all elements are close to zero
   for (const row of matrix) {
     for (const elem of row) {
-      const magnitude = Math.sqrt(elem.re * elem.re + elem.im * elem.im);
+      const magnitude = math.abs(elem);
       if (magnitude > tolerance) {
         return false;
       }
@@ -277,7 +272,7 @@ export function isNormalOperator(A: Operator, tolerance: number = 1e-10): boolea
  */
 export function operatorFromGenerator(generator: Operator): Operator {
   // Scale generator by i
-  const iG = generator.scale(createComplex(0, 1));
+  const iG = generator.scale(math.complex(0, 1));
   
   // Use matrix exponential implementation from matrixOperations
   const matrix = iG.toMatrix();
@@ -295,18 +290,16 @@ export function operatorFromGenerator(generator: Operator): Operator {
 export function projectionOperator(state: StateVector): Operator {
   const dim = state.dimension;
   const matrix: Complex[][] = Array(dim).fill(null).map(() => 
-    Array(dim).fill(null).map(() => createComplex(0, 0))
+    Array(dim).fill(null).map(() => math.complex(0, 0))
   );
   
   // Compute |ψ⟩⟨ψ|
   for (let i = 0; i < dim; i++) {
     for (let j = 0; j < dim; j++) {
-      matrix[i][j] = {
-        re: state.amplitudes[i].re * state.amplitudes[j].re + 
-            state.amplitudes[i].im * state.amplitudes[j].im,
-        im: state.amplitudes[i].re * state.amplitudes[j].im - 
-            state.amplitudes[i].im * state.amplitudes[j].re
-      };
+      matrix[i][j] = math.multiply(
+        state.amplitudes[i],
+        math.conj(state.amplitudes[j])
+      ) as Complex;
     }
   }
   

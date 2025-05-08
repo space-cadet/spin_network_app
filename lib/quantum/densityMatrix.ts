@@ -4,7 +4,8 @@
 
 import { Complex, StateVector, OperatorType, DensityMatrix, QuantumChannel, Operator } from './types';
 import { MatrixOperator } from './operator';
-import { createComplex, multiplyComplex, addComplex, conjugateComplex, isZeroComplex, subtractComplex } from './complex';
+import { multiplyMatrices } from './matrixOperations';
+import * as math from 'mathjs';
 
 /**
  * Implementation of density matrix operations
@@ -75,9 +76,43 @@ export class DensityMatrixOperator implements DensityMatrix {
   trace(): Complex {
     const matrix = this.toMatrix();
     return matrix.reduce((sum, row, i) => 
-      addComplex(sum, row[i]), 
-      createComplex(0, 0)
+      math.add(sum, row[i]) as Complex, 
+      math.complex(0, 0)
     );
+  }
+
+  /**
+   * Calculates purity Tr(ρ²)
+   */
+  purity(): number {
+    // Calculate Tr(ρ²) by squaring the matrix and taking trace
+    const matrix = this.toMatrix();
+    const matSquared = multiplyMatrices(matrix, matrix);
+    
+    // Sum diagonal elements
+    let trace = math.complex(0, 0);
+    for (let i = 0; i < this.dimension; i++) {
+      trace = math.add(trace, matSquared[i][i]) as Complex;
+    }
+    
+    // The purity should be real for a valid density matrix
+    return trace.re;
+  }
+
+  /**
+   * Calculates von Neumann entropy -Tr(ρ ln ρ)
+   */
+  vonNeumannEntropy(): number {
+    const { values } = this.eigenDecompose();
+    let entropy = 0;
+    
+    for (const value of values) {
+      if (value.re > 1e-10) {  // Only consider non-zero eigenvalues
+        entropy -= value.re * Math.log(value.re);
+      }
+    }
+    
+    return entropy;
   }
 
   /**
@@ -90,30 +125,29 @@ export class DensityMatrixOperator implements DensityMatrix {
       throw new Error('Invalid subsystem dimensions');
     }
 
-    // TODO: Implement partial trace algorithm
-    // This is a placeholder that needs to be implemented
-    const reducedMatrix = this.toMatrix();  // Placeholder
+    const reducedMatrix = this.operator.partialTrace(subsystemDimensions, [1]).toMatrix();
     return new DensityMatrixOperator(reducedMatrix);
   }
 
   /**
-   * Calculates purity Tr(ρ²)
+   * Scales density matrix by a complex number
    */
-  purity(): number {
-    const squared = this.compose(this);
-    return squared.toMatrix().reduce((sum, row, i) => 
-      sum + row[i].re,  // Trace should be real for ρ²
-      0
-    );
+  scale(scalar: Complex): Operator {
+    return this.operator.scale(scalar);
   }
 
   /**
-   * Calculates von Neumann entropy -Tr(ρ ln ρ)
+   * Adds this density matrix with another operator
    */
-  vonNeumannEntropy(): number {
-    // TODO: Implement eigenvalue computation and entropy calculation
-    // This is a placeholder that needs to be implemented
-    return 0;
+  add(other: Operator): Operator {
+    return this.operator.add(other);
+  }
+
+  /**
+   * Returns eigenvalues and eigenvectors
+   */
+  eigenDecompose(): { values: Complex[]; vectors: Operator[] } {
+    return this.operator.eigenDecompose();
   }
 
   /**
@@ -122,16 +156,16 @@ export class DensityMatrixOperator implements DensityMatrix {
   static fromPureState(state: StateVector): DensityMatrix {
     const dim = state.dimension;
     const matrix = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => createComplex(0, 0))
+      Array(dim).fill(null).map(() => math.complex(0, 0))
     );
 
     // Compute |ψ⟩⟨ψ|
     for (let i = 0; i < dim; i++) {
       for (let j = 0; j < dim; j++) {
-        matrix[i][j] = multiplyComplex(
+        matrix[i][j] = math.multiply(
           state.amplitudes[i],
-          conjugateComplex(state.amplitudes[j])
-        );
+          math.conj(state.amplitudes[j])
+        ) as Complex;
       }
     }
 
@@ -157,7 +191,7 @@ export class DensityMatrixOperator implements DensityMatrix {
 
     // Compute Σᵢ pᵢ|ψᵢ⟩⟨ψᵢ|
     const matrix = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => createComplex(0, 0))
+      Array(dim).fill(null).map(() => math.complex(0, 0))
     );
 
     for (let k = 0; k < states.length; k++) {
@@ -166,14 +200,14 @@ export class DensityMatrixOperator implements DensityMatrix {
 
       for (let i = 0; i < dim; i++) {
         for (let j = 0; j < dim; j++) {
-          const term = multiplyComplex(
-            multiplyComplex(
+          const term = math.multiply(
+            math.multiply(
               state.amplitudes[i],
-              conjugateComplex(state.amplitudes[j])
-            ),
-            createComplex(prob, 0)
-          );
-          matrix[i][j] = addComplex(matrix[i][j], term);
+              math.conj(state.amplitudes[j])
+            ) as Complex,
+            math.complex(prob, 0)
+          ) as Complex;
+          matrix[i][j] = math.add(matrix[i][j], term) as Complex;
         }
       }
     }
@@ -217,7 +251,7 @@ export class KrausChannel implements QuantumChannel {
   apply(state: DensityMatrix): DensityMatrix {
     const dim = this.krausOperators[0].dimension;
     const result = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => createComplex(0, 0))
+      Array(dim).fill(null).map(() => math.complex(0, 0))
     );
 
     // Apply channel: ρ' = Σᵢ EᵢρEᵢ†
@@ -228,7 +262,7 @@ export class KrausChannel implements QuantumChannel {
 
       for (let i = 0; i < dim; i++) {
         for (let j = 0; j < dim; j++) {
-          result[i][j] = addComplex(result[i][j], termMatrix[i][j]);
+          result[i][j] = math.add(result[i][j], termMatrix[i][j]) as Complex;
         }
       }
     }
@@ -314,7 +348,7 @@ function addOperators(a: Operator, b: Operator): Operator {
   const matrixA = a.toMatrix();
   const matrixB = b.toMatrix();
   const sumMatrix = matrixA.map((row, i) =>
-    row.map((elem, j) => addComplex(elem, matrixB[i][j]))
+    row.map((elem, j) => math.add(elem, matrixB[i][j]) as Complex)
   );
 
   return new MatrixOperator(sumMatrix);
@@ -328,7 +362,7 @@ function subtractOperators(a: Operator, b: Operator): Operator {
   const matrixA = a.toMatrix();
   const matrixB = b.toMatrix();
   const diffMatrix = matrixA.map((row, i) =>
-    row.map((elem, j) => subtractComplex(elem, matrixB[i][j]))
+    row.map((elem, j) => math.subtract(elem, matrixB[i][j]) as Complex)
   );
 
   return new MatrixOperator(diffMatrix);
@@ -337,14 +371,14 @@ function subtractOperators(a: Operator, b: Operator): Operator {
 function isOperatorZero(operator: Operator, tolerance: number = 1e-10): boolean {
   const matrix = operator.toMatrix();
   return matrix.every(row => 
-    row.every(elem => isZeroComplex(elem, tolerance))
+    row.every(elem => math.abs(elem) < tolerance)
   );
 }
 
 function createIdentityOperator(dimension: number): Operator {
   const matrix = Array(dimension).fill(null).map((_, i) => 
     Array(dimension).fill(null).map((_, j) => 
-      i === j ? createComplex(1, 0) : createComplex(0, 0)
+      i === j ? math.complex(1, 0) : math.complex(0, 0)
     )
   );
   return new MatrixOperator(matrix, 'unitary');
@@ -352,10 +386,13 @@ function createIdentityOperator(dimension: number): Operator {
 
 function createZeroOperator(dimension: number): Operator {
   const matrix = Array(dimension).fill(null).map(() => 
-    Array(dimension).fill(null).map(() => createComplex(0, 0))
+    Array(dimension).fill(null).map(() => math.complex(0, 0))
   );
   return new MatrixOperator(matrix);
 }
 
 // Note: Entanglement measures have been moved to information.ts
 // This allows better organization of quantum information metrics
+
+// Re-export entanglement measures from information.ts
+export { traceFidelity, concurrence, negativity } from './information';

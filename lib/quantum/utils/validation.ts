@@ -8,6 +8,7 @@
 
 import { Complex } from '../types';
 import { isZeroComplex } from '../complex';
+import * as math from 'mathjs';
 
 /**
  * Validates that a matrix has valid dimensions and shape for quantum operations.
@@ -130,7 +131,7 @@ export function validateAmps(amplitudes: Complex[], dimension: number): void {
  */
 export function validateNorm(amplitudes: Complex[], tolerance: number = 1e-10): void {
   const normSquared = amplitudes.reduce((sum, amp) => 
-    sum + amp.re * amp.re + amp.im * amp.im, 
+    sum + (amp.re * amp.re + amp.im * amp.im),
     0
   );
   

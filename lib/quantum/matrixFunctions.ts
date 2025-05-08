@@ -7,7 +7,6 @@
  */
 
 import { Complex } from './types';
-import { createComplex, addComplex, multiplyComplex } from './complex';
 import { 
   eigenDecomposition, 
   isHermitian, 
@@ -15,6 +14,7 @@ import {
   multiplyMatrices,
   scaleMatrix 
 } from './matrixOperations';
+import * as math from 'mathjs';
 
 /**
  * Applies an arbitrary function to a diagonalizable matrix
@@ -42,14 +42,14 @@ export function matrixFunction(
     // Construct the diagonal matrix of f(D)
     const fD = Array(dim).fill(null).map((_, i) => 
       Array(dim).fill(null).map((_, j) => 
-        i === j ? funcValues[i] : createComplex(0, 0)
+        i === j ? funcValues[i] : math.complex(0, 0)
       )
     );
     
     // Reconstruct matrix: U * f(D) * U†
     // First, construct U from vectors
     const U: Complex[][] = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => createComplex(0, 0))
+      Array(dim).fill(null).map(() => math.complex(0, 0))
     );
     
     for (let i = 0; i < dim; i++) {
@@ -84,10 +84,7 @@ export function matrixLogarithm(matrix: Complex[][]): Complex[][] {
     const r = Math.sqrt(x.re * x.re + x.im * x.im);
     const theta = Math.atan2(x.im, x.re);
     
-    return createComplex(
-      Math.log(r),
-      theta
-    );
+    return math.complex(Math.log(r), theta);
   });
 }
 
@@ -105,10 +102,7 @@ export function matrixSquareRoot(matrix: Complex[][]): Complex[][] {
     const r = Math.sqrt(Math.sqrt(x.re * x.re + x.im * x.im));
     const theta = Math.atan2(x.im, x.re) / 2;
     
-    return createComplex(
-      r * Math.cos(theta),
-      r * Math.sin(theta)
-    );
+    return math.complex(r * Math.cos(theta), r * Math.sin(theta));
   });
 }
 
@@ -127,10 +121,7 @@ export function matrixPower(matrix: Complex[][], power: number): Complex[][] {
     const r = Math.pow(Math.sqrt(x.re * x.re + x.im * x.im), power);
     const theta = Math.atan2(x.im, x.re) * power;
     
-    return createComplex(
-      r * Math.cos(theta),
-      r * Math.sin(theta)
-    );
+    return math.complex(r * Math.cos(theta), r * Math.sin(theta));
   });
 }
 
@@ -143,7 +134,7 @@ export function matrixPower(matrix: Complex[][], power: number): Complex[][] {
 export function matrixSin(matrix: Complex[][]): Complex[][] {
   return matrixFunction(matrix, (x) => {
     // Sine of complex number
-    return createComplex(
+    return math.complex(
       Math.sin(x.re) * Math.cosh(x.im),
       Math.cos(x.re) * Math.sinh(x.im)
     );
@@ -159,7 +150,7 @@ export function matrixSin(matrix: Complex[][]): Complex[][] {
 export function matrixCos(matrix: Complex[][]): Complex[][] {
   return matrixFunction(matrix, (x) => {
     // Cosine of complex number
-    return createComplex(
+    return math.complex(
       Math.cos(x.re) * Math.cosh(x.im),
       -Math.sin(x.re) * Math.sinh(x.im)
     );
