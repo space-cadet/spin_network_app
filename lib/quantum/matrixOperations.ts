@@ -261,19 +261,10 @@ export function eigenDecomposition(matrix: ComplexMatrix): {
     vectors: ComplexMatrix;
 } {
     const matrixM = math.matrix(matrix);
-    const { values, eigenvectors } = math.eigs(matrixM);
+    const { values, eigenvectors: eigenvectors } = math.eigs(matrixM);
 
-    // Convert values to Complex numbers regardless of input type
-    const eigenvalues = (values.valueOf() as number[]).map(v => math.complex(v));
-    
     return {
-        values: eigenvalues,
+        values: (values.valueOf() as number[]).map(v => math.complex(v)),
         vectors: eigenvectors.valueOf() as ComplexMatrix
     };
-    
-    // Ensure proper conversion from MathArray to our types
-    // return {
-    //     values: (values as math.Matrix).valueOf() as Complex[],
-    //     vectors: (eigenvectors as math.Matrix).valueOf() as ComplexMatrix
-    // };
 }

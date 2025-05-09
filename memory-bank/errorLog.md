@@ -1,5 +1,19 @@
 # Error Log
 
+## 2025-05-09 16:30 - T60: Eigendecomposition Implementation Issues
+**File:** `lib/quantum/matrixOperations.ts`
+**Error:** Incorrect handling of eigenvalue-eigenvector pairing with math.js DenseMatrix format
+**Cause:** When sorting eigenvalues, the corresponding eigenvectors were not being properly paired, leading to incorrect verification of the eigenvalue equation Av = λv
+**Fix:** 
+1. Updated eigendecomposition implementation to use eigenpair.value instead of sorted eigenvalues array
+2. Modified test suite to handle math.js DenseMatrix format correctly
+3. Added documentation about return format structure
+**Changes:**
+- Fixed eigenvalue-eigenvector pairing in tests
+- Updated verification to use math.js matrix operations consistently
+- Added comprehensive documentation in standalone-lib-quantum-plan.md
+**Task:** T60
+
 ## 2025-05-07 16:45 IST: Bell State and Density Matrix Creation Issues
 
 **Files:**

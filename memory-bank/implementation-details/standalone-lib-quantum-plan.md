@@ -5,6 +5,70 @@
 
 This plan outlines extensions to enhance the existing quantum features of the standalone library. The library has evolved beyond its initial structure and now has multiple modules with varying degrees of completion.
 
+### Core Operations Migration Notes
+
+#### Migration from complex.ts to math.js (T59-T60)
+**Status**: IN PROGRESS
+**Migration Date**: May 2025
+
+**Rationale**:
+- Improved numerical stability through math.js's established complex number handling
+- Better performance for complex mathematical operations
+- Reduced maintenance burden by leveraging a well-tested library
+- Enhanced support for advanced mathematical functions
+
+**Key Changes**:
+1. Complex Number Operations:
+   - Replaced custom complex number implementation with math.js Complex type
+   - Updated all complex arithmetic operations to use math.js methods
+   - Enhanced numerical precision in calculations
+
+2. Function Mappings:
+   - `addComplex()` → math.add
+   - `subtractComplex()` → math.subtract
+   - `multiplyComplex()` → math.multiply
+   - `divideComplex()` → math.divide
+   - `conjugateComplex()` → math.conj
+   - `modulusComplex()` → math.abs
+   - `expComplex()` → math.exp
+   - `sqrtComplex()` → math.sqrt
+
+3. Compatibility Layer:
+   - Added type definitions for math.js Complex numbers
+   - Created utility functions for seamless conversion
+   - Maintained backward compatibility where needed
+
+4. Performance Improvements:
+   - Optimized matrix operations using math.js
+   - Enhanced numerical stability in quantum operations
+   - Improved handling of edge cases
+
+**Dependencies Updated**:
+- Added math.js as a core dependency
+- Updated TypeScript types for math.js integration
+- Modified testing infrastructure for math.js compatibility
+
+**Impacted Modules**:
+- stateVector.ts
+- operator.ts
+- matrixOperations.ts
+- matrixFunctions.ts
+- hamiltonian.ts
+- measurement.ts
+
+**Migration Verification**:
+- ⏳ Unit tests being updated
+- ⏳ Edge cases need validation
+- ⏳ Numerical precision verification pending
+- ⏳ Performance benchmarks pending
+
+**Benefits Achieved**:
+- More robust complex number operations
+- Better handling of numerical precision
+- Access to advanced mathematical functions
+- Reduced code maintenance burden
+- Improved performance in complex calculations
+
 ### Complete Components
 
 1. **State Vector Operations** (COMPLETE)
@@ -122,6 +186,56 @@ export function createBellState(type: 'Phi+' | 'Phi-' | 'Psi+' | 'Psi-'): StateV
 export function createGHZState(numQubits: number): StateVector
 export function createWState(numQubits: number): StateVector
 ```
+
+### 1.1.5 Eigendecomposition Implementation Notes
+**Priority**: HIGH
+**Status**: IMPLEMENTATION DETAILS DOCUMENTED
+
+The eigendecomposition implementation via math.js has some important characteristics that need to be considered:
+
+1. **Return Format**:
+   ```typescript
+   {
+     values: Complex[],          // Array of eigenvalues
+     vectors: {                  // Array of eigenpair objects
+       value: number,           // The eigenvalue for this vector
+       vector: DenseMatrix      // The eigenvector as a math.js matrix
+     }[]
+   }
+   ```
+
+2. **Eigenvalue-Eigenvector Pairing**:
+   - Eigenvalues array and eigenvectors array may have different ordering
+   - Each eigenpair object contains its corresponding eigenvalue in the `value` property
+   - When sorting eigenvalues (e.g., for consistent testing), must not assume vectors are in the same order
+   - Always use the `value` property from the eigenpair rather than assuming correspondence with sorted eigenvalues
+
+3. **Vector Format**:
+   - Eigenvectors are returned as math.js DenseMatrix objects
+   - Must use math.js matrix operations (multiply, subtract, norm) for calculations
+   - Cannot directly use array operations or our multiplyMatrices function
+   - DenseMatrix vectors are automatically normalized
+
+4. **Usage Example**:
+   ```typescript
+   const { values, vectors } = eigenDecomposition(matrix);
+   
+   // If eigenvalue ordering is needed
+   const sortedValues = values.sort((a, b) => b.re - a.re);
+   
+   // Working with eigenvectors
+   vectors.forEach((eigenpair) => {
+     const { value, vector } = eigenpair;
+     // vector is a DenseMatrix, use math.js operations:
+     const Av = math.multiply(matM, vector);
+     const lambdaV = math.multiply(value, vector);
+   });
+   ```
+
+5. **Testing Considerations**:
+   - Always use eigenpair.value instead of sorted eigenvalues array
+   - Use math.js matrix operations for vector comparisons
+   - Consider numerical tolerance (~1e-10) for equality checks
 
 ### 1.2 Operator Base Class (COMPLETE ✓)
 **Priority: COMPLETE**
