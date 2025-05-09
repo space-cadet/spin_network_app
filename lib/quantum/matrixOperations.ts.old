@@ -1,0 +1,302 @@
+/**
+ * Core matrix operations for quantum computations.
+ * Uses math.js for enhanced numerical stability and complex number operations.
+ */
+
+import { Complex } from 'mathjs';
+import * as math from 'mathjs';
+
+// Type for matrix operations
+type ComplexMatrix = Complex[][];
+
+// Only clean up extreme numerical noise
+const NUMERICAL_THRESHOLD = 1e-15;
+
+/**
+ * Helper function for Kahan summation of complex numbers
+ */
+function kahanSum(numbers: Complex[]): Complex {
+    if (numbers.length === 0) {
+        return math.complex(0, 0);
+    }
+
+    // Ensure all numbers are proper math.js complex numbers
+    const complexNumbers = numbers.map(n => math.complex(n.re, n.im));
+
+    let sum = math.complex(0, 0);
+    let c = math.complex(0, 0);   // Compensation term
+
+    for (const num of complexNumbers) {
+        // y = num - c
+        const y = math.subtract(num, c) as Complex;
+        
+        // t = sum + y
+        const t = math.add(sum, y) as Complex;
+        
+        // c = (t - sum) - y
+        const tc = math.subtract(t, sum) as Complex;
+        c = math.subtract(tc, y) as Complex;
+
+        sum = t;
+    }
+
+    return sum;
+}
+
+/**
+ * Multiplies two complex matrices using math.js
+ */
+export function multiplyMatrices(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix {
+    if (!a || !b || a.length === 0 || b.length === 0) {
+        throw new Error('Invalid matrix dimensions');
+    }
+    if (a[0].length !== b.length) {
+        throw new Error('Matrix dimensions do not match for multiplication');
+    }
+
+    // Convert to math.js matrices, ensuring proper complex numbers
+    const matA = math.matrix(a.map(row => 
+        row.map(x => math.isComplex(x) ? x : math.complex(x?.re || 0, x?.im || 0))
+    ));
+    const matB = math.matrix(b.map(row => 
+        row.map(x => math.isComplex(x) ? x : math.complex(x?.re || 0, x?.im || 0))
+    ));
+
+    // Perform multiplication
+    const resultMat = math.multiply(matA, matB);
+    const resultArray = (resultMat.toArray() as any[][]).map(row =>
+        row.map(x => math.isComplex(x) ? x : math.complex(x?.re || 0, x?.im || 0))
+    );
+
+    // Clean up numerical noise
+    return resultArray.map(row =>
+        row.map(val => {
+            const absVal = math.abs(val);
+            return (typeof absVal === 'number' ? absVal : absVal.re) < NUMERICAL_THRESHOLD 
+                ? math.complex(0, 0) 
+                : val;
+        })
+    );
+}
+
+/**
+ * Computes matrix exponential exp(A) for a complex matrix A using math.js
+ */
+export function matrixExponential(matrix: ComplexMatrix): ComplexMatrix {
+    if (!matrix || matrix.length === 0) {
+        throw new Error('Invalid matrix');
+    }
+    const dim = matrix.length;
+    if (!matrix[0] || matrix[0].length !== dim) {
+        throw new Error('Matrix must be square');
+    }
+
+    // Convert to math.js matrix format
+    const matM = math.matrix(matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Compute matrix exponential
+    const result = math.expm(matM);
+
+    // Convert back to ComplexMatrix format
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
+}
+
+/**
+ * Computes tensor product (Kronecker product) of two matrices using math.js
+ */
+export function tensorProduct(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix {
+    if (!a || !b || a.length === 0 || b.length === 0) {
+        throw new Error('Invalid matrix dimensions');
+    }
+
+    // Convert matrices to math.js format
+    const matA = math.matrix(a.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+    const matB = math.matrix(b.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Compute Kronecker product
+    const result = math.kron(matA, matB);
+
+    // Convert back to ComplexMatrix
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
+}
+
+/**
+ * Computes the adjoint (conjugate transpose) of a matrix using math.js
+ */
+export function adjoint(matrix: ComplexMatrix): ComplexMatrix {
+    if (!matrix || matrix.length === 0) {
+        throw new Error('Invalid matrix');
+    }
+
+    console.log('Input matrix structure:');
+    console.log('- Matrix dimensions:', matrix.length, 'x', matrix[0].length);
+    console.log('- Matrix type:', typeof matrix);
+    console.log('- First row type:', typeof matrix[0]);
+    console.log('- Sample element:', matrix[0][0]);
+    console.log('- Sample element props:', Object.getOwnPropertyNames(matrix[0][0]));
+    
+    // Debug matrix structure before conversion
+    matrix.forEach((row, i) => {
+        row.forEach((elem, j) => {
+            if (!math.isComplex(elem)) {
+                console.log(`Non-complex element at [${i}][${j}]:`, elem);
+            }
+        });
+    });
+
+    try {
+        // Convert to proper math.js matrix format first
+        const properMatrix = matrix.map(row => 
+            row.map(elem => math.isComplex(elem) ? elem : math.complex(elem?.re || 0, elem?.im || 0))
+        );
+        
+        console.log('Converted matrix structure:', 
+            properMatrix.map(row => row.map(elem => ({re: elem.re, im: elem.im}))));
+        
+        const mathMatrix = math.matrix(properMatrix);
+        console.log('Math.js matrix created successfully');
+        
+        const conjMatrix = math.conj(mathMatrix);
+        console.log('Conjugate operation completed');
+        
+        const transposed = math.transpose(conjMatrix);
+        console.log('Transpose operation completed');
+        
+        // Convert back to array format
+        const result = transposed.valueOf() as ComplexMatrix;
+        console.log('Final matrix structure:', 
+            result.map(row => row.map(elem => ({re: elem.re, im: elem.im}))));
+            
+        return result;
+    } catch (e) {
+        console.error('Error in adjoint operation:', e);
+        console.error('Error location:', e.stack);
+        throw e;
+    }
+}
+
+/**
+ * Adds two matrices using math.js
+ */
+export function addMatrices(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix {
+    if (!a || !b || a.length !== b.length || a[0].length !== b[0].length) {
+        throw new Error('Matrix dimensions must match for addition');
+    }
+
+    // Convert to math.js matrices
+    const matA = math.matrix(a.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+    const matB = math.matrix(b.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Perform addition
+    const result = math.add(matA, matB);
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
+}
+
+/**
+ * Scales a matrix by a complex number using math.js
+ */
+export function scaleMatrix(matrix: ComplexMatrix, scalar: Complex): ComplexMatrix {
+    if (!matrix || matrix.length === 0) {
+        throw new Error('Invalid matrix');
+    }
+
+    // Ensure scalar is a proper math.js complex number
+    const s = math.complex(scalar.re, scalar.im);
+
+    // Convert matrix to math.js format
+    const matM = math.matrix(matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    ));
+
+    // Perform multiplication
+    const result = math.multiply(matM, s);
+    return (result.toArray() as any[][]).map(row =>
+        row.map(x => math.complex(x.re, x.im))
+    );
+}
+
+/**
+ * Checks if matrix is Hermitian (self-adjoint)
+ */
+export function isHermitian(matrix: ComplexMatrix, tolerance: number = 1e-10): boolean {
+    const n = matrix.length;
+    
+    // Convert matrix to math.js format
+    const matM = matrix.map(row => 
+        row.map(x => math.complex(x.re, x.im))
+    );
+    
+    for (let i = 0; i < n; i++) {
+        // Check diagonal elements are real
+        const diag = matM[i][i];
+        if (Math.abs(diag.im) > tolerance) {
+            return false;
+        }
+        
+        // Check off-diagonal elements are conjugates
+        for (let j = i + 1; j < n; j++) {
+            const upper = matM[i][j];
+            const lower = matM[j][i];
+            const conjLower = math.conj(lower);
+            
+            const diff = math.subtract(upper, conjLower) as Complex;
+            if (Math.abs(diff.re) > tolerance || Math.abs(diff.im) > tolerance) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+/**
+ * Checks if matrix is unitary
+ */
+export function isUnitary(matrix: ComplexMatrix, tolerance: number = 1e-10): boolean {
+    // Convert matrix to math.js format
+    const matM = math.matrix(matrix);
+    
+    // Calculate M * M† (should equal identity)
+    const matAdj = math.conj(math.transpose(matM));  // conjugate transpose
+    const product = math.multiply(matM, matAdj);
+    
+    // Compare with identity matrix
+    const n = matrix.length;
+    const identity = math.identity(n);
+    const diff = math.subtract(product, identity);
+    
+    // Check if difference matrix is approximately zero
+    return math.norm(diff) < tolerance;
+}
+
+/**
+ * Computes eigenvalues and eigenvectors of a matrix using math.js
+ * Returns sorted eigenvalues and corresponding eigenvectors
+ */
+export function eigenDecomposition(matrix: ComplexMatrix): {
+    values: Complex[];
+    vectors: ComplexMatrix;
+} {
+    const matrixM = math.matrix(matrix);
+    const { values, eigenvectors: eigenvectors } = math.eigs(matrixM);
+
+    return {
+        values: (values.valueOf() as number[]).map(v => math.complex(v)),
+        vectors: eigenvectors.valueOf() as ComplexMatrix
+    };
+}

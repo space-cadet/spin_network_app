@@ -288,21 +288,35 @@ describe('Matrix Operations', () => {
       
       // Check eigenvectors
     expect(vectors.length).toBe(2);
-    vectors.forEach((eigenpair) => {
-      // Each eigenpair should have a DenseMatrix vector
-      expect(eigenpair.vector).toBeDefined();
+    // Verify Av = λv for each eigenvector
+    for (let i = 0; i < vectors.length; i++) {
+      const eigenvector = vectors[i];
+      const eigenvalue = values[i];
       
-      // Convert test matrix to mathjs matrix for multiplication
-      const matM = math.matrix(matrix);
+      // Compute Av
+      const Av = [];
+      for (let row = 0; row < matrix.length; row++) {
+        let sumRe = 0;
+        let sumIm = 0;
+        for (let col = 0; col < matrix[0].length; col++) {
+          sumRe += matrix[row][col].re * eigenvector[col].re - matrix[row][col].im * eigenvector[col].im;
+          sumIm += matrix[row][col].re * eigenvector[col].im + matrix[row][col].im * eigenvector[col].re;
+        }
+        Av.push({ re: sumRe, im: sumIm });
+      }
       
-      // Compute Av and λv using the eigenvalue from the eigenpair
-      const Av = math.multiply(matM, eigenpair.vector);
-      const lambdaV = math.multiply(eigenpair.value, eigenpair.vector);
+      // Compute λv
+      const lambdaV = eigenvector.map(v => ({
+        re: eigenvalue.re * v.re - eigenvalue.im * v.im,
+        im: eigenvalue.re * v.im + eigenvalue.im * v.re
+      }));
       
-      // Check if Av = λv (within numerical tolerance)
-      const diff = math.subtract(Av, lambdaV);
-      expect(math.norm(diff)).toBeLessThan(1e-10);
-      });
+      // Check Av ≈ λv
+      for (let j = 0; j < Av.length; j++) {
+        expect(Math.abs(Av[j].re - lambdaV[j].re)).toBeLessThan(1e-10);
+        expect(Math.abs(Av[j].im - lambdaV[j].im)).toBeLessThan(1e-10);
+      }
+    }
     });
 
     it('computes eigenvalues for non-Hermitian matrix', () => {
@@ -327,13 +341,16 @@ describe('Matrix Operations', () => {
       expect(Math.abs(values[1].re - 1)).toBeLessThan(1e-10);
       
       // Check orthogonality
-      console.log('Vector type:', typeof vectors[0]);
-      console.log('Vector contents:', JSON.stringify(vectors[0]));
-      const dotProduct = math.abs(math.dot(
-        vectors[0].vector,
-        vectors[1].vector
-      ));
-      expect(dotProduct).toBeLessThan(1e-10);
+      let dotRe = 0;
+      let dotIm = 0;
+      for (let i = 0; i < vectors[0].length; i++) {
+        const v1 = vectors[0][i];
+        const v2 = vectors[1][i];
+        dotRe += v1.re * v2.re + v1.im * v2.im;
+        dotIm += v1.re * v2.im - v1.im * v2.re;
+      }
+      const dotMagnitude = Math.sqrt(dotRe * dotRe + dotIm * dotIm);
+      expect(dotMagnitude).toBeLessThan(1e-10);
     });
   });
 });

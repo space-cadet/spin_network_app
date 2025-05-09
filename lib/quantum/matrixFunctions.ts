@@ -46,17 +46,15 @@ export function matrixFunction(
       )
     );
     
-    // Reconstruct matrix: U * f(D) * U†
-    // First, construct U from vectors
-    const U: Complex[][] = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => math.complex(0, 0))
-    );
-    
-    for (let i = 0; i < dim; i++) {
-      for (let j = 0; j < dim; j++) {
-        U[j][i] = vectors[i][j]; // Fill the columns with eigenvectors
-      }
-    }
+    // Extract just the vector matrices from the eigenvector objects
+    const vectorMatrices = vectors.map(v => v.vector);
+
+    const U = vectorMatrices.map(v => {
+      // Ensure proper 2D column vector format
+      return [Array.isArray(v) ? v : [v]].flat();
+    });
+
+
     
     // Calculate U†
     const UDagger = adjoint(U);
@@ -96,14 +94,31 @@ export function matrixLogarithm(matrix: Complex[][]): Complex[][] {
  * @param matrix Matrix to calculate square root of
  * @returns The matrix square root
  */
-export function matrixSquareRoot(matrix: Complex[][]): Complex[][] {
-  return matrixFunction(matrix, (x) => {
-    // Square root of complex number
-    const r = Math.sqrt(Math.sqrt(x.re * x.re + x.im * x.im));
-    const theta = Math.atan2(x.im, x.re) / 2;
-    
-    return math.complex(r * Math.cos(theta), r * Math.sin(theta));
+export function matrixSquareRoot(matrix: ComplexMatrix): ComplexMatrix {
+  console.log('Matrix square root input:', 
+      matrix.map(row => row.map(elem => ({re: elem.re, im: elem.im}))));
+  
+  // Check matrix dimensions
+  console.log('Matrix dimensions:', matrix.length, 'x', matrix[0].length);
+  
+  // Verify matrix structure
+  matrix.forEach((row, i) => {
+      row.forEach((elem, j) => {
+          if (!math.isComplex(elem)) {
+              console.log(`Invalid element at [${i}][${j}]:`, elem);
+          }
+      });
   });
+  
+  try {
+      const result = matrixFunction(matrix, x => math.sqrt(x));
+      console.log('Square root calculation successful');
+      return result;
+  } catch (e) {
+      console.error('Error in matrix square root:', e);
+      console.error('Stack:', e.stack);
+      throw e;
+  }
 }
 
 /**

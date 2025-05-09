@@ -86,9 +86,19 @@ export function schmidtDecomposition(
   // Get right Schmidt basis vectors (eigenvectors of ρB)
   const statesB = filteredIndices.map(i => {
     const vector = vectors[i];
+    
+    // Add debugging statements
+    console.log('Processing vector:', vector);
+    console.log('Vector type:', typeof vector);
+    console.log('Is array?', Array.isArray(vector));
+    console.log('Vector properties:', Object.getOwnPropertyNames(vector));
+    
     // Ensure proper normalization
     const norm = Math.sqrt(vector.reduce((sum, v) => 
       sum + v.re * v.re + v.im * v.im, 0));
+      
+    console.log('Calculated norm:', norm);
+    
     const amplitudes = vector.map(v => 
       math.divide(v, math.complex(norm, 0)) as Complex
     );

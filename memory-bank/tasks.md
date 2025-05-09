@@ -14,7 +14,7 @@
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
 | T61 | Implement Quantum Circuit Module | ⬜ | HIGH | 2025-05-09 | [tasks/T61.md] | New task - implementing quantum circuit module |
-| T60 | Remove complex.ts and Direct Math.js Integration | 🔄 | HIGH | 2025-05-08 | [tasks/T60.md] | Matrix operations fixed, eigendecomposition completed, documentation updated |
+| T60 | Remove complex.ts and Direct Math.js Integration | 🔄 | HIGH | 2025-05-08 | [tasks/T60.md] | Matrix operations rewritten with improved validation and error handling, eigendecomposition fixed |
 | T59 | Math.js Complex Number Migration | ✅ | HIGH | 2025-05-08 | [tasks/T59.md] | Completed and superseded by T60 |
 | T58 | Extract Reusable React Template | 🔄 | HIGH | 2025-05-06 | [tasks/T58.md] | Core components extracted, example app created, planning state management |
 | T57 | Quantum Library Examples Implementation | 🔄 | HIGH | 2025-05-06 | [tasks/T57.md] | Basic examples complete, working on expanding example structure |
@@ -272,6 +272,7 @@
 4. **T52**: Complete API documentation
 
 ## Recent Updates
+- 2025-05-09 17:30: Updated T60 progress - Completed matrixOperations.ts rewrite with improved validation and error handling
 - 2025-05-09 15:30: Added T61 - New task for quantum circuit implementation
 - 2025-05-09 15:30: Updated T57 progress - enhanced examples implementation plan with structured approach
 - 2025-05-09 15:30: Updated T55 status - most quantum features complete, integrated with new T61 task
