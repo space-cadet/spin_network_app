@@ -4,10 +4,10 @@
 
 import { Hamiltonian } from '../hamiltonian';
 import { StateVector } from '../stateVector';
-import { createComplex } from '../complex';
 import { PauliX, PauliY, PauliZ } from '../gates';
 import { MatrixOperator } from '../operator';
 import { composeOperators } from '../composition';
+import * as math from 'mathjs';
 
 /**
  * Example 1: Single Spin in a Magnetic Field
@@ -23,8 +23,8 @@ function singleSpinExample() {
 
   // Create initial state |+⟩ = (|0⟩ + |1⟩)/√2
   const initialState = new StateVector(2, [
-    createComplex(1/Math.sqrt(2), 0),
-    createComplex(1/Math.sqrt(2), 0)
+    math.complex(1/Math.sqrt(2), 0),
+    math.complex(1/Math.sqrt(2), 0)
   ]);
 
   // Evolution times

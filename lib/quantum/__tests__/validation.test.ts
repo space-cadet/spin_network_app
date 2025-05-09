@@ -7,13 +7,14 @@ import {
   validateMatchDims
 } from '../utils/validation';
 import { Complex } from '../types';
+import * as math from 'mathjs';
 
 describe('Validation Utilities', () => {
   describe('validateMatDims', () => {
     test('accepts valid square matrix', () => {
       const matrix: Complex[][] = [
-        [{re: 1, im: 0}, {re: 0, im: 0}],
-        [{re: 0, im: 0}, {re: 1, im: 0}]
+        [math.complex(1, 0), math.complex(0, 0)],
+        [math.complex(0, 0), math.complex(1, 0)]
       ];
       expect(() => validateMatDims(matrix)).not.toThrow();
     });
@@ -25,8 +26,8 @@ describe('Validation Utilities', () => {
 
     test('rejects non-square matrix', () => {
       const matrix: Complex[][] = [
-        [{re: 1, im: 0}],
-        [{re: 0, im: 0}, {re: 1, im: 0}]
+        [math.complex(1, 0)],
+        [math.complex(0, 0), math.complex(1, 0)]
       ];
       expect(() => validateMatDims(matrix)).toThrow('Matrix must be square');
     });
@@ -69,16 +70,16 @@ describe('Validation Utilities', () => {
   describe('validateAmps', () => {
     test('accepts matching dimensions', () => {
       const amps: Complex[] = [
-        {re: 1, im: 0},
-        {re: 0, im: 0}
+        math.complex(1, 0),
+        math.complex(0, 0)
       ];
       expect(() => validateAmps(amps, 2)).not.toThrow();
     });
 
     test('rejects mismatched dimensions', () => {
       const amps: Complex[] = [
-        {re: 1, im: 0},
-        {re: 0, im: 0}
+        math.complex(1, 0),
+        math.complex(0, 0)
       ];
       expect(() => validateAmps(amps, 3)).toThrow('Number of amplitudes must match dimension');
     });
@@ -87,16 +88,16 @@ describe('Validation Utilities', () => {
   describe('validateNorm', () => {
     test('accepts normalized amplitudes', () => {
       const amps: Complex[] = [
-        {re: 1/Math.sqrt(2), im: 0},
-        {re: 1/Math.sqrt(2), im: 0}
+        math.complex(1/Math.sqrt(2), 0),
+        math.complex(1/Math.sqrt(2), 0)
       ];
       expect(() => validateNorm(amps)).not.toThrow();
     });
 
     test('rejects non-normalized amplitudes', () => {
       const amps: Complex[] = [
-        {re: 1, im: 0},
-        {re: 1, im: 0}
+        math.complex(1, 0),
+        math.complex(1, 0)
       ];
       expect(() => validateNorm(amps)).toThrow('State vector must be normalized');
     });

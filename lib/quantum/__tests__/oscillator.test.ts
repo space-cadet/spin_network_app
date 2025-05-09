@@ -3,8 +3,8 @@
  */
 
 import { creationOp, destructionOp, numberOp, positionOp, momentumOp, harmonicOscillator } from '../oscillator';
-import { createComplex } from '../complex';
 import { StateVector } from '../stateVector';
+import * as math from 'mathjs';
 
 describe('Quantum Oscillator Operators', () => {
     const dim = 4; // Use 4-dimensional Hilbert space for tests

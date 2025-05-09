@@ -2,10 +2,10 @@
  * Core type definitions for quantum operations
  */
 
-import { Complex as MathJsComplex } from 'mathjs';
+import { Complex } from 'mathjs';
 
 // Direct export of math.js Complex type
-export { Complex } from 'mathjs';
+export type { Complex } from 'mathjs';
 
 /**
  * Represents a quantum state vector

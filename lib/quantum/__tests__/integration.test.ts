@@ -6,6 +6,7 @@ import { HilbertSpace } from '../hilbertSpace';
 import { MatrixOperator } from '../operator';
 import { TEST_SPACES, TEST_OPERATORS, TEST_STATES } from './utils/testFixtures';
 import { stateVectorApproxEqual, createRandomState } from './utils/testHelpers';
+import * as math from 'mathjs';
 
 describe('Quantum Integration Tests', () => {
   describe('Space and State Integration', () => {
@@ -47,7 +48,7 @@ describe('Quantum Integration Tests', () => {
       
       // Check normalization
       const normSquared = result.amplitudes.reduce((sum, amp) => 
-        sum + amp.re * amp.re + amp.im * amp.im, 0);
+        sum + math.abs(amp) ** 2, 0);
       expect(Math.abs(normSquared - 1)).toBeLessThan(1e-10);
     });
   });
@@ -176,7 +177,7 @@ describe('Quantum Integration Tests', () => {
       
       // Check normalization maintained
       const normSquared = result.amplitudes.reduce((sum, amp) => 
-        sum + amp.re * amp.re + amp.im * amp.im, 0);
+        sum + math.abs(amp) ** 2, 0);
       expect(Math.abs(normSquared - 1)).toBeLessThan(1e-8);
     });
 

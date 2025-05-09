@@ -3,10 +3,11 @@
  */
 
 import { Hamiltonian, HamiltonianTerm } from '../hamiltonian';
-import { createComplex } from '../complex';
+// import { math.complex } from '../complex';
 import { PauliX, PauliY, PauliZ } from '../gates';
 import { MatrixOperator } from '../operator';
 import { StateVector } from '../stateVector';
+import * as math from 'mathjs';
 
 describe('Hamiltonian', () => {
   describe('Basic Hamiltonian operations', () => {
@@ -15,14 +16,14 @@ describe('Hamiltonian', () => {
     beforeEach(() => {
       // Create a simple Hamiltonian H = σz
       H = new Hamiltonian(2, [{
-        coefficient: createComplex(1, 0),
+        coefficient: math.complex(1, 0),
         operator: PauliZ
       }], 'spin');
     });
 
     test('should construct correctly', () => {
       expect(H.dimension).toBe(2);
-      expect(H.type).toBe('spin');
+      expect(H.hamiltonianType).toBe('spin');
       expect(H.terms.length).toBe(1);
     });
 
@@ -43,8 +44,8 @@ describe('Hamiltonian', () => {
     test('should correctly evolve states', () => {
       // Create |+⟩ state = (|0⟩ + |1⟩)/√2
       const statePlus = new StateVector(2, [
-        createComplex(1/Math.sqrt(2), 0),
-        createComplex(1/Math.sqrt(2), 0)
+        math.complex(1/Math.sqrt(2), 0),
+        math.complex(1/Math.sqrt(2), 0)
       ]);
 
       // Evolve for t = π/2 (quarter rotation)
@@ -99,10 +100,10 @@ describe('Hamiltonian', () => {
 
       // Test with singlet state (|↑↓⟩ - |↓↑⟩)/√2
       const singlet = new StateVector(4, [
-        createComplex(0, 0),
-        createComplex(1/Math.sqrt(2), 0),
-        createComplex(-1/Math.sqrt(2), 0),
-        createComplex(0, 0)
+        math.complex(0, 0),
+        math.complex(1/Math.sqrt(2), 0),
+        math.complex(-1/Math.sqrt(2), 0),
+        math.complex(0, 0)
       ]);
       const E_singlet = H.expectationValue(singlet);
       expect(E_singlet.re).toBeCloseTo(-3);  // Should be eigenstate with E=-3
@@ -120,39 +121,59 @@ describe('Hamiltonian', () => {
         const evolved = H.evolveState(updown, t);
         
         // Should only evolve within Sz=0 subspace
-        expect(evolved.amplitudes[0].re**2 + evolved.amplitudes[0].im**2).toBeCloseTo(0);
-        expect(evolved.amplitudes[3].re**2 + evolved.amplitudes[3].im**2).toBeCloseTo(0);
+        const prob0 = math.abs(math.multiply(evolved.amplitudes[0], math.conj(evolved.amplitudes[0])));
+        const prob3 = math.abs(math.multiply(evolved.amplitudes[3], math.conj(evolved.amplitudes[3])));
+        expect(prob0).toBeCloseTo(0);
+        expect(prob3).toBeCloseTo(0);
       }
+    });
+
+    it('evolves state correctly', () => {
+      const H = Hamiltonian.createHeisenbergHamiltonian(2, 1);
+      const state = new StateVector(4, [
+        math.complex(1, 0),
+        math.complex(0, 0),
+        math.complex(0, 0),
+        math.complex(0, 0)
+      ]);
+      
+      const evolved = H.evolveState(state, Math.PI);
+      
+      // At t = π, expect |00⟩ to evolve to |11⟩
+      const prob0 = math.abs(math.multiply(evolved.amplitudes[0], math.conj(evolved.amplitudes[0])));
+      const prob3 = math.abs(math.multiply(evolved.amplitudes[3], math.conj(evolved.amplitudes[3])));
+      expect(prob0).toBeCloseTo(0);
+      expect(prob3).toBeCloseTo(1);
     });
   });
 
   describe('Error handling', () => {
     test('should throw on dimension mismatch', () => {
       const H = new Hamiltonian(2, [{
-        coefficient: createComplex(1, 0),
+        coefficient: math.complex(1, 0),
         operator: PauliZ
       }]);
 
       const wrongState = new StateVector(3, [
-        createComplex(1, 0),
-        createComplex(0, 0),
-        createComplex(0, 0)
+        math.complex(1, 0),
+        math.complex(0, 0),
+        math.complex(0, 0)
       ]);
 
       expect(() => H.evolveState(wrongState, 1)).toThrow();
       expect(() => H.expectationValue(wrongState)).toThrow();
     });
 
-    test('should throw on non-Hermitian terms', () => {
+    test('should throw on non-Hermitian terms when required', () => {
       const nonHermitian = new MatrixOperator([
-        [createComplex(1, 0), createComplex(1, 1)],
-        [createComplex(1, -1), createComplex(1, 0)]
+        [math.complex(1, 0), math.complex(1, 1)],
+        [math.complex(1, -1), math.complex(1, 0)]
       ]);
 
       expect(() => new Hamiltonian(2, [{
-        coefficient: createComplex(1, 0),
+        coefficient: math.complex(1, 0),
         operator: nonHermitian
-      }])).toThrow();
+      }], 'custom', false, true)).toThrow();  // requireHermitian = true
     });
   });
 });

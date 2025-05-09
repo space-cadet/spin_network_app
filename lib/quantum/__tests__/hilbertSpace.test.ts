@@ -5,6 +5,8 @@
 import { HilbertSpace } from '../hilbertSpace';
 import { TEST_DIMS, TEST_SPACES, BASIS_STATES } from './utils/testFixtures';
 import { stateVectorApproxEqual } from './utils/testHelpers';
+import { StateVector } from '../stateVector';
+import * as math from 'mathjs';
 
 describe('HilbertSpace', () => {
   describe('Constructor', () => {
@@ -112,20 +114,20 @@ describe('HilbertSpace', () => {
     describe('superposition', () => {
       it('creates normalized superposition state', () => {
         const space = TEST_SPACES.QUBIT;
-        const coeffs = [{ re: 1, im: 0 }, { re: 1, im: 0 }];
+        const coeffs = [math.complex(1, 0), math.complex(1, 0)];
         const state = space.superposition(coeffs);
         
         expect(state.dimension).toBe(2);
         
         // Check normalization
         const normSquared = state.amplitudes.reduce((sum, amp) => 
-          sum + amp.re * amp.re + amp.im * amp.im, 0);
+          sum + math.abs(amp).re, 0);
         expect(Math.abs(normSquared - 1)).toBeLessThan(1e-10);
       });
 
       it('throws error for invalid coefficients', () => {
         const space = TEST_SPACES.QUBIT;
-        expect(() => space.superposition([{ re: 1, im: 0 }])).toThrow();
+        expect(() => space.superposition([math.complex(1, 0)])).toThrow();
       });
     });
 

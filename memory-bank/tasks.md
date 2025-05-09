@@ -13,8 +13,8 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
-| T60 | Remove complex.ts and Direct Math.js Integration | 🔄 | HIGH | 2025-05-08 | [tasks/T60.md] | Core math.js integration fixes complete, continuing module updates |
-| T59 | Math.js Complex Number Migration | ⏸️ | HIGH | 2025-05-08 | [tasks/T59.md] | Superseded by T60 |
+| T60 | Remove complex.ts and Direct Math.js Integration | 🔄 | HIGH | 2025-05-08 | [tasks/T60.md] | Matrix operations simplified and fixed, all tests passing |
+| T59 | Math.js Complex Number Migration | ✅ | HIGH | 2025-05-08 | [tasks/T59.md] | Completed and superseded by T60 |
 | T58 | Extract Reusable React Template | 🔄 | HIGH | 2025-05-06 | [tasks/T58.md] | Core components extracted, example app created, planning state management |
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|

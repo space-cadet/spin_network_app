@@ -135,21 +135,22 @@ export function adjoint(matrix: ComplexMatrix): ComplexMatrix {
         throw new Error('Invalid matrix');
     }
 
-    const m = matrix.length;
-    const n = matrix[0].length;
+    // const m = matrix.length;
+    // const n = matrix[0].length;
 
-    // Create conjugate transpose manually to ensure correct complex number handling
-    const result: ComplexMatrix = Array(n).fill(null).map(() => 
-        Array(m).fill(null).map(() => math.complex(0, 0))
-    );
+    // // Create conjugate transpose manually to ensure correct complex number handling
+    // const result: ComplexMatrix = Array(n).fill(null).map(() => 
+    //     Array(m).fill(null).map(() => math.complex(0, 0))
+    // );
 
-    for (let i = 0; i < m; i++) {
-        for (let j = 0; j < n; j++) {
-            result[j][i] = math.complex(matrix[i][j].re, -matrix[i][j].im);
-        }
-    }
+    // for (let i = 0; i < m; i++) {
+    //     for (let j = 0; j < n; j++) {
+    //         result[j][i] = math.complex(matrix[i][j].re, -matrix[i][j].im);
+    //     }
+    // }
 
-    return result;
+    const result = math.transpose(math.conj(matrix));
+    return result.valueOf() as ComplexMatrix;
 }
 
 /**
@@ -236,42 +237,19 @@ export function isHermitian(matrix: ComplexMatrix, tolerance: number = 1e-10): b
  */
 export function isUnitary(matrix: ComplexMatrix, tolerance: number = 1e-10): boolean {
     // Convert matrix to math.js format
-    const matM = math.matrix(matrix.map(row => 
-        row.map(x => math.complex(x.re, x.im))
-    ));
+    const matM = math.matrix(matrix);
     
-    // Get adjoint
-    const adjM = adjoint(matrix);
-    const matAdj = math.matrix(adjM.map(row => 
-        row.map(x => math.complex(x.re, x.im))
-    ));
+    // Calculate M * M† (should equal identity)
+    const matAdj = math.conj(math.transpose(matM));  // conjugate transpose
+    const product = math.multiply(matM, matAdj);
     
-    // Calculate products
-    const productUUdagger = math.multiply(matM, matAdj);
-    const productUdaggerU = math.multiply(matAdj, matM);
-    
-    // Convert to array for checking
-    const arrUUdagger = (productUUdagger.toArray() as any[][]).map(row =>
-        row.map(x => math.complex(x.re, x.im))
-    );
-    const arrUdaggerU = (productUdaggerU.toArray() as any[][]).map(row =>
-        row.map(x => math.complex(x.re, x.im))
-    );
-
+    // Compare with identity matrix
     const n = matrix.length;
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            const expected = i === j ? math.complex(1, 0) : math.complex(0, 0);
-            
-            const diffUU = math.subtract(arrUUdagger[i][j], expected) as Complex;
-            const diffUdaggerU = math.subtract(arrUdaggerU[i][j], expected) as Complex;
-            
-            if (math.abs(diffUU) > tolerance || math.abs(diffUdaggerU) > tolerance) {
-                return false;
-            }
-        }
-    }
-    return true;
+    const identity = math.identity(n);
+    const diff = math.subtract(product, identity);
+    
+    // Check if difference matrix is approximately zero
+    return math.norm(diff) < tolerance;
 }
 
 /**
@@ -282,123 +260,20 @@ export function eigenDecomposition(matrix: ComplexMatrix): {
     values: Complex[];
     vectors: ComplexMatrix;
 } {
-    // if (!isHermitian(matrix)) {
-    //     throw new Error('Matrix must be Hermitian for real eigenvalues');
-    // }
+    const matrixM = math.matrix(matrix);
+    const { values, eigenvectors } = math.eigs(matrixM);
 
-    // Convert to math.js matrix format, ensuring proper complex number handling
-    const n = matrix.length;
-    const matrixM = math.matrix(matrix.map(row => 
-        row.map(x => math.complex(x.re, x.im))
-    ));
-
-    // Compute eigenvalues and eigenvectors using math.js
-    const { values: rawVals, eigenvectors: rawVecs } = math.eigs(matrixM);
-
-    // Extract eigenvalues from DenseMatrix and convert to Complex type
-    const eigenvalues = (rawVals._data as number[]).map(v => math.complex(v, 0));
-
-    // Convert eigenvectors to ComplexMatrix format and normalize them
-    const eigenvectors: ComplexMatrix = [];
-    for (let i = 0; i < n; i++) {
-        // Extract eigenvector as column from rawVecs
-        const vec = Array(n).fill(0).map((_, j) => rawVecs[j][i]);
-        
-        // Normalize the eigenvector
-        const norm = Math.sqrt(vec.reduce((sum, x) => sum + x * x, 0));
-        const normalizedVec = vec.map(x => math.complex(x / norm, 0));
-        
-        eigenvectors.push(normalizedVec);
-    }
-
-    // Convert eigenvalues array-like object to actual array for sorting
-    const eigenvalueArray = Array.from(eigenvalues);
-    const indices = Array.from({ length: eigenvalueArray.length }, (_, i) => i)
-        .sort((a, b) => Math.abs(eigenvalueArray[b].re) - Math.abs(eigenvalueArray[a].re));
-
+    // Convert values to Complex numbers regardless of input type
+    const eigenvalues = (values.valueOf() as number[]).map(v => math.complex(v));
+    
     return {
-        values: indices.map(i => eigenvalueArray[i]),
-        vectors: indices.map(i => eigenvectors[i])
+        values: eigenvalues,
+        vectors: eigenvectors.valueOf() as ComplexMatrix
     };
-}
-
-/**
- * Power iteration to find largest eigenvalue/vector
- */
-function powerIteration(matrix: number[][]): { value: number; vector: number[] } {
-    const dim = matrix.length;
-    const MAX_ITERATIONS = 1000; // Increased from 100
-    const CONVERGENCE_THRESHOLD = 1e-8; // Relaxed from 1e-10
     
-    // Initialize with more stable starting vector
-    let vector = Array(dim).fill(0);
-    vector[0] = 1; // Start with basis vector instead of random
-    
-    // Initial normalization
-    const norm = Math.sqrt(vector.reduce((sum, v) => sum + v * v, 0));
-    vector = vector.map(v => v / norm);
-
-    let prevValue = 0;
-    
-    for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
-        // Apply matrix with enhanced numerical stability
-        const newVector = vector.map((_, i) => {
-            let sum = 0;
-            for (let j = 0; j < dim; j++) {
-                sum += matrix[i][j] * vector[j];
-            }
-            return sum;
-        });
-
-        // Compute new norm
-        const newNorm = Math.sqrt(newVector.reduce((sum, v) => sum + v * v, 0));
-        
-        // Check for zero norm (indicates zero eigenvalue)
-        if (Math.abs(newNorm) < 1e-14) {
-            return { value: 0, vector: vector };
-        }
-
-        const normalized = newVector.map(v => v / newNorm);
-
-        // Calculate eigenvalue using Rayleigh quotient
-        const value = vector.reduce((sum, v, i) => sum + v * newVector[i], 0);
-        
-        // Check convergence using both vector difference and eigenvalue stability
-        const vectorDiff = normalized.reduce((sum, v, i) => 
-            sum + Math.abs(v - vector[i]), 0
-        );
-        
-        const valueDiff = Math.abs(value - prevValue);
-        
-        if (vectorDiff < CONVERGENCE_THRESHOLD && valueDiff < CONVERGENCE_THRESHOLD) {
-            return { value, vector: normalized };
-        }
-
-        vector = normalized;
-        prevValue = value;
-    }
-
-    // If we haven't converged, but the last few iterations were stable enough,
-    // return the current best estimate
-    const finalValue = vector.reduce((sum, v, i) => {
-        let matrixValue = 0;
-        for (let j = 0; j < dim; j++) {
-            matrixValue += matrix[i][j] * vector[j];
-        }
-        return sum + v * matrixValue;
-    }, 0);
-
-    return { value: finalValue, vector: vector };
-}
-
-/**
- * Deflate matrix by removing contribution of found eigenvalue/vector
- */
-function deflateMatrix(matrix: number[][], value: number, vector: number[]) {
-    const dim = matrix.length;
-    for (let i = 0; i < dim; i++) {
-        for (let j = 0; j < dim; j++) {
-            matrix[i][j] -= value * vector[i] * vector[j];
-        }
-    }
+    // Ensure proper conversion from MathArray to our types
+    // return {
+    //     values: (values as math.Matrix).valueOf() as Complex[],
+    //     vectors: (eigenvectors as math.Matrix).valueOf() as ComplexMatrix
+    // };
 }

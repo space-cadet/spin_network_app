@@ -1,4 +1,11 @@
-# Edit History  
+# Edit History
+
+## 2025-05-09
+### [15:30] - T60: Matrix Operations Simplification
+- Modified `lib/quantum/matrixOperations.ts` - Simplified isUnitary implementation using direct math.js operations
+- Modified `lib/quantum/matrixOperations.ts` - Fixed eigenDecomposition to ensure consistent Complex type returns
+- Modified `lib/quantum/matrixOperations.ts` - Removed unused powerIteration and deflateMatrix functions
+- Modified `lib/quantum/__tests__/matrixOperations.test.ts` - Updated eigenvector tests to work with math.js formats  
 *Last Updated: 2025-05-08 16:45 IST*
 
 ## 2025-05-08

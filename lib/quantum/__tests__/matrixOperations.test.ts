@@ -288,9 +288,9 @@ describe('Matrix Operations', () => {
       // Should have normalized eigenvectors
       expect(vectors.length).toBe(2);
       for (const vector of vectors) {
-        const norm = vector.reduce((sum, v) => 
-          sum + math.abs(v) ** 2, 0);
-        expect(Math.abs(norm - 1)).toBeLessThan(1e-10);
+        const norm = vector.reduce((sum, v) =>
+        math.add(sum, math.pow(math.abs(v), 2) as Complex), math.complex(0, 0));
+        expect(Math.abs(norm.re - 1)).toBeLessThan(1e-10);
       }
 
       // Verify eigenvector equation Av = λv
@@ -316,21 +316,39 @@ describe('Matrix Operations', () => {
 
     it('handles degenerate eigenvalues', () => {
       const matrix = [
-        [math.complex(1, 0), math.complex(0, 0)],
-        [math.complex(0, 0), math.complex(1, 0)]
+          [math.complex(1, 0), math.complex(0, 0)],
+          [math.complex(0, 0), math.complex(1, 0)]
       ];
       const { values, vectors } = eigenDecomposition(matrix);
+
+      console.log('Values:', values);
+      console.log('Type of values:', typeof values);
+      console.log('Values structure:', JSON.stringify(values));
+
+      console.log(values[0], values[0].re);
+      console.log(typeof values[0]); 
       
-      // Should have same eigenvalue 1 twice
+      // Check eigenvalues
       expect(values.length).toBe(2);
+      // Handle both number and Complex cases
+      const val0 = typeof values[0] === 'number' ? values[0] : values[0].re;
+      const val1 = typeof values[1] === 'number' ? values[1] : values[1].re;
+
+      console.log(Math.abs(values[0].re - 1));
+      console.log(Math.abs(values[1].re - 1));
+
       expect(Math.abs(values[0].re - 1)).toBeLessThan(1e-10);
       expect(Math.abs(values[1].re - 1)).toBeLessThan(1e-10);
       
-      // Eigenvectors should be orthogonal
-      const dotProduct = vectors[0].reduce((sum, v, i) =>
-        sum + math.abs(math.multiply(math.conj(v), vectors[1][i])), 0
-      );
-      expect(Math.abs(dotProduct)).toBeLessThan(1e-10);
+      // Check orthogonality using math.js dot product
+      const vec0 = math.matrix(vectors[0]);
+      const vec1 = math.matrix(vectors[1]);
+      const dotProduct = math.abs(math.dot(
+          math.conj(vec0),
+          vec1
+      ));
+      
+      expect(dotProduct).toBeLessThan(1e-10);
     });
   });
 });

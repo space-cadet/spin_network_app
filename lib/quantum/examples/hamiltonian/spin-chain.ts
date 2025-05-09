@@ -10,10 +10,10 @@
 
 import { Hamiltonian } from '../../hamiltonian';
 import { StateVector } from '../../stateVector';
-import { createComplex } from '../../complex';
 import { MatrixOperator } from '../../operator';
 import { PauliZ } from '../../gates';
 import { composeOperators } from '../../composition';
+import * as math from 'mathjs';
 
 /**
  * Creates magnetization operator for a specific site in a spin chain

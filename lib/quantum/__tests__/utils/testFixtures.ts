@@ -2,9 +2,10 @@
  * Common test fixtures for quantum module tests
  */
 
-import { Complex, StateVector } from '../../types';
+import { Complex } from '../../types';
+import { StateVector } from '../../stateVector';
 import { HilbertSpace } from '../../hilbertSpace';
-import { createComplex } from '../../complex';
+import * as math from 'mathjs';
 
 /**
  * Standard test dimensions
@@ -22,33 +23,25 @@ export const TEST_DIMS = {
  */
 export const BASIS_STATES = {
   // Qubit basis states |0⟩ and |1⟩
-  QUBIT_0: {
-    dimension: 2,
-    amplitudes: [createComplex(1, 0), createComplex(0, 0)],
-    basis: '|0⟩'
-  },
-  QUBIT_1: {
-    dimension: 2,
-    amplitudes: [createComplex(0, 0), createComplex(1, 0)],
-    basis: '|1⟩'
-  },
+  QUBIT_0: new StateVector(2, [math.complex(1, 0), math.complex(0, 0)], '|0⟩'),
+  QUBIT_1: new StateVector(2, [math.complex(0, 0), math.complex(1, 0)], '|1⟩'),
 
   // Qutrit basis states |0⟩, |1⟩, |2⟩
-  QUTRIT_0: {
-    dimension: 3,
-    amplitudes: [createComplex(1, 0), createComplex(0, 0), createComplex(0, 0)],
-    basis: '|0⟩'
-  },
-  QUTRIT_1: {
-    dimension: 3,
-    amplitudes: [createComplex(0, 0), createComplex(1, 0), createComplex(0, 0)],
-    basis: '|1⟩'
-  },
-  QUTRIT_2: {
-    dimension: 3,
-    amplitudes: [createComplex(0, 0), createComplex(0, 0), createComplex(1, 0)],
-    basis: '|2⟩'
-  }
+  QUTRIT_0: new StateVector(3, [
+    math.complex(1, 0), 
+    math.complex(0, 0), 
+    math.complex(0, 0)
+  ], '|0⟩'),
+  QUTRIT_1: new StateVector(3, [
+    math.complex(0, 0), 
+    math.complex(1, 0), 
+    math.complex(0, 0)
+  ], '|1⟩'),
+  QUTRIT_2: new StateVector(3, [
+    math.complex(0, 0), 
+    math.complex(0, 0), 
+    math.complex(1, 0)
+  ], '|2⟩')
 };
 
 /**
@@ -59,16 +52,16 @@ export const TEST_STATES = {
   PLUS: {
     dimension: 2,
     amplitudes: [
-      createComplex(1/Math.sqrt(2), 0),
-      createComplex(1/Math.sqrt(2), 0)
+      math.complex(1/Math.sqrt(2), 0),
+      math.complex(1/Math.sqrt(2), 0)
     ],
     basis: '|+⟩'
   },
   MINUS: {
     dimension: 2,
     amplitudes: [
-      createComplex(1/Math.sqrt(2), 0),
-      createComplex(-1/Math.sqrt(2), 0)
+      math.complex(1/Math.sqrt(2), 0),
+      math.complex(-1/Math.sqrt(2), 0)
     ],
     basis: '|-⟩'
   },
@@ -77,20 +70,20 @@ export const TEST_STATES = {
   BELL_PHI_PLUS: {
     dimension: 4,
     amplitudes: [
-      createComplex(1/Math.sqrt(2), 0),
-      createComplex(0, 0),
-      createComplex(0, 0),
-      createComplex(1/Math.sqrt(2), 0)
+      math.complex(1/Math.sqrt(2), 0),
+      math.complex(0, 0),
+      math.complex(0, 0),
+      math.complex(1/Math.sqrt(2), 0)
     ],
     basis: '|Φ⁺⟩'
   },
   BELL_PHI_MINUS: {
     dimension: 4,
     amplitudes: [
-      createComplex(1/Math.sqrt(2), 0),
-      createComplex(0, 0),
-      createComplex(0, 0),
-      createComplex(-1/Math.sqrt(2), 0)
+      math.complex(1/Math.sqrt(2), 0),
+      math.complex(0, 0),
+      math.complex(0, 0),
+      math.complex(-1/Math.sqrt(2), 0)
     ],
     basis: '|Φ⁻⟩'
   }
@@ -111,35 +104,35 @@ export const TEST_SPACES = {
 export const TEST_OPERATORS = {
   // Pauli matrices
   PAULI_X: [
-    [createComplex(0, 0), createComplex(1, 0)],
-    [createComplex(1, 0), createComplex(0, 0)]
+    [math.complex(0, 0), math.complex(1, 0)],
+    [math.complex(1, 0), math.complex(0, 0)]
   ],
   PAULI_Y: [
-    [createComplex(0, 0), createComplex(0, -1)],
-    [createComplex(0, 1), createComplex(0, 0)]
+    [math.complex(0, 0), math.complex(0, -1)],
+    [math.complex(0, 1), math.complex(0, 0)]
   ],
   PAULI_Z: [
-    [createComplex(1, 0), createComplex(0, 0)],
-    [createComplex(0, 0), createComplex(-1, 0)]
+    [math.complex(1, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(-1, 0)]
   ],
   
   // Identity gate
   IDENTITY_2: [
-    [createComplex(1, 0), createComplex(0, 0)],
-    [createComplex(0, 0), createComplex(1, 0)]
+    [math.complex(1, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(1, 0)]
   ],
   
   // Hadamard gate
   HADAMARD: [
-    [createComplex(1/Math.sqrt(2), 0), createComplex(1/Math.sqrt(2), 0)],
-    [createComplex(1/Math.sqrt(2), 0), createComplex(-1/Math.sqrt(2), 0)]
+    [math.complex(1/Math.sqrt(2), 0), math.complex(1/Math.sqrt(2), 0)],
+    [math.complex(1/Math.sqrt(2), 0), math.complex(-1/Math.sqrt(2), 0)]
   ],
   
   // CNOT gate
   CNOT: [
-    [createComplex(1, 0), createComplex(0, 0), createComplex(0, 0), createComplex(0, 0)],
-    [createComplex(0, 0), createComplex(1, 0), createComplex(0, 0), createComplex(0, 0)],
-    [createComplex(0, 0), createComplex(0, 0), createComplex(0, 0), createComplex(1, 0)],
-    [createComplex(0, 0), createComplex(0, 0), createComplex(1, 0), createComplex(0, 0)]
+    [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(1, 0)],
+    [math.complex(0, 0), math.complex(0, 0), math.complex(1, 0), math.complex(0, 0)]
   ]
 };
