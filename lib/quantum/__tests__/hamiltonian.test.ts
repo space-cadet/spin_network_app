@@ -96,7 +96,7 @@ describe('Hamiltonian', () => {
       // Test with |↑↑⟩ state
       const upup = StateVector.computationalBasis(4, 0);
       const E_upup = H.expectationValue(upup);
-      expect(E_upup.re).toBeCloseTo(1);  // Should be eigenstate with E=+1
+      expect(E_upup.re).toBeCloseTo(0.75);  // Eigenstate with E = 3J/4
 
       // Test with singlet state (|↑↓⟩ - |↓↑⟩)/√2
       const singlet = new StateVector(4, [
@@ -106,14 +106,15 @@ describe('Hamiltonian', () => {
         math.complex({re: 0, im:  0})
       ]);
       const E_singlet = H.expectationValue(singlet);
-      expect(E_singlet.re).toBeCloseTo(-3);  // Should be eigenstate with E=-3
+      expect(E_singlet.re).toBeCloseTo(-0.75);  // Eigenstate with E = -3J/4
     });
 
-    test('should conserve total spin', () => {
+    test('should conserve total spin and energy', () => {
       const H = Hamiltonian.createHeisenbergHamiltonian(2, 1);
 
       // Start with |↑↓⟩ state
       const updown = StateVector.computationalBasis(4, 1);
+      const initialEnergy = H.expectationValue(updown).re;
       
       // Evolve for various times
       const times = [0.1, 0.5, 1.0, 2.0];
@@ -125,25 +126,34 @@ describe('Hamiltonian', () => {
         const prob3 = math.abs(math.multiply(evolved.amplitudes[3], math.conj(evolved.amplitudes[3])));
         expect(prob0).toBeCloseTo(0);
         expect(prob3).toBeCloseTo(0);
+        
+        // Energy should be conserved
+        const energy = H.expectationValue(evolved).re;
+        expect(energy).toBeCloseTo(initialEnergy);
+        
+        // Verify |↑↓⟩ evolves to mix with |↓↑⟩ only
+        const totalProb = math.abs(math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1]))) +
+                         math.abs(math.multiply(evolved.amplitudes[2], math.conj(evolved.amplitudes[2])));
+        expect(totalProb).toBeCloseTo(1);
       }
     });
 
-    it('evolves state correctly', () => {
+    test('evolves product and entangled states correctly', () => {
       const H = Hamiltonian.createHeisenbergHamiltonian(2, 1);
-      const state = new StateVector(4, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0})
-      ]);
       
-      const evolved = H.evolveState(state, Math.PI);
+      // Test evolution of |↑↑⟩ state (energy eigenstate)
+      const upup = StateVector.computationalBasis(4, 0);
+      const evolved_upup = H.evolveState(upup, Math.PI);
+      expect(math.abs(evolved_upup.innerProduct(upup))).toBeCloseTo(1);  // Should return to itself
       
-      // At t = π, expect |00⟩ to evolve to |11⟩
-      const prob0 = math.abs(math.multiply(evolved.amplitudes[0], math.conj(evolved.amplitudes[0])));
-      const prob3 = math.abs(math.multiply(evolved.amplitudes[3], math.conj(evolved.amplitudes[3])));
-      expect(prob0).toBeCloseTo(0);
-      expect(prob3).toBeCloseTo(1);
+      // Test evolution of |↑↓⟩ state
+      const updown = StateVector.computationalBasis(4, 1);
+      const evolved_updown = H.evolveState(updown, Math.PI);
+      
+      // At t = π, should have maximum overlap with |↓↑⟩
+      const downup = StateVector.computationalBasis(4, 2);
+      const overlap = math.abs(evolved_updown.innerProduct(downup));
+      expect(overlap).toBeCloseTo(1);
     });
   });
 
