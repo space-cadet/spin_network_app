@@ -1,20 +1,21 @@
 # Tasks Master Reference
-*Last Updated: 2025-05-09 15:30 IST*
+*Last Updated: 2025-05-11 20:30 IST*
 
 ## Tasks Overview
-- **Active Tasks:** 25
+- **Active Tasks:** 26
 - **Paused Tasks:** 4  
 - **Completed Tasks:** 28
-- **Latest Task ID:** T63
+- **Latest Task ID:** T64
 
 ## Task Registry
-*Last Updated: 2025-05-09 15:30 IST*
+*Last Updated: 2025-05-11 20:30 IST*
 
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
+| T64 | Graph-Quantum Integration Restructuring | ⬜ | HIGH | 2025-05-11 | [tasks/T64.md] |
 | T63 | Enhance Quantum Library Documentation | 🔄 | HIGH | 2025-05-11 | [tasks/T63.md] |
-| T61 | Implement Quantum Circuit Module | ⬜ | HIGH | 2025-05-09 | [tasks/T61.md] | New task - implementing quantum circuit module |
+| T61 | Implement Quantum Circuit Module | ⬜ | HIGH | 2025-05-09 | [tasks/T61.md] |
 | T62 | Fix eigenDecomposition Implementation | 🔄 | HIGH | 2025-05-10 | [tasks/T62.md] | Fixing mathjs complex number creation and eigenDecomposition implementation |
 | T60 | Remove complex.ts and Direct Math.js Integration | ✅ | HIGH | 2025-05-08 | [tasks/T60.md] | Completed - Matrix operations rewritten with improved validation and error handling |
 | T59 | Math.js Complex Number Migration | ✅ | HIGH | 2025-05-08 | [tasks/T59.md] | Completed and superseded by T60 |
@@ -28,6 +29,35 @@
 | T52 | Document Library API Reorganization | 🔄 | HIGH | 2025-05-03 | [tasks/T52.md] |
 
 ## Task Details
+### T64: Graph-Quantum Integration Restructuring
+**Description**: Redesign and restructure the library to create proper abstract graph tools that integrate with quantum module for building graph state vectors with quantum states on edges and intertwiner tensors on nodes.
+**Status**: ⬜ **Last**: 2025-05-11 20:30 IST
+**Progress**: 
+- ⬜ Phase 1: Package Structure and Quantum Migration
+  - ⬜ Create packages/quantum directory structure
+  - ⬜ Move and reorganize lib/quantum code
+  - ⬜ Create proper package configuration
+- ⬜ Phase 2: Abstract Graph Implementation
+  - ⬜ Create packages/graph-core structure
+  - ⬜ Implement AbstractGraph class
+  - ⬜ Create graph algorithms
+- ⬜ Phase 3: Tensor Core Implementation
+  - ⬜ Create packages/tensor-core structure
+  - ⬜ Implement tensor interfaces and operations
+- ⬜ Phase 4: Spin Network Integration
+  - ⬜ Create packages/spin-network structure
+  - ⬜ Implement EdgeStateVector and IntertwinerNode
+  - ⬜ Build GraphStateComposer
+- ⬜ Phase 5: Documentation and Examples
+**Files**: 
+- `packages/quantum/` - Migrated quantum mechanics core
+- `packages/graph-core/` - Abstract graph structures
+- `packages/tensor-core/` - Tensor operations
+- `packages/spin-network/` - Integration layer
+- `memory-bank/implementation-details/graph-quantum-integration-plan.md` - Implementation plan
+**Dependencies**: T56, T55
+**Notes**: Detailed implementation plan created in memory-bank/implementation-details/graph-quantum-integration-plan.md with comprehensive package restructuring strategy. Addresses naming issues and creates proper abstractions to separate graph structures from quantum-specific functionality.
+
 ### T61: Implement Quantum Circuit Module
 **Description**: Implement quantum circuit module following hybrid functional/OOP approach, integrating with existing quantum modules.
 **Status**: ⬜ **Last**: 2025-05-10 14:45 IST
@@ -261,6 +291,8 @@
 | T38 | Implement Intertwiner Tensor Initialization | 2025-04-24 | T36, T20 |
 
 ## Dependencies
+- **T64** → Depends on → **T55, T56**
+- **T63** → Depends on → **T56**
 - **T62** → Depends on → **T60**
 - **T61** → Depends on → **T55, T56**
 - **T59** → Depends on → **T56**
@@ -285,13 +317,16 @@
 - **T48** → None
 
 ## Priority Queue
-1. **T62**: Fix eigenDecomposition implementation for proper complex value handling
-2. **T61**: Implement quantum circuit module (circuit.ts)
-2. **T57**: Complete examples enhancement with comprehensive structure
-3. **T36**: Complete tensor operations module implementation
-4. **T52**: Complete API documentation
+1. **T64**: Graph-Quantum Integration Restructuring - foundational library redesign
+2. **T62**: Fix eigenDecomposition implementation for proper complex value handling
+3. **T61**: Implement quantum circuit module (circuit.ts)
+4. **T57**: Complete examples enhancement with comprehensive structure
+5. **T36**: Complete tensor operations module implementation
+6. **T52**: Complete API documentation
 
 ## Recent Updates
+- 2025-05-11 20:30: Added T64 - Graph-Quantum Integration Restructuring
+- 2025-05-11 20:30: Created implementation plan for graph-quantum integration in memory-bank/implementation-details
 - 2025-05-11 19:30: Added T63 - Enhance Quantum Library Documentation
 - 2025-05-11 19:30: Updated T52 - Link with new documentation task T63
 - 2025-05-10 18:30: Updated T62 - Identified specific mathjs complex number API change causing TypeScript errors

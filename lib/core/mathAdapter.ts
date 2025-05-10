@@ -6,7 +6,8 @@
  */
 
 import * as math from 'mathjs';
-import { SimulationGraph, SimulationEdge, StateVector, WeightFunction } from './types';
+import { SimulationGraph, SimulationEdge, WeightFunction } from './types';
+import { StateVector } from '../quantum/types';
 import { SimulationStateVector } from '../graph/graphState';
 
 /**

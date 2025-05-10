@@ -5,7 +5,7 @@
  * during the simulation to ensure physical validity.
  */
 
-import { StateVector } from '../core/types';
+import { StateVector } from '../quantum/stateVector';
 
 /**
  * Interface for conservation law checker
