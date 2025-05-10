@@ -21,8 +21,8 @@ import * as math from 'mathjs';
 function createOscillatorHamiltonian(dimension: number, omega: number = 1.0): Hamiltonian {
     const H = harmonicOscillator(dimension);
     const terms = [{
-        operator: H.scale(math.complex(omega, 0)) as MatrixOperator,
-        coefficient: math.complex(1, 0)
+        operator: H.scale(math.complex({re: omega, im:  0})) as MatrixOperator,
+        coefficient: math.complex({re: 1, im:  0})
     }];
 
     return new Hamiltonian(dimension, terms, 'custom');
@@ -36,7 +36,7 @@ function createCoherentState(dimension: number, alpha: number): StateVector {
     const amplitudes = new Array(dimension).fill(0).map((_, n) => {
         const magnitude = Math.exp(-alpha*alpha/2) * Math.pow(alpha, n) / 
                          Math.sqrt(factorial(n));
-        return math.complex(magnitude, 0);
+        return math.complex({re: magnitude, im:  0});
     });
     return new StateVector(dimension, amplitudes);
 }
@@ -124,9 +124,9 @@ function demonstrateWavepacket() {
 
     // Create superposition of ground and first excited state
     const initialState = new StateVector(dim, [
-        math.complex(1/Math.sqrt(2), 0),
-        math.complex(1/Math.sqrt(2), 0),
-        ...new Array(dim-2).fill(math.complex(0, 0))
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        ...new Array(dim-2).fill(math.complex({re: 0, im:  0}))
     ]);
 
     // Evolution times covering oscillation period

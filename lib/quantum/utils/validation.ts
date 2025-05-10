@@ -7,7 +7,6 @@
  */
 
 import { Complex } from '../types';
-import { isZeroComplex } from '../complex';
 import * as math from 'mathjs';
 
 /**

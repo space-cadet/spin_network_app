@@ -14,7 +14,7 @@
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
 | T61 | Implement Quantum Circuit Module | ⬜ | HIGH | 2025-05-09 | [tasks/T61.md] | New task - implementing quantum circuit module |
-| T62 | Fix eigenDecomposition Implementation | 🔄 | HIGH | 2025-05-10 | [tasks/T62.md] | Updating eigenDecomposition to properly handle complex values and eigenvectors |
+| T62 | Fix eigenDecomposition Implementation | 🔄 | HIGH | 2025-05-10 | [tasks/T62.md] | Fixing mathjs complex number creation and eigenDecomposition implementation |
 | T60 | Remove complex.ts and Direct Math.js Integration | ✅ | HIGH | 2025-05-08 | [tasks/T60.md] | Completed - Matrix operations rewritten with improved validation and error handling |
 | T59 | Math.js Complex Number Migration | ✅ | HIGH | 2025-05-08 | [tasks/T59.md] | Completed and superseded by T60 |
 | T58 | Extract Reusable React Template | 🔄 | HIGH | 2025-05-06 | [tasks/T58.md] | Core components extracted, example app created, planning state management |
@@ -287,6 +287,7 @@
 4. **T52**: Complete API documentation
 
 ## Recent Updates
+- 2025-05-10 18:30: Updated T62 - Identified specific mathjs complex number API change causing TypeScript errors
 - 2025-05-10 14:30: Added T62 - Fix eigenDecomposition implementation
 - 2025-05-10 14:30: Updated T60 status to completed - Matrix operations rewrite finished
 - 2025-05-09 17:30: Updated T60 progress - Completed matrixOperations.ts rewrite with improved validation and error handling

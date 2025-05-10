@@ -12,7 +12,8 @@ import {
   isHermitian, 
   adjoint, 
   multiplyMatrices,
-  scaleMatrix 
+  scaleMatrix,
+  ComplexMatrix 
 } from './matrixOperations';
 import * as math from 'mathjs';
 
@@ -34,7 +35,7 @@ export function matrixFunction(
   
   // For Hermitian matrices, use eigendecomposition
   if (isHermitian(matrix)) {
-    const { values, vectors } = eigenDecomposition(matrix);
+    const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true});
     
     // Apply function to eigenvalues
     const funcValues = values.map(v => func(v));
@@ -42,19 +43,12 @@ export function matrixFunction(
     // Construct the diagonal matrix of f(D)
     const fD = Array(dim).fill(null).map((_, i) => 
       Array(dim).fill(null).map((_, j) => 
-        i === j ? funcValues[i] : math.complex(0, 0)
+        i === j ? funcValues[i] : math.complex({re: 0, im:  0})
       )
     );
     
-    // Extract just the vector matrices from the eigenvector objects
-    const vectorMatrices = vectors.map(v => v.vector);
-
-    const U = vectorMatrices.map(v => {
-      // Ensure proper 2D column vector format
-      return [Array.isArray(v) ? v : [v]].flat();
-    });
-
-
+    // The vectors are already in the correct format
+    const U = vectors;
     
     // Calculate U†
     const UDagger = adjoint(U);
@@ -82,7 +76,7 @@ export function matrixLogarithm(matrix: Complex[][]): Complex[][] {
     const r = Math.sqrt(x.re * x.re + x.im * x.im);
     const theta = Math.atan2(x.im, x.re);
     
-    return math.complex(Math.log(r), theta);
+    return math.complex({re: Math.log(r), im:  theta});
   });
 }
 
@@ -95,11 +89,11 @@ export function matrixLogarithm(matrix: Complex[][]): Complex[][] {
  * @returns The matrix square root
  */
 export function matrixSquareRoot(matrix: ComplexMatrix): ComplexMatrix {
-  console.log('Matrix square root input:', 
-      matrix.map(row => row.map(elem => ({re: elem.re, im: elem.im}))));
+  // console.log('Matrix square root input:', 
+  //     matrix.map(row => row.map(elem => ({re: elem.re, im: elem.im}))));
   
   // Check matrix dimensions
-  console.log('Matrix dimensions:', matrix.length, 'x', matrix[0].length);
+  // console.log('Matrix dimensions:', matrix.length, 'x', matrix[0].length);
   
   // Verify matrix structure
   matrix.forEach((row, i) => {
@@ -136,9 +130,9 @@ export function matrixPower(matrix: Complex[][], power: number): Complex[][] {
     const r = Math.pow(Math.sqrt(x.re * x.re + x.im * x.im), power);
     const theta = Math.atan2(x.im, x.re) * power;
     
-    return math.complex(r * Math.cos(theta), r * Math.sin(theta));
-  });
-}
+    return math.complex({re: r * Math.cos(theta), im:  r * Math.sin(theta)})});
+  };
+
 
 /**
  * Calculates the matrix sine function

@@ -25,7 +25,7 @@ export function computationalBasis(numQubits: number): StateVector[] {
 
   for (let i = 0; i < dimension; i++) {
     const state = new StateVector(dimension);
-    state.setState(i, math.complex(1, 0));
+    state.setState(i, math.complex({re: 1, im:  0}));
     basis.push(state);
   }
 
@@ -41,7 +41,7 @@ export function createBasisState(dimension: number, index: number): StateVector 
   }
 
   const state = new StateVector(dimension);
-  state.setState(index, math.complex(1, 0));
+  state.setState(index, math.complex({re: 1, im:  0}));
   return state;
 }
 
@@ -54,20 +54,20 @@ export function createBellState(type: 'Phi+' | 'Phi-' | 'Psi+' | 'Psi-'): StateV
   
   switch (type) {
     case 'Phi+': // |00⟩ + |11⟩)/√2
-      state.setState(0, math.complex(1/Math.sqrt(2), 0));
-      state.setState(3, math.complex(1/Math.sqrt(2), 0));
+      state.setState(0, math.complex({re: 1/Math.sqrt(2), im:  0}));
+      state.setState(3, math.complex({re: 1/Math.sqrt(2), im:  0}));
       break;
     case 'Phi-': // |00⟩ - |11⟩)/√2
-      state.setState(0, math.complex(1/Math.sqrt(2), 0));
-      state.setState(3, math.complex(-1/Math.sqrt(2), 0));
+      state.setState(0, math.complex({re: 1/Math.sqrt(2), im:  0}));
+      state.setState(3, math.complex({re: -1/Math.sqrt(2), im:  0}));
       break;
     case 'Psi+': // |01⟩ + |10⟩)/√2
-      state.setState(1, math.complex(1/Math.sqrt(2), 0));
-      state.setState(2, math.complex(1/Math.sqrt(2), 0));
+      state.setState(1, math.complex({re: 1/Math.sqrt(2), im:  0}));
+      state.setState(2, math.complex({re: 1/Math.sqrt(2), im:  0}));
       break;
     case 'Psi-': // |01⟩ - |10⟩)/√2
-      state.setState(1, math.complex(1/Math.sqrt(2), 0));
-      state.setState(2, math.complex(-1/Math.sqrt(2), 0));
+      state.setState(1, math.complex({re: 1/Math.sqrt(2), im:  0}));
+      state.setState(2, math.complex({re: -1/Math.sqrt(2), im:  0}));
       break;
   }
 
@@ -86,8 +86,8 @@ export function createGHZState(numQubits: number): StateVector {
   const state = new StateVector(dimension);
 
   // Set first and last computational basis states
-  state.setState(0, math.complex(1/Math.sqrt(2), 0));
-  state.setState(dimension - 1, math.complex(1/Math.sqrt(2), 0));
+  state.setState(0, math.complex({re: 1/Math.sqrt(2), im:  0}));
+  state.setState(dimension - 1, math.complex({re: 1/Math.sqrt(2), im:  0}));
 
   return state;
 }
@@ -102,7 +102,7 @@ export function createWState(numQubits: number): StateVector {
 
   const dimension = 2 ** numQubits;
   const state = new StateVector(dimension);
-  const amplitude = math.complex(1/Math.sqrt(numQubits), 0);
+  const amplitude = math.complex({re: 1/Math.sqrt(numQubits), im:  0});
 
   // Set states with exactly one 1
   for (let i = 0; i < numQubits; i++) {
@@ -118,7 +118,7 @@ export function createWState(numQubits: number): StateVector {
  */
 export function createPlusState(): StateVector {
   const state = new StateVector(2);
-  const amplitude = math.complex(1/Math.sqrt(2), 0);
+  const amplitude = math.complex({re: 1/Math.sqrt(2), im:  0});
   state.setState(0, amplitude);
   state.setState(1, amplitude);
   return state;
@@ -129,7 +129,7 @@ export function createPlusState(): StateVector {
  */
 export function createMinusState(): StateVector {
   const state = new StateVector(2);
-  state.setState(0, math.complex(1/Math.sqrt(2), 0));
-  state.setState(1, math.complex(-1/Math.sqrt(2), 0));
+  state.setState(0, math.complex({re: 1/Math.sqrt(2), im:  0}));
+  state.setState(1, math.complex({re: -1/Math.sqrt(2), im:  0}));
   return state;
 }

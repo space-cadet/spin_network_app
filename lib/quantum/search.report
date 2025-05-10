@@ -1,0 +1,749 @@
+oscillator.ts:            .map(() => math.complex(0, 0)));
+oscillator.ts:        matrix[m + 1][m] = math.complex(Math.sqrt(m + 1), 0);
+oscillator.ts:            .map(() => math.complex(0, 0)));
+oscillator.ts:        matrix[m - 1][m] = math.complex(Math.sqrt(m), 0);
+oscillator.ts:            .map((_, j) => i === j ? math.complex(i, 0) : math.complex(0, 0)));
+oscillator.ts:    const finalOp = sumOp.scale(math.complex(1/Math.sqrt(2), 0));
+oscillator.ts:    const diffOp = aUpOp.add(aOp.scale(math.complex(-1, 0)));
+oscillator.ts:    const finalOp = diffOp.scale(math.complex(0, 1/Math.sqrt(2)));
+oscillator.ts:    const halfId = MatrixOperator.identity(dimension).scale(math.complex(0.5, 0));
+states.ts:    state.setState(i, math.complex(1, 0));
+states.ts:  state.setState(index, math.complex(1, 0));
+states.ts:      state.setState(0, math.complex(1/Math.sqrt(2), 0));
+states.ts:      state.setState(3, math.complex(1/Math.sqrt(2), 0));
+states.ts:      state.setState(0, math.complex(1/Math.sqrt(2), 0));
+states.ts:      state.setState(3, math.complex(-1/Math.sqrt(2), 0));
+states.ts:      state.setState(1, math.complex(1/Math.sqrt(2), 0));
+states.ts:      state.setState(2, math.complex(1/Math.sqrt(2), 0));
+states.ts:      state.setState(1, math.complex(1/Math.sqrt(2), 0));
+states.ts:      state.setState(2, math.complex(-1/Math.sqrt(2), 0));
+states.ts:  state.setState(0, math.complex(1/Math.sqrt(2), 0));
+states.ts:  state.setState(dimension - 1, math.complex(1/Math.sqrt(2), 0));
+states.ts:  const amplitude = math.complex(1/Math.sqrt(numQubits), 0);
+states.ts:  const amplitude = math.complex(1/Math.sqrt(2), 0);
+states.ts:  state.setState(0, math.complex(1/Math.sqrt(2), 0));
+states.ts:  state.setState(1, math.complex(-1/Math.sqrt(2), 0));
+matrixFunctions.ts:        i === j ? funcValues[i] : math.complex(0, 0)
+matrixFunctions.ts:    return math.complex(Math.log(r), theta);
+matrixFunctions.ts:    return math.complex(r * Math.cos(theta), r * Math.sin(theta));
+matrixFunctions.ts:    return math.complex(
+matrixFunctions.ts:    return math.complex(
+hamiltonian.ts:          Array(dimension).fill(null).map(() => math.complex(0, 0))
+hamiltonian.ts:      Array(dimension).fill(null).map(() => math.complex(0, 0))
+hamiltonian.ts:        return math.multiply(element, math.complex(0, -time)) as Complex;
+hamiltonian.ts:          evolutionMatrix[i][j] = math.complex(i === j ? 1 : 0, 0);
+hamiltonian.ts:        coefficient: math.complex(Bx, 0),
+hamiltonian.ts:        coefficient: math.complex(By, 0),
+hamiltonian.ts:        coefficient: math.complex(Bz, 0),
+hamiltonian.ts:    const coeff = math.complex(coupling, 0);
+hamiltonian.ts:            coefficient: math.complex(0, 0), // Zero coefficient
+measurement.ts:                .map(() => math.complex(0, 0)));
+measurement.ts:                        math.complex(thisMatrix[i][k].re, thisMatrix[i][k].im),
+measurement.ts:                        math.complex(otherMatrix[k][j].re, otherMatrix[k][j].im)
+measurement.ts:    let result = math.complex(0, 0);
+operatorAlgebra.ts:  return a.add(b.scale(math.complex(-1, 0)));
+operatorAlgebra.ts:      .map(() => math.complex(0, 0)));
+operatorAlgebra.ts:      let ab = math.complex(0, 0);
+operatorAlgebra.ts:      let ba = math.complex(0, 0);
+operatorAlgebra.ts:            math.complex(matrixA[i][k].re, matrixA[i][k].im),
+operatorAlgebra.ts:            math.complex(matrixB[k][j].re, matrixB[k][j].im)
+operatorAlgebra.ts:            math.complex(matrixB[i][k].re, matrixB[i][k].im),
+operatorAlgebra.ts:            math.complex(matrixA[k][j].re, matrixA[k][j].im)
+operatorAlgebra.ts:      .map(() => math.complex(0, 0)));
+operatorAlgebra.ts:      let ab = math.complex(0, 0);
+operatorAlgebra.ts:      let ba = math.complex(0, 0);
+operatorAlgebra.ts:            math.complex(matrixA[i][k].re, matrixA[i][k].im),
+operatorAlgebra.ts:            math.complex(matrixB[k][j].re, matrixB[k][j].im)
+operatorAlgebra.ts:            math.complex(matrixB[i][k].re, matrixB[i][k].im),
+operatorAlgebra.ts:            math.complex(matrixA[k][j].re, matrixA[k][j].im)
+operatorAlgebra.ts:    const firstOrder = commutator(A, B).scale(math.complex(0.5, 0));
+operatorAlgebra.ts:    const AAB = commutator(A, AB).scale(math.complex(1/12, 0));
+operatorAlgebra.ts:    const BAB = commutator(B, AB).scale(math.complex(-1/12, 0));
+operatorAlgebra.ts:  const iG = generator.scale(math.complex(0, 1));
+operatorAlgebra.ts:    Array(dim).fill(null).map(() => math.complex(0, 0))
+stateVector.ts:      .map(() => math.complex(0, 0));
+stateVector.ts:    let result = math.complex(0, 0);
+stateVector.ts:      math.divide(amp, math.complex(currentNorm, 0))
+stateVector.ts:      .map((_, i) => i === index ? math.complex(1, 0) : math.complex(0, 0));
+stateVector.ts:    const coefficient = math.complex(1 / Math.sqrt(dimension), 0);
+operator.ts:    return math.complex(value, 0);
+operator.ts:    return math.complex((value as any).re, (value as any).im);
+operator.ts:            .map(() => math.complex()));
+operator.ts:            const expected = i === j ? math.complex(1, 0) : math.complex(0, 0);
+operator.ts:      .map(() => math.complex(0, 0));
+operator.ts:        .map(() => math.complex(0, 0)));
+operator.ts:        let sum = math.complex(0, 0);
+operator.ts:            math.complex(this.matrix[i][k].re, this.matrix[i][k].im),
+operator.ts:            math.complex(otherMatrix[k][j].re, otherMatrix[k][j].im)
+operator.ts:        .map(() => math.complex(0, 0)));
+operator.ts:        adjointMatrix[i][j] = math.complex(elem.re, -elem.im);
+operator.ts:        .map(() => math.complex()));
+operator.ts:        .map((_, j) => i === j ? math.complex(1, 0) : math.complex(0, 0))
+operator.ts:        .map(() => math.complex(0, 0))
+operator.ts:          math.complex(this.matrix[i][j].re, this.matrix[i][j].im),
+operator.ts:          math.complex(otherMatrix[i][j].re, otherMatrix[i][j].im)
+operator.ts:        .map(() => math.complex(0, 0)));
+operator.ts:          .map((_, j) => i === j ? math.clone(v[i]) : math.complex(0, 0)));
+gates.ts:    [math.complex(0, 0), math.complex(1, 0)],
+gates.ts:    [math.complex(1, 0), math.complex(0, 0)]
+gates.ts:    [math.complex(0, 0), math.complex(0, -1)],
+gates.ts:    [math.complex(0, 1), math.complex(0, 0)]
+gates.ts:    [math.complex(1, 0), math.complex(0, 0)],
+gates.ts:    [math.complex(0, 0), math.complex(-1, 0)]
+gates.ts:    [math.complex(1/Math.sqrt(2), 0), math.complex(1/Math.sqrt(2), 0)],
+gates.ts:    [math.complex(1/Math.sqrt(2), 0), math.complex(-1/Math.sqrt(2), 0)]
+gates.ts:    [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+gates.ts:    [math.complex(0, 0), math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)],
+gates.ts:    [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(1, 0)],
+gates.ts:    [math.complex(0, 0), math.complex(0, 0), math.complex(1, 0), math.complex(0, 0)]
+information.ts:    Array(dimB).fill(null).map(() => math.complex(0, 0))
+information.ts:      math.divide(v, math.complex(norm, 0)) as Complex
+information.ts:    const amplitudes = Array(dimA).fill(null).map(() => math.complex(0, 0));
+information.ts:      math.divide(a, math.complex(schmidt, 0)) as Complex
+information.ts:    row.map((elem, j) => math.complex(
+information.ts:    v.re > 1e-10 ? math.complex(Math.log(v.re), 0) : math.complex(-1000, 0) // Use a large negative number as approximation
+information.ts:    Array(rho.dimension).fill(null).map(() => math.complex(0, 0))
+information.ts:    [math.complex(0, 0), math.complex(0, -1)],
+information.ts:    [math.complex(0, 1), math.complex(0, 0)]
+information.ts:    Array(4).fill(null).map(() => math.complex(0, 0))
+information.ts:    Array(dimA * dimB).fill(null).map(() => math.complex(0, 0))
+matrixOperations.ts:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts:        row.map(elem => math.complex(
+matrixOperations.ts:            math.complex(
+matrixOperations.ts:        math.complex(cleanupNumericalNoise(v), 0)
+matrixOperations.ts:            vec.map(v => math.complex(cleanupNumericalNoise(v), 0))
+matrixOperations.ts:                vec.map(v => math.complex(cleanupNumericalNoise(v), 0)) : 
+matrixOperations.ts:    const s = math.complex(scalar.re, scalar.im);
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(1, 0),
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(0, 0)
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(0, 0),
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(1, 0)
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(1/Math.sqrt(2), 0),
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(1/Math.sqrt(2), 0)
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(1/Math.sqrt(2), 0),
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(-1/Math.sqrt(2), 0)
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(1/Math.sqrt(2), 0),
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(0, 1/Math.sqrt(2))
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(1/Math.sqrt(2), 0),
+examples/operatorAlgebra/uncertainty-demo.ts:    math.complex(0, -1/Math.sqrt(2))
+examples/operatorAlgebra/uncertainty-demo.ts:  const X_generator = PauliX.scale(math.complex(-Math.PI/4, 0));
+examples/operatorAlgebra/uncertainty-demo.ts:  const Z_generator = PauliZ.scale(math.complex(-Math.PI/4, 0));
+examples/hamiltonian/quantum-oscillator.ts:        operator: H.scale(math.complex(omega, 0)) as MatrixOperator,
+examples/hamiltonian/quantum-oscillator.ts:        coefficient: math.complex(1, 0)
+examples/hamiltonian/quantum-oscillator.ts:        return math.complex(magnitude, 0);
+examples/hamiltonian/quantum-oscillator.ts:        math.complex(1/Math.sqrt(2), 0),
+examples/hamiltonian/quantum-oscillator.ts:        math.complex(1/Math.sqrt(2), 0),
+examples/hamiltonian/quantum-oscillator.ts:        ...new Array(dim-2).fill(math.complex(0, 0))
+matrixOperations.ts.old:        return math.complex(0, 0);
+matrixOperations.ts.old:    const complexNumbers = numbers.map(n => math.complex(n.re, n.im));
+matrixOperations.ts.old:    let sum = math.complex(0, 0);
+matrixOperations.ts.old:    let c = math.complex(0, 0);   // Compensation term
+matrixOperations.ts.old:        row.map(x => math.isComplex(x) ? x : math.complex(x?.re || 0, x?.im || 0))
+matrixOperations.ts.old:        row.map(x => math.isComplex(x) ? x : math.complex(x?.re || 0, x?.im || 0))
+matrixOperations.ts.old:        row.map(x => math.isComplex(x) ? x : math.complex(x?.re || 0, x?.im || 0))
+matrixOperations.ts.old:                ? math.complex(0, 0) 
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:            row.map(elem => math.isComplex(elem) ? elem : math.complex(elem?.re || 0, elem?.im || 0))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:    const s = math.complex(scalar.re, scalar.im);
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        row.map(x => math.complex(x.re, x.im))
+matrixOperations.ts.old:        values: (values.valueOf() as number[]).map(v => math.complex(v)),
+examples/information/information-demo.ts:  const matrix = Array(dim).fill(null).map(() => Array(dim).fill(null).map(() => math.complex(0, 0)));
+examples/information/information-demo.ts:      matrix[i][j] = math.complex(re, im);
+examples/information/information-demo.ts:    math.complex(1, 0),
+examples/information/information-demo.ts:    math.complex(0, 0)
+examples/information/information-demo.ts:    math.complex(0, 0),
+examples/information/information-demo.ts:    math.complex(1, 0)
+examples/information/information-demo.ts:    math.complex(1/Math.sqrt(2), 0),
+examples/information/information-demo.ts:    math.complex(1/Math.sqrt(2), 0)
+examples/information/information-demo.ts:    [math.complex(0.5, 0), math.complex(0, 0)],
+examples/information/information-demo.ts:    [math.complex(0, 0), math.complex(0.5, 0)]
+examples/information/information-demo.ts:    [math.complex(0.7, 0), math.complex(0, 0)],
+examples/information/information-demo.ts:    [math.complex(0, 0), math.complex(0.3, 0)]
+examples/operatorAlgebra/commutator-demo.ts:    math.complex(1/Math.sqrt(2), 0),
+examples/operatorAlgebra/commutator-demo.ts:    math.complex(1/Math.sqrt(2), 0)
+examples/information/entanglement-demo.ts:    math.complex(1, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0)
+examples/information/entanglement-demo.ts:    math.complex(Math.sqrt(0.7), 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(Math.sqrt(0.3), 0)
+examples/information/entanglement-demo.ts:    math.complex(1, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0)
+examples/information/entanglement-demo.ts:    math.complex(Math.sqrt(0.7), 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(0, 0),
+examples/information/entanglement-demo.ts:    math.complex(Math.sqrt(0.3), 0)
+examples/information/entanglement-demo.ts:    Array(dim).fill(null).map(() => math.complex(0, 0))
+examples/information/entanglement-demo.ts:      math.complex(1, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0)
+examples/information/entanglement-demo.ts:      math.complex(Math.sqrt(0.7), 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(Math.sqrt(0.3), 0)
+examples/information/entanglement-demo.ts:      math.complex(1, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0)
+examples/information/entanglement-demo.ts:      math.complex(Math.sqrt(0.7), 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(0, 0),
+examples/information/entanglement-demo.ts:      math.complex(Math.sqrt(0.3), 0)
+densityMatrix.ts:      math.complex(0, 0)
+densityMatrix.ts:    let trace = math.complex(0, 0);
+densityMatrix.ts:      Array(dim).fill(null).map(() => math.complex(0, 0))
+densityMatrix.ts:      Array(dim).fill(null).map(() => math.complex(0, 0))
+densityMatrix.ts:            math.complex(prob, 0)
+densityMatrix.ts:      Array(dim).fill(null).map(() => math.complex(0, 0))
+densityMatrix.ts:      i === j ? math.complex(1, 0) : math.complex(0, 0)
+densityMatrix.ts:    Array(dimension).fill(null).map(() => math.complex(0, 0))
+__tests__/operatorAlgebra.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/operatorAlgebra.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/operatorAlgebra.test.ts:        math.complex(1, 0),
+__tests__/operatorAlgebra.test.ts:        math.complex(0, 0)
+__tests__/operatorAlgebra.test.ts:        [math.complex(1, 0), math.complex(1, 0)],
+__tests__/operatorAlgebra.test.ts:        [math.complex(0, 0), math.complex(2, 0)]
+__tests__/operatorAlgebra.test.ts:        math.complex(1, 0),
+__tests__/operatorAlgebra.test.ts:        math.complex(0, 0)
+__tests__/operatorAlgebra.test.ts:      const A = PauliX.scale(math.complex(0.1, 0)); // small value for better approximation
+__tests__/operatorAlgebra.test.ts:      const B = PauliY.scale(math.complex(0.1, 0));
+__tests__/operatorAlgebra.test.ts:      const comm = commutator(A, B).scale(math.complex(0.5, 0));
+older/matrixOperations-v2.ts:                        math.complex(element.re, element.im)
+__tests__/information.test.ts:        math.complex(1, 0),
+__tests__/information.test.ts:        math.complex(0, 0),
+__tests__/information.test.ts:        math.complex(0, 0),
+__tests__/information.test.ts:        math.complex(0, 0)
+__tests__/information.test.ts:      const state = new StateVector(4, Array(4).fill(math.complex(0.5, 0)));
+__tests__/information.test.ts:        math.complex(1, 0),
+__tests__/information.test.ts:        math.complex(0, 0)
+__tests__/information.test.ts:        math.complex(1, 0),
+__tests__/information.test.ts:        math.complex(0, 0)
+__tests__/information.test.ts:        math.complex(0, 0),
+__tests__/information.test.ts:        math.complex(1, 0)
+__tests__/information.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/information.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/information.test.ts:        math.complex(1, 0),
+__tests__/information.test.ts:        math.complex(0, 0)
+__tests__/information.test.ts:      const zeroMatrix = [[math.complex(1, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                          [math.complex(0, 0), math.complex(0, 0)]];
+__tests__/information.test.ts:      const plusMatrix = [[math.complex(0.5, 0), math.complex(0.5, 0)], 
+__tests__/information.test.ts:                          [math.complex(0.5, 0), math.complex(0.5, 0)]];
+__tests__/information.test.ts:      const mixedMatrix = [[math.complex(0.5, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                           [math.complex(0, 0), math.complex(0.5, 0)]];
+__tests__/information.test.ts:      const pureMatrix = [[math.complex(1, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                          [math.complex(0, 0), math.complex(0, 0)]];
+__tests__/information.test.ts:      const zeroMatrix = [[math.complex(1, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                          [math.complex(0, 0), math.complex(0, 0)]];
+__tests__/information.test.ts:      const oneMatrix = [[math.complex(0, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                         [math.complex(0, 0), math.complex(1, 0)]];
+__tests__/information.test.ts:      const zeroMatrix = [[math.complex(1, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                          [math.complex(0, 0), math.complex(0, 0)]];
+__tests__/information.test.ts:      const pureMatrix = [[math.complex(1, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                          [math.complex(0, 0), math.complex(0, 0)]];
+__tests__/information.test.ts:      const mixedMatrix = [[math.complex(0.5, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                           [math.complex(0, 0), math.complex(0.5, 0)]];
+__tests__/information.test.ts:        math.complex(1, 0),
+__tests__/information.test.ts:        math.complex(0, 0),
+__tests__/information.test.ts:        math.complex(0, 0),
+__tests__/information.test.ts:        math.complex(0, 0)
+__tests__/information.test.ts:      const pureMatrix = [[math.complex(1, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                          [math.complex(0, 0), math.complex(0, 0)]];
+__tests__/information.test.ts:      const mixedMatrix = [[math.complex(0.5, 0), math.complex(0, 0)], 
+__tests__/information.test.ts:                           [math.complex(0, 0), math.complex(0.5, 0)]];
+__tests__/information.test.ts:        [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/information.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/information.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/information.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)]
+__tests__/information.test.ts:        [math.complex(0.5, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0.5, 0)],
+__tests__/information.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/information.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/information.test.ts:        [math.complex(0.5, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0.5, 0)]
+__tests__/states.test.ts:      expect(basis[0].amplitudes[0]).toEqual(math.complex(1, 0));
+__tests__/states.test.ts:      expect(basis[0].amplitudes[1]).toEqual(math.complex(0, 0));
+__tests__/states.test.ts:      expect(basis[1].amplitudes[0]).toEqual(math.complex(0, 0));
+__tests__/states.test.ts:      expect(basis[1].amplitudes[1]).toEqual(math.complex(1, 0));
+__tests__/states.test.ts:      expect(state0.amplitudes[0]).toEqual(math.complex(1, 0));
+__tests__/states.test.ts:      expect(state0.amplitudes[1]).toEqual(math.complex(0, 0));
+__tests__/states.test.ts:      expect(state1.amplitudes[0]).toEqual(math.complex(0, 0));
+__tests__/states.test.ts:      expect(state1.amplitudes[1]).toEqual(math.complex(1, 0));
+__tests__/states.test.ts:      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[1]).toEqual(math.complex(0, 0));
+__tests__/states.test.ts:      expect(state.amplitudes[2]).toEqual(math.complex(0, 0));
+__tests__/states.test.ts:      expect(state.amplitudes[3]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[3]).toEqual(math.complex(-1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[1]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[2]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[1]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[2]).toEqual(math.complex(-1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[3]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[7]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      const expectedAmp = math.complex(1/Math.sqrt(2), 0);
+__tests__/states.test.ts:      const expectedAmp = math.complex(1/Math.sqrt(3), 0);
+__tests__/states.test.ts:      const expectedAmp = math.complex(1/Math.sqrt(2), 0);
+__tests__/states.test.ts:      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
+__tests__/states.test.ts:      expect(state.amplitudes[1]).toEqual(math.complex(-1/Math.sqrt(2), 0));
+examples/hamiltonian-demo.ts:    math.complex(1/Math.sqrt(2), 0),
+examples/hamiltonian-demo.ts:    math.complex(1/Math.sqrt(2), 0)
+__tests__/hamiltonian.test.ts:        coefficient: math.complex(1, 0),
+__tests__/hamiltonian.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/hamiltonian.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/hamiltonian.test.ts:        math.complex(0, 0),
+__tests__/hamiltonian.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/hamiltonian.test.ts:        math.complex(-1/Math.sqrt(2), 0),
+__tests__/hamiltonian.test.ts:        math.complex(0, 0)
+__tests__/hamiltonian.test.ts:        math.complex(1, 0),
+__tests__/hamiltonian.test.ts:        math.complex(0, 0),
+__tests__/hamiltonian.test.ts:        math.complex(0, 0),
+__tests__/hamiltonian.test.ts:        math.complex(0, 0)
+__tests__/hamiltonian.test.ts:        coefficient: math.complex(1, 0),
+__tests__/hamiltonian.test.ts:        math.complex(1, 0),
+__tests__/hamiltonian.test.ts:        math.complex(0, 0),
+__tests__/hamiltonian.test.ts:        math.complex(0, 0)
+__tests__/hamiltonian.test.ts:        [math.complex(1, 0), math.complex(1, 1)],
+__tests__/hamiltonian.test.ts:        [math.complex(1, -1), math.complex(1, 0)]
+__tests__/hamiltonian.test.ts:        coefficient: math.complex(1, 0),
+__tests__/eigendecomposition.test.ts:    let sum = math.complex(0, 0);
+__tests__/eigendecomposition.test.ts:      let dotProduct = math.complex(0, 0);
+__tests__/eigendecomposition.test.ts:      i === j ? values[i] : math.complex(0, 0)
+__tests__/eigendecomposition.test.ts:        [math.complex(2, 0), math.complex(1, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(2, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(1, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(0, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(1, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(1, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(2, 0), math.complex(3, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(2, 0), math.complex(4, 0), math.complex(5, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(3, 0), math.complex(5, 0), math.complex(6, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(0, -1)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 1), math.complex(0, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(2, 0), math.complex(1, 1), math.complex(0, 2)],
+__tests__/eigendecomposition.test.ts:        [math.complex(1, -1), math.complex(3, 0), math.complex(2, 1)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, -2), math.complex(2, -1), math.complex(4, 0)]
+__tests__/eigendecomposition.test.ts:      const psi = [math.complex(1/Math.sqrt(2), 0), math.complex(1/Math.sqrt(2), 0)];
+__tests__/eigendecomposition.test.ts:        [math.complex(0.5, 0), math.complex(0.5, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0.5, 0), math.complex(0.5, 0)]
+__tests__/eigendecomposition.test.ts:      let dotProduct = math.complex(0, 0);
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(2, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(-1, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(1, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(Math.cos(Math.PI/4), Math.sin(Math.PI/4)), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(Math.cos(Math.PI/4), -Math.sin(Math.PI/4))]
+__tests__/eigendecomposition.test.ts:        [math.complex(1+epsilon, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(1, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(1e6, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(1e-6, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(1, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(0, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(1, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(0, 0)]
+__tests__/eigendecomposition.test.ts:          let sum = math.complex(0, 0);
+__tests__/eigendecomposition.test.ts:        [math.complex(1, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(-1, 0)]
+__tests__/eigendecomposition.test.ts:        [math.complex(Math.cos(angle), -Math.sin(angle)), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(Math.cos(angle), Math.sin(angle))]
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(1, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/eigendecomposition.test.ts:        [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)]
+__tests__/validation.test.ts:        [math.complex(1, 0), math.complex(0, 0)],
+__tests__/validation.test.ts:        [math.complex(0, 0), math.complex(1, 0)]
+__tests__/validation.test.ts:        [math.complex(1, 0)],
+__tests__/validation.test.ts:        [math.complex(0, 0), math.complex(1, 0)]
+__tests__/validation.test.ts:        math.complex(1, 0),
+__tests__/validation.test.ts:        math.complex(0, 0)
+__tests__/validation.test.ts:        math.complex(1, 0),
+__tests__/validation.test.ts:        math.complex(0, 0)
+__tests__/validation.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/validation.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/validation.test.ts:        math.complex(1, 0),
+__tests__/validation.test.ts:        math.complex(1, 0)
+examples/composition/multi-system-demo.ts:    Array(4).fill(null).map(() => math.complex(0, 0))
+examples/composition/multi-system-demo.ts:      bellMatrix[i][j] = math.complex(re, im);
+__tests__/gates.test.ts:        math.complex(1, 0),
+__tests__/gates.test.ts:        math.complex(0, 0)
+__tests__/gates.test.ts:      expect(state1.amplitudes[0]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:      expect(state1.amplitudes[1]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/gates.test.ts:      expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(matrix[1][1]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(matrix[0][1]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:      expect(matrix[1][0]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:        math.complex(1, 0),
+__tests__/gates.test.ts:        math.complex(0, 0)
+__tests__/gates.test.ts:      expect(result.amplitudes[0]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:      expect(result.amplitudes[1]).toEqual(math.complex(0, 1));
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/gates.test.ts:      expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(matrix[1][1]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(matrix[0][1]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:      expect(matrix[1][0]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:        math.complex(0, 0),
+__tests__/gates.test.ts:        math.complex(1, 0)
+__tests__/gates.test.ts:      expect(result.amplitudes[0]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:      expect(result.amplitudes[1]).toEqual(math.complex(-1, 0));
+__tests__/gates.test.ts:        math.complex(1, 0),
+__tests__/gates.test.ts:        math.complex(0, 0)
+__tests__/gates.test.ts:      expect(result.amplitudes[0]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(result.amplitudes[1]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/gates.test.ts:      expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(matrix[1][1]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(matrix[0][1]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:      expect(matrix[1][0]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:        math.complex(1, 0),
+__tests__/gates.test.ts:        math.complex(0, 0)
+__tests__/gates.test.ts:        math.complex(0, 0),
+__tests__/gates.test.ts:        math.complex(1, 0)
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/gates.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/gates.test.ts:        math.complex(0, 0),
+__tests__/gates.test.ts:        math.complex(0, 0),
+__tests__/gates.test.ts:        math.complex(0, 0),
+__tests__/gates.test.ts:        math.complex(1, 0)
+__tests__/gates.test.ts:      expect(result.amplitudes[2]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:      expect(result.amplitudes[3]).toEqual(math.complex(0, 0));
+__tests__/gates.test.ts:        math.complex(0, 0),
+__tests__/gates.test.ts:        math.complex(1, 0),
+__tests__/gates.test.ts:        math.complex(0, 0),
+__tests__/gates.test.ts:        math.complex(0, 0)
+__tests__/gates.test.ts:      expect(result.amplitudes[1]).toEqual(math.complex(1, 0));
+__tests__/gates.test.ts:        math.complex(1/2, 0),
+__tests__/gates.test.ts:        math.complex(1/2, 0),
+__tests__/gates.test.ts:        math.complex(1/2, 0),
+__tests__/gates.test.ts:        math.complex(1/2, 0)
+__tests__/gates.test.ts:          const expected = i === j ? math.complex(1, 0) : math.complex(0, 0);
+__tests__/matrixOperations.test.ts:      i === j ? math.complex(1, 0) : math.complex(0, 0)
+__tests__/matrixOperations.test.ts:        [math.complex(2, 0), math.complex(0, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, 0), math.complex(2, 0)]
+__tests__/matrixOperations.test.ts:      expect(result[0][0]).toEqual(math.complex(2, 0));
+__tests__/matrixOperations.test.ts:      expect(result[1][1]).toEqual(math.complex(2, 0));
+__tests__/matrixOperations.test.ts:        [math.complex(0, 1), math.complex(1, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, -1)]
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, 1)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, -1), math.complex(1, 0)]
+__tests__/matrixOperations.test.ts:      expect(result[0][0]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:      expect(result[0][1]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:      expect(result[1][0]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:      expect(result[1][1]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:      const a = [[math.complex(1, 0)]];
+__tests__/matrixOperations.test.ts:      const b = [[math.complex(1, 0)], [math.complex(1, 0)]];
+__tests__/matrixOperations.test.ts:        [math.complex(0, 0), math.complex(0, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, 0), math.complex(0, 0)]
+__tests__/matrixOperations.test.ts:      expect(result[0][0]).toEqual(math.complex(1, 0));
+__tests__/matrixOperations.test.ts:      expect(result[1][1]).toEqual(math.complex(1, 0));
+__tests__/matrixOperations.test.ts:      expect(result[0][1]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:      expect(result[1][0]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, 0), math.complex(1, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(2, 0), math.complex(0, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, 0), math.complex(2, 0)]
+__tests__/matrixOperations.test.ts:      expect(result[0][0]).toEqual(math.complex(2, 0));
+__tests__/matrixOperations.test.ts:      expect(result[3][3]).toEqual(math.complex(2, 0));
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(2, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(3, 0), math.complex(4, 0)]
+__tests__/matrixOperations.test.ts:      expect(complexEqual(result[0][1], math.complex(3, 0))).toBe(true);
+__tests__/matrixOperations.test.ts:      expect(complexEqual(result[1][0], math.complex(2, 0))).toBe(true);
+__tests__/matrixOperations.test.ts:        [math.complex(1, 1), math.complex(0, 1)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(1, -1)]
+__tests__/matrixOperations.test.ts:      expect(complexEqual(result[0][0], math.complex(1, -1))).toBe(true);
+__tests__/matrixOperations.test.ts:      expect(complexEqual(result[0][1], math.complex(1, 0))).toBe(true);
+__tests__/matrixOperations.test.ts:      expect(complexEqual(result[1][0], math.complex(0, -1))).toBe(true);
+__tests__/matrixOperations.test.ts:      expect(complexEqual(result[1][1], math.complex(1, 1))).toBe(true);
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, 1)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, -1), math.complex(1, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, -1)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, 1), math.complex(1, 0)]
+__tests__/matrixOperations.test.ts:      expect(result[0][0]).toEqual(math.complex(2, 0));
+__tests__/matrixOperations.test.ts:      expect(result[0][1]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:      expect(result[1][0]).toEqual(math.complex(0, 0));
+__tests__/matrixOperations.test.ts:      expect(result[1][1]).toEqual(math.complex(2, 0));
+__tests__/matrixOperations.test.ts:      const a = [[math.complex(1, 0)]];
+__tests__/matrixOperations.test.ts:      const b = [[math.complex(1, 0)], [math.complex(1, 0)]];
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, 1)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, -1)]
+__tests__/matrixOperations.test.ts:      const scalar = math.complex(2, 0);
+__tests__/matrixOperations.test.ts:      expect(result[0][0]).toEqual(math.complex(2, 0));
+__tests__/matrixOperations.test.ts:      expect(result[0][1]).toEqual(math.complex(0, 2));
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, 1)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(0, -1)]
+__tests__/matrixOperations.test.ts:      const scalar = math.complex(0, 1);
+__tests__/matrixOperations.test.ts:      expect(result[0][0]).toEqual(math.complex(0, 1));
+__tests__/matrixOperations.test.ts:      expect(result[0][1]).toEqual(math.complex(-1, 0));
+__tests__/matrixOperations.test.ts:      expect(() => scaleMatrix([], math.complex(1, 0))).toThrow();
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(2, -1)],
+__tests__/matrixOperations.test.ts:        [math.complex(2, 1), math.complex(3, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(2, -1)],
+__tests__/matrixOperations.test.ts:        [math.complex(2, -1), math.complex(3, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(1, 1e-11), math.complex(1, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(1, -1e-11)]
+__tests__/matrixOperations.test.ts:        [math.complex(1/Math.sqrt(2), 0), math.complex(-1/Math.sqrt(2), 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(1/Math.sqrt(2), 0), math.complex(1/Math.sqrt(2), 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(1, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(1, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(1 + 1e-11, 0), math.complex(0, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(0, 0), math.complex(1 - 1e-11, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(2, 0), math.complex(1, 0)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(2, 0)]
+__tests__/matrixOperations.test.ts:        [math.complex(1, 0), math.complex(1, 1)],
+__tests__/matrixOperations.test.ts:        [math.complex(1, -2), math.complex(2, 0)]
+__tests__/matrixOperations.test.ts:          [math.complex(1, 0), math.complex(0, 0)],
+__tests__/matrixOperations.test.ts:          [math.complex(0, 0), math.complex(1, 0)]
+__tests__/matrixFunctions.test.ts:      [math.complex(2, 0), math.complex(1, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(1, 0), math.complex(2, 0)]
+__tests__/matrixFunctions.test.ts:      [math.complex(2, 0), math.complex(1, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(1, 0), math.complex(2, 0)]
+__tests__/matrixFunctions.test.ts:      [math.complex(5, 0), math.complex(4, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(4, 0), math.complex(5, 0)]
+__tests__/matrixFunctions.test.ts:      [math.complex(2, 0), math.complex(1, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(1, 0), math.complex(2, 0)]
+__tests__/matrixFunctions.test.ts:      return math.complex(r * Math.cos(theta), r * Math.sin(theta));
+__tests__/matrixFunctions.test.ts:      return math.complex(Math.log(r), theta);
+__tests__/matrixFunctions.test.ts:      return math.complex(r * Math.cos(theta), r * Math.sin(theta));
+__tests__/matrixFunctions.test.ts:      [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(0, 0), math.complex(2, 0), math.complex(0, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(0, 0), math.complex(0, 0), math.complex(3, 0)]
+__tests__/matrixFunctions.test.ts:      [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(0, 0), math.complex(8, 0), math.complex(0, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(0, 0), math.complex(0, 0), math.complex(27, 0)]
+__tests__/matrixFunctions.test.ts:      [math.complex(Math.PI/4, 0), math.complex(0, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(0, 0), math.complex(Math.PI/2, 0)]
+__tests__/matrixFunctions.test.ts:      return math.complex(
+__tests__/matrixFunctions.test.ts:      [math.complex(Math.sin(Math.PI/4), 0), math.complex(0, 0)],
+__tests__/matrixFunctions.test.ts:      [math.complex(0, 0), math.complex(Math.sin(Math.PI/2), 0)]
+__tests__/hilbertSpace.test.ts:        const coeffs = [math.complex(1, 0), math.complex(1, 0)];
+__tests__/hilbertSpace.test.ts:        expect(() => space.superposition([math.complex(1, 0)])).toThrow();
+__tests__/operator.test.ts:      i === j ? math.complex(1, 0) : math.complex(0, 0)
+__tests__/operator.test.ts:      expect(() => new MatrixOperator([[math.complex(1, 0)], [math.complex(1, 0), math.complex(0, 0)]])).toThrow();
+__tests__/operator.test.ts:      const matrix = [[math.complex(1, 0), math.complex(0, 0)], [math.complex(0, 0), math.complex(1, 0)]];
+__tests__/operator.test.ts:        [math.complex(1, 0), math.complex(1, -1)],
+__tests__/operator.test.ts:        [math.complex(1, -1), math.complex(2, 0)]  // Wrong conjugate
+__tests__/operator.test.ts:        [math.complex(1, 0), math.complex(1, -1)],
+__tests__/operator.test.ts:        [math.complex(1, 1), math.complex(2, 0)]
+__tests__/operator.test.ts:        [math.complex(2, 0), math.complex(0, 0)],
+__tests__/operator.test.ts:        [math.complex(0, 0), math.complex(2, 0)]
+__tests__/operator.test.ts:        [math.complex(2, 0), math.complex(0, 0)],
+__tests__/operator.test.ts:        [math.complex(0, 0), math.complex(2, 0)]
+__tests__/operator.test.ts:        const state = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+__tests__/operator.test.ts:        expect(result.amplitudes[0]).toEqual(math.complex(1, 0));
+__tests__/operator.test.ts:        expect(result.amplitudes[1]).toEqual(math.complex(0, 0));
+__tests__/operator.test.ts:          math.complex(1, 0),
+__tests__/operator.test.ts:          math.complex(0, 0),
+__tests__/operator.test.ts:          math.complex(0, 0)
+__tests__/operator.test.ts:        expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/operator.test.ts:        expect(matrix[1][1]).toEqual(math.complex(1, 0));
+__tests__/operator.test.ts:          [math.complex(1, 1), math.complex(0, 0)],
+__tests__/operator.test.ts:          [math.complex(0, 0), math.complex(1, -1)]
+__tests__/operator.test.ts:        expect(adjointMatrix[0][0]).toEqual(math.complex(1, -1));
+__tests__/operator.test.ts:        expect(adjointMatrix[1][1]).toEqual(math.complex(1, 1));
+__tests__/operator.test.ts:        expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/operator.test.ts:        expect(matrix[3][3]).toEqual(math.complex(1, 0));
+__tests__/operator.test.ts:        const scalar = math.complex(2, 0);
+__tests__/operator.test.ts:        expect(matrix[0][0]).toEqual(math.complex(2, 0));
+__tests__/operator.test.ts:        expect(matrix[1][1]).toEqual(math.complex(2, 0));
+__tests__/operator.test.ts:        expect(matrix[0][0]).toEqual(math.complex(2, 0));
+__tests__/operator.test.ts:        expect(matrix[1][1]).toEqual(math.complex(2, 0));
+__tests__/operator.test.ts:        expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/operator.test.ts:        expect(matrix[0][1]).toEqual(math.complex(0, 0));
+__tests__/operator.test.ts:        expect(matrix[1][0]).toEqual(math.complex(0, 0));
+__tests__/operator.test.ts:        expect(matrix[1][1]).toEqual(math.complex(1, 0));
+__tests__/operator.test.ts:        expect(matrix[0][0]).toEqual(math.complex(0, 0));
+__tests__/operator.test.ts:        expect(matrix[0][1]).toEqual(math.complex(0, 0));
+__tests__/operator.test.ts:        expect(matrix[1][0]).toEqual(math.complex(0, 0));
+__tests__/operator.test.ts:        expect(matrix[1][1]).toEqual(math.complex(0, 0));
+__tests__/stateVector.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/stateVector.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/stateVector.test.ts:      const amps = [math.complex(1, 0)];
+__tests__/stateVector.test.ts:        const amp = math.complex(1, 0);
+__tests__/stateVector.test.ts:        const amp = math.complex(1, 0);
+__tests__/stateVector.test.ts:          math.complex(1, 0),
+__tests__/stateVector.test.ts:          math.complex(0, 0)
+__tests__/stateVector.test.ts:          math.complex(0, 0),
+__tests__/stateVector.test.ts:          math.complex(1, 0)
+__tests__/stateVector.test.ts:        expect(product).toEqual(math.complex(0, 0));
+__tests__/stateVector.test.ts:          math.complex(1/Math.sqrt(2), 0),
+__tests__/stateVector.test.ts:          math.complex(1/Math.sqrt(2), 0)
+__tests__/stateVector.test.ts:          math.complex(1/Math.sqrt(2), 0),
+__tests__/stateVector.test.ts:          math.complex(1/Math.sqrt(2), 0)
+__tests__/stateVector.test.ts:          math.complex(2, 0),
+__tests__/stateVector.test.ts:          math.complex(2, 0)
+__tests__/stateVector.test.ts:          math.complex(1, 0),
+__tests__/stateVector.test.ts:          math.complex(0, 0)
+__tests__/stateVector.test.ts:          math.complex(1, 0),
+__tests__/stateVector.test.ts:          math.complex(0, 0)
+__tests__/stateVector.test.ts:        expect(product.amplitudes[0]).toEqual(math.complex(1, 0));
+__tests__/stateVector.test.ts:          math.complex(1, 0),
+__tests__/stateVector.test.ts:          math.complex(0, 0)
+__tests__/stateVector.test.ts:          math.complex(1e-11, 1e-11),
+__tests__/stateVector.test.ts:          math.complex(0, 0)
+__tests__/stateVector.test.ts:        expect(state.amplitudes[0]).toEqual(math.complex(1, 0));
+__tests__/stateVector.test.ts:        expect(state.amplitudes[1]).toEqual(math.complex(0, 0));
+__tests__/stateVector.test.ts:          math.complex(1, 0),
+__tests__/stateVector.test.ts:          math.complex(1, 0)
+__tests__/stateVector.test.ts:        const expectedAmp = math.complex(1/Math.sqrt(2), 0);
+__tests__/densityMatrix.test.ts:        math.complex(1, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0)
+__tests__/densityMatrix.test.ts:      expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/densityMatrix.test.ts:      expect(matrix[1][1]).toEqual(math.complex(0, 0));
+__tests__/densityMatrix.test.ts:        [math.complex(2, 0), math.complex(0, 0)],
+__tests__/densityMatrix.test.ts:        [math.complex(0, 0), math.complex(0, 0)]
+__tests__/densityMatrix.test.ts:        [math.complex(1, 0), math.complex(1, 0)],
+__tests__/densityMatrix.test.ts:        [math.complex(0, 1), math.complex(0, 0)]
+__tests__/densityMatrix.test.ts:        [math.complex(2, 0), math.complex(0, 0)],
+__tests__/densityMatrix.test.ts:        [math.complex(0, 0), math.complex(-1, 0)]
+__tests__/densityMatrix.test.ts:        math.complex(1, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0)
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 1/Math.sqrt(2)),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0)
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:      const pureState = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+__tests__/densityMatrix.test.ts:          new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]),
+__tests__/densityMatrix.test.ts:          new StateVector(2, [math.complex(0, 0), math.complex(1, 0)])
+__tests__/densityMatrix.test.ts:      const state1 = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+__tests__/densityMatrix.test.ts:      const state2 = new StateVector(2, [math.complex(1/Math.sqrt(2), 0), math.complex(1/Math.sqrt(2), 0)]);
+__tests__/densityMatrix.test.ts:        new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]),
+__tests__/densityMatrix.test.ts:        new StateVector(2, [math.complex(0, 0), math.complex(1, 0)])
+__tests__/densityMatrix.test.ts:        new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]),
+__tests__/densityMatrix.test.ts:        new StateVector(2, [math.complex(0, 0), math.complex(1, 0)])
+__tests__/densityMatrix.test.ts:        new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]),
+__tests__/densityMatrix.test.ts:        new StateVector(3, [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)])
+__tests__/densityMatrix.test.ts:        math.complex(1, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0)
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:      const state = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:      const state = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/densityMatrix.test.ts:          i === j ? math.complex(0.25, 0) : math.complex(0, 0)
+__tests__/densityMatrix.test.ts:          math.complex(
+__tests__/densityMatrix.test.ts:      const state1 = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+__tests__/densityMatrix.test.ts:      const state2 = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+__tests__/densityMatrix.test.ts:        math.complex(1, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0)
+__tests__/densityMatrix.test.ts:        math.complex(1, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0)
+__tests__/densityMatrix.test.ts:        math.complex(1, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0),
+__tests__/densityMatrix.test.ts:        math.complex(0, 0)
+__tests__/composition.test.ts:        math.complex(1, 0),
+__tests__/composition.test.ts:        math.complex(0, 0)
+__tests__/composition.test.ts:        math.complex(0, 0),
+__tests__/composition.test.ts:        math.complex(1, 0)
+__tests__/composition.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/composition.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/measurement.test.ts:        math.complex(1, 0),
+__tests__/measurement.test.ts:        math.complex(0, 0)
+__tests__/measurement.test.ts:      expect(matrix[0][0]).toEqual(math.complex(1, 0));
+__tests__/measurement.test.ts:      expect(matrix[0][1]).toEqual(math.complex(0, 0));
+__tests__/measurement.test.ts:      expect(matrix[1][0]).toEqual(math.complex(0, 0));
+__tests__/measurement.test.ts:      expect(matrix[1][1]).toEqual(math.complex(0, 0));
+__tests__/measurement.test.ts:        math.complex(1, 0),
+__tests__/measurement.test.ts:        math.complex(0, 0)
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/measurement.test.ts:        math.complex(1, 0),
+__tests__/measurement.test.ts:        math.complex(0, 0)
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/measurement.test.ts:        math.complex(1, 0),
+__tests__/measurement.test.ts:        math.complex(0, 0)
+__tests__/measurement.test.ts:        [math.complex(1, 0), math.complex(0, 0)],
+__tests__/measurement.test.ts:        [math.complex(0, 0), math.complex(-1, 0)]
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/measurement.test.ts:        [math.complex(1, 0), math.complex(0, 0)],
+__tests__/measurement.test.ts:        [math.complex(0, 0), math.complex(1, 0)]
+__tests__/measurement.test.ts:        math.complex(1, 0),
+__tests__/measurement.test.ts:        math.complex(0, 0)
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0),
+__tests__/measurement.test.ts:        math.complex(1/Math.sqrt(2), 0)
+__tests__/measurement.test.ts:        math.complex(1, 0),
+__tests__/measurement.test.ts:        math.complex(0, 0)
+__tests__/measurement.test.ts:        math.complex(1, 0),
+__tests__/measurement.test.ts:        math.complex(0, 0)
+__tests__/measurement.test.ts:      expect(result.state.amplitudes[0]).toEqual(math.complex(1, 0));
+__tests__/measurement.test.ts:      expect(result.state.amplitudes[1]).toEqual(math.complex(0, 0));
+__tests__/utils/testHelpers.ts:  const ca = typeof a === 'number' ? math.complex(a, 0) : math.complex(a.re, a.im);
+__tests__/utils/testHelpers.ts:  const cb = typeof b === 'number' ? math.complex(b, 0) : math.complex(b.re, b.im);
+__tests__/utils/testHelpers.ts:    const complexAmp = math.complex(amp.re, amp.im);
+__tests__/utils/testHelpers.ts:    const complexAmp = math.complex(amp.re, amp.im);
+__tests__/utils/testHelpers.ts:    row.map(x => math.complex(x, 0))
+__tests__/utils/testFixtures.ts:  QUBIT_0: new StateVector(2, [math.complex(1, 0), math.complex(0, 0)], '|0⟩'),
+__tests__/utils/testFixtures.ts:  QUBIT_1: new StateVector(2, [math.complex(0, 0), math.complex(1, 0)], '|1⟩'),
+__tests__/utils/testFixtures.ts:    math.complex(1, 0), 
+__tests__/utils/testFixtures.ts:    math.complex(0, 0), 
+__tests__/utils/testFixtures.ts:    math.complex(0, 0)
+__tests__/utils/testFixtures.ts:    math.complex(0, 0), 
+__tests__/utils/testFixtures.ts:    math.complex(1, 0), 
+__tests__/utils/testFixtures.ts:    math.complex(0, 0)
+__tests__/utils/testFixtures.ts:    math.complex(0, 0), 
+__tests__/utils/testFixtures.ts:    math.complex(0, 0), 
+__tests__/utils/testFixtures.ts:    math.complex(1, 0)
+__tests__/utils/testFixtures.ts:      math.complex(1/Math.sqrt(2), 0),
+__tests__/utils/testFixtures.ts:      math.complex(1/Math.sqrt(2), 0)
+__tests__/utils/testFixtures.ts:      math.complex(1/Math.sqrt(2), 0),
+__tests__/utils/testFixtures.ts:      math.complex(-1/Math.sqrt(2), 0)
+__tests__/utils/testFixtures.ts:      math.complex(1/Math.sqrt(2), 0),
+__tests__/utils/testFixtures.ts:      math.complex(0, 0),
+__tests__/utils/testFixtures.ts:      math.complex(0, 0),
+__tests__/utils/testFixtures.ts:      math.complex(1/Math.sqrt(2), 0)
+__tests__/utils/testFixtures.ts:      math.complex(1/Math.sqrt(2), 0),
+__tests__/utils/testFixtures.ts:      math.complex(0, 0),
+__tests__/utils/testFixtures.ts:      math.complex(0, 0),
+__tests__/utils/testFixtures.ts:      math.complex(-1/Math.sqrt(2), 0)
+__tests__/utils/testFixtures.ts:    [math.complex(0, 0), math.complex(1, 0)],
+__tests__/utils/testFixtures.ts:    [math.complex(1, 0), math.complex(0, 0)]
+__tests__/utils/testFixtures.ts:    [math.complex(0, 0), math.complex(0, -1)],
+__tests__/utils/testFixtures.ts:    [math.complex(0, 1), math.complex(0, 0)]
+__tests__/utils/testFixtures.ts:    [math.complex(1, 0), math.complex(0, 0)],
+__tests__/utils/testFixtures.ts:    [math.complex(0, 0), math.complex(-1, 0)]
+__tests__/utils/testFixtures.ts:    [math.complex(1, 0), math.complex(0, 0)],
+__tests__/utils/testFixtures.ts:    [math.complex(0, 0), math.complex(1, 0)]
+__tests__/utils/testFixtures.ts:    [math.complex(1/Math.sqrt(2), 0), math.complex(1/Math.sqrt(2), 0)],
+__tests__/utils/testFixtures.ts:    [math.complex(1/Math.sqrt(2), 0), math.complex(-1/Math.sqrt(2), 0)]
+__tests__/utils/testFixtures.ts:    [math.complex(1, 0), math.complex(0, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/utils/testFixtures.ts:    [math.complex(0, 0), math.complex(1, 0), math.complex(0, 0), math.complex(0, 0)],
+__tests__/utils/testFixtures.ts:    [math.complex(0, 0), math.complex(0, 0), math.complex(0, 0), math.complex(1, 0)],
+__tests__/utils/testFixtures.ts:    [math.complex(0, 0), math.complex(0, 0), math.complex(1, 0), math.complex(0, 0)]

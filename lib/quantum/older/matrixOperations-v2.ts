@@ -401,7 +401,7 @@ export class QuantumMatrix {
             this.mathMatrix = math.matrix(
                 this.elements.map(row =>
                     row.map(element =>
-                        math.complex(element.re, element.im)
+                        math.complex({re: element.re, im:  element.im})
                     )
                 )
             );

@@ -55,15 +55,15 @@ export class ProjectionOperator implements Operator {
         // Initialize result matrix
         const resultMatrix = Array(dim).fill(null)
             .map(() => Array(dim).fill(null)
-                .map(() => math.complex(0, 0)));
+                .map(() => math.complex({re: 0, im:  0})));
 
         // Calculate matrix product
         for (let i = 0; i < dim; i++) {
             for (let j = 0; j < dim; j++) {
                 for (let k = 0; k < dim; k++) {
                     const term = math.multiply(
-                        math.complex(thisMatrix[i][k].re, thisMatrix[i][k].im),
-                        math.complex(otherMatrix[k][j].re, otherMatrix[k][j].im)
+                        math.complex({re: thisMatrix[i][k].re, im:  thisMatrix[i][k].im}),
+                        math.complex({re: otherMatrix[k][j].re, im:  otherMatrix[k][j].im})
                     );
                     resultMatrix[i][j] = math.add(resultMatrix[i][j], term) as Complex;
                 }
@@ -96,7 +96,7 @@ export class ProjectionOperator implements Operator {
  */
 export function expectationValue(state: StateVector, operator: Operator): Complex {
     const resultState = operator.apply(state);
-    let result = math.complex(0, 0);
+    let result = math.complex({re: 0, im:  0});
 
     for (let i = 0; i < state.dimension; i++) {
         // ⟨ψ|A|ψ⟩ = Σ ψi* (A|ψ⟩)i

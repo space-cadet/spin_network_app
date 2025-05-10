@@ -220,7 +220,7 @@ function demoPartialTrace() {
   
   // Create density matrix for Bell state
   const bellMatrix = Array(4).fill(null).map(() => 
-    Array(4).fill(null).map(() => math.complex(0, 0))
+    Array(4).fill(null).map(() => math.complex({re: 0, im:  0}))
   );
   
   // Construct |Ψ⟩⟨Ψ| for Bell state
@@ -230,7 +230,7 @@ function demoPartialTrace() {
                  bell.amplitudes[i].im * bell.amplitudes[j].im;
       const im = bell.amplitudes[i].re * bell.amplitudes[j].im - 
                  bell.amplitudes[i].im * bell.amplitudes[j].re;
-      bellMatrix[i][j] = math.complex(re, im);
+      bellMatrix[i][j] = math.complex({re: re, im:  im});
     }
   }
   

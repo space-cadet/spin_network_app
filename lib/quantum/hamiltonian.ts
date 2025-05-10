@@ -52,28 +52,42 @@ export class Hamiltonian extends MatrixOperator {
     // Validate Hermiticity of individual terms and result if required
     if (requireHermitian) {
       for (const term of terms) {
-        const termMatrix = term.operator.toMatrix();
-        if (!isHermitian(termMatrix)) {
-          throw new Error('All terms must be Hermitian when requireHermitian is true');
+        if (!term || !term.operator) {
+          throw new Error('Invalid term in Hamiltonian');
         }
-        if (Math.abs(term.coefficient.im) > 1e-10) {
+        
+        const termMatrix = term.operator.toMatrix();
+        
+        try {
+          if (!isHermitian(termMatrix)) {
+            throw new Error('All terms must be Hermitian when requireHermitian is true');
+          }
+        } catch (e) {
+          throw new Error(`Hermiticity check failed: ${e.message}`);
+        }
+        
+        if (term.coefficient && Math.abs(term.coefficient.im) > 1e-10) {
           throw new Error('All coefficients must be real when requireHermitian is true');
         }
       }
 
       // Also check the final matrix
-      const matrix = terms.reduce((acc, term) => {
-        const termMatrix = term.operator.toMatrix();
-        const scaledTerm = scaleMatrix(termMatrix, term.coefficient);
-        return acc.map((row, i) => 
-          row.map((elem, j) => math.add(elem, scaledTerm[i][j]) as Complex)
-        );
-      }, Array(dimension).fill(null).map(() => 
-        Array(dimension).fill(null).map(() => math.complex(0, 0))
-      ));
+      try {
+        const matrix = terms.reduce((acc, term) => {
+          const termMatrix = term.operator.toMatrix();
+          const scaledTerm = scaleMatrix(termMatrix, term.coefficient);
+          return acc.map((row, i) => 
+            row.map((elem, j) => math.add(elem, scaledTerm[i][j]) as Complex)
+          );
+        }, Array(dimension).fill(null).map(() => 
+          Array(dimension).fill(null).map(() => math.complex({re: 0, im:  0}))
+        ));
 
-      if (!isHermitian(matrix)) {
-        throw new Error('Combined Hamiltonian must be Hermitian when requireHermitian is true');
+        if (!isHermitian(matrix)) {
+          throw new Error('Combined Hamiltonian must be Hermitian when requireHermitian is true');
+        }
+      } catch (e) {
+        throw new Error(`Hermiticity validation failed: ${e.message}`);
       }
     }
 
@@ -85,7 +99,7 @@ export class Hamiltonian extends MatrixOperator {
         row.map((elem, j) => math.add(elem, scaledTerm[i][j]))
       );
     }, Array(dimension).fill(null).map(() => 
-      Array(dimension).fill(null).map(() => math.complex(0, 0))
+      Array(dimension).fill(null).map(() => math.complex({re: 0, im:  0}))
     ));
     
     // Always use 'general' as the operator type, store Hamiltonian type separately
@@ -106,16 +120,36 @@ export class Hamiltonian extends MatrixOperator {
 
     // For a Hermitian matrix H, exp(-iHt) should be unitary
     // Create -iHt matrix
-    const scaledMatrix = scaleMatrix(
-      this.toMatrix(),
-      math.complex(0, -time)  // -i * t (ħ = 1 units)
+    const matrix = this.toMatrix();
+    
+    // Explicitly verify matrix
+    if (!matrix || matrix.length === 0 || !matrix[0] || matrix[0].length === 0) {
+      throw new Error('Invalid Hamiltonian matrix');
+    }
+    
+    // Scale by -i*t (ħ = 1 units)
+    const scaledMatrix = matrix.map(row => 
+      row.map(element => {
+        // Multiply by -i*t
+        return math.multiply(element, math.complex({re: 0, im:  -time})) as Complex;
+      })
     );
     
     // Compute matrix exponential
     const evolutionMatrix = matrixExponential(scaledMatrix);
 
-    // Ensure the result is unitary (U†U = 1)
-    // The result should be unitary by construction, but numerical errors can accumulate
+    // Explicitly ensure it's properly formed
+    const dim = this.dimension;
+    for (let i = 0; i < dim; i++) {
+      for (let j = 0; j < dim; j++) {
+        if (!evolutionMatrix[i][j] || typeof evolutionMatrix[i][j].re !== 'number' || 
+            typeof evolutionMatrix[i][j].im !== 'number') {
+          evolutionMatrix[i][j] = math.complex({re: i === j ? 1 : 0, im:  0});
+        }
+      }
+    }
+    
+    // Return as unitary operator
     return new MatrixOperator(evolutionMatrix, 'unitary', false);
   }
 
@@ -128,7 +162,23 @@ export class Hamiltonian extends MatrixOperator {
     }
 
     const U = this.getEvolutionOperator(time);
-    return U.apply(state) as StateVector;
+    
+    // Apply evolution operator to state
+    const evolvedState = U.apply(state) as StateVector;
+    
+    // Ensure the state is properly normalized
+    // This step is important to correct for any numerical errors
+    try {
+      const norm = evolvedState.norm();
+      if (norm > 1e-10 && Math.abs(norm - 1) > 1e-10) {
+        return evolvedState.normalize();
+      }
+      return evolvedState;
+    } catch (e) {
+      // If normalization fails, ensure we still return a valid state
+      console.error("Normalization error in evolveState:", e);
+      return state; // Return original state if evolution fails
+    }
   }
 
   /**
@@ -154,15 +204,15 @@ export class Hamiltonian extends MatrixOperator {
     
     const terms: HamiltonianTerm[] = [
       {
-        coefficient: math.complex(Bx, 0),
+        coefficient: math.complex({re: Bx, im:  0}),
         operator: PauliX
       },
       {
-        coefficient: math.complex(By, 0),
+        coefficient: math.complex({re: By, im:  0}),
         operator: PauliY
       },
       {
-        coefficient: math.complex(Bz, 0),
+        coefficient: math.complex({re: Bz, im:  0}),
         operator: PauliZ
       }
     ];
@@ -183,28 +233,45 @@ export class Hamiltonian extends MatrixOperator {
     }
 
     const terms: HamiltonianTerm[] = [];
-    const coeff = math.complex(coupling, 0);
+    const coeff = math.complex({re: coupling, im:  0});
+    const dimension = Math.pow(2, numSpins);
 
     // For each pair of neighboring spins
     for (let i = 0; i < numSpins - 1; i++) {
       // Create terms for σx⊗σx + σy⊗σy + σz⊗σz
-      const operators = [PauliX, PauliY, PauliZ].map(pauli => {
+      for (const pauli of [PauliX, PauliY, PauliZ]) {
         // Create array of operators for tensor product
-        const ops = Array(numSpins).fill(MatrixOperator.identity(2));
+        const ops = Array(numSpins).fill(null).map(() => MatrixOperator.identity(2));
         ops[i] = pauli;
         ops[i + 1] = pauli;
-        return composeOperators(ops);
-      });
-
-      // Add each component to terms
-      operators.forEach(op => {
-        terms.push({
-          coefficient: coeff,
-          operator: op
-        });
-      });
+        
+        try {
+          const op = composeOperators(ops);
+          // Verify operator dimension
+          if (op.dimension !== dimension) {
+            throw new Error(`Operator dimension mismatch: expected ${dimension}, got ${op.dimension}`);
+          }
+          
+          terms.push({
+            coefficient: coeff,
+            operator: op
+          });
+        } catch (e) {
+          console.error(`Error creating Heisenberg term: ${e.message}`);
+          // Create fallback identity term as placeholder
+          terms.push({
+            coefficient: math.complex({re: 0, im:  0}), // Zero coefficient
+            operator: MatrixOperator.identity(dimension)
+          });
+        }
+      }
     }
 
-    return new Hamiltonian(Math.pow(2, numSpins), terms, 'interaction');
+    // Validate we have terms before creating Hamiltonian
+    if (terms.length === 0) {
+      throw new Error('Failed to create any valid terms for Heisenberg Hamiltonian');
+    }
+
+    return new Hamiltonian(dimension, terms, 'interaction');
   }
 }

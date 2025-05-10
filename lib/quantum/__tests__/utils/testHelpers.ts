@@ -11,8 +11,8 @@ import * as math from 'mathjs';
  */
 export function complexApproxEqual(a: Complex, b: Complex, tolerance: number = 1e-10): boolean {
   // Ensure we're working with proper math.js complex numbers
-  const ca = typeof a === 'number' ? math.complex(a, 0) : math.complex(a.re, a.im);
-  const cb = typeof b === 'number' ? math.complex(b, 0) : math.complex(b.re, b.im);
+  const ca = typeof a === 'number' ? math.complex({re: a, im:  0}) : math.complex({re: a.re, im:  a.im});
+  const cb = typeof b === 'number' ? math.complex({re: b, im:  0}) : math.complex({re: b.re, im:  b.im});
   const diff = math.subtract(ca, cb) as Complex;
   return math.abs(diff) < tolerance;
 }
@@ -35,13 +35,25 @@ export function createRandomState(space: HilbertSpace): StateVector {
   }));
   
   // Normalize
-  const normSquared = amplitudes.reduce((sum, amp) => 
-    sum + math.abs(amp) ** 2, 0);
+  const normSquared = amplitudes.reduce((sum, amp) => {
+    // Convert plain object to math.js Complex if needed
+    const complexAmp = math.complex({re: amp.re, im:  amp.im});
+    // Calculate absolute value squared (|z|²)
+    const absSquared = math.add(
+      math.multiply(complexAmp.re, complexAmp.re),
+      math.multiply(complexAmp.im, complexAmp.im)
+    );
+    return sum + absSquared;
+  }, 0);
+  
   const normFactor = Math.sqrt(normSquared);
   
-  const normalizedAmplitudes = amplitudes.map(amp => 
-    math.divide(amp, normFactor) as Complex
-  );
+  const normalizedAmplitudes = amplitudes.map(amp => {
+    // Convert plain object to math.js Complex
+    const complexAmp = math.complex({re: amp.re, im:  amp.im});
+    // Divide by normalization factor
+    return math.divide(complexAmp, normFactor) as Complex;
+  });
 
   return {
     dimension: space.dimension,
@@ -80,7 +92,7 @@ export function createRandomUnitary(dim: number): Complex[][] {
 
   // Convert to complex matrix
   return realMatrix.map(row => 
-    row.map(x => math.complex(x, 0))
+    row.map(x => math.complex({re: x, im:  0}))
   );
 }
 

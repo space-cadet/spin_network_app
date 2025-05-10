@@ -31,12 +31,12 @@ describe('Quantum States', () => {
       expectStateNormalized(basis[1]);
       
       // |0⟩ state
-      expect(basis[0].amplitudes[0]).toEqual(math.complex(1, 0));
-      expect(basis[0].amplitudes[1]).toEqual(math.complex(0, 0));
+      expect(basis[0].amplitudes[0]).toEqual(math.complex({re: 1, im:  0}));
+      expect(basis[0].amplitudes[1]).toEqual(math.complex({re: 0, im:  0}));
       
       // |1⟩ state
-      expect(basis[1].amplitudes[0]).toEqual(math.complex(0, 0));
-      expect(basis[1].amplitudes[1]).toEqual(math.complex(1, 0));
+      expect(basis[1].amplitudes[0]).toEqual(math.complex({re: 0, im:  0}));
+      expect(basis[1].amplitudes[1]).toEqual(math.complex({re: 1, im:  0}));
     });
 
     it('creates valid basis for two qubits', () => {
@@ -54,13 +54,13 @@ describe('Quantum States', () => {
   describe('createBasisState', () => {
     it('creates valid computational basis states', () => {
       const state0 = createBasisState(2, 0);
-      expect(state0.amplitudes[0]).toEqual(math.complex(1, 0));
-      expect(state0.amplitudes[1]).toEqual(math.complex(0, 0));
+      expect(state0.amplitudes[0]).toEqual(math.complex({re: 1, im:  0}));
+      expect(state0.amplitudes[1]).toEqual(math.complex({re: 0, im:  0}));
       expectStateNormalized(state0);
 
       const state1 = createBasisState(2, 1);
-      expect(state1.amplitudes[0]).toEqual(math.complex(0, 0));
-      expect(state1.amplitudes[1]).toEqual(math.complex(1, 0));
+      expect(state1.amplitudes[0]).toEqual(math.complex({re: 0, im:  0}));
+      expect(state1.amplitudes[1]).toEqual(math.complex({re: 1, im:  0}));
       expectStateNormalized(state1);
     });
 
@@ -75,34 +75,34 @@ describe('Quantum States', () => {
       const state = createBellState('Phi+');
       expectStateNormalized(state);
       
-      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
-      expect(state.amplitudes[1]).toEqual(math.complex(0, 0));
-      expect(state.amplitudes[2]).toEqual(math.complex(0, 0));
-      expect(state.amplitudes[3]).toEqual(math.complex(1/Math.sqrt(2), 0));
+      expect(state.amplitudes[0]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
+      expect(state.amplitudes[1]).toEqual(math.complex({re: 0, im:  0}));
+      expect(state.amplitudes[2]).toEqual(math.complex({re: 0, im:  0}));
+      expect(state.amplitudes[3]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
     });
 
     it('creates normalized Phi- Bell state', () => {
       const state = createBellState('Phi-');
       expectStateNormalized(state);
       
-      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
-      expect(state.amplitudes[3]).toEqual(math.complex(-1/Math.sqrt(2), 0));
+      expect(state.amplitudes[0]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
+      expect(state.amplitudes[3]).toEqual(math.complex({re: -1/Math.sqrt(2), im:  0}));
     });
 
     it('creates normalized Psi+ Bell state', () => {
       const state = createBellState('Psi+');
       expectStateNormalized(state);
       
-      expect(state.amplitudes[1]).toEqual(math.complex(1/Math.sqrt(2), 0));
-      expect(state.amplitudes[2]).toEqual(math.complex(1/Math.sqrt(2), 0));
+      expect(state.amplitudes[1]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
+      expect(state.amplitudes[2]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
     });
 
     it('creates normalized Psi- Bell state', () => {
       const state = createBellState('Psi-');
       expectStateNormalized(state);
       
-      expect(state.amplitudes[1]).toEqual(math.complex(1/Math.sqrt(2), 0));
-      expect(state.amplitudes[2]).toEqual(math.complex(-1/Math.sqrt(2), 0));
+      expect(state.amplitudes[1]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
+      expect(state.amplitudes[2]).toEqual(math.complex({re: -1/Math.sqrt(2), im:  0}));
     });
   });
 
@@ -111,16 +111,16 @@ describe('Quantum States', () => {
       const state = createGHZState(2);
       expectStateNormalized(state);
       
-      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
-      expect(state.amplitudes[3]).toEqual(math.complex(1/Math.sqrt(2), 0));
+      expect(state.amplitudes[0]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
+      expect(state.amplitudes[3]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
     });
 
     it('creates valid 3-qubit GHZ state', () => {
       const state = createGHZState(3);
       expectStateNormalized(state);
       
-      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
-      expect(state.amplitudes[7]).toEqual(math.complex(1/Math.sqrt(2), 0));
+      expect(state.amplitudes[0]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
+      expect(state.amplitudes[7]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
     });
 
     it('throws error for invalid number of qubits', () => {
@@ -135,7 +135,7 @@ describe('Quantum States', () => {
       const state = createWState(2);
       expectStateNormalized(state);
       
-      const expectedAmp = math.complex(1/Math.sqrt(2), 0);
+      const expectedAmp = math.complex({re: 1/Math.sqrt(2), im:  0});
       expect(state.amplitudes[1]).toEqual(expectedAmp);
       expect(state.amplitudes[2]).toEqual(expectedAmp);
     });
@@ -144,7 +144,7 @@ describe('Quantum States', () => {
       const state = createWState(3);
       expectStateNormalized(state);
       
-      const expectedAmp = math.complex(1/Math.sqrt(3), 0);
+      const expectedAmp = math.complex({re: 1/Math.sqrt(3), im:  0});
       expect(state.amplitudes[1]).toEqual(expectedAmp);
       expect(state.amplitudes[2]).toEqual(expectedAmp);
       expect(state.amplitudes[4]).toEqual(expectedAmp);
@@ -162,7 +162,7 @@ describe('Quantum States', () => {
       const state = createPlusState();
       expectStateNormalized(state);
       
-      const expectedAmp = math.complex(1/Math.sqrt(2), 0);
+      const expectedAmp = math.complex({re: 1/Math.sqrt(2), im:  0});
       expect(state.amplitudes[0]).toEqual(expectedAmp);
       expect(state.amplitudes[1]).toEqual(expectedAmp);
     });
@@ -171,8 +171,8 @@ describe('Quantum States', () => {
       const state = createMinusState();
       expectStateNormalized(state);
       
-      expect(state.amplitudes[0]).toEqual(math.complex(1/Math.sqrt(2), 0));
-      expect(state.amplitudes[1]).toEqual(math.complex(-1/Math.sqrt(2), 0));
+      expect(state.amplitudes[0]).toEqual(math.complex({re: 1/Math.sqrt(2), im:  0}));
+      expect(state.amplitudes[1]).toEqual(math.complex({re: -1/Math.sqrt(2), im:  0}));
     });
   });
 });

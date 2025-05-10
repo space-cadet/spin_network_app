@@ -22,7 +22,7 @@ import * as math from 'mathjs';
 // Helper to create density matrices from state vectors
 function createDensityMatrix(state: StateVector): DensityMatrixOperator {
   const dim = state.dimension;
-  const matrix = Array(dim).fill(null).map(() => Array(dim).fill(null).map(() => math.complex(0, 0)));
+  const matrix = Array(dim).fill(null).map(() => Array(dim).fill(null).map(() => math.complex({re: 0, im:  0})));
   
   // Construct density matrix |Ψ⟩⟨Ψ|
   for (let i = 0; i < dim; i++) {
@@ -31,7 +31,7 @@ function createDensityMatrix(state: StateVector): DensityMatrixOperator {
                  state.amplitudes[i].im * state.amplitudes[j].im;
       const im = state.amplitudes[i].re * state.amplitudes[j].im - 
                  state.amplitudes[i].im * state.amplitudes[j].re;
-      matrix[i][j] = math.complex(re, im);
+      matrix[i][j] = math.complex({re: re, im:  im});
     }
   }
   
@@ -44,20 +44,20 @@ function createTestStates() {
   
   // |0⟩ state
   const zeroState = new StateVector(2, [
-    math.complex(1, 0),
-    math.complex(0, 0)
+    math.complex({re: 1, im:  0}),
+    math.complex({re: 0, im:  0})
   ]);
   
   // |1⟩ state
   const oneState = new StateVector(2, [
-    math.complex(0, 0),
-    math.complex(1, 0)
+    math.complex({re: 0, im:  0}),
+    math.complex({re: 1, im:  0})
   ]);
   
   // |+⟩ = (|0⟩ + |1⟩)/√2 state
   const plusState = new StateVector(2, [
-    math.complex(1/Math.sqrt(2), 0),
-    math.complex(1/Math.sqrt(2), 0)
+    math.complex({re: 1/Math.sqrt(2), im:  0}),
+    math.complex({re: 1/Math.sqrt(2), im:  0})
   ]);
   
   // Mixed states (density matrices)
@@ -69,15 +69,15 @@ function createTestStates() {
   
   // Maximally mixed state I/2
   const mixedMatrix = [
-    [math.complex(0.5, 0), math.complex(0, 0)],
-    [math.complex(0, 0), math.complex(0.5, 0)]
+    [math.complex({re: 0.5, im:  0}), math.complex({re: 0, im:  0})],
+    [math.complex({re: 0, im:  0}), math.complex({re: 0.5, im:  0})]
   ];
   const mixedDensity = new DensityMatrixOperator(mixedMatrix);
   
   // Partially mixed state
   const partialMixedMatrix = [
-    [math.complex(0.7, 0), math.complex(0, 0)],
-    [math.complex(0, 0), math.complex(0.3, 0)]
+    [math.complex({re: 0.7, im:  0}), math.complex({re: 0, im:  0})],
+    [math.complex({re: 0, im:  0}), math.complex({re: 0.3, im:  0})]
   ];
   const partialMixedDensity = new DensityMatrixOperator(partialMixedMatrix);
   

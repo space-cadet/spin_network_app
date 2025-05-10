@@ -131,8 +131,8 @@ describe('Operator Algebra', () => {
     it('calculates uncertainty product for a state', () => {
       // Create a state |+⟩ = (|0⟩ + |1⟩)/√2
       const plusState = new StateVector(2, [
-        math.complex(1/Math.sqrt(2), 0),
-        math.complex(1/Math.sqrt(2), 0)
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        math.complex({re: 1/Math.sqrt(2), im:  0})
       ]);
       
       // For |+⟩, ΔY·ΔZ ≥ |⟨[Y,Z]⟩|/2 = |⟨X⟩|/2 = 1/2
@@ -145,8 +145,8 @@ describe('Operator Algebra', () => {
     it('follows uncertainty principle', () => {
       // Create |0⟩ state
       const state = new StateVector(2, [
-        math.complex(1, 0),
-        math.complex(0, 0)
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       
       // Calculate uncertainty and commutator expectation
@@ -174,8 +174,8 @@ describe('Operator Algebra', () => {
     it('identifies non-normal operators', () => {
       // Example of non-normal operator: upper triangular but not diagonal
       const nonNormal = new MatrixOperator([
-        [math.complex(1, 0), math.complex(1, 0)],
-        [math.complex(0, 0), math.complex(2, 0)]
+        [math.complex({re: 1, im:  0}), math.complex({re: 1, im:  0})],
+        [math.complex({re: 0, im:  0}), math.complex({re: 2, im:  0})]
       ]);
       
       expect(isNormalOperator(nonNormal)).toBe(false);
@@ -208,8 +208,8 @@ describe('Operator Algebra', () => {
     it('creates projection operator from state', () => {
       // Create |0⟩ state
       const state = new StateVector(2, [
-        math.complex(1, 0),
-        math.complex(0, 0)
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       
       // Create projection operator |0⟩⟨0|
@@ -262,8 +262,8 @@ describe('Operator Algebra', () => {
     
     it('includes commutator correction when A and B do not commute', () => {
       // When A and B don't commute, first order correction is [A,B]/2
-      const A = PauliX.scale(math.complex(0.1, 0)); // small value for better approximation
-      const B = PauliY.scale(math.complex(0.1, 0));
+      const A = PauliX.scale(math.complex({re: 0.1, im:  0})); // small value for better approximation
+      const B = PauliY.scale(math.complex({re: 0.1, im:  0}));
       
       // A and B don't commute
       expect(operatorsCommute(A, B)).toBe(false);
@@ -275,7 +275,7 @@ describe('Operator Algebra', () => {
       const sum = A.add(B);
       
       // Calculate [A,B]/2
-      const comm = commutator(A, B).scale(math.complex(0.5, 0));
+      const comm = commutator(A, B).scale(math.complex({re: 0.5, im:  0}));
       
       // Expected: A + B + [A,B]/2
       const expected = sum.add(comm);

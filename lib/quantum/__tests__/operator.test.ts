@@ -10,7 +10,7 @@ import * as math from 'mathjs';
 function createTestMatrix(dim: number): MatrixOperator {
   const matrix = Array(dim).fill(null).map((_, i) => 
     Array(dim).fill(null).map((_, j) => 
-      i === j ? math.complex(1, 0) : math.complex(0, 0)
+      i === j ? math.complex({re: 1, im:  0}) : math.complex({re: 0, im:  0})
     )
   );
   return new MatrixOperator(matrix);
@@ -26,11 +26,11 @@ describe('MatrixOperator', () => {
 
     it('validates matrix dimensions', () => {
       expect(() => new MatrixOperator([])).toThrow();
-      expect(() => new MatrixOperator([[math.complex(1, 0)], [math.complex(1, 0), math.complex(0, 0)]])).toThrow();
+      expect(() => new MatrixOperator([[math.complex({re: 1, im:  0})], [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]])).toThrow();
     });
 
     it('validates operator types', () => {
-      const matrix = [[math.complex(1, 0), math.complex(0, 0)], [math.complex(0, 0), math.complex(1, 0)]];
+      const matrix = [[math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})], [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})]];
       expect(() => new MatrixOperator(matrix, 'invalid' as any)).toThrow();
     });
 
@@ -39,8 +39,8 @@ describe('MatrixOperator', () => {
       // [1    1-i]
       // [1-i   2]  // Note: for Hermitian, this should be [1+i  2]
       const nonHermitianMatrix = [
-        [math.complex(1, 0), math.complex(1, -1)],
-        [math.complex(1, -1), math.complex(2, 0)]  // Wrong conjugate
+        [math.complex({re: 1, im:  0}), math.complex({re: 1, im:  -1})],
+        [math.complex({re: 1, im:  -1}), math.complex({re: 2, im:  0})]  // Wrong conjugate
       ];
       expect(() => new MatrixOperator(nonHermitianMatrix, 'hermitian')).toThrow();
 
@@ -48,8 +48,8 @@ describe('MatrixOperator', () => {
       // [1    1-i]
       // [1+i   2]
       const validHermitianMatrix = [
-        [math.complex(1, 0), math.complex(1, -1)],
-        [math.complex(1, 1), math.complex(2, 0)]
+        [math.complex({re: 1, im:  0}), math.complex({re: 1, im:  -1})],
+        [math.complex({re: 1, im:  1}), math.complex({re: 2, im:  0})]
       ];
       expect(() => new MatrixOperator(validHermitianMatrix, 'hermitian')).not.toThrow();
     });
@@ -57,8 +57,8 @@ describe('MatrixOperator', () => {
     it('validates unitary property', () => {
       // Non-unitary matrix
       const nonUnitaryMatrix = [
-        [math.complex(2, 0), math.complex(0, 0)],
-        [math.complex(0, 0), math.complex(2, 0)]
+        [math.complex({re: 2, im:  0}), math.complex({re: 0, im:  0})],
+        [math.complex({re: 0, im:  0}), math.complex({re: 2, im:  0})]
       ];
       expect(() => new MatrixOperator(nonUnitaryMatrix, 'unitary')).toThrow();
     });
@@ -66,8 +66,8 @@ describe('MatrixOperator', () => {
     it('validates projection property', () => {
       // Non-projection matrix
       const nonProjectionMatrix = [
-        [math.complex(2, 0), math.complex(0, 0)],
-        [math.complex(0, 0), math.complex(2, 0)]
+        [math.complex({re: 2, im:  0}), math.complex({re: 0, im:  0})],
+        [math.complex({re: 0, im:  0}), math.complex({re: 2, im:  0})]
       ];
       expect(() => new MatrixOperator(nonProjectionMatrix, 'projection')).toThrow();
     });
@@ -77,19 +77,19 @@ describe('MatrixOperator', () => {
     describe('apply', () => {
       it('applies operator to state vector', () => {
         const op = createTestMatrix(2);
-        const state = new StateVector(2, [math.complex(1, 0), math.complex(0, 0)]);
+        const state = new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]);
         const result = op.apply(state);
         
-        expect(result.amplitudes[0]).toEqual(math.complex(1, 0));
-        expect(result.amplitudes[1]).toEqual(math.complex(0, 0));
+        expect(result.amplitudes[0]).toEqual(math.complex({re: 1, im:  0}));
+        expect(result.amplitudes[1]).toEqual(math.complex({re: 0, im:  0}));
       });
 
       it('throws error for dimension mismatch', () => {
         const op = createTestMatrix(2);
         const state = new StateVector(3, [
-          math.complex(1, 0),
-          math.complex(0, 0),
-          math.complex(0, 0)
+          math.complex({re: 1, im:  0}),
+          math.complex({re: 0, im:  0}),
+          math.complex({re: 0, im:  0})
         ]);
         expect(() => op.apply(state)).toThrow();
       });
@@ -103,8 +103,8 @@ describe('MatrixOperator', () => {
         
         expect(result.dimension).toBe(2);
         const matrix = result.toMatrix();
-        expect(matrix[0][0]).toEqual(math.complex(1, 0));
-        expect(matrix[1][1]).toEqual(math.complex(1, 0));
+        expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
+        expect(matrix[1][1]).toEqual(math.complex({re: 1, im:  0}));
       });
 
       it('throws error for dimension mismatch', () => {
@@ -117,15 +117,15 @@ describe('MatrixOperator', () => {
     describe('adjoint', () => {
       it('computes adjoint of operator', () => {
         const matrix = [
-          [math.complex(1, 1), math.complex(0, 0)],
-          [math.complex(0, 0), math.complex(1, -1)]
+          [math.complex({re: 1, im:  1}), math.complex({re: 0, im:  0})],
+          [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  -1})]
         ];
         const op = new MatrixOperator(matrix);
         const adjoint = op.adjoint();
         const adjointMatrix = adjoint.toMatrix();
         
-        expect(adjointMatrix[0][0]).toEqual(math.complex(1, -1));
-        expect(adjointMatrix[1][1]).toEqual(math.complex(1, 1));
+        expect(adjointMatrix[0][0]).toEqual(math.complex({re: 1, im:  -1}));
+        expect(adjointMatrix[1][1]).toEqual(math.complex({re: 1, im:  1}));
       });
     });
 
@@ -137,20 +137,20 @@ describe('MatrixOperator', () => {
         
         expect(result.dimension).toBe(4);
         const matrix = result.toMatrix();
-        expect(matrix[0][0]).toEqual(math.complex(1, 0));
-        expect(matrix[3][3]).toEqual(math.complex(1, 0));
+        expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
+        expect(matrix[3][3]).toEqual(math.complex({re: 1, im:  0}));
       });
     });
 
     describe('scale', () => {
       it('scales operator by complex number', () => {
         const op = createTestMatrix(2);
-        const scalar = math.complex(2, 0);
+        const scalar = math.complex({re: 2, im:  0});
         const scaled = op.scale(scalar);
         const matrix = scaled.toMatrix();
         
-        expect(matrix[0][0]).toEqual(math.complex(2, 0));
-        expect(matrix[1][1]).toEqual(math.complex(2, 0));
+        expect(matrix[0][0]).toEqual(math.complex({re: 2, im:  0}));
+        expect(matrix[1][1]).toEqual(math.complex({re: 2, im:  0}));
       });
     });
 
@@ -161,8 +161,8 @@ describe('MatrixOperator', () => {
         const sum = op1.add(op2);
         const matrix = sum.toMatrix();
         
-        expect(matrix[0][0]).toEqual(math.complex(2, 0));
-        expect(matrix[1][1]).toEqual(math.complex(2, 0));
+        expect(matrix[0][0]).toEqual(math.complex({re: 2, im:  0}));
+        expect(matrix[1][1]).toEqual(math.complex({re: 2, im:  0}));
       });
 
       it('throws error for dimension mismatch', () => {
@@ -198,10 +198,10 @@ describe('MatrixOperator', () => {
         const identity = MatrixOperator.identity(2);
         const matrix = identity.toMatrix();
         
-        expect(matrix[0][0]).toEqual(math.complex(1, 0));
-        expect(matrix[0][1]).toEqual(math.complex(0, 0));
-        expect(matrix[1][0]).toEqual(math.complex(0, 0));
-        expect(matrix[1][1]).toEqual(math.complex(1, 0));
+        expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
+        expect(matrix[0][1]).toEqual(math.complex({re: 0, im:  0}));
+        expect(matrix[1][0]).toEqual(math.complex({re: 0, im:  0}));
+        expect(matrix[1][1]).toEqual(math.complex({re: 1, im:  0}));
       });
     });
 
@@ -210,10 +210,10 @@ describe('MatrixOperator', () => {
         const zero = MatrixOperator.zero(2);
         const matrix = zero.toMatrix();
         
-        expect(matrix[0][0]).toEqual(math.complex(0, 0));
-        expect(matrix[0][1]).toEqual(math.complex(0, 0));
-        expect(matrix[1][0]).toEqual(math.complex(0, 0));
-        expect(matrix[1][1]).toEqual(math.complex(0, 0));
+        expect(matrix[0][0]).toEqual(math.complex({re: 0, im:  0}));
+        expect(matrix[0][1]).toEqual(math.complex({re: 0, im:  0}));
+        expect(matrix[1][0]).toEqual(math.complex({re: 0, im:  0}));
+        expect(matrix[1][1]).toEqual(math.complex({re: 0, im:  0}));
       });
     });
   });

@@ -114,20 +114,26 @@ describe('HilbertSpace', () => {
     describe('superposition', () => {
       it('creates normalized superposition state', () => {
         const space = TEST_SPACES.QUBIT;
-        const coeffs = [math.complex(1, 0), math.complex(1, 0)];
+        const coeffs = [math.complex({re: 1, im:  0}), math.complex({re: 1, im:  0})];
         const state = space.superposition(coeffs);
         
         expect(state.dimension).toBe(2);
         
         // Check normalization
-        const normSquared = state.amplitudes.reduce((sum, amp) => 
-          sum + math.abs(amp).re, 0);
+        const normSquared = state.amplitudes.reduce((sum, amp) => {
+          // Calculate |z|² = re² + im²
+          const absSquared = math.add(
+            math.multiply(amp.re, amp.re),
+            math.multiply(amp.im, amp.im)
+          );
+          return sum + absSquared;
+        }, 0);
         expect(Math.abs(normSquared - 1)).toBeLessThan(1e-10);
       });
 
       it('throws error for invalid coefficients', () => {
         const space = TEST_SPACES.QUBIT;
-        expect(() => space.superposition([math.complex(1, 0)])).toThrow();
+        expect(() => space.superposition([math.complex({re: 1, im:  0})])).toThrow();
       });
     });
 

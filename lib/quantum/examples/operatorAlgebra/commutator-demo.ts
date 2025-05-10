@@ -104,8 +104,8 @@ function demoUncertaintyPrinciple() {
   
   // Create |+⟩ state (eigenstate of X)
   const plusState = new StateVector(2, [
-    math.complex(1/Math.sqrt(2), 0),
-    math.complex(1/Math.sqrt(2), 0)
+    math.complex({re: 1/Math.sqrt(2), im:  0}),
+    math.complex({re: 1/Math.sqrt(2), im:  0})
   ]);
   
   // Calculate ΔY·ΔZ for |+⟩

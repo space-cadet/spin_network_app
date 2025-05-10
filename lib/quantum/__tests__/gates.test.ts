@@ -17,19 +17,19 @@ describe('Quantum Gates', () => {
   describe('Pauli X (NOT) Gate', () => {
     it('flips basis states', () => {
       const state0 = new StateVector(2, [
-        math.complex(1, 0),
-        math.complex(0, 0)
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       const state1 = PauliX.apply(state0);
       
-      expect(state1.amplitudes[0]).toEqual(math.complex(0, 0));
-      expect(state1.amplitudes[1]).toEqual(math.complex(1, 0));
+      expect(state1.amplitudes[0]).toEqual(math.complex({re: 0, im:  0}));
+      expect(state1.amplitudes[1]).toEqual(math.complex({re: 1, im:  0}));
     });
 
     it('is self-inverse (X² = I)', () => {
       const state = new StateVector(2, [
-        math.complex(1/Math.sqrt(2), 0),
-        math.complex(1/Math.sqrt(2), 0)
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        math.complex({re: 1/Math.sqrt(2), im:  0})
       ]);
       
       const X2 = PauliX.compose(PauliX);
@@ -46,29 +46,29 @@ describe('Quantum Gates', () => {
       const matrix = product.toMatrix();
       
       // XX† = I
-      expect(matrix[0][0]).toEqual(math.complex(1, 0));
-      expect(matrix[1][1]).toEqual(math.complex(1, 0));
-      expect(matrix[0][1]).toEqual(math.complex(0, 0));
-      expect(matrix[1][0]).toEqual(math.complex(0, 0));
+      expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
+      expect(matrix[1][1]).toEqual(math.complex({re: 1, im:  0}));
+      expect(matrix[0][1]).toEqual(math.complex({re: 0, im:  0}));
+      expect(matrix[1][0]).toEqual(math.complex({re: 0, im:  0}));
     });
   });
 
   describe('Pauli Y Gate', () => {
     it('rotates basis states with imaginary phase', () => {
       const state0 = new StateVector(2, [
-        math.complex(1, 0),
-        math.complex(0, 0)
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       const result = PauliY.apply(state0);
       
-      expect(result.amplitudes[0]).toEqual(math.complex(0, 0));
-      expect(result.amplitudes[1]).toEqual(math.complex(0, 1));
+      expect(result.amplitudes[0]).toEqual(math.complex({re: 0, im:  0}));
+      expect(result.amplitudes[1]).toEqual(math.complex({re: 0, im:  1}));
     });
 
     it('is self-inverse (Y² = I)', () => {
       const state = new StateVector(2, [
-        math.complex(1/Math.sqrt(2), 0),
-        math.complex(1/Math.sqrt(2), 0)
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        math.complex({re: 1/Math.sqrt(2), im:  0})
       ]);
       
       const Y2 = PauliY.compose(PauliY);
@@ -83,40 +83,40 @@ describe('Quantum Gates', () => {
       const product = PauliY.compose(adjoint);
       const matrix = product.toMatrix();
       
-      expect(matrix[0][0]).toEqual(math.complex(1, 0));
-      expect(matrix[1][1]).toEqual(math.complex(1, 0));
-      expect(matrix[0][1]).toEqual(math.complex(0, 0));
-      expect(matrix[1][0]).toEqual(math.complex(0, 0));
+      expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
+      expect(matrix[1][1]).toEqual(math.complex({re: 1, im:  0}));
+      expect(matrix[0][1]).toEqual(math.complex({re: 0, im:  0}));
+      expect(matrix[1][0]).toEqual(math.complex({re: 0, im:  0}));
     });
   });
 
   describe('Pauli Z Gate', () => {
     it('applies phase flip to |1⟩', () => {
       const state1 = new StateVector(2, [
-        math.complex(0, 0),
-        math.complex(1, 0)
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 1, im:  0})
       ]);
       const result = PauliZ.apply(state1);
       
-      expect(result.amplitudes[0]).toEqual(math.complex(0, 0));
-      expect(result.amplitudes[1]).toEqual(math.complex(-1, 0));
+      expect(result.amplitudes[0]).toEqual(math.complex({re: 0, im:  0}));
+      expect(result.amplitudes[1]).toEqual(math.complex({re: -1, im:  0}));
     });
 
     it('leaves |0⟩ unchanged', () => {
       const state0 = new StateVector(2, [
-        math.complex(1, 0),
-        math.complex(0, 0)
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       const result = PauliZ.apply(state0);
       
-      expect(result.amplitudes[0]).toEqual(math.complex(1, 0));
-      expect(result.amplitudes[1]).toEqual(math.complex(0, 0));
+      expect(result.amplitudes[0]).toEqual(math.complex({re: 1, im:  0}));
+      expect(result.amplitudes[1]).toEqual(math.complex({re: 0, im:  0}));
     });
 
     it('is self-inverse (Z² = I)', () => {
       const state = new StateVector(2, [
-        math.complex(1/Math.sqrt(2), 0),
-        math.complex(1/Math.sqrt(2), 0)
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        math.complex({re: 1/Math.sqrt(2), im:  0})
       ]);
       
       const Z2 = PauliZ.compose(PauliZ);
@@ -131,18 +131,18 @@ describe('Quantum Gates', () => {
       const product = PauliZ.compose(adjoint);
       const matrix = product.toMatrix();
       
-      expect(matrix[0][0]).toEqual(math.complex(1, 0));
-      expect(matrix[1][1]).toEqual(math.complex(1, 0));
-      expect(matrix[0][1]).toEqual(math.complex(0, 0));
-      expect(matrix[1][0]).toEqual(math.complex(0, 0));
+      expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
+      expect(matrix[1][1]).toEqual(math.complex({re: 1, im:  0}));
+      expect(matrix[0][1]).toEqual(math.complex({re: 0, im:  0}));
+      expect(matrix[1][0]).toEqual(math.complex({re: 0, im:  0}));
     });
   });
 
   describe('Hadamard Gate', () => {
     it('creates equal superposition from |0⟩', () => {
       const state0 = new StateVector(2, [
-        math.complex(1, 0),
-        math.complex(0, 0)
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       const result = Hadamard.apply(state0);
       
@@ -152,8 +152,8 @@ describe('Quantum Gates', () => {
 
     it('creates opposite phase superposition from |1⟩', () => {
       const state1 = new StateVector(2, [
-        math.complex(0, 0),
-        math.complex(1, 0)
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 1, im:  0})
       ]);
       const result = Hadamard.apply(state1);
       
@@ -163,8 +163,8 @@ describe('Quantum Gates', () => {
 
     it('is self-inverse (H² = I)', () => {
       const state = new StateVector(2, [
-        math.complex(1/Math.sqrt(2), 0),
-        math.complex(1/Math.sqrt(2), 0)
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        math.complex({re: 1/Math.sqrt(2), im:  0})
       ]);
       
       const H2 = Hadamard.compose(Hadamard);
@@ -190,36 +190,36 @@ describe('Quantum Gates', () => {
     it('flips target qubit when control is |1⟩', () => {
       // |11⟩ -> |10⟩
       const state = new StateVector(4, [
-        math.complex(0, 0),
-        math.complex(0, 0),
-        math.complex(0, 0),
-        math.complex(1, 0)
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 1, im:  0})
       ]);
       const result = CNOT.apply(state);
       
-      expect(result.amplitudes[2]).toEqual(math.complex(1, 0));
-      expect(result.amplitudes[3]).toEqual(math.complex(0, 0));
+      expect(result.amplitudes[2]).toEqual(math.complex({re: 1, im:  0}));
+      expect(result.amplitudes[3]).toEqual(math.complex({re: 0, im:  0}));
     });
 
     it('leaves target unchanged when control is |0⟩', () => {
       // |01⟩ -> |01⟩
       const state = new StateVector(4, [
-        math.complex(0, 0),
-        math.complex(1, 0),
-        math.complex(0, 0),
-        math.complex(0, 0)
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       const result = CNOT.apply(state);
       
-      expect(result.amplitudes[1]).toEqual(math.complex(1, 0));
+      expect(result.amplitudes[1]).toEqual(math.complex({re: 1, im:  0}));
     });
 
     it('is self-inverse (CNOT² = I)', () => {
       const state = new StateVector(4, [
-        math.complex(1/2, 0),
-        math.complex(1/2, 0),
-        math.complex(1/2, 0),
-        math.complex(1/2, 0)
+        math.complex({re: 1/2, im:  0}),
+        math.complex({re: 1/2, im:  0}),
+        math.complex({re: 1/2, im:  0}),
+        math.complex({re: 1/2, im:  0})
       ]);
       
       const CNOT2 = CNOT.compose(CNOT);
@@ -237,7 +237,7 @@ describe('Quantum Gates', () => {
       
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-          const expected = i === j ? math.complex(1, 0) : math.complex(0, 0);
+          const expected = i === j ? math.complex({re: 1, im:  0}) : math.complex({re: 0, im:  0});
           expect(matrix[i][j]).toEqual(expected);
         }
       }

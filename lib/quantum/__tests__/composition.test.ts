@@ -40,13 +40,13 @@ describe('Quantum Composition', () => {
     it('composes product states', () => {
       // Create |0⟩ and |1⟩ states
       const state0 = new StateVector(2, [
-        math.complex(1, 0),
-        math.complex(0, 0)
+        math.complex({re: 1, im:  0}),
+        math.complex({re: 0, im:  0})
       ]);
       
       const state1 = new StateVector(2, [
-        math.complex(0, 0),
-        math.complex(1, 0)
+        math.complex({re: 0, im:  0}),
+        math.complex({re: 1, im:  0})
       ]);
       
       // Compose to |0⟩⊗|1⟩ = |01⟩
@@ -63,8 +63,8 @@ describe('Quantum Composition', () => {
     it('composes superposition states', () => {
       // Create |+⟩ states
       const plusState = new StateVector(2, [
-        math.complex(1/Math.sqrt(2), 0),
-        math.complex(1/Math.sqrt(2), 0)
+        math.complex({re: 1/Math.sqrt(2), im:  0}),
+        math.complex({re: 1/Math.sqrt(2), im:  0})
       ]);
       
       // Compose |+⟩⊗|+⟩
