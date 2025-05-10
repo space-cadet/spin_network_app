@@ -397,24 +397,167 @@ const BaseApp: React.FC<BaseAppProps> = ({
 - Configurable node and edge properties
 - State persistence for graph configurations
 
-## Quantum Simulation Components
+## Quantum Library Technology
 
-### Quantum Tetrahedron (T53)
-#### Implementation
+### Quantum Module Architecture (May 2025)
+
+The quantum library has been significantly expanded and restructured to provide comprehensive quantum mechanics capabilities while maintaining a clean, modular architecture:
+
+#### Core Technologies
+
+- **Math.js Integration**: Direct integration with Math.js for complex number operations and matrix manipulation
+- **TypeScript**: Comprehensive type definitions for quantum states, operators, and systems
+- **Hybrid Architecture**: Combines functional core with stateful wrappers
+- **WASM Integration**: Planned Python integration via WebAssembly for performance-critical operations
+
+#### Quantum Physics Components
+
+1. **Core Quantum Types and Operations**
+   - Complex number operations with direct Math.js integration
+   - Comprehensive matrix operations with eigendecomposition
+   - Hilbert space operations and composition
+   - Tensor product and operations
+   - State vector operations with validation
+
+2. **Quantum Mechanics Implementation**
+   - Quantum operators with algebra (commutators, anti-commutators)
+   - Unitary time evolution
+   - Hamiltonian systems with validation
+   - Measurement theory with eigendecomposition
+   - Schmidt decomposition
+   - Density matrices with partial trace
+   - Quantum information metrics
+
+3. **Quantum Circuit System**
+   - Gate operations (Pauli X/Y/Z, Hadamard, CNOT)
+   - Circuit composition
+   - Measurement operations
+   - Stateful wrapper class with functional core
+
+4. **Quantum-Graph Integration**
+   - Abstract graph implementation
+   - Quantum state vectors on edges
+   - Intertwiner tensors on nodes
+   - Graph state composition
+   - Package-based architecture
+
+### Technical Implementation Patterns
+
+#### Hybrid Functional/OOP Pattern
+
+The quantum library uses a hybrid approach combining functional programming with object-oriented wrappers:
+
+```typescript
+// Pure functional core
+export const applyOperator = (operator: Matrix, stateVector: ComplexVector): ComplexVector => {
+  // Implementation details
+};
+
+// Stateful wrapper class
+export class Operator {
+  private matrix: Matrix;
+  
+  constructor(matrix: Matrix) {
+    this.matrix = validateHermitian(matrix);
+  }
+  
+  apply(state: StateVector): StateVector {
+    // Delegates to pure function
+    const result = applyOperator(this.matrix, state.toArray());
+    return new StateVector(result);
+  }
+}
+```
+
+#### Math.js Complex Integration
+
+Direct integration with Math.js complex number API:
+
+```typescript
+import { complex, Complex, add, multiply } from 'mathjs';
+
+// Create complex numbers
+const a = complex(1, 2);  // 1 + 2i
+const b = complex(3, 4);  // 3 + 4i
+
+// Complex operations
+const sum = add(a, b);    // 4 + 6i
+const product = multiply(a, b);  // -5 + 10i
+```
+
+#### Eigendecomposition Pattern
+
+Robust implementation for quantum measurements:
+
+```typescript
+export const eigenDecomposition = (matrix: Matrix): EigenDecomposition => {
+  // Implementation using math.js eigs() function
+  // Returns eigenvalues and eigenvectors
+};
+
+// Used in measurement operations
+export const measure = (state: StateVector, observable: Operator): MeasurementResult => {
+  const { eigenvalues, eigenvectors } = eigenDecomposition(observable.getMatrix());
+  // Calculate probabilities using eigenvectors and state
+  return { outcomes, probabilities };
+};
+```
+
+### Quantum Library Modules
+
+#### Quantum Core (lib/quantum/)
+
+- **types.ts**: Core type definitions for quantum mechanics
+- **stateVector.ts**: Quantum state implementations
+- **operator.ts**: Quantum operator framework
+- **matrixOperations.ts**: Advanced matrix operations
+- **matrixFunctions.ts**: Matrix logarithm, square root, etc.
+- **operatorAlgebra.ts**: Commutators and advanced algebra
+- **measurement.ts**: Quantum measurement system
+- **hamiltonian.ts**: Energy operators and evolution
+- **gates.ts**: Standard quantum gates
+- **densityMatrix.ts**: Mixed state representations
+- **information.ts**: Entropy and information metrics
+- **circuit/**: Quantum circuit implementation (new)
+- **utils/**: Validation and helper functions
+
+#### Integration Layer
+
+- **graph-core/**: Abstract graph implementations
+- **tensor-core/**: Core tensor operations
+- **spin-network/**: Integration of quantum with graphs
+
+#### Examples and Testing
+
+- **examples/**: Educational quantum examples
+  - hamiltonian/: Quantum oscillator, spin chains
+  - information/: Quantum information examples
+  - circuits/: Quantum circuit demonstrations
+  - algorithms/: Quantum algorithm implementations
+
+- **__tests__/**: Comprehensive test suite
+  - Unit tests for all modules
+  - Integration tests
+  - Validation suites
+
+### Quantum Simulation Components
+
+#### Quantum Tetrahedron (T53)
+##### Implementation
 - **Visualization**: Used Plotly for interactive 3D visualization with NetworkX for graph structure
 - **Quantum Engine**: Used QuTiP for quantum state manipulation and evolution
 - **State Space**: Implemented using tensor product of 6 spin-1/2 states (one per edge)
 - **Interactions**: Three-body interactions between edges of each face using Pauli operators
 - **Controls**: Interactive coupling strength controls using ipywidgets
 
-#### Technical Architecture
+##### Technical Architecture
 - **Graph Structure**: NetworkX tetrahedral_graph() with 3D coordinate mapping
 - **State Management**: QuTiP Quantum Objects (Qobj) for states and operators
 - **Evolution**: Schrödinger equation solver with custom Hamiltonian
 - **Visualization**: Real-time updates using Plotly's Figure.update() and callbacks
 - **Mathematical Documentation**: Jupyter markdown cells with LaTeX equations
 
-#### Features
+##### Features
 - Full tensor product state space representation
 - Isotropic three-body interactions
 - Interactive parameter control

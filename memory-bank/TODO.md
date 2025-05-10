@@ -1,7 +1,47 @@
-- Review all tensor dimension calculations across library after tensor validation test fixes [T47]
-- Consider adding validation checks for spin vs dimension inputs# Spin Network Visualization and Diffusion App - TODO
+# Spin Network Visualization and Quantum Library - TODO
 
 This document tracks both accomplished objectives and planned tasks for the project. Items are organized by priority and development phase according to the revised plan.
+
+## Current Quantum Library Priorities (May 2025)
+
+### High Priority
+- [ ] Complete Graph-Quantum Integration Restructuring [T64]
+  - [ ] Create packages/quantum directory structure
+  - [ ] Implement AbstractGraph class
+  - [ ] Implement tensor core operations
+  - [ ] Create integration layer with proper abstractions
+
+- [ ] Fix eigenDecomposition Implementation [T62]
+  - [ ] Resolve complex number creation TypeScript errors
+  - [ ] Improve numerical stability
+  - [ ] Add proper error handling
+
+- [ ] Implement Quantum Circuit Module [T61]
+  - [ ] Create circuit types and interfaces
+  - [ ] Implement core operations
+  - [ ] Create stateful wrapper class
+
+- [ ] Complete Quantum Library Examples [T57]
+  - [ ] Enhance existing examples documentation
+  - [ ] Create new example directories (algorithms, circuits)
+  - [ ] Implement educational progression structure
+
+### Medium Priority
+- [ ] Enhance quantum library documentation [T63]
+  - [ ] Document all core modules (stateVector, operator, measurement)
+  - [ ] Add architecture documentation
+  - [ ] Create documentation examples
+
+- [ ] Complete Python WebAssembly Integration [T54]
+  - [ ] Create WebAssembly core
+  - [ ] Implement Python bindings
+  - [ ] Add testing infrastructure
+
+- [ ] Complete Tensor and State Vector Sandbox [T36]
+  - [ ] Finish tensor operations module
+  - [ ] Add state vector operations
+
+### Code Quality
 
 ## Accomplished Objectives
 

@@ -1,7 +1,6 @@
-# Spin Network Visualization and Diffusion App
+# Spin Network Visualization and Quantum Library
 
-An interactive web application for constructing, visualizing, and simulating diffusion processes on spin networks.  
-This project serves as an educational and research tool for exploring quantum geometric concepts through an interactive interface.
+An interactive web application and modular library for constructing, visualizing, and simulating quantum spin networks with advanced tensor operations. This project serves as both an educational and research tool for exploring quantum geometric concepts through an interactive interface and a comprehensive quantum mechanics library.
 
 <!-- ![Spin Network Visualization App](public/spin-network-icon.svg) -->
 
@@ -13,20 +12,34 @@ This project serves as an educational and research tool for exploring quantum ge
 
 ## Project Overview
 
-The Spin Network Visualization and Diffusion App enables users to:
-- Construct spin networks from scratch or templates
-- Edit network nodes (intertwiners) and edges (spins)
+The Spin Network Visualization and Quantum Library enables users to:
+- Construct and manipulate quantum spin networks with proper tensor operations
+- Implement and simulate quantum mechanical systems with advanced operator algebra
+- Work with quantum gates, circuits, and measurement operations
+- Analyze quantum entanglement and information metrics
 - Visualize network structure, energy conservation, and simulation results
-- Simulate both ordinary and telegraph diffusion processes on arbitrary graphs
+- Simulate both quantum and classical diffusion processes on arbitrary graphs
 - Analyze geometric and statistical properties of networks
 
 ## Features
 
+- **Quantum Library (New)**
+  - Comprehensive quantum mechanics implementation
+  - Advanced matrix operations with eigendecomposition
+  - Quantum operator algebra (commutators, anti-commutators)
+  - Quantum gates, circuits, and measurement operations
+  - Hamiltonian systems with time evolution
+  - Quantum information metrics and entanglement measures
+  - Density matrices with partial trace operations
+  - Math.js integration for robust complex number handling
+  
 - **Network Construction & Manipulation**
   - Create and edit spin networks with various symmetries (lattice, circular, random)
   - UI-based node/edge creation and deletion
   - Comprehensive type management for visual customization (real-time updates, sidebar integration)
+  
 - **Simulation Engine**
+  - Quantum simulation capabilities with state vector evolution
   - Ordinary diffusion (heat equation) and telegraph equation models
   - Multiple numerical solvers (Euler, Midpoint, RK4, Adaptive)
   - Real-time visualization of propagation and energy conservation
@@ -75,25 +88,31 @@ Domain-specific implementation:
 - Network visualization
 - Analysis tools
 
-## Current Status (April 2025)
+## Current Status (May 2025)
 
-- ✅ Redux integration for simulation state and UI
-- ✅ Robust error handling and validation in all analysis modules
-- ✅ Performance optimizations: reduced re-renders, improved memoization, throttling
-- ✅ Debug tools: dedicated debug panel, raw data display, enhanced logging
-- ✅ Refactored large components for maintainability
-- ✅ Intertwiner space calculations and comprehensive mathematical documentation
-- ✅ Physics notebook with detailed explanations of mathematical foundations
-- 🔄 Ongoing: Advanced simulation analysis, component refactoring, database/log management
+- ✅ Comprehensive quantum library implementation with Math.js integration
+- ✅ Quantum operator algebra with commutator operations
+- ✅ Matrix operations with enhanced numerical stability
+- ✅ Quantum measurement system with eigendecomposition
+- ✅ Quantum information metrics and entanglement measures
+- ✅ Quantum state representation with validation
+- ✅ Hamiltonian systems with time evolution
+- ✅ Quantum gate implementations (Pauli, Hadamard, CNOT)
+- ✅ React template extraction with state management
+- ✅ Modular package architecture design
+- 🔄 Ongoing: Quantum circuit implementation, eigenDecomposition fixes, Python WebAssembly integration
+- 🔄 Planned: Graph-Quantum integration restructuring, enhanced documentation
 
 ## Technology Stack
 
 - **Frontend**: React with TypeScript
-- **Visualization**: Cytoscape.js (networks), D3.js (plots)
-- **Mathematics**: math.js, numeric.js
+- **Visualization**: Cytoscape.js (networks), D3.js (plots), Plotly (3D visualization)
+- **Mathematics**: math.js with complex number operations
+- **Quantum**: Custom quantum library with Math.js integration
 - **State Management**: Redux
 - **Build System**: Vite
 - **Package Manager**: pnpm
+- **Python Integration**: QuTiP, NetworkX (with planned WebAssembly bridge)
 
 ## Getting Started
 
@@ -197,7 +216,11 @@ spin_network_app/
 ├── packages/            # Modular packages
 │   ├── template-core/   # Core template components
 │   ├── template-base/   # Base template implementation
-│   └── simulation-app/  # Current app as a package
+│   ├── simulation-app/  # Current app as a package
+│   ├── quantum/        # Quantum mechanics library (planned)
+│   ├── graph-core/     # Abstract graph implementation (planned)
+│   ├── tensor-core/    # Tensor operations (planned)
+│   └── spin-network/   # Integration layer (planned)
 ├── memory-bank/         # Project documentation and context
 ├── public/              # Static assets
 ├── resources/           # Technical documentation
