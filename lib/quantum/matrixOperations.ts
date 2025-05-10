@@ -1,9 +1,21 @@
 /**
- * Quantum Matrix Operations (v3)
+ * Quantum Matrix Operations
  * 
- * Provides pure functional implementations of matrix operations for quantum computations.
- * Focuses on type safety, proper error handling, and mathematical correctness while
- * maintaining a clean functional interface.
+ * This module provides pure functional implementations of matrix operations
+ * specifically designed for quantum computations. It focuses on:
+ * - Type safety through TypeScript
+ * - Proper error handling with detailed messages
+ * - Mathematical correctness and numerical stability
+ * - Clean functional programming interface
+ * 
+ * Key features:
+ * - Complex matrix operations (multiplication, addition, scaling)
+ * - Quantum-specific operations (tensor products, adjoints)
+ * - Eigendecomposition with support for degenerate cases
+ * - Numerical stability handling
+ * - Comprehensive error checking
+ * 
+ * @module quantum/matrixOperations
  */
 
 import * as math from 'mathjs';
@@ -11,27 +23,62 @@ import { Complex } from './types';
 
 // ==================== Type Definitions ====================
 
+/**
+ * Represents a matrix of complex numbers
+ * Each element is a Complex type from mathjs
+ */
 export type ComplexMatrix = Complex[][];
 
+/**
+ * Represents the dimensions of a matrix
+ */
 export interface MatrixDimensions {
+    /** Number of rows in the matrix */
     rows: number;
+    /** Number of columns in the matrix */
     cols: number;
 }
 
+/**
+ * Result of matrix validation operations
+ */
 export interface ValidationResult {
+    /** Whether the matrix is valid */
     valid: boolean;
+    /** Error message if validation failed */
     error?: string;
 }
 
 
 // ==================== Configuration ====================
 
+/**
+ * Numerical threshold for floating point comparisons and noise reduction
+ * 
+ * Used for:
+ * - Comparing complex numbers for equality
+ * - Cleaning up numerical noise in calculations
+ * - Determining if a value is effectively zero
+ * - Validating unitary and Hermitian properties
+ * - Checking orthogonality of eigenvectors
+ * 
+ * @constant
+ * @default 1e-10
+ */
 const NUMERICAL_THRESHOLD = 1e-10;
 
 // ==================== Validation Functions ====================
 
 /**
  * Validates matrix structure and element types
+ * 
+ * Checks for:
+ * - Non-empty array structure
+ * - Consistent row lengths
+ * - Valid complex numbers in all positions
+ * 
+ * @param matrix - Matrix to validate
+ * @returns Validation result with error message if invalid
  */
 function validateMatrix(matrix: ComplexMatrix): ValidationResult {
     if (!Array.isArray(matrix) || matrix.length === 0) {
@@ -61,6 +108,13 @@ function validateMatrix(matrix: ComplexMatrix): ValidationResult {
 
 /**
  * Validates matrix dimensions for multiplication
+ * 
+ * Ensures that the number of columns in the first matrix
+ * equals the number of rows in the second matrix
+ * 
+ * @param a - First matrix
+ * @param b - Second matrix
+ * @returns Validation result with error message if dimensions are incompatible
  */
 function validateMultiplicationDimensions(a: ComplexMatrix, b: ComplexMatrix): ValidationResult {
     if (!a[0] || !b[0]) {
@@ -78,7 +132,10 @@ function validateMultiplicationDimensions(a: ComplexMatrix, b: ComplexMatrix): V
 }
 
 /**
- * Validates square matrix
+ * Validates that a matrix is square (same number of rows and columns)
+ * 
+ * @param matrix - Matrix to validate
+ * @returns Validation result with error message if not square
  */
 function validateSquareMatrix(matrix: ComplexMatrix): ValidationResult {
     if (!matrix[0] || matrix.length !== matrix[0].length) {
@@ -90,7 +147,10 @@ function validateSquareMatrix(matrix: ComplexMatrix): ValidationResult {
 // ==================== Utility Functions ====================
 
 /**
- * Cleans up numerical noise in results
+ * Cleans up numerical noise in results by zeroing very small values
+ * 
+ * @param value - Numerical value to clean
+ * @returns Cleaned value (0 if absolute value is below threshold)
  */
 function cleanupNumericalNoise(value: number): number {
     return Math.abs(value) < NUMERICAL_THRESHOLD ? 0 : value;
@@ -98,6 +158,9 @@ function cleanupNumericalNoise(value: number): number {
 
 /**
  * Converts ComplexMatrix to math.js matrix format
+ * 
+ * @param matrix - ComplexMatrix to convert
+ * @returns math.js Matrix equivalent
  */
 function toMathMatrix(matrix: ComplexMatrix): math.Matrix {
     return math.matrix(matrix.map(row =>
@@ -107,6 +170,11 @@ function toMathMatrix(matrix: ComplexMatrix): math.Matrix {
 
 /**
  * Converts math.js matrix to ComplexMatrix format
+ * 
+ * Includes cleanup of numerical noise in the conversion process
+ * 
+ * @param matrix - math.js Matrix to convert
+ * @returns ComplexMatrix equivalent with cleaned numerical values
  */
 function fromMathMatrix(matrix: math.Matrix): ComplexMatrix {
     const data = matrix.valueOf() as math.Complex[][];
@@ -121,12 +189,25 @@ function fromMathMatrix(matrix: math.Matrix): ComplexMatrix {
 // ==================== Core Matrix Operations ====================
 
 /**
- * Multiplies two complex matrices
+ * Multiplies two complex matrices using standard matrix multiplication
  * 
- * @param a First matrix
- * @param b Second matrix
- * @returns Result of matrix multiplication
- * @throws Error if matrices have invalid dimensions
+ * For matrices A (m×n) and B (n×p), computes the product C = AB (m×p) where:
+ * C[i,j] = Σ(k=0 to n-1) A[i,k] * B[k,j]
+ * 
+ * In quantum mechanics, matrix multiplication represents:
+ * - Sequential application of quantum operations
+ * - Composition of quantum gates
+ * - Transformation of quantum states
+ * 
+ * @param a - First matrix (m×n)
+ * @param b - Second matrix (n×p)
+ * @returns Result matrix (m×p)
+ * @throws Error if matrices have invalid dimensions or elements
+ * 
+ * @example
+ * // Multiply Hadamard gate by itself (H² = I)
+ * const H = [[1/√2, 1/√2], [1/√2, -1/√2]];
+ * const HH = multiplyMatrices(H, H); // Should give identity matrix
  */
 export function multiplyMatrices(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix {
     const validationA = validateMatrix(a);
@@ -154,9 +235,21 @@ export function multiplyMatrices(a: ComplexMatrix, b: ComplexMatrix): ComplexMat
 /**
  * Computes the adjoint (conjugate transpose) of a matrix
  * 
- * @param matrix Input matrix
+ * The adjoint A† of a matrix A is obtained by taking the complex conjugate
+ * of each element and then transposing the matrix. For quantum operators,
+ * the adjoint is essential for:
+ * - Testing if an operator is Hermitian (A = A†)
+ * - Testing if an operator is unitary (A†A = AA† = I)
+ * - Computing expectation values ⟨ψ|A|ψ⟩
+ * 
+ * @param matrix - Input matrix
  * @returns Adjoint matrix
  * @throws Error if matrix is invalid
+ * 
+ * @example
+ * const matrix = [[{re: 1, im: 1}, {re: 0, im: 0}],
+ *                 [{re: 0, im: 0}, {re: 1, im: -1}]];
+ * const adj = adjoint(matrix); // Conjugate transpose
  */
 export function adjoint(matrix: ComplexMatrix): ComplexMatrix {
     const validation = validateMatrix(matrix);
@@ -176,19 +269,43 @@ export function adjoint(matrix: ComplexMatrix): ComplexMatrix {
 }
 
 /**
- * Computes tensor product of two matrices
+ * Computes tensor product (Kronecker product) of two matrices
  * 
- * @param a First matrix
- * @param b Second matrix
- * @returns Tensor product matrix
+ * The tensor product A ⊗ B of matrices A and B is a matrix whose dimension
+ * is the product of the dimensions of A and B. It represents the quantum
+ * mechanical combination of two quantum systems.
+ * 
+ * @param a - First matrix
+ * @param b - Second matrix
+ * @returns Tensor product matrix with dimensions (m*p) × (n*q) for m×n and p×q input matrices
  * @throws Error if either matrix is invalid
+ * 
+ * @example
+ * const a = [[1, 0], [0, 1]]; // 2×2 identity matrix
+ * const b = [[0, 1], [1, 0]]; // Pauli X matrix
+ * const result = tensorProduct(a, b); // 4×4 matrix
  */
 /**
  * Computes matrix exponential exp(A) for a complex matrix A
  * 
- * @param matrix Input matrix
+ * The matrix exponential is defined as:
+ * exp(A) = I + A + A²/2! + A³/3! + ...
+ * 
+ * In quantum mechanics, the matrix exponential is crucial for:
+ * - Time evolution: U(t) = exp(-iHt/ħ) where H is the Hamiltonian
+ * - Quantum gates: Many gates are exponentials of Pauli matrices
+ * - Continuous transformations: exp(θA) gives continuous path of transformations
+ * 
+ * @param matrix - Input matrix (must be square)
  * @returns Matrix exponential result
  * @throws Error if matrix is invalid or non-square
+ * 
+ * @example
+ * // Pauli X gate is exp(iπX/2) where X is the Pauli X matrix
+ * const X = [[0, 1], [1, 0]];
+ * const theta = Math.PI/2;
+ * const iX = scaleMatrix(X, {re: 0, im: theta});
+ * const expIX = matrixExponential(iX);
  */
 export function matrixExponential(matrix: ComplexMatrix): ComplexMatrix {
     const validation = validateMatrix(matrix);
@@ -334,7 +451,20 @@ export function eigenDecomposition(
 }
 
 /**
- * Helper function to normalize vectors
+ * Normalizes a set of complex vectors and adjusts their phases
+ * 
+ * For each vector:
+ * 1. Computes the norm (length) of the vector
+ * 2. Divides by the norm to get unit length
+ * 3. Adjusts the phase so the first significant component is real and positive
+ * 
+ * This is important in quantum mechanics where:
+ * - Vectors must be normalized (unit length)
+ * - Global phase is arbitrary but should be consistent
+ * 
+ * @param vectors - Array of complex vectors to normalize
+ * @returns Normalized vectors with consistent phases
+ * @private
  */
 function normalizeVectors(vectors: ComplexMatrix): ComplexMatrix {
     return vectors.map(vector => {
@@ -364,7 +494,25 @@ function normalizeVectors(vectors: ComplexMatrix): ComplexMatrix {
     });
 }
 /**
- * Helper function to process eigenvectors, handling complex values and enforcing orthogonality
+ * Processes eigenvectors to ensure proper normalization and orthogonality
+ * 
+ * Performs several key operations:
+ * 1. Cleans up numerical noise in eigenvector components
+ * 2. Groups degenerate eigenvectors (same eigenvalue)
+ * 3. Orthogonalizes degenerate eigenvectors
+ * 4. Normalizes all vectors to unit length
+ * 
+ * This is crucial for quantum mechanics where:
+ * - Eigenvectors form an orthonormal basis
+ * - Degenerate eigenstates need special handling
+ * - Numerical precision affects physical meaning
+ * 
+ * @param vectors - Raw eigenvectors from computation
+ * @param values - Corresponding eigenvalues
+ * @param dimension - Matrix dimension
+ * @param precision - Numerical precision threshold
+ * @param enforceOrthogonality - Whether to enforce orthogonality
+ * @returns Processed eigenvectors
  * @private
  */
 function processEigenvectors(
@@ -413,7 +561,18 @@ function processEigenvectors(
 }
 
 /**
- * Helper function to group eigenvectors by degenerate eigenvalues
+ * Groups eigenvectors by their corresponding eigenvalues
+ * 
+ * In quantum mechanics, degenerate eigenstates (states with same energy/eigenvalue)
+ * require special handling. This function:
+ * 1. Groups vectors with eigenvalues that are equal within precision
+ * 2. Creates a map of eigenvalue -> vectors for efficient processing
+ * 3. Handles both real and complex eigenvalues
+ * 
+ * @param vectors - Array of eigenvectors
+ * @param values - Corresponding eigenvalues
+ * @param precision - Numerical threshold for considering eigenvalues equal
+ * @returns Map of eigenvalue groups to their corresponding vectors
  * @private
  */
 function groupDegenerateEigenvectors(
@@ -438,7 +597,20 @@ function groupDegenerateEigenvectors(
 }
 
 /**
- * Helper function to orthogonalize degenerate eigenvectors using modified Gram-Schmidt
+ * Orthogonalizes degenerate eigenvectors using modified Gram-Schmidt process
+ * 
+ * For quantum systems with degenerate states, we need an orthonormal basis.
+ * This function:
+ * 1. Takes groups of degenerate vectors (same eigenvalue)
+ * 2. Applies modified Gram-Schmidt for numerical stability
+ * 3. Ensures resulting vectors are orthogonal and normalized
+ * 
+ * The modified Gram-Schmidt process is more numerically stable than
+ * classical Gram-Schmidt, which is important for quantum computations.
+ * 
+ * @param groups - Map of eigenvalue groups to their vectors
+ * @param precision - Numerical threshold for orthogonality
+ * @returns Array of orthogonalized vectors
  * @private
  */
 function orthogonalizeDegenerateEigenvectors(
@@ -476,7 +648,19 @@ function orthogonalizeDegenerateEigenvectors(
 }
 
 /**
- * Helper function to compute vector projection
+ * Computes the projection of vector v onto vector u
+ * 
+ * The projection is given by: proj_u(v) = (⟨v|u⟩/⟨u|u⟩)u
+ * where ⟨v|u⟩ is the inner product.
+ * 
+ * This is used in:
+ * - Gram-Schmidt orthogonalization
+ * - Finding components of quantum states
+ * - Decomposing states into basis vectors
+ * 
+ * @param v - Vector to project
+ * @param u - Vector to project onto
+ * @returns Projection vector
  * @private
  */
 function computeProjection(v: Complex[], u: Complex[]): Complex[] {
@@ -488,7 +672,20 @@ function computeProjection(v: Complex[], u: Complex[]): Complex[] {
 }
 
 /**
- * Helper function to compute inner product of complex vectors
+ * Computes the inner product ⟨v|u⟩ of two complex vectors
+ * 
+ * The inner product is defined as: Σᵢ v̄ᵢuᵢ
+ * where v̄ᵢ is the complex conjugate of vᵢ
+ * 
+ * This is fundamental in quantum mechanics for:
+ * - Computing probability amplitudes
+ * - Calculating expectation values
+ * - Determining orthogonality
+ * - Normalizing quantum states
+ * 
+ * @param v - First vector
+ * @param u - Second vector
+ * @returns Complex inner product
  * @private
  */
 function innerProduct(v: Complex[], u: Complex[]): Complex {
@@ -502,7 +699,16 @@ function innerProduct(v: Complex[], u: Complex[]): Complex {
 }
 
 /**
- * Helper function to subtract complex vectors
+ * Subtracts two complex vectors component-wise
+ * 
+ * Used in:
+ * - Gram-Schmidt orthogonalization
+ * - Error calculation
+ * - Vector space operations
+ * 
+ * @param v - First vector
+ * @param u - Second vector
+ * @returns v - u component-wise
  * @private
  */
 function subtractVectors(v: Complex[], u: Complex[]): Complex[] {
@@ -512,7 +718,18 @@ function subtractVectors(v: Complex[], u: Complex[]): Complex[] {
 }
 
 /**
- * Helper function to compute vector norm
+ * Computes the norm (length) of a complex vector
+ * 
+ * The norm is defined as: √(⟨v|v⟩)
+ * where ⟨v|v⟩ is the inner product of v with itself
+ * 
+ * Critical in quantum mechanics for:
+ * - Normalizing quantum states
+ * - Computing probabilities
+ * - Validating unitary transformations
+ * 
+ * @param v - Complex vector
+ * @returns Norm of the vector
  * @private
  */
 function vectorNorm(v: Complex[]): number {
@@ -521,7 +738,16 @@ function vectorNorm(v: Complex[]): number {
 }
 
 /**
- * Helper function to round to precision
+ * Rounds a number to a specified precision
+ * 
+ * Used for:
+ * - Handling numerical noise
+ * - Comparing floating point numbers
+ * - Grouping nearly-equal eigenvalues
+ * 
+ * @param value - Number to round
+ * @param precision - Precision threshold
+ * @returns Rounded value
  * @private
  */
 function roundToPrec(value: number, precision: number): number {
@@ -529,7 +755,18 @@ function roundToPrec(value: number, precision: number): number {
 }
 
 /**
- * Helper function to verify eigendecomposition
+ * Verifies the correctness of eigendecomposition
+ * 
+ * Checks that Av = λv for each eigenpair (λ,v) within specified precision.
+ * This verification is important because:
+ * - Numerical methods can accumulate errors
+ * - Degenerate eigenvalues need special attention
+ * - Physical meaning depends on mathematical accuracy
+ * 
+ * @param matrix - Original matrix
+ * @param values - Computed eigenvalues
+ * @param vectors - Computed eigenvectors
+ * @param precision - Tolerance for verification
  * @private
  */
 function verifyDecomposition(

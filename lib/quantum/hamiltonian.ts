@@ -1,6 +1,29 @@
 /**
- * Hamiltonian implementation for quantum systems
- * Represents energy operators and generates time evolution
+ * Quantum Hamiltonian Implementation
+ * 
+ * This module provides a comprehensive implementation of quantum Hamiltonians,
+ * which are the fundamental operators representing the total energy of quantum
+ * systems. The Hamiltonian determines:
+ * - System energy levels (eigenvalues)
+ * - Stationary states (eigenvectors)
+ * - Time evolution (through Schrödinger equation)
+ * 
+ * Key features:
+ * - Custom and predefined Hamiltonian types
+ * - Time evolution generation
+ * - Energy expectation calculation
+ * - Support for common physical systems:
+ *   * Spin-1/2 in magnetic field
+ *   * Heisenberg spin chains
+ *   * Harmonic oscillators
+ *   * Custom interactions
+ * 
+ * Mathematical form:
+ * H = Σᵢ cᵢOᵢ where:
+ * - cᵢ are complex coefficients
+ * - Oᵢ are quantum operators
+ * 
+ * @module quantum/hamiltonian
  */
 
 import { Complex, Operator, OperatorType } from './types';
@@ -14,26 +37,76 @@ import { isHermitian } from './matrixOperations';
 import * as math from 'mathjs';
 
 /**
- * Types of common Hamiltonians
+ * Classifies different types of quantum Hamiltonians
+ * 
+ * Each type represents a specific physical system:
+ * 
+ * @property 'free' - Free particle Hamiltonian
+ *    H = p²/2m (kinetic energy only)
+ * 
+ * @property 'harmonic' - Harmonic oscillator
+ *    H = p²/2m + mω²x²/2 (kinetic + potential)
+ * 
+ * @property 'spin' - Spin system in magnetic field
+ *    H = -μ·B (magnetic coupling)
+ * 
+ * @property 'interaction' - Interaction between systems
+ *    H = Σᵢⱼ Jᵢⱼ(Sᵢ·Sⱼ) (spin-spin coupling)
+ * 
+ * @property 'custom' - User-defined Hamiltonian
+ *    H = Σᵢ cᵢOᵢ (general form)
  */
 export type HamiltonianType = 
-  | 'free'           // Free particle
-  | 'harmonic'       // Harmonic oscillator  
-  | 'spin'          // Spin system
-  | 'interaction'    // Interaction term
-  | 'custom';        // Custom Hamiltonian
+  | 'free'           
+  | 'harmonic'      
+  | 'spin'          
+  | 'interaction'    
+  | 'custom';        
 
 /**
- * Interface for Hamiltonian terms
+ * Represents a single term in a Hamiltonian expansion
+ * 
+ * A Hamiltonian is typically expressed as a sum of terms:
+ * H = Σᵢ cᵢOᵢ
+ * where each term consists of:
+ * - A complex coefficient cᵢ (coupling strength, energy scale)
+ * - A quantum operator Oᵢ (physical observable)
+ * 
+ * Examples:
+ * - Zeeman term: H = μB·σ (coefficient = magnetic field strength)
+ * - Coupling term: H = JSᵢ·Sⱼ (coefficient = exchange coupling)
+ * - External field: H = εσz (coefficient = field strength)
+ * 
+ * @property coefficient - Complex coupling strength (energy units)
+ * @property operator - Quantum operator representing physical observable
  */
 export interface HamiltonianTerm {
-  coefficient: Complex;    // Coupling strength
-  operator: Operator;      // Operator for this term
+  coefficient: Complex;    
+  operator: Operator;      
 }
 
 /**
- * Core Hamiltonian class
- * Represents quantum system energy operator
+ * Core Hamiltonian class representing quantum system energy operators
+ * 
+ * The Hamiltonian is the fundamental operator in quantum mechanics that:
+ * 1. Determines the total energy of the system
+ * 2. Generates time evolution through Schrödinger's equation
+ * 3. Defines the system's energy eigenstates
+ * 
+ * Features:
+ * - Constructs Hamiltonians from operator terms
+ * - Validates Hermiticity (optional)
+ * - Generates time evolution operators
+ * - Computes energy expectations
+ * - Supports both time-dependent and time-independent cases
+ * 
+ * Physical Significance:
+ * - Eigenvalues represent possible energy measurements
+ * - Eigenvectors represent stationary states
+ * - Expectation values give average energy
+ * - Time evolution U(t) = exp(-iHt/ħ) describes dynamics
+ * 
+ * @extends MatrixOperator
  */
 export class Hamiltonian extends MatrixOperator {
   readonly hamiltonianType: HamiltonianType;
@@ -111,7 +184,23 @@ export class Hamiltonian extends MatrixOperator {
   }
 
   /**
-   * Generates time evolution operator U(t) = exp(-iHt/ħ)
+   * Generates the quantum time evolution operator U(t) = exp(-iHt/ħ)
+   * 
+   * The time evolution operator is fundamental in quantum mechanics:
+   * - Transforms states from time t₀ to t: |ψ(t)⟩ = U(t-t₀)|ψ(t₀)⟩
+   * - Preserves probability (unitary)
+   * - Satisfies group properties (U(t₁)U(t₂) = U(t₁+t₂))
+   * 
+   * Implementation:
+   * 1. Validates time-independence
+   * 2. Computes -iHt (using ħ = 1 units)
+   * 3. Calculates matrix exponential
+   * 4. Ensures unitarity
+   * 
+   * @param time - Evolution time (in natural units)
+   * @returns Unitary evolution operator U(t)
+   * @throws Error for time-dependent Hamiltonians
+   * @throws Error for invalid matrix structure
    */
   getEvolutionOperator(time: number): Operator {
     if (this._timeDependent) {
@@ -154,7 +243,26 @@ export class Hamiltonian extends MatrixOperator {
   }
 
   /**
-   * Evolves a state under this Hamiltonian
+   * Evolves a quantum state under this Hamiltonian for time t
+   * 
+   * Implements Schrödinger equation evolution:
+   * |ψ(t)⟩ = exp(-iHt/ħ)|ψ(0)⟩
+   * 
+   * Process:
+   * 1. Validates state dimension
+   * 2. Computes evolution operator U(t)
+   * 3. Applies U(t) to initial state
+   * 4. Ensures normalization (corrects numerical errors)
+   * 
+   * Physical meaning:
+   * - Describes how quantum state changes with time
+   * - Preserves total probability (norm = 1)
+   * - Maintains quantum superposition
+   * 
+   * @param state - Initial quantum state |ψ(0)⟩
+   * @param time - Evolution time t
+   * @returns Evolved state |ψ(t)⟩
+   * @throws Error if dimensions don't match
    */
   evolveState(state: StateVector, time: number): StateVector {
     if (state.dimension !== this.dimension) {
@@ -182,7 +290,20 @@ export class Hamiltonian extends MatrixOperator {
   }
 
   /**
-   * Computes expectation value of energy
+   * Computes the expectation value of energy for a given state
+   * 
+   * The energy expectation value is:
+   * ⟨E⟩ = ⟨ψ|H|ψ⟩
+   * 
+   * Physical significance:
+   * - Average energy in state |ψ⟩
+   * - Real for physical (Hermitian) Hamiltonians
+   * - Bounded by energy eigenvalues
+   * - Constant for energy eigenstates
+   * 
+   * @param state - Quantum state |ψ⟩
+   * @returns Complex energy expectation value
+   * @throws Error if dimensions don't match
    */
   expectationValue(state: StateVector): Complex {
     if (state.dimension !== this.dimension) {
@@ -194,8 +315,26 @@ export class Hamiltonian extends MatrixOperator {
   }
 
   /**
-   * Creates spin-1/2 Hamiltonian in magnetic field
-   * H = B·σ where σ are Pauli matrices
+   * Creates a spin-1/2 Hamiltonian in a magnetic field
+   * 
+   * Implements the Zeeman Hamiltonian:
+   * H = B·σ = Bxσx + Byσy + Bzσz
+   * where:
+   * - B = (Bx, By, Bz) is the magnetic field vector
+   * - σ = (σx, σy, σz) are the Pauli matrices
+   * 
+   * Physical significance:
+   * - Describes magnetic dipole in field
+   * - Energy splitting ΔE = 2|B|
+   * - Precession frequency ω = 2|B|
+   * - Eigenstates align/anti-align with B
+   * 
+   * @param magneticField - [Bx, By, Bz] field components
+   * @returns Spin Hamiltonian operator
+   * 
+   * @example
+   * // Create Hamiltonian for field along z-axis
+   * const H = Hamiltonian.createSpinHamiltonian([0, 0, 1]);
    */
   static createSpinHamiltonian(
     magneticField: [number, number, number]
@@ -221,8 +360,33 @@ export class Hamiltonian extends MatrixOperator {
   }
 
   /**
-   * Creates Heisenberg interaction Hamiltonian
-   * H = J Σ S₁·S₂ for nearest neighbors
+   * Creates a Heisenberg interaction Hamiltonian for a spin chain
+   * 
+   * Implements the Heisenberg model:
+   * H = J Σᵢ Sᵢ·Sᵢ₊₁
+   * where:
+   * - J is the exchange coupling constant
+   * - Sᵢ are spin operators at site i
+   * - Sum runs over nearest neighbors
+   * 
+   * The interaction term Sᵢ·Sᵢ₊₁ expands as:
+   * Sᵢ·Sᵢ₊₁ = SxᵢSxᵢ₊₁ + SyᵢSyᵢ₊₁ + SzᵢSzᵢ₊₁
+   * 
+   * Physical significance:
+   * - Models magnetic interactions in materials
+   * - J > 0: Ferromagnetic coupling (parallel spins favored)
+   * - J < 0: Antiferromagnetic coupling (anti-parallel spins favored)
+   * - Conserves total spin
+   * - Supports quantum entanglement
+   * 
+   * @param numSpins - Number of spins in the chain
+   * @param coupling - Exchange coupling strength J
+   * @returns Heisenberg Hamiltonian operator
+   * @throws Error if numSpins < 2
+   * 
+   * @example
+   * // Create antiferromagnetic chain of 3 spins
+   * const H = Hamiltonian.createHeisenbergHamiltonian(3, -1.0);
    */
   static createHeisenbergHamiltonian(
     numSpins: number,
