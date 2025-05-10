@@ -806,22 +806,283 @@ lib/quantum/
 **Priority: HIGH**
 **Current Status**: Not implemented
 
-### 5.1 Core Circuit Framework
+### 5.1 Circuit Module Structure
 
-#### 5.1.1 Interfaces & Types
+The circuit implementation will follow the established patterns from the existing codebase, particularly from `states.ts`, `operator.ts`, and `stateVector.ts`. The implementation will use a hybrid approach combining pure functional operations with an optional stateful wrapper class.
 
-**Required Interfaces:**
+#### 5.1.1 Core Types and Interfaces
 
 ```typescript
 /**
- * Circuit instruction representing a gate applied to specific qubits
+ * Core circuit types
  */
-interface CircuitInstruction {
-  operator: Operator;        // The quantum operator (gate) to apply
-  targets: number[];         // Target qubit indices
-  controls?: number[];       // Optional control qubit indices
-  label?: string;            // Optional label for the instruction
+export interface CircuitInterface {
+    readonly numQubits: number;
+    readonly depth: number;
+    
+    // Circuit building
+    addGate(gate: Operator, targets: number[], step?: number): this;
+    addMeasurement(qubit: number, step?: number): this;
+    
+    // Execution
+    execute(initialState?: StateVector): CircuitResult;
+    executeWithShots(shots: number, initialState?: StateVector): MeasurementDistribution;
+    
+    // Utilities
+    toOperator(): Operator;
+    inverse(): CircuitInterface;
 }
+
+/**
+ * Pure data structures
+ */
+type GateOperation = {
+    type: 'gate';
+    operator: Operator;
+    targets: number[];
+    controls?: number[];
+    label?: string;
+};
+
+type MeasurementOperation = {
+    type: 'measurement';
+    target: number;
+    basis?: Operator;
+    label?: string;
+};
+
+type QuantumOperation = GateOperation | MeasurementOperation;
+
+type CircuitData = {
+    numQubits: number;
+    operations: QuantumOperation[][];
+};
+
+type CircuitResult = {
+    finalState: StateVector;
+    measurements: MeasurementRecord[];
+    intermediateStates?: StateVector[];
+};
+
+type MeasurementRecord = {
+    step: number;
+    qubit: number;
+    outcome: number;
+    probability: number;
+};
+
+/**
+ * Cache structure for stateful operations
+ */
+type CircuitCache = {
+    operator: Operator | null;
+    results: Map<string, CircuitResult>;
+};
+```
+
+#### 5.1.2 Pure Functional Core
+
+```typescript
+/**
+ * Pure circuit operations module
+ */
+export const circuitOps = {
+    // Circuit creation
+    createCircuit(numQubits: number): CircuitData;
+    
+    // Operation addition
+    addGate(
+        circuit: CircuitData, 
+        gate: Operator, 
+        targets: number[], 
+        step?: number
+    ): CircuitData;
+    
+    addMeasurement(
+        circuit: CircuitData, 
+        qubit: number, 
+        step?: number
+    ): CircuitData;
+    
+    // Circuit execution
+    execute(
+        circuit: CircuitData, 
+        initialState?: StateVector
+    ): CircuitResult;
+    
+    // Circuit transformation
+    inverse(circuit: CircuitData): CircuitData;
+    toOperator(circuit: CircuitData): Operator;
+    
+    // Validation
+    validate(circuit: CircuitData): void;
+};
+
+/**
+ * Validation utilities
+ */
+export const circuitValidation = {
+    validateTargets(circuit: CircuitData, targets: number[]): void;
+    validateOperation(operation: QuantumOperation): void;
+    validateCircuitState(circuit: CircuitData): void;
+};
+```
+
+#### 5.1.3 Stateful Wrapper Class
+
+```typescript
+/**
+ * Stateful circuit class with caching
+ */
+export class Circuit implements CircuitInterface {
+    private readonly data: CircuitData;
+    private cache: CircuitCache;
+    
+    constructor(numQubits: number) {
+        validatePosDim(numQubits);
+        this.data = circuitOps.createCircuit(numQubits);
+        this.cache = createEmptyCache();
+    }
+    
+    // Fluent interface using pure operations
+    addGate(gate: Operator, targets: number[], step?: number): this {
+        this.data = circuitOps.addGate(this.data, gate, targets, step);
+        this.invalidateCache();
+        return this;
+    }
+    
+    // Execution with caching
+    execute(initialState?: StateVector): CircuitResult {
+        const cacheKey = this.getCacheKey(initialState);
+        const cached = this.cache.results.get(cacheKey);
+        if (cached) return cached;
+        
+        const result = circuitOps.execute(this.data, initialState);
+        this.cache.results.set(cacheKey, result);
+        return result;
+    }
+    
+    // Cache management
+    private invalidateCache(): void;
+    private getCacheKey(state?: StateVector): string;
+    
+    // Access to pure data
+    getData(): Readonly<CircuitData>;
+}
+```
+
+#### 5.1.2 Pure Circuit Operations
+
+```typescript
+// Pure functional operations for circuit manipulation
+export const circuitOps = {
+    // Create new circuit
+    createCircuit(numQubits: number): CircuitData;
+
+    // Add operations
+    addGate(
+        circuit: CircuitData, 
+        gate: Operator, 
+        targets: number[], 
+        step?: number
+    ): CircuitData;
+
+    addMeasurement(
+        circuit: CircuitData, 
+        qubit: number, 
+        step?: number
+    ): CircuitData;
+
+    // Circuit execution
+    execute(
+        circuit: CircuitData, 
+        initialState?: StateVector
+    ): CircuitResult;
+
+    // Circuit composition
+    compose(c1: CircuitData, c2: CircuitData): CircuitData;
+    
+    // Circuit transformation
+    inverse(circuit: CircuitData): CircuitData;
+};
+```
+
+#### 5.1.3 Stateful Circuit Class
+
+```typescript
+/**
+ * Stateful wrapper for circuit operations with caching
+ */
+export class Circuit {
+    private data: CircuitData;
+    private cachedOperator: Operator | null = null;
+    private cachedResults: Map<string, CircuitResult> = new Map();
+
+    constructor(numQubits: number) {
+        this.data = circuitOps.createCircuit(numQubits);
+    }
+
+    // Circuit building with fluent interface
+    addGate(gate: Operator, targets: number[], step?: number): this {
+        this.data = circuitOps.addGate(this.data, gate, targets, step);
+        this.invalidateCache();
+        return this;
+    }
+
+    addMeasurement(qubit: number, step?: number): this {
+        this.data = circuitOps.addMeasurement(this.data, qubit, step);
+        this.invalidateCache();
+        return this;
+    }
+
+    // Execution with caching
+    execute(initialState?: StateVector): CircuitResult {
+        const cacheKey = this.getCacheKey(initialState);
+        if (this.cachedResults.has(cacheKey)) {
+            return this.cachedResults.get(cacheKey)!;
+        }
+
+        const result = circuitOps.execute(this.data, initialState);
+        this.cachedResults.set(cacheKey, result);
+        return result;
+    }
+
+    // Cached operator conversion
+    toOperator(): Operator {
+        if (!this.cachedOperator) {
+            this.cachedOperator = this.computeOperator();
+        }
+        return this.cachedOperator;
+    }
+
+    // Circuit composition
+    compose(other: Circuit): Circuit {
+        const newCircuit = new Circuit(
+            Math.max(this.data.numQubits, other.data.numQubits)
+        );
+        newCircuit.data = circuitOps.compose(this.data, other.data);
+        return newCircuit;
+    }
+
+    // Create inverse circuit
+    inverse(): Circuit {
+        const newCircuit = new Circuit(this.data.numQubits);
+        newCircuit.data = circuitOps.inverse(this.data);
+        return newCircuit;
+    }
+
+    // Cache management
+    private invalidateCache(): void {
+        this.cachedOperator = null;
+        this.cachedResults.clear();
+    }
+
+    // Allow access to underlying data
+    getData(): Readonly<CircuitData> {
+        return Object.freeze({...this.data});
+    }
+}
+```
 
 /**
  * Result of a circuit execution
@@ -911,44 +1172,124 @@ export class QuantumCircuit {
 }
 ```
 
-#### 5.1.3 Supplementary Classes
+#### 5.1.4 Utility Functions and Common Patterns
 
-**MeasurementDistribution Class:**
+The circuit implementation includes both pure functions for creating common quantum circuits and a utility class for measurement statistics.
 
+**Measurement Statistics:**
 ```typescript
+/**
+ * Handles measurement statistics and distribution analysis
+ */
 export class MeasurementDistribution {
-  // Properties
-  readonly counts: Record<string, number>;  // Measurement outcomes and their counts
-  readonly shots: number;                   // Total number of shots
-  
-  // Constructor
-  constructor(counts: Record<string, number>, shots: number);
-  
-  // Get probability of a specific outcome
-  getProbability(outcome: string): number;
-  
-  // Get most likely outcome
-  getMostLikely(): string;
-  
-  // Convert to array of [outcome, count] entries
-  toArray(): [string, number][];
+    private counts: Record<string, number>;
+    private shots: number;
+    
+    constructor(counts: Record<string, number>, shots: number) {
+        this.counts = counts;
+        this.shots = shots;
+    }
+    
+    // Get probability of specific outcome
+    getProbability(outcome: string): number {
+        return (this.counts[outcome] || 0) / this.shots;
+    }
+    
+    // Get most frequent outcome
+    getMostLikely(): string {
+        return Object.entries(this.counts)
+            .reduce((a, b) => a[1] > b[1] ? a : b)[0];
+    }
+    
+    // Convert to array format
+    toArray(): [string, number][] {
+        return Object.entries(this.counts);
+    }
 }
-```
 
-**CircuitBuilder Utility Class:**
+/**
+ * Pure functions for creating common quantum circuits
+ */
+export const commonCircuits = {
+    // Create Bell state circuit
+    createBellCircuit(
+        q1: number = 0,
+        q2: number = 1
+    ): CircuitData {
+        return pipe(
+            circuitOps.createCircuit(Math.max(q1, q2) + 1),
+            c => circuitOps.addGate(c, Hadamard, [q1]),
+            c => circuitOps.addGate(c, CNOT, [q2], [q1])
+        );
+    },
 
-```typescript
-export class CircuitBuilder {
-  // Constructor
-  constructor(numQubits: number);
-  
-  // Create common circuit patterns
-  static bell(qubits?: [number, number]): QuantumCircuit;
-  static ghz(numQubits: number): QuantumCircuit;
-  static qft(numQubits: number): QuantumCircuit;
-  static inverseQft(numQubits: number): QuantumCircuit;
-  static random(numQubits: number, depth: number): QuantumCircuit;
-}
+    // Create GHZ state circuit
+    createGHZCircuit(numQubits: number): CircuitData {
+        return pipe(
+            circuitOps.createCircuit(numQubits),
+            c => circuitOps.addGate(c, Hadamard, [0]),
+            c => range(1, numQubits).reduce(
+                (acc, i) => circuitOps.addGate(acc, CNOT, [i], [0]), 
+                c
+            )
+        );
+    },
+
+    // Create QFT circuit
+    createQFTCircuit(numQubits: number): CircuitData {
+        const circuit = circuitOps.createCircuit(numQubits);
+        // QFT implementation...
+        return circuit;
+    },
+
+    // Create random circuit (for testing)
+    createRandomCircuit(
+        numQubits: number,
+        depth: number,
+        seed?: number
+    ): CircuitData {
+        const circuit = circuitOps.createCircuit(numQubits);
+        // Random circuit generation...
+        return circuit;
+    }
+};
+
+/**
+ * Convenience wrapper for common circuits
+ */
+export const CircuitFactory = {
+    bell(q1: number = 0, q2: number = 1): Circuit {
+        const data = commonCircuits.createBellCircuit(q1, q2);
+        const circuit = new Circuit(data.numQubits);
+        circuit.loadData(data);
+        return circuit;
+    },
+
+    ghz(numQubits: number): Circuit {
+        const data = commonCircuits.createGHZCircuit(numQubits);
+        const circuit = new Circuit(numQubits);
+        circuit.loadData(data);
+        return circuit;
+    },
+
+    qft(numQubits: number): Circuit {
+        const data = commonCircuits.createQFTCircuit(numQubits);
+        const circuit = new Circuit(numQubits);
+        circuit.loadData(data);
+        return circuit;
+    },
+
+    random(
+        numQubits: number,
+        depth: number,
+        seed?: number
+    ): Circuit {
+        const data = commonCircuits.createRandomCircuit(numQubits, depth, seed);
+        const circuit = new Circuit(numQubits);
+        circuit.loadData(data);
+        return circuit;
+    }
+};
 ```
 
 ### 5.2 Circuit Operations

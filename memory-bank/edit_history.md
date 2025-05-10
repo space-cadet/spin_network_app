@@ -1,5 +1,33 @@
 # Edit History
 
+## 2025-05-10
+### [14:30] - T62: Fixed eigenDecomposition Implementation
+- Modified `lib/quantum/__tests__/eigendecomposition.test.ts`:
+  - Updated test suite to handle optional eigenvectors
+  - Added proper null checks for vectors
+  - Added test cases for eigenvalue-only computation
+  - Added orthogonality enforcement tests
+- Modified `lib/quantum/matrixOperations.ts`:
+  - Fixed eigendecomposition to properly handle complex values
+  - Added support for optional eigenvector computation
+  - Added orthogonality enforcement option
+  - Improved numerical stability
+  - Enhanced error handling
+- Created `/memory-bank/tasks/T62.md` - New task for eigendecomposition fixes
+- Modified `/memory-bank/tasks.md` - Added T62 and updated T60 status
+
+## 2025-05-10
+### [15:00] - T61: Created Hybrid Circuit Implementation Plan
+- Created `/memory-bank/implementation-details/circuit-implementation.md` with detailed hybrid implementation approach:
+  - Pure functional core (circuitOps.ts)
+  - Stateful wrapper class (circuit.ts)
+  - Integration strategy with existing modules
+  - Test suite organization
+- Modified `/memory-bank/tasks/T61.md` - Updated with hybrid implementation strategy
+- Modified `/memory-bank/tasks.md` - Updated task details and progress
+
+# Previous History
+
 ## 2025-05-09
 ### [17:30] - T60: Matrix Operations Rewrite
 - Rewrote `lib/quantum/matrixOperations.ts` with improved implementation:

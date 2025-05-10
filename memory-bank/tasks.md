@@ -14,7 +14,8 @@
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
 | T61 | Implement Quantum Circuit Module | ⬜ | HIGH | 2025-05-09 | [tasks/T61.md] | New task - implementing quantum circuit module |
-| T60 | Remove complex.ts and Direct Math.js Integration | 🔄 | HIGH | 2025-05-08 | [tasks/T60.md] | Matrix operations rewritten with improved validation and error handling, eigendecomposition fixed |
+| T62 | Fix eigenDecomposition Implementation | 🔄 | HIGH | 2025-05-10 | [tasks/T62.md] | Updating eigenDecomposition to properly handle complex values and eigenvectors |
+| T60 | Remove complex.ts and Direct Math.js Integration | ✅ | HIGH | 2025-05-08 | [tasks/T60.md] | Completed - Matrix operations rewritten with improved validation and error handling |
 | T59 | Math.js Complex Number Migration | ✅ | HIGH | 2025-05-08 | [tasks/T59.md] | Completed and superseded by T60 |
 | T58 | Extract Reusable React Template | 🔄 | HIGH | 2025-05-06 | [tasks/T58.md] | Core components extracted, example app created, planning state management |
 | T57 | Quantum Library Examples Implementation | 🔄 | HIGH | 2025-05-06 | [tasks/T57.md] | Basic examples complete, working on expanding example structure |
@@ -27,21 +28,33 @@
 
 ## Task Details
 ### T61: Implement Quantum Circuit Module
-**Description**: Implement a comprehensive quantum circuit module (circuit.ts) from scratch with QuantumCircuit class and supporting interfaces.
-**Status**: ⬜ **Last**: 2025-05-09 15:30 IST
+**Description**: Implement quantum circuit module following hybrid functional/OOP approach, integrating with existing quantum modules.
+**Status**: ⬜ **Last**: 2025-05-10 14:45 IST
 **Progress**: 
-- ⬜ Create core interfaces (CircuitInstruction, CircuitResult, MeasurementRecord)
-- ⬜ Implement QuantumCircuit class with circuit building methods
-- ⬜ Implement circuit execution methods
-- ⬜ Implement utility methods (clone, inverse, transpile)
-- ⬜ Create MeasurementDistribution class for results handling
-- ⬜ Implement CircuitBuilder class for common circuit patterns
-- ⬜ Create comprehensive test suite
+- ⬜ Phase 1: Core Implementation
+  - ⬜ Implement core types (GateOperation, MeasurementOperation, CircuitData)
+  - ⬜ Create pure functional operations (circuitOps.ts)
+  - ⬜ Implement stateful wrapper class (circuit.ts)
+- ⬜ Phase 2: Integration
+  - ⬜ Integrate with StateVector system
+  - ⬜ Integrate with Operator framework
+  - ⬜ Add measurement integration
+- ⬜ Phase 3: Common Patterns
+  - ⬜ Implement pure circuit functions
+  - ⬜ Create factory methods
+  - ⬜ Add utility functions
+- ⬜ Phase 4: Testing
+  - ⬜ Create unit tests
+  - ⬜ Implement property tests
+  - ⬜ Add integration tests
 **Files**: 
-- `lib/quantum/circuit.ts` - Main implementation (currently empty)
-- `lib/quantum/__tests__/circuit.test.ts` - Test suite (to be created)
+- `lib/quantum/circuit/types.ts` - Circuit-specific types
+- `lib/quantum/circuit/circuitOps.ts` - Pure functional operations
+- `lib/quantum/circuit/circuit.ts` - Stateful wrapper class
+- `lib/quantum/circuit/commonCircuits.ts` - Common circuit patterns
+- `lib/quantum/__tests__/circuit/` - Test suite directory
 **Dependencies**: T55, T56
-**Notes**: Implementation will follow the detailed structure outlined in the quantum library implementation plan. Must integrate seamlessly with existing gates.ts, measurement.ts and other modules.
+**Notes**: Implementation follows hybrid approach combining pure functional core with stateful wrapper, based on patterns from existing modules. Detailed implementation plan in circuit-implementation.md.
 
 ### T56: Quantum Library Code Reorganization 
 **Description**: Reorganize quantum library code to improve maintainability and eliminate duplication. Consolidate validation functions and ensure clean separation of concerns.
@@ -243,6 +256,7 @@
 | T38 | Implement Intertwiner Tensor Initialization | 2025-04-24 | T36, T20 |
 
 ## Dependencies
+- **T62** → Depends on → **T60**
 - **T61** → Depends on → **T55, T56**
 - **T59** → Depends on → **T56**
 - **T57** → Depends on → **T56**
@@ -266,12 +280,15 @@
 - **T48** → None
 
 ## Priority Queue
-1. **T61**: Implement quantum circuit module (circuit.ts)
+1. **T62**: Fix eigenDecomposition implementation for proper complex value handling
+2. **T61**: Implement quantum circuit module (circuit.ts)
 2. **T57**: Complete examples enhancement with comprehensive structure
 3. **T36**: Complete tensor operations module implementation
 4. **T52**: Complete API documentation
 
 ## Recent Updates
+- 2025-05-10 14:30: Added T62 - Fix eigenDecomposition implementation
+- 2025-05-10 14:30: Updated T60 status to completed - Matrix operations rewrite finished
 - 2025-05-09 17:30: Updated T60 progress - Completed matrixOperations.ts rewrite with improved validation and error handling
 - 2025-05-09 15:30: Added T61 - New task for quantum circuit implementation
 - 2025-05-09 15:30: Updated T57 progress - enhanced examples implementation plan with structured approach
