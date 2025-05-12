@@ -1,5 +1,114 @@
 # Error Log
 
+## 2025-05-12 - TypeScript Error: Invalid math.MathType Addition
+**File:** `packages/quantum/__tests__/hamiltonian.test.ts`
+**Error:** Operator '+' cannot be applied to types 'math.MathType' and 'math.MathType'
+**Cause:** Direct use of '+' operator on mathjs types is not supported as mathjs types need their own arithmetic functions
+**Fix:** 
+1. Replaced direct '+' operator with mathjs `add()` function
+2. Restructured code to be more readable with the function call
+**Changes:**
+```typescript
+// Before:
+const totalProb = math.abs(math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1]))) +
+                  math.abs(math.multiply(evolved.amplitudes[2], math.conj(evolved.amplitudes[2])));
+
+// After:
+const totalProb = math.add(
+    math.abs(math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1]))),
+    math.abs(math.multiply(evolved.amplitudes[2], math.conj(evolved.amplitudes[2])))
+);
+```
+**Task:** T62
+
+## 2025-05-12 - TypeScript Error: Vectors Parameter Possibly Undefined in eigenDecomposition
+**File:** `packages/quantum/__tests__/eigendecomposition.test.ts`, `packages/quantum/__tests__/matrixOperations.test.ts`
+**Error:** 'vectors' is possibly 'undefined' when using eigenDecomposition with computeEigenvectors: true
+**Cause:** TypeScript couldn't infer that vectors would be defined when computeEigenvectors option was set to true
+**Fix:** 
+1. Added function overloading to eigenDecomposition in matrixOperations.ts
+2. Created specific return type for when computeEigenvectors: true that guarantees vectors is defined
+3. Created specific return type for when computeEigenvectors: false that makes vectors undefined
+**Changes:**
+```typescript
+export function eigenDecomposition(
+    matrix: ComplexMatrix,
+    options: { computeEigenvectors: true; ... }
+): {
+    values: Complex[];
+    vectors: ComplexMatrix;  // Not optional when computeEigenvectors is true
+};
+
+export function eigenDecomposition(
+    matrix: ComplexMatrix,
+    options: { computeEigenvectors?: false; ... }
+): {
+    values: Complex[];
+    vectors?: undefined;  // Undefined when computeEigenvectors is false
+};
+```
+**Task:** T62
+
+## 2025-05-12 - Interface Naming Conflict in Quantum Package
+**File:** `packages/quantum/src/core/types.ts`, `packages/quantum/src/states/stateVector.ts`
+**Error:** Module has already exported a member named 'StateVector'
+**Cause:** The same name 'StateVector' was being used for both the interface in core/types.ts and the implementing class in states/stateVector.ts, causing naming conflicts when both were imported
+**Fix:** 
+1. Renamed the interface in core/types.ts to 'IStateVector'
+2. Updated all references to use the new interface name
+3. Removed "StateVector as IStateVector" imports in favor of direct "IStateVector" imports
+**Changes:**
+- Renamed interface in core/types.ts from StateVector to IStateVector
+- Updated references in Operator interface and MeasurementOutcome interface
+- Fixed imports across the quantum package to use the new interface name
+**Task:** n/a
+
+## 2025-05-12 - TypeScript/Runtime Error: Complex Math.js Type Handling
+**Files:** 
+- `packages/quantum/examples/hamiltonian/spin-chain.ts`
+- `packages/quantum/src/utils/matrixOperations.ts`
+- `packages/quantum/__tests__/utils/testHelpers.ts`
+
+**Errors:**
+1. Property 'toFixed' does not exist on type 'MathType'
+2. Missing overload for eigenDecomposition without options
+3. StateVector return type mismatch
+
+**Cause:** Inconsistent handling of math.js types (Complex, MathType) across different files, especially when converting between native numbers and complex values
+
+**Fix:** 
+1. In spin-chain.ts:
+```typescript
+// Old:
+const prob_updown = (math.abs(math.multiply(...))) as Complex).re;
+
+// New:
+const complexProb = math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1])) as Complex;
+const absValue = math.abs(complexProb);
+const prob_updown = typeof absValue === 'number' ? absValue : absValue.re;
+```
+
+2. In matrixOperations.ts:
+```typescript
+// Added new overload for no-options case:
+export function eigenDecomposition(
+    matrix: ComplexMatrix
+): {
+    values: Complex[];
+    vectors?: ComplexMatrix;
+};
+```
+
+3. In testHelpers.ts:
+```typescript
+// Fixed return type by using proper constructor:
+return new StateVector(space.dimension, normalizedAmplitudes, 'random');
+```
+
+**Impact:** These fixes resolved runtime errors and improved type safety across the quantum computation codebase, particularly in areas dealing with complex number calculations and matrix operations.
+
+**Task:** T123 - Complex Number Type Safety Improvements
+
 ## 2025-05-09 16:30 - T60: Eigendecomposition Implementation Issues
 **File:** `lib/quantum/matrixOperations.ts`
 **Error:** Incorrect handling of eigenvalue-eigenvector pairing with math.js DenseMatrix format

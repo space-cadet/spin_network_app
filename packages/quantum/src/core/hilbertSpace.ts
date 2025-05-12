@@ -2,7 +2,7 @@
  * Hilbert space implementation supporting composition and tensor products
  */
 
-import { Complex, StateVector as IStateVector } from './types';
+import { Complex, IStateVector } from './types';
 import { StateVector } from '../states/stateVector';
 import * as math from 'mathjs';
 

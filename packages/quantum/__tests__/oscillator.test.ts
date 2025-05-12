@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { creationOp, destructionOp, numberOp, positionOp, momentumOp, harmonicOscillator } from '../src/utils/oscillator';
-import { StateVector } from '../stateVector';
+import { StateVector } from '../src/states/stateVector';
 import * as math from 'mathjs';
 
 describe('Quantum Oscillator Operators', () => {

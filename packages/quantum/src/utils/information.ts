@@ -6,8 +6,8 @@
  * and other quantum information-related operations.
  */
 
-import { Complex, StateVector, DensityMatrix, Operator } from '../core/types';
-import { StateVector as StateVectorClass } from '../states/stateVector';
+import { Complex, IStateVector, IDensityMatrix, IOperator } from '../core/types';
+import { StateVector } from '../states/stateVector';
 import { MatrixOperator } from '../operators/operator';
 import { DensityMatrixOperator } from '../states/densityMatrix';
 import { eigenDecomposition, multiplyMatrices, scaleMatrix } from './matrixOperations';
@@ -28,13 +28,13 @@ import * as math from 'mathjs';
  * @returns Object containing Schmidt coefficients, and basis states for subsystems A and B
  */
 export function schmidtDecomposition(
-  state: StateVector, 
+  state: IStateVector, 
   dimA: number, 
   dimB: number
 ): {
   values: number[],
-  statesA: StateVector[],
-  statesB: StateVector[]
+  statesA: IStateVector[],
+  statesB: IStateVector[]
 } {
   // Check dimensions
   if (state.dimension !== dimA * dimB) {
@@ -85,6 +85,9 @@ export function schmidtDecomposition(
   const filteredIndices = indexValuePairs.map(pair => pair.index);
   
   // Get right Schmidt basis vectors (eigenvectors of ρB)
+  if (!vectors || vectors.length === 0) {
+    throw new Error('Invalid eigenvectors in Schmidt decomposition');
+  }
   const statesB = filteredIndices.map(i => {
     const vector = vectors[i];
     
@@ -104,10 +107,13 @@ export function schmidtDecomposition(
       math.divide(v, math.complex(norm, 0)) as Complex
     );
     // const amplitudes = math.divide(math.matrix(vector), norm).valueOf();
-    return new StateVectorClass(dimB, amplitudes);
+    return new StateVector(dimB, amplitudes);
   });
   
   // Calculate left Schmidt basis vectors using M|v⟩/λ
+  if (!vectors || vectors.length === 0) {
+    throw new Error('Invalid eigenvectors in Schmidt decomposition');
+  }
   const statesA = filteredIndices.map((i, idx) => {
     const schmidt = schmidtValues[idx];
     const v = vectors[i];
@@ -127,7 +133,7 @@ export function schmidtDecomposition(
       math.divide(a, math.complex(schmidt, 0)) as Complex
     );
     
-    return new StateVectorClass(dimA, finalAmps);
+    return new StateVector(dimA, finalAmps);
   });
   
   return {
@@ -149,7 +155,7 @@ export function schmidtDecomposition(
  * @param B Second operator (usually a density matrix)
  * @returns The trace distance (between 0 and 1)
  */
-export function traceDistance(A: Operator, B: Operator): number {
+export function traceDistance(A: IOperator, B: IOperator): number {
   if (A.dimension !== B.dimension) {
     throw new Error('Operators must have the same dimension for trace distance');
   }
@@ -193,7 +199,7 @@ export function traceDistance(A: Operator, B: Operator): number {
  * @param stateB Second pure state
  * @returns The fidelity (between 0 and 1)
  */
-export function fidelity(stateA: StateVector, stateB: StateVector): number {
+export function fidelity(stateA: IStateVector, stateB: IStateVector): number {
   if (stateA.dimension !== stateB.dimension) {
     throw new Error('States must have the same dimension for fidelity');
   }
@@ -216,7 +222,7 @@ export function fidelity(stateA: StateVector, stateB: StateVector): number {
  * @param sigma Second density matrix
  * @returns The fidelity (between 0 and 1)
  */
-export function traceFidelity(rho: DensityMatrix, sigma: DensityMatrix): number {
+export function traceFidelity(rho: IDensityMatrix, sigma: IDensityMatrix): number {
   if (rho.dimension !== sigma.dimension) {
     throw new Error('Density matrices must have the same dimension for fidelity');
   }
@@ -256,7 +262,7 @@ export function traceFidelity(rho: DensityMatrix, sigma: DensityMatrix): number 
  * @param sigma Second density matrix
  * @returns The quantum relative entropy (non-negative)
  */
-export function quantumRelativeEntropy(rho: DensityMatrix, sigma: DensityMatrix): number {
+export function quantumRelativeEntropy(rho: IDensityMatrix, sigma: IDensityMatrix): number {
   if (rho.dimension !== sigma.dimension) {
     throw new Error('Density matrices must have the same dimension for relative entropy');
   }
@@ -279,12 +285,18 @@ export function quantumRelativeEntropy(rho: DensityMatrix, sigma: DensityMatrix)
     Array(rho.dimension).fill(null).map(() => math.complex(0, 0))
   );
   
+  if (!sigmaEigenvectors) {
+    throw new Error('Failed to compute eigenvectors for sigma');
+  }
+
   for (let i = 0; i < rho.dimension; i++) {
     for (let j = 0; j < rho.dimension; j++) {
       for (let k = 0; k < rho.dimension; k++) {
-        const term1 = math.multiply(sigmaEigenvectors[k][i], math.conj(sigmaEigenvectors[k][j])) as Complex;
-        const term2 = math.multiply(term1, logSigmaEigenvalues[k]) as Complex;
-        logSigma[i][j] = math.add(logSigma[i][j], term2) as Complex;
+        if (sigmaEigenvectors[k] && sigmaEigenvectors[k][i] && sigmaEigenvectors[k][j]) {
+          const term1 = math.multiply(sigmaEigenvectors[k][i], math.conj(sigmaEigenvectors[k][j])) as Complex;
+          const term2 = math.multiply(term1, logSigmaEigenvalues[k]) as Complex;
+          logSigma[i][j] = math.add(logSigma[i][j], term2) as Complex;
+        }
       }
     }
   }
@@ -316,7 +328,7 @@ export function quantumRelativeEntropy(rho: DensityMatrix, sigma: DensityMatrix)
  * @param rho Density matrix
  * @returns Entropy value (non-negative)
  */
-export function vonNeumannEntropy(rho: DensityMatrix): number {
+export function vonNeumannEntropy(rho: IDensityMatrix): number {
   const matrix = rho.toMatrix();
   const { values } = eigenDecomposition(matrix);
   
@@ -341,7 +353,7 @@ export function vonNeumannEntropy(rho: DensityMatrix): number {
  * @param dimB Dimension of second subsystem
  * @returns Entanglement entropy
  */
-export function entanglementEntropy(state: StateVector, dimA: number, dimB: number): number {
+export function entanglementEntropy(state: IStateVector, dimA: number, dimB: number): number {
   // Perform Schmidt decomposition to get Schmidt coefficients
   const { values } = schmidtDecomposition(state, dimA, dimB);
   
@@ -366,7 +378,7 @@ export function entanglementEntropy(state: StateVector, dimA: number, dimB: numb
  * @param rho Density matrix
  * @returns Linear entropy (between 0 and 1-1/d)
  */
-export function linearEntropy(rho: DensityMatrix): number {
+export function linearEntropy(rho: IDensityMatrix): number {
   return 1 - rho.purity();
 }
 
@@ -381,7 +393,7 @@ export function linearEntropy(rho: DensityMatrix): number {
  * @returns Quantum mutual information
  */
 export function quantumMutualInformation(
-  rhoAB: DensityMatrix, 
+  rhoAB: IDensityMatrix, 
   dimA: number, 
   dimB: number
 ): number {
@@ -414,7 +426,7 @@ export function quantumMutualInformation(
  * @param rho Two-qubit density matrix
  * @returns Concurrence value (between 0 and 1)
  */
-export function concurrence(rho: DensityMatrix): number {
+export function concurrence(rho: IDensityMatrix): number {
   if (rho.dimension !== 4) {
     throw new Error('Concurrence only defined for 2-qubit states');
   }
@@ -486,7 +498,7 @@ export function concurrence(rho: DensityMatrix): number {
  * @param dimB Dimension of second subsystem
  * @returns Negativity value (≥ 0)
  */
-export function negativity(rho: DensityMatrix, dimA: number, dimB: number): number {
+export function negativity(rho: IDensityMatrix, dimA: number, dimB: number): number {
   if (rho.dimension !== dimA * dimB) {
     throw new Error('Density matrix dimension must match product of subsystem dimensions');
   }
@@ -537,7 +549,7 @@ export function negativity(rho: DensityMatrix, dimA: number, dimB: number): numb
  * @param dimB Dimension of second subsystem
  * @returns One-way quantum discord
  */
-export function quantumDiscord(rho: DensityMatrix, dimA: number, dimB: number): number {
+export function quantumDiscord(rho: IDensityMatrix, dimA: number, dimB: number): number {
   if (rho.dimension !== dimA * dimB) {
     throw new Error('Density matrix dimension must match product of subsystem dimensions');
   }

@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, test } from 'vitest';
 
-import { Hamiltonian, HamiltonianTerm } from '../src/operators/hamiltonian';
+import { Hamiltonian, IHamiltonianTerm } from '../src/operators/hamiltonian';
 // import { math.complex } from '../complex';
 import { PauliX, PauliY, PauliZ } from '../src/operators/gates';
 import { MatrixOperator } from '../src/operators/operator';
@@ -133,9 +133,11 @@ describe('Hamiltonian', () => {
         const energy = H.expectationValue(evolved).re;
         expect(energy).toBeCloseTo(initialEnergy);
         
-        // Verify |↑↓⟩ evolves to mix with |↓↑⟩ only
-        const totalProb = math.abs(math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1]))) +
-                         math.abs(math.multiply(evolved.amplitudes[2], math.conj(evolved.amplitudes[2])));
+        // Verify |↑↓⟩ evolves to mix with |↓↑⟩ only 
+        const totalProb = math.add(
+          math.abs(math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1]))),
+          math.abs(math.multiply(evolved.amplitudes[2], math.conj(evolved.amplitudes[2])))
+        );
         expect(totalProb).toBeCloseTo(1);
       }
     });

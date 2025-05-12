@@ -120,6 +120,11 @@ describe('Eigendecomposition', () => {
         computeEigenvectors: true,
         enforceOrthogonality: true
       });
+
+      // Since we explicitly requested eigenvectors, they should be defined
+      if (!vectors) {
+        throw new Error('Expected eigenvectors to be defined');
+      }
       
       // Should have 2 eigenvalues and eigenvectors
       expect(values.length).toBe(2);
@@ -207,6 +212,11 @@ describe('Eigendecomposition', () => {
         enforceOrthogonality: true
       });
       
+      // Since we explicitly requested eigenvectors, they should be defined
+      if (!vectors) {
+        throw new Error('Expected eigenvectors to be defined');
+      }
+
       // Check eigenvector properties
       expect(isOrthonormal(vectors)).toBe(true);
       
@@ -240,6 +250,11 @@ describe('Eigendecomposition', () => {
         enforceOrthogonality: true
       });
       
+      // Since we explicitly requested eigenvectors, they should be defined
+      if (!vectors) {
+        throw new Error('Expected eigenvectors to be defined');
+      }
+
       // Eigenvalues should be 1 and -1
       expect(values.length).toBe(2);
       const sortedValues = [...values].sort((a, b) => b.re - a.re);
@@ -267,6 +282,11 @@ describe('Eigendecomposition', () => {
       
       const { values, vectors } = eigenDecomposition(matrix);
       
+      // Since we explicitly requested eigenvectors, they should be defined
+      if (!vectors) {
+        throw new Error('Expected eigenvectors to be defined');
+      }
+
       // Hermitian matrices have real eigenvalues
       values.forEach(v => {
         expect(Math.abs(v.im)).toBeLessThan(1e-10);
@@ -291,6 +311,11 @@ describe('Eigendecomposition', () => {
       
       const { values, vectors } = eigenDecomposition(projector, {computeEigenvectors: true});
       
+      // Since we explicitly requested eigenvectors, they should be defined
+      if (!vectors) {
+        throw new Error('Expected eigenvectors to be defined');
+      }
+
       // A projector has eigenvalues 1 and 0
       expect(values.length).toBe(2);
       const sorted = [...values].sort((a, b) => b.re - a.re);

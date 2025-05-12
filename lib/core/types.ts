@@ -6,7 +6,7 @@
  */
 
 import { Matrix, MathArray } from 'mathjs';
-import { StateVector as QuantumStateVector } from '../quantum/types';
+import { IStateVector as QuantumStateVector } from '../quantum/types';
 
 /**
  * Represents a graph structure for simulation

@@ -3,8 +3,8 @@
  */
 
 import { HilbertSpace } from '../core/hilbertSpace';
-import { Operator } from '../core/types';
-import { StateVector as IStateVector } from '../core/types';
+import { IOperator } from '../core/types';
+import { IStateVector } from '../core/types';
 import { StateVector } from './stateVector';
 import { validateMatchDims } from '../utils/validation';
 
@@ -38,7 +38,7 @@ export function composeStates(states: IStateVector[]): IStateVector {
 /**
  * Composes multiple operators via tensor product
  */
-export function composeOperators(operators: Operator[]): Operator {
+export function composeOperators(operators: IOperator[]): IOperator {
   if (operators.length === 0) {
     throw new Error('Empty operators array');
   }
@@ -67,10 +67,10 @@ export function bipartiteSplit(
  * Performs partial trace over specified subsystems
  */
 export function partialTrace(
-  operator: Operator,
+  operator: IOperator,
   dims: number[],
   traceOutIndices: number[]
-): Operator {
+): IOperator {
   // Total dimension should match operator dimension
   const totalDim = dims.reduce((a, b) => a * b, 1);
   validateMatchDims(totalDim, operator.dimension);

@@ -1,5 +1,5 @@
 import { HilbertSpace } from '../../src/core/hilbertSpace';
-import { StateVector } from '../../src/core/types';
+import { IStateVector } from '../../src/core/types';
 import { createPlusState, createBasisState } from '../../src/states/states';
 import { Hadamard } from '../../src/operators/gates';
 import * as math from 'mathjs';

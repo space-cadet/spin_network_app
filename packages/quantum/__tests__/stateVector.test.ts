@@ -29,7 +29,7 @@ describe('StateVector', () => {
     });
 
     it('creates state with given amplitudes', () => {
-      const amps: Complex[] = [
+      const amps: math.Complex[] = [
         math.complex(1/Math.sqrt(2),  0),
         math.complex(1/Math.sqrt(2),  0)
       ];

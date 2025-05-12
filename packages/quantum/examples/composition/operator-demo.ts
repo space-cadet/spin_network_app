@@ -2,7 +2,7 @@ import { HilbertSpace } from '../../src/core/hilbertSpace';
 import { MatrixOperator } from '../../src/operators/operator';
 import { PauliX, PauliY, PauliZ } from '../../src/operators/gates';
 import { createBasisState } from '../../src/states/states';
-import { Complex, Operator } from '../../src/core/types';
+import { Complex, IOperator } from '../../src/core/types';
 
 // Demonstrates basic quantum operator operations
 function demoOperators() {

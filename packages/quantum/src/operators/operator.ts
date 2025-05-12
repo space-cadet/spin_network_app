@@ -2,7 +2,7 @@
  * Quantum operator implementations using math.js for enhanced numerical stability
  */
 
-import { Complex, StateVector as IStateVector, OperatorType, Operator } from '../core/types';
+import { Complex, IStateVector, OperatorType, IOperator } from '../core/types';
 import { StateVector } from '../states/stateVector';
 import { validateMatDims, validateMatchDims } from '../utils/validation';
 import { eigenDecomposition } from '../utils/matrixOperations';
@@ -31,7 +31,7 @@ function ensureComplex(value: math.MathType): Complex {
 /** 
  * Implementation of operator using matrix representation
  */
-export class MatrixOperator implements Operator {
+export class MatrixOperator implements IOperator {
   readonly dimension: number;
   readonly type: OperatorType;
   private matrix: ComplexMatrix;
@@ -142,7 +142,7 @@ export class MatrixOperator implements Operator {
   /**
    * Composes with another operator: O₁O₂
    */
-  compose(other: Operator): Operator {
+  compose(other: IOperator): IOperator {
     validateMatchDims(other.dimension, this.dimension);
 
     // Get matrix representation of the other operator
@@ -187,7 +187,7 @@ export class MatrixOperator implements Operator {
   /**
    * Returns the adjoint (Hermitian conjugate) of the operator
    */
-  adjoint(): Operator {
+  adjoint(): IOperator {
     // Initialize adjoint matrix with proper dimensions
     const adjointMatrix = Array(this.dimension).fill(null)
       .map(() => Array(this.dimension).fill(null)
@@ -286,7 +286,7 @@ export class MatrixOperator implements Operator {
   /**
    * Creates tensor product with another operator
    */
-  tensorProduct(other: Operator): Operator {
+  tensorProduct(other: IOperator): IOperator {
     const otherMatrix = other.toMatrix();
     const newDim = this.dimension * other.dimension;
     const resultMatrix = Array(newDim).fill(null)
@@ -353,7 +353,7 @@ export class MatrixOperator implements Operator {
   /**
    * Adds this operator with another operator
    */
-  add(other: Operator): MatrixOperator {
+  add(other: IOperator): MatrixOperator {
     validateMatchDims(other.dimension, this.dimension);
 
     const otherMatrix = other.toMatrix();
@@ -371,7 +371,7 @@ export class MatrixOperator implements Operator {
   /**
    * Performs partial trace over specified subsystems
    */
-  partialTrace(dims: number[], traceOutIndices: number[]): Operator {
+  partialTrace(dims: number[], traceOutIndices: number[]): IOperator {
     // Validate dimensions
     const totalDim = dims.reduce((a, b) => a * b, 1);
     if (totalDim !== this.dimension) {
@@ -433,6 +433,9 @@ export class MatrixOperator implements Operator {
     const { values, vectors } = eigenDecomposition(this.matrix, { computeEigenvectors: true });
     
     // Create operators from eigenvectors
+    if (!vectors || vectors.length === 0) {
+      throw new Error('No eigenvectors found');
+    }
     const vectorOperators = vectors.map(v => {
       // Create full matrix for the eigenvector operator
       const matrix: ComplexMatrix = Array(this.dimension).fill(null)

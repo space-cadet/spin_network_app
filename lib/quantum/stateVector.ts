@@ -2,7 +2,7 @@
  * Quantum state vector implementation
  */
 
-import { Complex, StateVector as IStateVector } from './types';
+import { Complex, IStateVector as IStateVector } from './types';
 import * as math from 'mathjs';
 import { 
   validatePosDim, 
@@ -20,7 +20,7 @@ export class StateVector implements IStateVector {
     
     this.dimension = dimension;
     this.amplitudes = amplitudes || Array(dimension).fill(null)
-      .map(() => math.complex({re: 0, im:  0}));
+      .map(() => math.complex(0,  0));
     this.basis = basis;
 
     if (amplitudes) {
@@ -52,11 +52,11 @@ export class StateVector implements IStateVector {
       throw new Error('States must have same dimension for inner product');
     }
 
-    let result = math.complex({re: 0, im:  0});
+    let result = math.complex(0,  0);
     for (let i = 0; i < this.dimension; i++) {
       const conj = math.conj(this.amplitudes[i]);
       const prod = math.multiply(conj, other.amplitudes[i]);
-      result = math.add(result, prod);
+      result = math.add(result, prod) as Complex;
     }
     return result;
   }
@@ -65,7 +65,7 @@ export class StateVector implements IStateVector {
    * Calculates norm of state vector
    */
   norm(): number {
-    const normSquared = math.abs(this.innerProduct(this));
+    const normSquared = math.abs(this.innerProduct(this)).re;
     return Math.sqrt(normSquared);
   }
 
@@ -79,7 +79,7 @@ export class StateVector implements IStateVector {
     }
 
     const normalizedAmplitudes = this.amplitudes.map(amp => 
-      math.divide(amp, math.complex({re: currentNorm, im:  0}))
+      math.divide(amp, math.complex(currentNorm,  0)) as Complex
     );
 
     return new StateVector(this.dimension, normalizedAmplitudes, this.basis);
@@ -114,7 +114,7 @@ export class StateVector implements IStateVector {
    * Returns true if state is zero vector
    */
   isZero(tolerance: number = 1e-10): boolean {
-    return this.amplitudes.every(amp => math.abs(amp) < tolerance);
+    return this.amplitudes.every(amp => math.abs(amp).re < tolerance);
   }
 
   /**
@@ -130,7 +130,7 @@ export class StateVector implements IStateVector {
   toString(): string {
     const components = this.amplitudes
       .map((amp, i) => {
-        if (math.abs(amp) < 1e-10) {
+        if (math.abs(amp).re < 1e-10) {
           return '';
         }
         const sign = i === 0 ? '' : ' + ';
@@ -150,7 +150,7 @@ export class StateVector implements IStateVector {
     validateIdx(index, dimension);
 
     const amplitudes = Array(dimension).fill(null)
-      .map((_, i) => i === index ? math.complex({re: 1, im:  0}) : math.complex({re: 0, im:  0}));
+      .map((_, i) => i === index ? math.complex(1,  0) : math.complex(0,  0));
     
     return new StateVector(dimension, amplitudes, `|${index}⟩`);
   }
@@ -181,7 +181,7 @@ export class StateVector implements IStateVector {
   static equalSuperposition(dimension: number): StateVector {
     validatePosDim(dimension);
 
-    const coefficient = math.complex({re: 1 / Math.sqrt(dimension), im:  0});
+    const coefficient = math.complex(1 / Math.sqrt(dimension),  0);
     const coefficients = Array(dimension).fill(coefficient);
     
     return new StateVector(dimension, coefficients, '|+⟩');

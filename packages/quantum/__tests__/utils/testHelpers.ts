@@ -2,7 +2,7 @@
  * Test helpers for quantum module tests
  */
 
-import { Complex, StateVector } from '../../src/core/types';
+import { Complex, IStateVector } from '../../src/core/types';
 import { HilbertSpace } from '../../src/core/hilbertSpace';
 import * as math from 'mathjs';
 
@@ -14,13 +14,13 @@ export function complexApproxEqual(a: Complex, b: Complex, tolerance: number = 1
   const ca = typeof a === 'number' ? math.complex(a,  0) : math.complex(a.re,  a.im);
   const cb = typeof b === 'number' ? math.complex(b,  0) : math.complex(b.re,  b.im);
   const diff = math.subtract(ca, cb) as Complex;
-  return math.abs(diff) < tolerance;
+  return (math.abs(diff).re as number) < tolerance;
 }
 
 /**
  * Checks if two state vectors are approximately equal
  */
-export function stateVectorApproxEqual(a: StateVector, b: StateVector, tolerance: number = 1e-10): boolean {
+export function stateVectorApproxEqual(a: IStateVector, b: IStateVector, tolerance: number = 1e-10): boolean {
   if (a.dimension !== b.dimension) return false;
   return a.amplitudes.every((amp, i) => complexApproxEqual(amp, b.amplitudes[i], tolerance));
 }
@@ -28,7 +28,7 @@ export function stateVectorApproxEqual(a: StateVector, b: StateVector, tolerance
 /**
  * Creates a normalized random state vector in given Hilbert space
  */
-export function createRandomState(space: HilbertSpace): StateVector {
+export function createRandomState(space: HilbertSpace): IStateVector {
   const amplitudes = Array(space.dimension).fill(null).map(() => ({
     re: Math.random() - 0.5,
     im: Math.random() - 0.5
@@ -58,7 +58,74 @@ export function createRandomState(space: HilbertSpace): StateVector {
   return {
     dimension: space.dimension,
     amplitudes: normalizedAmplitudes,
-    basis: 'random'
+    basis: 'random',
+    setState: (index: number, value: Complex): void => {
+      if (index < 0 || index >= space.dimension) throw new Error('Index out of bounds');
+      normalizedAmplitudes[index] = value;
+    },
+    getState: (index: number): Complex => {
+      if (index < 0 || index >= space.dimension) throw new Error('Index out of bounds');
+      return normalizedAmplitudes[index];
+    },
+    innerProduct: (other: IStateVector): Complex => {
+      if (other.dimension !== space.dimension) throw new Error('Dimension mismatch');
+      let result = math.complex(0, 0);
+      for (let i = 0; i < space.dimension; i++) {
+        const conj = math.conj(normalizedAmplitudes[i]);
+        result = math.add(result, math.multiply(conj, other.amplitudes[i])) as Complex;
+      }
+      return result;
+    },
+    norm: (): number => {
+      const innerProd = math.complex(0, 0);
+      for (let i = 0; i < space.dimension; i++) {
+        const conj = math.conj(normalizedAmplitudes[i]);
+        const amp = normalizedAmplitudes[i];
+        innerProd.re += conj.re * amp.re + conj.im * amp.im;
+        innerProd.im += conj.re * amp.im - conj.im * amp.re;
+      }
+      return Math.sqrt(innerProd.re);
+    },
+    normalize: () => {
+      const norm = Math.sqrt(normalizedAmplitudes.reduce((sum, amp) => {
+        return sum + math.abs(amp) ** 2;
+      }, 0));
+      const normalized = normalizedAmplitudes.map(amp => math.divide(amp, math.complex(norm, 0)) as Complex);
+      return {
+        ...this,
+        amplitudes: normalized
+      } as IStateVector;
+    },
+    tensorProduct: (other: IStateVector): IStateVector => {
+      const newDimension = space.dimension * other.dimension;
+      const newAmplitudes: Complex[] = [];
+      for (let i = 0; i < space.dimension; i++) {
+        for (let j = 0; j < other.dimension; j++) {
+          newAmplitudes.push(math.multiply(normalizedAmplitudes[i], other.amplitudes[j]) as Complex);
+        }
+      }
+      return {
+        dimension: newDimension,
+        amplitudes: newAmplitudes,
+        basis: 'tensor',
+      } as IStateVector;
+    },
+    isZero: (tolerance: number = 1e-10): boolean => {
+      return normalizedAmplitudes.every(amp => math.abs(amp).re < tolerance);
+    },
+    toArray: (): Complex[] => {
+      return [...normalizedAmplitudes];
+    },
+    toString: (): string => {
+      return normalizedAmplitudes
+        .map((amp, i) => {
+          if (math.abs(amp).re < 1e-10) return '';
+          const sign = i === 0 ? '' : ' + ';
+          return `${sign}${amp.toString()}|${i}⟩`;
+        })
+        .filter(s => s !== '')
+        .join('') || '0';
+    }
   };
 }
 
@@ -101,22 +168,21 @@ export function createRandomUnitary(dim: number): Complex[][] {
  */
 export function createRandomHermitian(dim: number): Complex[][] {
   const matrix = Array(dim).fill(null).map(() => 
-    Array(dim).fill(null).map(() => ({
-      re: Math.random() - 0.5,
-      im: Math.random() - 0.5
-    }))
+    Array(dim).fill(null).map(() => 
+      math.complex(Math.random() - 0.5, Math.random() - 0.5)
+    )
   );
 
   // Make Hermitian
   for (let i = 0; i < dim; i++) {
     for (let j = i + 1; j < dim; j++) {
-      matrix[j][i] = {
-        re: matrix[i][j].re,
-        im: -matrix[i][j].im
-      };
+      matrix[j][i] = math.complex(
+        matrix[i][j].re,
+        -matrix[i][j].im
+      );
     }
     // Diagonal elements should be real
-    matrix[i][i].im = 0;
+    matrix[i][i] = math.complex(matrix[i][i].re, 0);
   }
 
   return matrix;

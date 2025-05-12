@@ -279,8 +279,12 @@ describe('Matrix Operations', () => {
         [math.complex(1,  0), math.complex(2,  0)]
       ];
       const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true, enforceOrthogonality: true});
-      // console.log(values);
-      // console.log(vectors);
+      
+      // Since we explicitly requested eigenvectors, they should be defined
+      if (!vectors) {
+        throw new Error('Expected eigenvectors to be defined');
+      }
+      
       // Check eigenvalues (sort by real part to ensure consistent order)
       expect(values.length).toBe(2);
       const indices = values.map((_, i) => i).sort((a, b) => values[b].re - values[a].re);
@@ -336,6 +340,11 @@ describe('Matrix Operations', () => {
           [math.complex(0,  0), math.complex(1,  0)]
       ];
       const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true});
+      
+      // Since we explicitly requested eigenvectors, they should be defined
+      if (!vectors) {
+        throw new Error('Expected eigenvectors to be defined');
+      }
       
       // Check eigenvalues
       expect(values.length).toBe(2);

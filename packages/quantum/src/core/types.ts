@@ -10,7 +10,7 @@ export type { Complex } from 'mathjs';
 /**
  * Represents a quantum state vector
  */
-export interface StateVector {
+export interface IStateVector {
   dimension: number;      // Hilbert space dimension
   amplitudes: Complex[];  // State vector amplitudes in computational basis
   basis?: string;        // Optional basis label
@@ -20,10 +20,10 @@ export interface StateVector {
   getState(index: number): Complex;
 
   // Quantum operations
-  innerProduct(other: StateVector): Complex;
+  innerProduct(other: IStateVector): Complex;
   norm(): number;
-  normalize(): StateVector;
-  tensorProduct(other: StateVector): StateVector;
+  normalize(): IStateVector;
+  tensorProduct(other: IStateVector): IStateVector;
 
   // Utility methods
   isZero(tolerance?: number): boolean;
@@ -39,39 +39,39 @@ export type OperatorType = 'unitary' | 'hermitian' | 'projection' | 'general';
 /**
  * Base interface for quantum operators
  */
-export interface Operator {
+export interface IOperator {
   dimension: number;      // Hilbert space dimension  
   type: OperatorType;    // Type of operator
   
   // Core operations
-  apply(state: StateVector): StateVector;  // Apply operator to state
-  compose(other: Operator): Operator;      // Compose with another operator  
-  adjoint(): Operator;                     // Hermitian conjugate
+  apply(state: IStateVector): IStateVector;  // Apply operator to state
+  compose(other: IOperator): IOperator;      // Compose with another operator  
+  adjoint(): IOperator;                     // Hermitian conjugate
   toMatrix(): Complex[][];                 // Matrix representation
-  tensorProduct(other: Operator): Operator; // Tensor product with another operator
-  partialTrace(dims: number[], traceOutIndices: number[]): Operator; // Partial trace over subsystems
+  tensorProduct(other: IOperator): IOperator; // Tensor product with another operator
+  partialTrace(dims: number[], traceOutIndices: number[]): IOperator; // Partial trace over subsystems
   
   // Added operations
-  scale(scalar: Complex): Operator;        // Scale operator by complex number
-  add(other: Operator): Operator;          // Add two operators
-  eigenDecompose(): { values: Complex[]; vectors: Operator[] };
+  scale(scalar: Complex): IOperator;        // Scale operator by complex number
+  add(other: IOperator): IOperator;          // Add two operators
+  eigenDecompose(): { values: Complex[]; vectors: IOperator[] };
 }
 
 /**
  * Type for measurement outcomes
  */
-export interface MeasurementOutcome {
+export interface IMeasurementOutcome {
   value: number;          // Measured eigenvalue
-  state: StateVector;     // Post-measurement state
+  state: IStateVector;     // Post-measurement state
   probability: number;    // Measurement probability
 }
 
 /**
  * Interface for density matrix operations
  */
-export interface DensityMatrix extends Operator {
+export interface IDensityMatrix extends IOperator {
   trace(): Complex;                                    // Calculate trace
-  partialTrace(subsystemDimensions: number[]): DensityMatrix;  // Partial trace
+  partialTrace(subsystemDimensions: number[]): IDensityMatrix;  // Partial trace
   purity(): number;                                    // Calculate purity
   vonNeumannEntropy(): number;                        // Calculate entropy
 }
@@ -79,6 +79,6 @@ export interface DensityMatrix extends Operator {
 /**
  * Interface for quantum channels
  */
-export interface QuantumChannel {
-  apply(state: DensityMatrix): DensityMatrix;         // Apply channel to state
+export interface IQuantumChannel {
+  apply(state: IDensityMatrix): IDensityMatrix;         // Apply channel to state
 }

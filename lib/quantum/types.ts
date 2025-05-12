@@ -10,7 +10,7 @@ export type { Complex } from 'mathjs';
 /**
  * Represents a quantum state vector
  */
-export interface StateVector {
+export interface IStateVector {
   dimension: number;      // Hilbert space dimension
   amplitudes: Complex[];  // State vector amplitudes in computational basis
   basis?: string;        // Optional basis label
@@ -20,10 +20,10 @@ export interface StateVector {
   getState(index: number): Complex;
 
   // Quantum operations
-  innerProduct(other: StateVector): Complex;
+  innerProduct(other: IStateVector): Complex;
   norm(): number;
-  normalize(): StateVector;
-  tensorProduct(other: StateVector): StateVector;
+  normalize(): IStateVector;
+  tensorProduct(other: IStateVector): IStateVector;
 
   // Utility methods
   isZero(tolerance?: number): boolean;
@@ -44,7 +44,7 @@ export interface Operator {
   type: OperatorType;    // Type of operator
   
   // Core operations
-  apply(state: StateVector): StateVector;  // Apply operator to state
+  apply(state: IStateVector): IStateVector;  // Apply operator to state
   compose(other: Operator): Operator;      // Compose with another operator  
   adjoint(): Operator;                     // Hermitian conjugate
   toMatrix(): Complex[][];                 // Matrix representation
@@ -62,7 +62,7 @@ export interface Operator {
  */
 export interface MeasurementOutcome {
   value: number;          // Measured eigenvalue
-  state: StateVector;     // Post-measurement state
+  state: IStateVector;     // Post-measurement state
   probability: number;    // Measurement probability
 }
 

@@ -6,7 +6,7 @@
  */
 
 // Import from core types
-import { Complex, Operator, StateVector } from '../core/types';
+import { Complex, IOperator, IStateVector } from '../core/types';
 
 // Basic circuit interfaces will be implemented here
 

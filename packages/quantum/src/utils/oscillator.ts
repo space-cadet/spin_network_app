@@ -2,7 +2,7 @@
  * Creation and annihilation operators for quantum harmonic oscillators
  */
 
-import { Complex, Operator } from '../core/types';
+import { Complex, IOperator } from '../core/types';
 import { MatrixOperator } from '../operators/operator';
 import * as math from 'mathjs';
 
@@ -10,7 +10,7 @@ import * as math from 'mathjs';
  * Creates creation operator a† for dimension N
  * Matrix elements: ⟨n|a†|m⟩ = √(m+1)δ(n,m+1)
  */
-export function creationOp(dimension: number): Operator {
+export function creationOp(dimension: number): IOperator {
     const matrix = Array(dimension).fill(null)
         .map(() => Array(dimension).fill(null)
             .map(() => math.complex(0,  0)));
@@ -27,7 +27,7 @@ export function creationOp(dimension: number): Operator {
  * Creates annihilation operator a for dimension N
  * Matrix elements: ⟨n|a|m⟩ = √m δ(n,m-1)
  */
-export function destructionOp(dimension: number): Operator {
+export function destructionOp(dimension: number): IOperator {
     const matrix = Array(dimension).fill(null)
         .map(() => Array(dimension).fill(null)
             .map(() => math.complex(0,  0)));
@@ -43,7 +43,7 @@ export function destructionOp(dimension: number): Operator {
 /**
  * Creates number operator n = a†a for dimension N
  */
-export function numberOp(dimension: number): Operator {
+export function numberOp(dimension: number): IOperator {
     // Create diagonal matrix for number operator
     const matrix = Array(dimension).fill(null)
         .map((_, i) => Array(dimension).fill(null)
@@ -56,7 +56,7 @@ export function numberOp(dimension: number): Operator {
 /**
  * Creates position operator x = (a + a†)/√2 for dimension N
  */
-export function positionOp(dimension: number): Operator {
+export function positionOp(dimension: number): IOperator {
     const aOp = destructionOp(dimension);
     const aUpOp = creationOp(dimension);
     
@@ -70,7 +70,7 @@ export function positionOp(dimension: number): Operator {
 /**
  * Creates momentum operator p = i(a† - a)/√2 for dimension N
  */
-export function momentumOp(dimension: number): Operator {
+export function momentumOp(dimension: number): IOperator {
     const aOp = destructionOp(dimension);
     const aUpOp = creationOp(dimension);
     
@@ -85,7 +85,7 @@ export function momentumOp(dimension: number): Operator {
  * Creates harmonic oscillator Hamiltonian H = ℏω(a†a + 1/2)
  * For simplicity, we set ℏω = 1
  */
-export function harmonicOscillator(dimension: number): Operator {
+export function harmonicOscillator(dimension: number): IOperator {
     const n = numberOp(dimension);
     const halfId = MatrixOperator.identity(dimension).scale(math.complex(0.5,  0));
     const hamiltonian = n.add(halfId);

@@ -131,10 +131,10 @@ describe('Quantum Integration Tests', () => {
       
       // Create |00⟩ + |11⟩ / √2
       const state = space.superposition([
-        { re: 1/Math.sqrt(2), im: 0 },
-        { re: 0, im: 0 },
-        { re: 0, im: 0 },
-        { re: 1/Math.sqrt(2), im: 0 }
+        math.complex(1/Math.sqrt(2), 0),
+        math.complex(0, 0),
+        math.complex( 0, 0 ),
+        math.complex( 1/Math.sqrt(2), 0 )
       ]);
       
       // Apply local operations (X⊗Z)

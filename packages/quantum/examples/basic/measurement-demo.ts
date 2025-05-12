@@ -2,7 +2,7 @@ import { HilbertSpace } from '../../src/core/hilbertSpace';
 import { createPlusState, createBasisState } from '../../src/states/states';
 import { ProjectionOperator } from '../../src/operators/measurement';
 import { measureState } from '../../src/operators/measurement';
-import { Complex, MeasurementOutcome, Operator } from '../../src/core/types';
+import { Complex, IMeasurementOutcome, IOperator } from '../../src/core/types';
 
 // Demonstrates quantum measurement operations
 function demoMeasurement() {
@@ -27,7 +27,7 @@ function demoMeasurement() {
     console.log('\nProjection onto |1⟩:', outcome1.amplitudes);
     
     // Demonstrate complete measurement
-    const result: MeasurementOutcome = measureState(plusState, projector0);
+    const result: IMeasurementOutcome = measureState(plusState, projector0);
     console.log('\nMeasurement result:', {
         value: result.value,
         probability: result.probability,

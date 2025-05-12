@@ -37,13 +37,17 @@ export function matrixFunction(
   if (isHermitian(matrix)) {
     const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true});
     
+    if (!vectors) {
+      throw new Error('Failed to compute eigenvectors');
+    }
+
     // Apply function to eigenvalues
     const funcValues = values.map(v => func(v));
     
     // Construct the diagonal matrix of f(D)
     const fD = Array(dim).fill(null).map((_, i) => 
       Array(dim).fill(null).map((_, j) => 
-        i === j ? funcValues[i] : math.complex(0,  0)
+        i === j ? funcValues[i] : math.complex(0, 0)
       )
     );
     
@@ -89,12 +93,6 @@ export function matrixLogarithm(matrix: Complex[][]): Complex[][] {
  * @returns The matrix square root
  */
 export function matrixSquareRoot(matrix: ComplexMatrix): ComplexMatrix {
-  // console.log('Matrix square root input:', 
-  //     matrix.map(row => row.map(elem => ({re: elem.re, im: elem.im}))));
-  
-  // Check matrix dimensions
-  // console.log('Matrix dimensions:', matrix.length, 'x', matrix[0].length);
-  
   // Verify matrix structure
   matrix.forEach((row, i) => {
       row.forEach((elem, j) => {
@@ -108,9 +106,11 @@ export function matrixSquareRoot(matrix: ComplexMatrix): ComplexMatrix {
       const result = matrixFunction(matrix, x => math.sqrt(x));
       // console.log('Square root calculation successful');
       return result;
-  } catch (e) {
+  } catch (e: unknown) {
       console.error('Error in matrix square root:', e);
-      console.error('Stack:', e.stack);
+      if (e instanceof Error) {
+          console.error('Stack:', e.stack);
+      }
       throw e;
   }
 }

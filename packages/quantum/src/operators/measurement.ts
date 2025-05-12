@@ -2,29 +2,30 @@
  * Measurement operations for quantum states
  */
 
-import { Complex, Operator, StateVector, MeasurementOutcome } from '../core/types';
+import { Complex, IOperator, IStateVector, IMeasurementOutcome } from '../core/types';
 import { MatrixOperator } from './operator';
+import { StateVector } from '../states/stateVector';
 import * as math from 'mathjs';
 
 /**
  * Implementation of a projection operator for quantum measurements
  */
-export class ProjectionOperator implements Operator {
+export class ProjectionOperator implements IOperator {
     private _operator: MatrixOperator;
     private _dimension: number;
 
     constructor(state: StateVector) {
         this._dimension = state.dimension;
         
-        // Create projection matrix |ψ⟩⟨ψ| without validation
+        // Create projection matrix |ψ⟩⟨ψ| with proper complex number initialization
         const matrix: Complex[][] = Array(state.dimension).fill(null)
-            .map(() => Array(state.dimension).fill(null).map(() => ({ re: 0, im: 0 })));
+            .map(() => Array(state.dimension).fill(null).map(() => math.complex(0, 0)));
         
         for (let i = 0; i < state.dimension; i++) {
             for (let j = 0; j < state.dimension; j++) {
                 // |ψ⟩⟨ψ| = ψi * ψj*
                 matrix[i][j] = math.multiply(
-                    state.amplitudes[i],
+                    math.complex(state.amplitudes[i].re, state.amplitudes[i].im),
                     math.conj(state.amplitudes[j])
                 ) as Complex;
             }
@@ -46,55 +47,44 @@ export class ProjectionOperator implements Operator {
         return this._operator.apply(state);
     }
 
-    compose(other: Operator): Operator {
-        // Manually implement composition with proper complex number handling
-        const otherMatrix = other.toMatrix();
-        const thisMatrix = this.toMatrix();
-        const dim = this.dimension;
-
-        // Initialize result matrix
-        const resultMatrix = Array(dim).fill(null)
-            .map(() => Array(dim).fill(null)
-                .map(() => math.complex(0, 0)));
-
-        // Calculate matrix product
-        for (let i = 0; i < dim; i++) {
-            for (let j = 0; j < dim; j++) {
-                for (let k = 0; k < dim; k++) {
-                    const term = math.multiply(
-                        math.complex(thisMatrix[i][k].re, thisMatrix[i][k].im),
-                        math.complex(otherMatrix[k][j].re, otherMatrix[k][j].im)
-                    );
-                    resultMatrix[i][j] = math.add(resultMatrix[i][j], term) as Complex;
-                }
-            }
-        }
-
-        return new MatrixOperator(resultMatrix, 'general');
+    compose(other: IOperator): IOperator {
+        return this._operator.compose(other);
     }
 
-    adjoint(): Operator {
-        // Projection operators are Hermitian
-        return this;
+    adjoint(): IOperator {
+        // Create new MatrixOperator since projection operators are Hermitian
+        return new MatrixOperator(this.toMatrix(), 'projection');
     }
 
     toMatrix(): Complex[][] {
         return this._operator.toMatrix();
     }
 
-    tensorProduct(other: Operator): Operator {
+    tensorProduct(other: IOperator): IOperator {
         return this._operator.tensorProduct(other);
     }
 
-    partialTrace(dims: number[], traceOutIndices: number[]): Operator {
+    partialTrace(dims: number[], traceOutIndices: number[]): IOperator {
         return this._operator.partialTrace(dims, traceOutIndices);
+    }
+
+    scale(scalar: Complex): IOperator {
+        return this._operator.scale(scalar);
+    }
+
+    add(other: IOperator): IOperator {
+        return this._operator.add(other);
+    }
+
+    eigenDecompose(): { values: Complex[]; vectors: IOperator[] } {
+        return this._operator.eigenDecompose();
     }
 }
 
 /**
  * Calculate expectation value of an operator for a given state
  */
-export function expectationValue(state: StateVector, operator: Operator): Complex {
+export function expectationValue(state: StateVector, operator: IOperator): Complex {
     const resultState = operator.apply(state);
     let result = math.complex(0, 0);
 
@@ -115,7 +105,7 @@ export function expectationValue(state: StateVector, operator: Operator): Comple
 /**
  * Perform a measurement on a quantum state with a given observable
  */
-export function measureState(state: StateVector, operator: Operator): MeasurementOutcome {
+export function measureState(state: StateVector, operator: IOperator): IMeasurementOutcome {
     // For a projective measurement, the eigenvalue is 1 for the measured state
     const eigenvalue = 1;
     
@@ -124,7 +114,7 @@ export function measureState(state: StateVector, operator: Operator): Measuremen
     
     // Calculate probability from norm squared of resulting state
     const probability = resultState.amplitudes.reduce((sum, amp) => 
-        sum + math.abs(amp) ** 2, 0
+        sum + (math.abs(amp) as unknown as number) ** 2, 0
     );
     
     // Normalize the post-measurement state
@@ -132,16 +122,11 @@ export function measureState(state: StateVector, operator: Operator): Measuremen
         math.divide(amp, math.sqrt(probability)) as Complex
     );
     
-    const postState: StateVector = {
-        dimension: state.dimension,
-        amplitudes: normalizedAmplitudes,
-        basis: state.basis
-    };
-    
+    // Create new StateVector instance
     return {
         value: eigenvalue,
         probability,
-        state: postState
+        state: new StateVector(state.dimension, normalizedAmplitudes, state.basis)
     };
 }
 
@@ -149,9 +134,9 @@ export function measureState(state: StateVector, operator: Operator): Measuremen
  * Create a measurement operator for a given observable and eigenvalue
  */
 export function createMeasurementOperator(
-    observable: Operator, 
+    observable: IOperator, 
     eigenvalue: number
-): Operator {
+): IOperator {
     // This would involve eigendecomposition of the observable
     // For now, we'll just implement projection measurements
     throw new Error('General measurement operators not yet implemented');

@@ -2,7 +2,7 @@
  * Quantum state vector implementation
  */
 
-import { Complex, StateVector as IStateVector } from '../core/types';
+import { Complex, IStateVector } from '../core/types';
 import * as math from 'mathjs';
 import { 
   validatePosDim, 

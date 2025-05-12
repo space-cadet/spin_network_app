@@ -32,19 +32,13 @@ export function matrixExponential(
   for (let n = 1; n <= terms; n++) {
     // Multiply term by matrix and divide by n
     term = multiplyMatrices(term, matrix).map(row =>
-      row.map(element => ({ 
-        re: element.re / n,
-        im: element.im / n 
-      }))
+      row.map(element => math.complex(element.re / n, element.im / n))
     );
     
     // Add to result
     result.forEach((row, i) =>
       row.forEach((_, j) => {
-        result[i][j] = {
-          re: result[i][j].re + term[i][j].re,
-          im: result[i][j].im + term[i][j].im
-        };
+        result[i][j] = math.add(result[i][j], term[i][j]) as Complex;
       })
     );
   }

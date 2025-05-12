@@ -2,8 +2,9 @@
  * Test helpers for quantum module tests
  */
 
-import { Complex, StateVector } from '../../types';
+import { Complex } from '../../types';
 import { HilbertSpace } from '../../hilbertSpace';
+import { StateVector } from '../../stateVector';
 import * as math from 'mathjs';
 
 /**
@@ -11,10 +12,10 @@ import * as math from 'mathjs';
  */
 export function complexApproxEqual(a: Complex, b: Complex, tolerance: number = 1e-10): boolean {
   // Ensure we're working with proper math.js complex numbers
-  const ca = typeof a === 'number' ? math.complex({re: a, im:  0}) : math.complex({re: a.re, im:  a.im});
-  const cb = typeof b === 'number' ? math.complex({re: b, im:  0}) : math.complex({re: b.re, im:  b.im});
+  const ca = typeof a === 'number' ? math.complex(a,  0) : math.complex(a.re,  a.im);
+  const cb = typeof b === 'number' ? math.complex(b,  0) : math.complex(b.re,  b.im);
   const diff = math.subtract(ca, cb) as Complex;
-  return math.abs(diff) < tolerance;
+  return math.abs(diff).re < tolerance;
 }
 
 /**
@@ -37,7 +38,7 @@ export function createRandomState(space: HilbertSpace): StateVector {
   // Normalize
   const normSquared = amplitudes.reduce((sum, amp) => {
     // Convert plain object to math.js Complex if needed
-    const complexAmp = math.complex({re: amp.re, im:  amp.im});
+    const complexAmp = math.complex(amp.re,  amp.im);
     // Calculate absolute value squared (|z|²)
     const absSquared = math.add(
       math.multiply(complexAmp.re, complexAmp.re),
@@ -50,16 +51,13 @@ export function createRandomState(space: HilbertSpace): StateVector {
   
   const normalizedAmplitudes = amplitudes.map(amp => {
     // Convert plain object to math.js Complex
-    const complexAmp = math.complex({re: amp.re, im:  amp.im});
+    const complexAmp = math.complex(amp.re,  amp.im);
     // Divide by normalization factor
     return math.divide(complexAmp, normFactor) as Complex;
   });
 
-  return {
-    dimension: space.dimension,
-    amplitudes: normalizedAmplitudes,
-    basis: 'random'
-  };
+  return new StateVector(space.dimension,
+    normalizedAmplitudes,'random');
 }
 
 /**
@@ -92,7 +90,7 @@ export function createRandomUnitary(dim: number): Complex[][] {
 
   // Convert to complex matrix
   return realMatrix.map(row => 
-    row.map(x => math.complex({re: x, im:  0}))
+    row.map(x => math.complex(x,  0))
   );
 }
 
@@ -101,19 +99,18 @@ export function createRandomUnitary(dim: number): Complex[][] {
  */
 export function createRandomHermitian(dim: number): Complex[][] {
   const matrix = Array(dim).fill(null).map(() => 
-    Array(dim).fill(null).map(() => ({
-      re: Math.random() - 0.5,
-      im: Math.random() - 0.5
-    }))
+    Array(dim).fill(null).map(() => (
+      math.complex(Math.random() - 0.5,
+      Math.random() - 0.5)
+    ))
   );
 
   // Make Hermitian
   for (let i = 0; i < dim; i++) {
     for (let j = i + 1; j < dim; j++) {
-      matrix[j][i] = {
-        re: matrix[i][j].re,
-        im: -matrix[i][j].im
-      };
+      matrix[j][i] =
+        math.complex(matrix[i][j].re,
+        -matrix[i][j].im);
     }
     // Diagonal elements should be real
     matrix[i][i].im = 0;

@@ -12,6 +12,7 @@ import { Hamiltonian } from '../../src/operators/hamiltonian';
 import { StateVector } from '../../src/states/stateVector';
 import { MatrixOperator } from '../../src/operators/operator';
 import { PauliZ } from '../../src/operators/gates';
+import { Complex } from '../../src/core/types';
 import { composeOperators } from '../../src/states/composite';
 import * as math from 'mathjs';
 
@@ -81,7 +82,9 @@ function demonstrateHeisenbergDynamics() {
         const corr_num = evolved.innerProduct(corr.apply(evolved)).re;
         
         // Calculate probability of being in |↑↓⟩ state
-        const prob_updown = math.abs(math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1])));
+        const complexProb = math.multiply(evolved.amplitudes[1], math.conj(evolved.amplitudes[1])) as Complex;
+        const absValue = math.abs(complexProb);
+        const prob_updown = typeof absValue === 'number' ? absValue : absValue.re;
         
         // Theoretical values
         const energy_th = initial_energy;  // Energy is conserved
@@ -162,7 +165,7 @@ function demonstrateDomainWall() {
  */
 function calculateDomainWidth(magnetizations: number[]): number {
     // Find points where magnetization crosses zero
-    const crossings = [];
+    const crossings: number[] = [];
     for (let i = 0; i < magnetizations.length - 1; i++) {
         if (magnetizations[i] * magnetizations[i+1] <= 0) {
             crossings.push(i + Math.abs(magnetizations[i]) / 

@@ -99,7 +99,7 @@ describe('Operator Algebra', () => {
       
       // Just verify that the result is non-zero
       const hasNonZeroElement = matrix.some(row => 
-        row.some(elem => math.abs(elem) > 1e-10)
+        row.some(elem => math.abs(elem).re > 1e-10)
       );
       expect(hasNonZeroElement).toBe(true);
     });

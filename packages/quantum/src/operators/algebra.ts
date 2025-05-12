@@ -5,7 +5,7 @@
  * anti-commutators, Lie algebraic structures, and more.
  */
 
-import { Complex, Operator, StateVector } from '../core/types';
+import { Complex, IOperator, IStateVector } from '../core/types';
 import { MatrixOperator } from './operator';
 import { matrixExponential } from '../utils/matrixOperations';
 import * as math from 'mathjs';
@@ -17,7 +17,7 @@ import * as math from 'mathjs';
  * @param b Second operator
  * @returns The sum operator
  */
-export function addOperators(a: Operator, b: Operator): Operator {
+export function addOperators(a: IOperator, b: IOperator): IOperator {
   if (a.dimension !== b.dimension) {
     throw new Error('Operator dimensions do not match');
   }
@@ -31,7 +31,7 @@ export function addOperators(a: Operator, b: Operator): Operator {
  * @param b Second operator to subtract
  * @returns The difference operator
  */
-export function subtractOperators(a: Operator, b: Operator): Operator {
+export function subtractOperators(a: IOperator, b: IOperator): IOperator {
   if (a.dimension !== b.dimension) {
     throw new Error('Operator dimensions do not match');
   }
@@ -48,7 +48,7 @@ export function subtractOperators(a: Operator, b: Operator): Operator {
  * @param B Second operator
  * @returns The commutator operator [A,B]
  */
-export function commutator(A: Operator, B: Operator): Operator {
+export function commutator(A: IOperator, B: IOperator): IOperator {
   if (A.dimension !== B.dimension) {
     throw new Error('Operators must have the same dimension for commutator');
   }
@@ -104,7 +104,7 @@ export function commutator(A: Operator, B: Operator): Operator {
  * @param B Second operator
  * @returns The anti-commutator operator {A,B}
  */
-export function antiCommutator(A: Operator, B: Operator): Operator {
+export function antiCommutator(A: IOperator, B: IOperator): IOperator {
   if (A.dimension !== B.dimension) {
     throw new Error('Operators must have the same dimension for anti-commutator');
   }
@@ -160,7 +160,7 @@ export function antiCommutator(A: Operator, B: Operator): Operator {
  * @param indices Array of pairs of indices specifying the commutator structure
  * @returns The resulting operator from the nested commutator structure
  */
-export function nestedCommutator(ops: Operator[], indices: number[][]): Operator {
+export function nestedCommutator(ops: IOperator[], indices: number[][]): IOperator {
   if (ops.length < 2 || indices.length < 1) {
     throw new Error('Need at least two operators and one pair of indices');
   }
@@ -200,7 +200,7 @@ export function nestedCommutator(ops: Operator[], indices: number[][]): Operator
  * @param B Second operator
  * @returns The Lie derivative operator
  */
-export function lieDerivative(A: Operator, B: Operator): Operator {
+export function lieDerivative(A: IOperator, B: IOperator): IOperator {
   return commutator(A, B);
 }
 
@@ -215,7 +215,7 @@ export function lieDerivative(A: Operator, B: Operator): Operator {
  * @param order Maximum order of nested commutators to include
  * @returns Approximation of exp(A+B) based on BCH formula
  */
-export function BCHFormula(A: Operator, B: Operator, order: number = 2): Operator {
+export function BCHFormula(A: IOperator, B: IOperator, order: number = 2): IOperator {
   if (A.dimension !== B.dimension) {
     throw new Error('Operators must have the same dimension for BCH formula');
   }
@@ -254,7 +254,7 @@ export function BCHFormula(A: Operator, B: Operator, order: number = 2): Operato
  * @param tolerance Numerical tolerance for zero check
  * @returns True if operators commute
  */
-export function operatorsCommute(A: Operator, B: Operator, tolerance: number = 1e-10): boolean {
+export function operatorsCommute(A: IOperator, B: IOperator, tolerance: number = 1e-10): boolean {
   const comm = commutator(A, B);
   const matrix = comm.toMatrix();
   
@@ -281,7 +281,7 @@ export function operatorsCommute(A: Operator, B: Operator, tolerance: number = 1
  * @param B Second operator
  * @returns Complex expectation value
  */
-export function commutatorExpectation(state: StateVector, A: Operator, B: Operator): Complex {
+export function commutatorExpectation(state: IStateVector, A: IOperator, B: IOperator): Complex {
   const commutatorOp = commutator(A, B);
   const resultState = commutatorOp.apply(state);
   return state.innerProduct(resultState);
@@ -297,7 +297,7 @@ export function commutatorExpectation(state: StateVector, A: Operator, B: Operat
  * @param B Second operator
  * @returns Real number representing uncertainty product
  */
-export function uncertaintyProduct(state: StateVector, A: Operator, B: Operator): number {
+export function uncertaintyProduct(state: IStateVector, A: IOperator, B: IOperator): number {
   // Calculate ΔA = √(⟨A²⟩ - ⟨A⟩²)
   const expectA = state.innerProduct(A.apply(state));
   const expectA2 = state.innerProduct(A.compose(A).apply(state));
@@ -322,7 +322,7 @@ export function uncertaintyProduct(state: StateVector, A: Operator, B: Operator)
  * @param tolerance Numerical tolerance
  * @returns True if operator is normal
  */
-export function isNormalOperator(A: Operator, tolerance: number = 1e-10): boolean {
+export function isNormalOperator(A: IOperator, tolerance: number = 1e-10): boolean {
   const ADagger = A.adjoint();
   const AA_dagger = A.compose(ADagger);
   const A_daggerA = ADagger.compose(A);
@@ -338,7 +338,7 @@ export function isNormalOperator(A: Operator, tolerance: number = 1e-10): boolea
  * @param generator Generator operator G
  * @returns Resulting operator exp(iG)
  */
-export function operatorFromGenerator(generator: Operator): Operator {
+export function operatorFromGenerator(generator: IOperator): IOperator {
   // Scale generator by i
   const iG = generator.scale(math.complex(0, 1));
   
@@ -355,7 +355,7 @@ export function operatorFromGenerator(generator: Operator): Operator {
  * @param state Quantum state to project onto
  * @returns Projection operator
  */
-export function projectionOperator(state: StateVector): Operator {
+export function projectionOperator(state: IStateVector): IOperator {
   const dim = state.dimension;
   const matrix: Complex[][] = Array(dim).fill(null).map(() => 
     Array(dim).fill(null).map(() => math.complex(0, 0))

@@ -2,7 +2,7 @@
  * Density matrix implementation for mixed quantum states and operations
  */
 
-import { Complex, StateVector, OperatorType, DensityMatrix, QuantumChannel, Operator } from '../core/types';
+import { Complex, IStateVector, OperatorType, IDensityMatrix, IQuantumChannel, IOperator } from '../core/types';
 import { MatrixOperator } from '../operators/operator';
 import { multiplyMatrices } from '../utils/matrixOperations';
 import * as math from 'mathjs';
@@ -10,7 +10,7 @@ import * as math from 'mathjs';
 /**
  * Implementation of density matrix operations
  */
-export class DensityMatrixOperator implements DensityMatrix {
+export class DensityMatrixOperator implements IDensityMatrix {
   readonly dimension: number;
   readonly type: OperatorType = 'hermitian';
   private operator: MatrixOperator;
@@ -46,21 +46,21 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Applies density matrix to state vector
    */
-  apply(state: StateVector): StateVector {
+  apply(state: IStateVector): IStateVector {
     return this.operator.apply(state);
   }
 
   /**
    * Composes with another operator
    */
-  compose(other: Operator): Operator {
+  compose(other: IOperator): IOperator {
     return this.operator.compose(other);
   }
 
   /**
    * Returns adjoint (same as original for density matrix)
    */
-  adjoint(): Operator {
+  adjoint(): IOperator {
     return this;  // Density matrices are Hermitian
   }
 
@@ -119,7 +119,7 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Performs partial trace over specified subsystems
    */
-  partialTrace(subsystemDimensions: number[]): DensityMatrix {
+  partialTrace(subsystemDimensions: number[]): IDensityMatrix {
     // Validate dimensions multiply to total dimension
     const totalDim = subsystemDimensions.reduce((a, b) => a * b, 1);
     if (totalDim !== this.dimension) {
@@ -133,28 +133,28 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Scales density matrix by a complex number
    */
-  scale(scalar: Complex): Operator {
+  scale(scalar: Complex): IOperator {
     return this.operator.scale(scalar);
   }
 
   /**
    * Adds this density matrix with another operator
    */
-  add(other: Operator): Operator {
+  add(other: IOperator): IOperator {
     return this.operator.add(other);
   }
 
   /**
    * Returns eigenvalues and eigenvectors
    */
-  eigenDecompose(): { values: Complex[]; vectors: Operator[] } {
+  eigenDecompose(): { values: Complex[]; vectors: IOperator[] } {
     return this.operator.eigenDecompose();
   }
 
   /**
    * Creates density matrix from pure state
    */
-  static fromPureState(state: StateVector): DensityMatrix {
+  static fromPureState(state: IStateVector): IDensityMatrix {
     const dim = state.dimension;
     const matrix = Array(dim).fill(null).map(() => 
       Array(dim).fill(null).map(() => math.complex(0, 0))
@@ -176,7 +176,7 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Creates density matrix from mixed state
    */
-  static mixedState(states: StateVector[], probabilities: number[]): DensityMatrix {
+  static mixedState(states: IStateVector[], probabilities: number[]): IDensityMatrix {
     if (states.length !== probabilities.length) {
       throw new Error('Number of states must match number of probabilities');
     }
@@ -219,7 +219,7 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Returns tensor product with another operator
    */
-  tensorProduct(other: Operator): Operator {
+  tensorProduct(other: IOperator): IOperator {
     return this.operator.tensorProduct(other);
   }
 }
@@ -227,8 +227,8 @@ export class DensityMatrixOperator implements DensityMatrix {
 /**
  * Implementation of quantum channels using Kraus operators
  */
-export class KrausChannel implements QuantumChannel {
-  constructor(private krausOperators: Operator[]) {
+export class KrausChannel implements IQuantumChannel {
+  constructor(private krausOperators: IOperator[]) {
     // Validate non-empty array of operators
     if (!krausOperators || krausOperators.length === 0) {
       throw new Error('At least one Kraus operator is required');
@@ -254,7 +254,7 @@ export class KrausChannel implements QuantumChannel {
     }
   }
 
-  apply(state: DensityMatrix): DensityMatrix {
+  apply(state: IDensityMatrix): IDensityMatrix {
     const dim = this.krausOperators[0].dimension;
     const result = Array(dim).fill(null).map(() => 
       Array(dim).fill(null).map(() => math.complex(0, 0))
@@ -282,71 +282,71 @@ export class KrausChannel implements QuantumChannel {
 /**
  * Creates a depolarizing channel
  */
-export function createDepolarizingChannel(dimension: number, p: number): QuantumChannel {
+export function createDepolarizingChannel(dimension: number, p: number): IQuantumChannel {
   if (p < 0 || p > 1) {
     throw new Error('Probability must be between 0 and 1');
   }
 
   // TODO: Implement Kraus operators for depolarizing channel
-  const krausOperators: Operator[] = [];
+  const krausOperators: IOperator[] = [];
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates an amplitude damping channel
  */
-export function createAmplitudeDampingChannel(gamma: number): QuantumChannel {
+export function createAmplitudeDampingChannel(gamma: number): IQuantumChannel {
   if (gamma < 0 || gamma > 1) {
     throw new Error('Damping parameter must be between 0 and 1');
   }
 
   // TODO: Implement Kraus operators for amplitude damping
-  const krausOperators: Operator[] = [];
+  const krausOperators: IOperator[] = [];
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates a phase damping channel
  */
-export function createPhaseDampingChannel(gamma: number): QuantumChannel {
+export function createPhaseDampingChannel(gamma: number): IQuantumChannel {
   if (gamma < 0 || gamma > 1) {
     throw new Error('Damping parameter must be between 0 and 1');
   }
 
   // TODO: Implement Kraus operators for phase damping
-  const krausOperators: Operator[] = [];
+  const krausOperators: IOperator[] = [];
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates a bit flip channel
  */
-export function createBitFlipChannel(p: number): QuantumChannel {
+export function createBitFlipChannel(p: number): IQuantumChannel {
   if (p < 0 || p > 1) {
     throw new Error('Probability must be between 0 and 1');
   }
 
   // TODO: Implement Kraus operators for bit flip
-  const krausOperators: Operator[] = [];
+  const krausOperators: IOperator[] = [];
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates a phase flip channel
  */
-export function createPhaseFlipChannel(p: number): QuantumChannel {
+export function createPhaseFlipChannel(p: number): IQuantumChannel {
   if (p < 0 || p > 1) {
     throw new Error('Probability must be between 0 and 1');
   }
 
   // TODO: Implement Kraus operators for phase flip
-  const krausOperators: Operator[] = [];
+  const krausOperators: IOperator[] = [];
   return new KrausChannel(krausOperators);
 }
 
 // Helper functions for quantum operations
 
-function addOperators(a: Operator, b: Operator): Operator {
+function addOperators(a: IOperator, b: IOperator): IOperator {
   if (a.dimension !== b.dimension) {
     throw new Error('Operator dimensions do not match');
   }
@@ -360,7 +360,7 @@ function addOperators(a: Operator, b: Operator): Operator {
   return new MatrixOperator(sumMatrix);
 }
 
-function subtractOperators(a: Operator, b: Operator): Operator {
+function subtractOperators(a: IOperator, b: IOperator): IOperator {
   if (a.dimension !== b.dimension) {
     throw new Error('Operator dimensions do not match');
   }
@@ -374,7 +374,7 @@ function subtractOperators(a: Operator, b: Operator): Operator {
   return new MatrixOperator(diffMatrix);
 }
 
-function isOperatorZero(operator: Operator, tolerance: number = 1e-10): boolean {
+function isOperatorZero(operator: IOperator, tolerance: number = 1e-10): boolean {
   const matrix = operator.toMatrix();
   return matrix.every(row => 
     row.every(elem => {
@@ -384,7 +384,7 @@ function isOperatorZero(operator: Operator, tolerance: number = 1e-10): boolean 
   );
 }
 
-function createIdentityOperator(dimension: number): Operator {
+function createIdentityOperator(dimension: number): IOperator {
   const matrix = Array(dimension).fill(null).map((_, i) => 
     Array(dimension).fill(null).map((_, j) => 
       i === j ? math.complex(1, 0) : math.complex(0, 0)
@@ -393,7 +393,7 @@ function createIdentityOperator(dimension: number): Operator {
   return new MatrixOperator(matrix, 'unitary');
 }
 
-function createZeroOperator(dimension: number): Operator {
+function createZeroOperator(dimension: number): IOperator {
   const matrix = Array(dimension).fill(null).map(() => 
     Array(dimension).fill(null).map(() => math.complex(0, 0))
   );

@@ -26,7 +26,7 @@
  * @module quantum/hamiltonian
  */
 
-import { Complex, Operator, OperatorType } from '../core/types';
+import { Complex, IOperator, OperatorType } from '../core/types';
 import { StateVector } from '../states/stateVector';
 import { MatrixOperator } from './operator';
 import { validatePosDim } from '../utils/validation';
@@ -80,9 +80,9 @@ export type HamiltonianType =
  * @property coefficient - Complex coupling strength (energy units)
  * @property operator - Quantum operator representing physical observable
  */
-export interface HamiltonianTerm {
+export interface IHamiltonianTerm {
   coefficient: Complex;    
-  operator: Operator;      
+  operator: IOperator;      
 }
 
 /**
@@ -110,12 +110,12 @@ export interface HamiltonianTerm {
  */
 export class Hamiltonian extends MatrixOperator {
   readonly hamiltonianType: HamiltonianType;
-  readonly terms: HamiltonianTerm[];
+  readonly terms: IHamiltonianTerm[];
   private _timeDependent: boolean;
 
   constructor(
     dimension: number,
-    terms: HamiltonianTerm[],
+    terms: IHamiltonianTerm[],
     hamiltonianType: HamiltonianType = 'custom',
     timeDependent: boolean = false,
     requireHermitian: boolean = false
@@ -135,8 +135,12 @@ export class Hamiltonian extends MatrixOperator {
           if (!isHermitian(termMatrix)) {
             throw new Error('All terms must be Hermitian when requireHermitian is true');
           }
-        } catch (e) {
-          throw new Error(`Hermiticity check failed: ${e.message}`);
+        } catch (e: unknown) {
+          if (e instanceof Error) {
+            throw new Error(`Hermiticity check failed: ${e.message}`);
+          } else {
+            throw new Error('Hermiticity check failed: Unknown error');
+          }
         }
         
         if (term.coefficient && Math.abs(term.coefficient.im) > 1e-10) {
@@ -159,8 +163,12 @@ export class Hamiltonian extends MatrixOperator {
         if (!isHermitian(matrix)) {
           throw new Error('Combined Hamiltonian must be Hermitian when requireHermitian is true');
         }
-      } catch (e) {
-        throw new Error(`Hermiticity validation failed: ${e.message}`);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          throw new Error(`Hermiticity validation failed: ${e.message}`);
+        } else {
+          throw new Error('Hermiticity validation failed: Unknown error');
+        }
       }
     }
 
@@ -202,7 +210,7 @@ export class Hamiltonian extends MatrixOperator {
    * @throws Error for time-dependent Hamiltonians
    * @throws Error for invalid matrix structure
    */
-  getEvolutionOperator(time: number): Operator {
+  getEvolutionOperator(time: number): IOperator {
     if (this._timeDependent) {
       throw new Error('Time-dependent Hamiltonians require numerical integration');
     }
@@ -282,9 +290,9 @@ export class Hamiltonian extends MatrixOperator {
         return evolvedState.normalize();
       }
       return evolvedState;
-    } catch (e) {
+    } catch (e: unknown) {
       // If normalization fails, ensure we still return a valid state
-      console.error("Normalization error in evolveState:", e);
+      console.error("Normalization error in evolveState:", e instanceof Error ? e.message : "Unknown error");
       return state; // Return original state if evolution fails
     }
   }
@@ -341,7 +349,7 @@ export class Hamiltonian extends MatrixOperator {
   ): Hamiltonian {
     const [Bx, By, Bz] = magneticField;
     
-    const terms: HamiltonianTerm[] = [
+    const terms: IHamiltonianTerm[] = [
       {
         coefficient: math.complex(Bx, 0),
         operator: PauliX
@@ -396,7 +404,7 @@ export class Hamiltonian extends MatrixOperator {
       throw new Error('Heisenberg model requires at least 2 spins');
     }
 
-    const terms: HamiltonianTerm[] = [];
+    const terms: IHamiltonianTerm[] = [];
     const coeff = math.complex(coupling, 0);
     const dimension = Math.pow(2, numSpins);
 
@@ -420,8 +428,8 @@ export class Hamiltonian extends MatrixOperator {
             coefficient: coeff,
             operator: op
           });
-        } catch (e) {
-          console.error(`Error creating Heisenberg term: ${e.message}`);
+        } catch (e: unknown) {
+          console.error(`Error creating Heisenberg term: ${e instanceof Error ? e.message : "Unknown error"}`);
           // Create fallback identity term as placeholder
           terms.push({
             coefficient: math.complex(0, 0), // Zero coefficient

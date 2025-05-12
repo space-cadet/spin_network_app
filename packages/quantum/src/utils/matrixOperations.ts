@@ -32,7 +32,7 @@ export type ComplexMatrix = Complex[][];
 /**
  * Represents the dimensions of a matrix
  */
-export interface MatrixDimensions {
+export interface IMatrixDimensions {
     /** Number of rows in the matrix */
     rows: number;
     /** Number of columns in the matrix */
@@ -42,7 +42,7 @@ export interface MatrixDimensions {
 /**
  * Result of matrix validation operations
  */
-export interface ValidationResult {
+export interface IValidationResult {
     /** Whether the matrix is valid */
     valid: boolean;
     /** Error message if validation failed */
@@ -80,7 +80,7 @@ const NUMERICAL_THRESHOLD = 1e-10;
  * @param matrix - Matrix to validate
  * @returns Validation result with error message if invalid
  */
-function validateMatrix(matrix: ComplexMatrix): ValidationResult {
+function validateMatrix(matrix: ComplexMatrix): IValidationResult {
     if (!Array.isArray(matrix) || matrix.length === 0) {
         return { valid: false, error: 'Matrix must be non-empty array' };
     }
@@ -116,7 +116,7 @@ function validateMatrix(matrix: ComplexMatrix): ValidationResult {
  * @param b - Second matrix
  * @returns Validation result with error message if dimensions are incompatible
  */
-function validateMultiplicationDimensions(a: ComplexMatrix, b: ComplexMatrix): ValidationResult {
+function validateMultiplicationDimensions(a: ComplexMatrix, b: ComplexMatrix): IValidationResult {
     if (!a[0] || !b[0]) {
         return { valid: false, error: 'Empty matrix provided' };
     }
@@ -137,7 +137,7 @@ function validateMultiplicationDimensions(a: ComplexMatrix, b: ComplexMatrix): V
  * @param matrix - Matrix to validate
  * @returns Validation result with error message if not square
  */
-function validateSquareMatrix(matrix: ComplexMatrix): ValidationResult {
+function validateSquareMatrix(matrix: ComplexMatrix): IValidationResult {
     if (!matrix[0] || matrix.length !== matrix[0].length) {
         return { valid: false, error: 'Matrix must be square' };
     }
@@ -152,8 +152,8 @@ function validateSquareMatrix(matrix: ComplexMatrix): ValidationResult {
  * @param value - Numerical value to clean
  * @returns Cleaned value (0 if absolute value is below threshold)
  */
-function cleanupNumericalNoise(value: number): number {
-    return Math.abs(value) < NUMERICAL_THRESHOLD ? 0 : value;
+function cleanupNumericalNoise(value: number,precision: number = NUMERICAL_THRESHOLD): number {
+    return Math.abs(value) < precision ? 0 : value;
 }
 
 /**
@@ -366,6 +366,37 @@ export function tensorProduct(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix
  * const { values, vectors } = eigenDecomposition(matrix);
  */
 export function eigenDecomposition(
+    matrix: ComplexMatrix
+): {
+    values: Complex[];
+    vectors?: ComplexMatrix;
+};
+
+export function eigenDecomposition(
+    matrix: ComplexMatrix,
+    options: {
+        precision?: number;
+        computeEigenvectors?: true;
+        enforceOrthogonality?: boolean;
+    }
+): {
+    values: Complex[];
+    vectors: ComplexMatrix;
+};
+
+export function eigenDecomposition(
+    matrix: ComplexMatrix,
+    options: {
+        precision?: number;
+        computeEigenvectors?: false;
+        enforceOrthogonality?: boolean;
+    }
+): {
+    values: Complex[];
+    vectors?: undefined;
+};
+
+export function eigenDecomposition(
     matrix: ComplexMatrix,
     options: {
         precision?: number;
@@ -409,15 +440,21 @@ export function eigenDecomposition(
         // Process eigenvectors
         let vectors: ComplexMatrix | undefined;
         try {
-            const eigenvectors = (result.eigenvectors as math.Matrix).valueOf() as Array<{
-                value: number;
-                vector: math.Matrix;
-            }>;
+            const eigenvectors = result.eigenvectors as {
+                value: number | math.BigNumber;
+                vector: math.MathCollection;
+            }[];
             
             // Sort eigenvectors to match eigenvalue order
             const sortedEigenvectors = eigenvectors.sort((a, b) => {
-                const aVal = typeof a.value === 'number' ? a.value : a.value.re;
-                const bVal = typeof b.value === 'number' ? b.value : b.value.re;
+                const aVal = math.isNumber(a.value) ? a.value 
+                    : math.isComplex(a.value) ? (a.value as math.Complex).re
+                    : Number((a.value as math.BigNumber).toString());
+    
+                const bVal = math.isNumber(b.value) ? b.value 
+                    : math.isComplex(b.value) ? (b.value as math.Complex).re
+                    : Number((b.value as math.BigNumber).toString());
+    
                 return aVal - bVal;
             });
 
@@ -436,7 +473,11 @@ export function eigenDecomposition(
                 vectors = normalizeVectors(vectors);
             }
         } catch (error) {
-            console.warn(`Eigenvector computation warning: ${error.message}`);
+            if (error instanceof Error) {
+                console.warn(`Eigenvector computation warning: ${error.message}`);
+            } else {
+                console.warn('Unknown eigenvector computation error');
+            }
             return { values: complexValues };
         }
 
@@ -446,7 +487,11 @@ export function eigenDecomposition(
         };
 
     } catch (error) {
-        throw new Error(`Eigendecomposition failed: ${error.message}`);
+        if (error instanceof Error) {
+            throw new Error(`Eigendecomposition failed: ${error.message}`);
+        } else {
+            throw new Error('Unknown eigendecomposition error');
+        }
     }
 }
 
@@ -470,7 +515,7 @@ function normalizeVectors(vectors: ComplexMatrix): ComplexMatrix {
     return vectors.map(vector => {
         // Compute norm
         const normSquared = vector.reduce((sum, v) => {
-            const abs = math.abs(v);
+            const abs = Number(math.abs(v));
             return sum + abs * abs;
         }, 0);
         const norm = Math.sqrt(normSquared);
@@ -619,7 +664,7 @@ function orthogonalizeDegenerateEigenvectors(
 ): ComplexMatrix {
     const orthogonalVectors: ComplexMatrix = [];
     
-    for (const vectors of groups.values()) {
+    Array.from(groups.values()).forEach(vectors => {
         if (vectors.length > 1) {
             // Apply modified Gram-Schmidt for numerical stability
             for (let i = 0; i < vectors.length; i++) {
@@ -642,7 +687,7 @@ function orthogonalizeDegenerateEigenvectors(
             // Single vector case - just add it
             orthogonalVectors.push(vectors[0]);
         }
-    }
+    });
     
     return orthogonalVectors;
 }
