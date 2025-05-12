@@ -3,6 +3,17 @@
 
 ### [2025-05-12]
 
+#### [24:00] - T64a: Created UI components and fixed routing
+- Modified `packages/graph-test-app/src/main.tsx` - Added Router component for proper routing context
+- Modified `packages/graph-test-app/src/App.tsx` - Removed Router wrapper and updated layout structure
+- Created `packages/graph-test-app/src/components/panels/ControlPanel.tsx` - Implementation of left control panel
+- Created `packages/graph-test-app/src/components/panels/PropertiesPanel.tsx` - Implementation of right properties panel
+- Created `packages/graph-test-app/src/components/panels/ConsolePanel.tsx` - Implementation of bottom console panel
+- Created `packages/graph-test-app/src/components/graph/GraphCanvas.tsx` - Basic graph visualization placeholder
+- Created `packages/graph-test-app/src/components/common/BackendSelector.tsx` - Backend switching UI component
+- Added proper panel organization and layout structure
+- Fixed AppLayout routing context issues
+
 #### [23:55] - T64a: Initial graph testing app implementation
 - Created `packages/graph-test-app/package.json` - Added dependencies and configuration
 - Created `packages/graph-test-app/tsconfig.json` - Set up TypeScript configuration

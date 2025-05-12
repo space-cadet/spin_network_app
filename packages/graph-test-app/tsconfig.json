@@ -23,7 +23,9 @@
     /* Paths */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@spin-network/template-core": ["../template-core/src"],
+      "@spin-network/template-core/*": ["../template-core/src/*"]
     }
   },
   "include": ["src"],

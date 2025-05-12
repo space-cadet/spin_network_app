@@ -1,46 +1,29 @@
 import React from 'react';
 
-export interface ControlPanelProps {
-  onLibrarySelect: (lib: 'graphology' | 'cytoscape') => void;
-  onOperationSelect: (op: string) => void;
-  onGenerateGraph: (params: any) => void; // We'll type this properly later
-}
-
-export const ControlPanel: React.FC<ControlPanelProps> = ({
-  onLibrarySelect,
-  onOperationSelect,
-  onGenerateGraph,
-}) => {
+export const ControlPanel: React.FC = () => {
   return (
-    <div className="h-full overflow-auto">
-      <h2 className="text-lg font-semibold mb-4">Graph Controls</h2>
-      <div className="space-y-4">
-        {/* Library Selection */}
-        <div>
-          <h3 className="font-medium mb-2">Library</h3>
-          <select 
-            className="w-full p-2 rounded bg-white dark:bg-gray-700"
-            onChange={(e) => onLibrarySelect(e.target.value as 'graphology' | 'cytoscape')}
-          >
-            <option value="graphology">Graphology</option>
-            <option value="cytoscape">Cytoscape</option>
-          </select>
-        </div>
-
-        {/* Operations */}
-        <div>
-          <h3 className="font-medium mb-2">Operations</h3>
-          {/* We'll add operation controls here */}
-        </div>
-
-        {/* Graph Generation */}
-        <div>
-          <h3 className="font-medium mb-2">Generate Graph</h3>
-          {/* We'll add graph generation controls here */}
-        </div>
+    <div className="p-4 h-full flex flex-col">
+      <h2 className="text-lg font-semibold mb-4">Controls</h2>
+      <div className="space-y-2">
+        <button 
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          onClick={() => console.log('Create Node clicked')}
+        >
+          Create Node
+        </button>
+        <button 
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          onClick={() => console.log('Create Edge clicked')}
+        >
+          Create Edge
+        </button>
+        <button 
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          onClick={() => console.log('Run BFS clicked')}
+        >
+          Run BFS
+        </button>
       </div>
     </div>
   );
 };
-
-export default ControlPanel;

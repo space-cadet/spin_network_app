@@ -1,35 +1,13 @@
 import React from 'react';
 
-export interface ConsolePanelProps {
-  logs: Array<{
-    timestamp: number;
-    message: string;
-    type: 'info' | 'warning' | 'error';
-  }>;
-}
-
-export const ConsolePanel: React.FC<ConsolePanelProps> = ({
-  logs = [],
-}) => {
+export const ConsolePanel: React.FC = () => {
   return (
-    <div className="h-full overflow-auto font-mono text-sm">
-      <h2 className="text-lg font-semibold mb-4">Console</h2>
-      <div className="space-y-1">
-        {logs.map((log, index) => (
-          <div 
-            key={index}
-            className={`p-1 ${
-              log.type === 'error' ? 'text-red-500' :
-              log.type === 'warning' ? 'text-yellow-500' :
-              'text-gray-300'
-            }`}
-          >
-            [{new Date(log.timestamp).toISOString()}] {log.message}
-          </div>
-        ))}
+    <div className="p-4 h-full flex flex-col">
+      <h2 className="text-lg font-semibold mb-2">Console</h2>
+      <div className="font-mono text-sm whitespace-pre overflow-auto flex-1 bg-gray-50 dark:bg-gray-800 p-2 rounded">
+Welcome to Graph Library Test App
+Active backend: graphology
       </div>
     </div>
   );
 };
-
-export default ConsolePanel;

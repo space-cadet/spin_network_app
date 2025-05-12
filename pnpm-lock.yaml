@@ -227,8 +227,8 @@ importers:
   packages/graph-test-app:
     dependencies:
       '@spin-network/template-core':
-        specifier: workspace:*
-        version: link:../template-core
+        specifier: link:../template-core/src
+        version: link:../template-core/src
       cytoscape:
         specifier: ^3.26.0
         version: 3.31.2

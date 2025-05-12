@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@spin-network/template-core': path.resolve(__dirname, '../template-core/src')
     },
   },
   server: {

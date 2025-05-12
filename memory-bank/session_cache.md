@@ -28,15 +28,18 @@
   - postcss.config.js and tailwind.config.js for styling
 - ✅ Created basic component structure:
   - App.tsx with template-core layout
-  - Panel components (Control, Metrics, Console)
+  - Panel components (Control, Properties, Console)
   - Graph visualization component
-- ✅ Set up utils for:
-  - Performance measurement
-  - Graph generation
-  - Graph metrics
-- ⚠️ Identified issues:
-  - Build dependencies for template-core and template-base need fixing
-  - Template package builds required before proceeding
+  - Backend selector component
+- ✅ Fixed routing setup:
+  - Added Router to main.tsx
+  - Removed Router from App.tsx
+  - Fixed AppLayout routing context
+- ✅ Created working UI with:
+  - Left panel (Controls)
+  - Right panel (Properties)
+  - Bottom panel (Console)
+  - Backend selection in header
 
 **Next Session Tasks**:
 1. Fix template package build issues

@@ -1,8 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
 import { Activity } from 'lucide-react';
 import { AppLayout, ResizablePanel } from '@spin-network/template-core';  
 import { useTheme, usePanel, usePanelLayout } from '@spin-network/template-core/state';
+import { ControlPanel } from './components/panels/ControlPanel';
+import { PropertiesPanel } from './components/panels/PropertiesPanel';
+import { ConsolePanel } from './components/panels/ConsolePanel';
+import { GraphCanvas } from './components/graph/GraphCanvas';
+import { BackendSelector } from './components/common/BackendSelector';
 
 const GraphTestApp: React.FC = () => {
   const [theme] = useTheme();
@@ -17,7 +21,7 @@ const GraphTestApp: React.FC = () => {
       addPanel({
         id: 'leftSidebar',
         isOpen: true,
-        size: 300,
+        size: 250,
         minSize: 200,
         maxSize: 400,
       });
@@ -26,7 +30,7 @@ const GraphTestApp: React.FC = () => {
       addPanel({
         id: 'rightSidebar',
         isOpen: true,
-        size: 350,
+        size: 300,
         minSize: 250,
         maxSize: 500,
       });
@@ -35,7 +39,7 @@ const GraphTestApp: React.FC = () => {
       addPanel({
         id: 'bottomPanel',
         isOpen: true,
-        size: 200,
+        size: 150,
         minSize: 100,
         maxSize: 400,
       });
@@ -51,53 +55,66 @@ const GraphTestApp: React.FC = () => {
     : 'bg-gray-100 text-gray-900';
 
   return (
-    <Router>
-      <AppLayout
-        title="Graph Library Test"
-        titleIcon={<Activity className="w-6 h-6" />}
-        version="v0.1.0"
-        className={theme === 'dark' ? 'dark' : ''}
-      >
-        <div className="flex h-full">
-          {/* Left Panel - Controls */}
-          {leftPanel?.isOpen && (
-            <ResizablePanel
-              direction="horizontal"
-              defaultSize={leftPanel?.size || 300}
-              minSize={leftPanel?.minSize}
-              maxSize={leftPanel?.maxSize}
-              className={`p-4 ${sidebarClasses}`}
-              onResize={(size) => updateLeftPanel({ size })}
-            >
-              {/* ControlPanel will go here */}
-              <div>Control Panel</div>
-            </ResizablePanel>
-          )}
+    <AppLayout
+      title="Graph Library Test"
+      titleIcon={<Activity className="w-6 h-6" />}
+      version="v0.1.0"
+      className={theme === 'dark' ? 'dark' : ''}
+      navItems={[
+        { path: '/', label: 'Graph Test', icon: <Activity className="w-4 h-4" /> }
+      ]}
+      rightContent={<BackendSelector />}
+    >
+      <div className="flex h-full">
+        {/* Left Panel - Controls */}
+        {leftPanel?.isOpen && (
+          <ResizablePanel
+            direction="horizontal"
+            defaultSize={leftPanel?.size || 250}
+            minSize={leftPanel?.minSize}
+            maxSize={leftPanel?.maxSize}
+            className={`${sidebarClasses} border-r border-gray-200`}
+            onResize={(size) => updateLeftPanel({ size })}
+          >
+            <ControlPanel />
+          </ResizablePanel>
+        )}
 
-          {/* Main Content - Graph Canvas */}
-          <div className={`flex-1 p-6 ${mainClasses}`}>
-            {/* GraphCanvas will go here */}
-            <div>Graph Canvas</div>
-          </div>
-
-          {/* Right Panel - Metrics */}
-          {rightPanel?.isOpen && (
-            <ResizablePanel
-              direction="horizontal"
-              defaultSize={rightPanel?.size || 350}
-              minSize={rightPanel?.minSize}
-              maxSize={rightPanel?.maxSize}
-              className={`p-4 ${sidebarClasses}`}
-              handlePosition="start"
-              onResize={(size) => updateRightPanel({ size })}
-            >
-              {/* MetricsPanel will go here */}
-              <div>Metrics Panel</div>
-            </ResizablePanel>
-          )}
+        {/* Main Content - Graph Canvas */}
+        <div className={`flex-1 relative ${mainClasses}`}>
+          <GraphCanvas />
         </div>
-      </AppLayout>
-    </Router>
+
+        {/* Right Panel - Properties */}
+        {rightPanel?.isOpen && (
+          <ResizablePanel
+            direction="horizontal"
+            defaultSize={rightPanel?.size || 300}
+            minSize={rightPanel?.minSize}
+            maxSize={rightPanel?.maxSize}
+            className={`${sidebarClasses} border-l border-gray-200`}
+            handlePosition="start"
+            onResize={(size) => updateRightPanel({ size })}
+          >
+            <PropertiesPanel />
+          </ResizablePanel>
+        )}
+      </div>
+
+      {/* Bottom Panel - Console */}
+      {bottomPanel?.isOpen && (
+        <ResizablePanel
+          direction="vertical"
+          defaultSize={bottomPanel?.size || 150}
+          minSize={bottomPanel?.minSize}
+          maxSize={bottomPanel?.maxSize}
+          className={`${sidebarClasses} border-t border-gray-200`}
+          handlePosition="start"
+        >
+          <ConsolePanel />
+        </ResizablePanel>
+      )}
+    </AppLayout>
   );
 };
 
