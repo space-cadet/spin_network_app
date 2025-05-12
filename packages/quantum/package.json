@@ -1,0 +1,24 @@
+{
+  "name": "@spin-network/quantum",
+  "version": "0.1.0",
+  "description": "Quantum mechanics library for spin networks",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "mathjs": "^12.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0",
+    "vitest": "^1.0.0",
+    "eslint": "^8.0.0",
+    "rimraf": "^5.0.0"
+  }
+}
