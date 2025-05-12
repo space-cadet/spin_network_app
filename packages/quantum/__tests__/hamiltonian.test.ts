@@ -2,11 +2,13 @@
  * Tests for Hamiltonian implementation
  */
 
-import { Hamiltonian, HamiltonianTerm } from '../hamiltonian';
+import { describe, it, expect, beforeEach, test } from 'vitest';
+
+import { Hamiltonian, HamiltonianTerm } from '../src/operators/hamiltonian';
 // import { math.complex } from '../complex';
-import { PauliX, PauliY, PauliZ } from '../gates';
-import { MatrixOperator } from '../operator';
-import { StateVector } from '../stateVector';
+import { PauliX, PauliY, PauliZ } from '../src/operators/gates';
+import { MatrixOperator } from '../src/operators/operator';
+import { StateVector } from '../src/states/stateVector';
 import * as math from 'mathjs';
 
 describe('Hamiltonian', () => {

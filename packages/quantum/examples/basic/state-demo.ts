@@ -1,7 +1,7 @@
-import { HilbertSpace } from '../../hilbertSpace';
-import { StateVector } from '../../types';
-import { createPlusState, createBasisState } from '../../states';
-import { Hadamard } from '../../gates';
+import { HilbertSpace } from '../../src/core/hilbertSpace';
+import { StateVector } from '../../src/core/types';
+import { createPlusState, createBasisState } from '../../src/states/states';
+import { Hadamard } from '../../src/operators/gates';
 import * as math from 'mathjs';
 
 // Demonstrates quantum state operations

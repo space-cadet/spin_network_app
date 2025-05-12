@@ -12,13 +12,14 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "jest": "^29.7.0",
     "mathjs": "^12.1.0"
   },
   "devDependencies": {
+    "eslint": "^8.0.0",
+    "rimraf": "^5.0.0",
     "typescript": "^5.8.3",
     "vite": "^6.0.0",
-    "vitest": "^1.0.0",
-    "eslint": "^8.0.0",
-    "rimraf": "^5.0.0"
+    "vitest": "^1.0.0"
   }
 }

@@ -11,10 +11,10 @@ import {
   projectionOperator,
   isNormalOperator,
   operatorFromGenerator 
-} from '../../operatorAlgebra';
-import { PauliX, PauliY, PauliZ, Hadamard } from '../../gates';
-import { StateVector } from '../../stateVector';
-import { MatrixOperator } from '../../operator';
+} from '../../src/operators/algebra';
+import { PauliX, PauliY, PauliZ, Hadamard } from '../../src/operators/gates';
+import { StateVector } from '../../src/states/stateVector';
+import { MatrixOperator } from '../../src/operators/operator';
 import * as math from 'mathjs';
 
 // Create various test states

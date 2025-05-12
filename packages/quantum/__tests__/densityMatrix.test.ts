@@ -2,6 +2,8 @@
  * Tests for density matrix operations
  */
 
+import { describe, it, expect } from 'vitest';
+
 import { 
   DensityMatrixOperator,
   KrausChannel,
@@ -13,8 +15,8 @@ import {
   traceFidelity,
   concurrence,
   negativity
-} from '../densityMatrix';
-import { StateVector } from '../stateVector';
+} from '../src/states/densityMatrix';
+import { StateVector } from '../src/states/stateVector';
 import * as math from 'mathjs';
 
 describe('DensityMatrix', () => {

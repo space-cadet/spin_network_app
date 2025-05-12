@@ -8,11 +8,11 @@
  * 4. Domain wall dynamics
  */
 
-import { Hamiltonian } from '../../hamiltonian';
-import { StateVector } from '../../stateVector';
-import { MatrixOperator } from '../../operator';
-import { PauliZ } from '../../gates';
-import { composeOperators } from '../../composition';
+import { Hamiltonian } from '../../src/operators/hamiltonian';
+import { StateVector } from '../../src/states/stateVector';
+import { MatrixOperator } from '../../src/operators/operator';
+import { PauliZ } from '../../src/operators/gates';
+import { composeOperators } from '../../src/states/composite';
 import * as math from 'mathjs';
 
 /**

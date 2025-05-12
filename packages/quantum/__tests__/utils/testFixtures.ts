@@ -2,9 +2,9 @@
  * Common test fixtures for quantum module tests
  */
 
-import { Complex } from '../../types';
-import { StateVector } from '../../stateVector';
-import { HilbertSpace } from '../../hilbertSpace';
+import { Complex } from '../../src/core/types';
+import { StateVector } from '../../src/states/stateVector';
+import { HilbertSpace } from '../../src/core/hilbertSpace';
 import * as math from 'mathjs';
 
 /**

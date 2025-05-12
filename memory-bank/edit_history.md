@@ -1,7 +1,14 @@
 # Edit History
-*Last Updated: 2025-05-12 20:30 IST*
+*Last Updated: 2025-05-12 22:30 IST*
 
 ## [2025-05-12] - T64: Graph-Quantum Integration Restructuring
+### [22:30] - Fixed import paths in all files
+- Updated import paths in all src files under packages/quantum
+- Fixed import paths in all test files under packages/quantum/__tests__
+- Fixed import paths in all example files under packages/quantum/examples
+- Updated README.md in examples to reference correct path for running examples
+- Identified Jest/Vitest testing function import issues in test files
+
 ### [20:30] - Completed Phase 1: Package Structure and Quantum Migration
 - Created `packages/quantum/` directory structure with core, states, operators, and utils folders
 - Created `packages/quantum/package.json` and configuration files

@@ -2,6 +2,8 @@
  * Tests for quantum information theory functionality
  */
 
+import { describe, it, expect } from 'vitest';
+
 import {
   schmidtDecomposition,
   fidelity,
@@ -14,11 +16,11 @@ import {
   quantumMutualInformation,
   concurrence,
   negativity
-} from '../information';
-import { StateVector } from '../stateVector';
-import { DensityMatrixOperator } from '../densityMatrix';
-import { createBellState, createGHZState } from '../states';
-import { MatrixOperator } from '../operator';
+} from '../src/utils/information';
+import { StateVector } from '../src/states/stateVector';
+import { DensityMatrixOperator } from '../src/states/densityMatrix';
+import { createBellState, createGHZState } from '../src/states/states';
+import { MatrixOperator } from '../src/operators/operator';
 import * as math from 'mathjs';
 
 describe('Quantum Information', () => {

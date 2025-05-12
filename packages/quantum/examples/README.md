@@ -44,7 +44,7 @@ pnpm tsx basic/measurement-demo.ts
 From the project root:
 ```bash
 cd /Users/deepak/code/spin_network_app
-pnpm tsx lib/quantum/examples/basic/[example-name].ts
+pnpm tsx packages/quantum/examples/basic/[example-name].ts
 ```
 
 ## Dependencies

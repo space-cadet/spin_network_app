@@ -10,12 +10,12 @@ import {
   entanglementEntropy,
   concurrence,
   negativity
-} from '../../information';
-import { StateVector } from '../../stateVector';
-import { DensityMatrixOperator } from '../../densityMatrix';
-import { createBellState, createGHZState, createWState } from '../../states';
-import { Complex } from '../../types';
-import { eigenDecomposition } from '../../matrixOperations';
+} from '../../src/utils/information';
+import { StateVector } from '../../src/states/stateVector';
+import { DensityMatrixOperator } from '../../src/states/densityMatrix';
+import { createBellState, createGHZState, createWState } from '../../src/states/states';
+import { Complex } from '../../src/core/types';
+import { eigenDecomposition } from '../../src/utils/matrixOperations';
 import * as math from 'mathjs';
 
 // Demonstrate Schmidt decomposition

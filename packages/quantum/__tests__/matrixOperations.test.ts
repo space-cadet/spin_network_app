@@ -2,6 +2,8 @@
  * Tests for matrix operations
  */
 
+import { describe, it, expect } from 'vitest';
+
 import {
   multiplyMatrices,
   matrixExponential,
@@ -12,8 +14,8 @@ import {
   isHermitian,
   isUnitary,
   eigenDecomposition
-} from '../matrixOperations';
-import { Complex } from '../types';
+} from '../src/utils/matrixOperations';
+import { Complex } from '../src/core/types';
 import * as math from 'mathjs';
 
 // Helper to compare complex numbers accounting for -0/0 differences

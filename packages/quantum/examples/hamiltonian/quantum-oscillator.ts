@@ -9,10 +9,10 @@
  * 5. Wavepacket dynamics
  */
 
-import { Hamiltonian } from '../../hamiltonian';
-import { StateVector } from '../../stateVector';
-import { MatrixOperator } from '../../operator';
-import { harmonicOscillator, positionOp, numberOp, destructionOp, creationOp } from '../../oscillator';
+import { Hamiltonian } from '../../src/operators/hamiltonian';
+import { StateVector } from '../../src/states/stateVector';
+import { MatrixOperator } from '../../src/operators/operator';
+import { harmonicOscillator, positionOp, numberOp, destructionOp, creationOp } from '../../src/utils/oscillator';
 import * as math from 'mathjs';
 
 /**

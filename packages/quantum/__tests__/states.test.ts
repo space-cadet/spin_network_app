@@ -2,6 +2,8 @@
  * Tests for quantum states implementation
  */
 
+import { describe, it, expect } from 'vitest';
+
 import { 
   computationalBasis,
   createBasisState,
@@ -10,7 +12,7 @@ import {
   createWState,
   createPlusState,
   createMinusState
-} from '../states';
+} from '../src/states/states';
 // import { math.complex } from '../complex';
 import * as math from 'mathjs';
 

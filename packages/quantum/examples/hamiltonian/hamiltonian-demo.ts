@@ -2,11 +2,11 @@
  * Examples of using the Hamiltonian class for quantum simulations
  */
 
-import { Hamiltonian } from '../../hamiltonian';
-import { StateVector } from '../../stateVector';
-import { PauliX, PauliY, PauliZ } from '../../gates';
-import { MatrixOperator } from '../../operator';
-import { composeOperators } from '../../composition';
+import { Hamiltonian } from '../../src/operators/hamiltonian';
+import { StateVector } from '../../src/states/stateVector';
+import { PauliX, PauliY, PauliZ } from '../../src/operators/gates';
+import { MatrixOperator } from '../../src/operators/operator';
+import { composeOperators } from '../../src/states/composite';
 import * as math from 'mathjs';
 
 /**

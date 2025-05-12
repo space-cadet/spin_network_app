@@ -2,14 +2,16 @@
  * Tests for quantum gates
  */
 
+import { describe, it, expect } from 'vitest';
+
 import { 
   PauliX,   // NOT gate
   PauliY,
   PauliZ,  // Phase flip
   Hadamard,
   CNOT
-} from '../gates';
-import { StateVector } from '../stateVector';
+} from '../src/operators/gates';
+import { StateVector } from '../src/states/stateVector';
 // import { math.complex } from '../complex';
 import * as math from 'mathjs';
 

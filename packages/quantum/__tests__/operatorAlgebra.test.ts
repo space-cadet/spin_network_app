@@ -2,6 +2,8 @@
  * Tests for quantum operator algebra functionality
  */
 
+import { describe, it, expect } from 'vitest';
+
 import { 
   commutator, 
   antiCommutator, 
@@ -14,10 +16,10 @@ import {
   isNormalOperator,
   operatorFromGenerator,
   projectionOperator
-} from '../operatorAlgebra';
-import { MatrixOperator } from '../operator';
-import { StateVector } from '../stateVector';
-import { PauliX, PauliY, PauliZ } from '../gates';
+} from '../src/operators/algebra';
+import { MatrixOperator } from '../src/operators/operator';
+import { StateVector } from '../src/states/stateVector';
+import { PauliX, PauliY, PauliZ } from '../src/operators/gates';
 import * as math from 'mathjs';
 
 describe('Operator Algebra', () => {

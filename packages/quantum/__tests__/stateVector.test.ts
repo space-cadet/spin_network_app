@@ -2,7 +2,9 @@
  * Tests for quantum state vector implementation
  */
 
-import { StateVector } from '../stateVector';
+import { describe, it, expect } from 'vitest';
+
+import { StateVector } from '../src/states/stateVector';
 import * as math from 'mathjs';
 
 // Helper function to verify state normalization

@@ -99,14 +99,14 @@ export function matrixSquareRoot(matrix: ComplexMatrix): ComplexMatrix {
   matrix.forEach((row, i) => {
       row.forEach((elem, j) => {
           if (!math.isComplex(elem)) {
-              console.log(`Invalid element at [${i}][${j}]:`, elem);
+              // console.log(`Invalid element at [${i}][${j}]:`, elem);
           }
       });
   });
   
   try {
       const result = matrixFunction(matrix, x => math.sqrt(x));
-      console.log('Square root calculation successful');
+      // console.log('Square root calculation successful');
       return result;
   } catch (e) {
       console.error('Error in matrix square root:', e);

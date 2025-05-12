@@ -70,7 +70,7 @@ export function schmidtDecomposition(
   
   // Get eigenvalues and eigenvectors of reduced density matrix
   const { values, vectors } = eigenDecomposition(reducedRhoB, {computeEigenvectors: true});
-  console.log(vectors, typeof vectors);
+  // console.log(vectors, typeof vectors);
   
   // Create paired indices and Schmidt values, then filter and sort
   const indexValuePairs = values.map((val, idx) => ({

@@ -2,8 +2,10 @@
  * Tests for quantum operator implementation
  */
 
-import { MatrixOperator } from '../operator';
-import { StateVector } from '../stateVector';
+import { describe, it, expect } from 'vitest';
+
+import { MatrixOperator } from '../src/operators/operator';
+import { StateVector } from '../src/states/stateVector';
 import * as math from 'mathjs';
 
 // Helper function to create test matrices

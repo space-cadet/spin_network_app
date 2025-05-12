@@ -1,3 +1,5 @@
+import { describe, it, expect, test } from 'vitest';
+
 import {
   validateMatDims,
   validatePosDim,
@@ -5,8 +7,8 @@ import {
   validateAmps,
   validateNorm,
   validateMatchDims
-} from '../utils/validation';
-import { Complex } from '../types';
+} from '../src/utils/validation';
+import { Complex } from '../src/core/types';
 import * as math from 'mathjs';
 
 describe('Validation Utilities', () => {

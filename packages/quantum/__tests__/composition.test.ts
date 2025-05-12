@@ -2,6 +2,8 @@
  * Tests for quantum composition operations
  */
 
+import { describe, it, expect } from 'vitest';
+
 import { 
   composeSpaces, 
   composeStates, 

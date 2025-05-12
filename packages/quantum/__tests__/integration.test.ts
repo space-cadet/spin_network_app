@@ -2,8 +2,10 @@
  * Integration tests for quantum functionality
  */
 
-import { HilbertSpace } from '../hilbertSpace';
-import { MatrixOperator } from '../operator';
+import { describe, it, expect } from 'vitest';
+
+import { HilbertSpace } from '../src/core/hilbertSpace';
+import { MatrixOperator } from '../src/operators/operator';
 import { TEST_SPACES, TEST_OPERATORS, TEST_STATES } from './utils/testFixtures';
 import { stateVectorApproxEqual, createRandomState } from './utils/testHelpers';
 import * as math from 'mathjs';

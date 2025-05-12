@@ -1,8 +1,8 @@
-import { HilbertSpace } from '../../hilbertSpace';
-import { MatrixOperator } from '../../operator';
-import { PauliX, PauliY, PauliZ } from '../../gates';
-import { createBasisState } from '../../states';
-import { Complex, Operator } from '../../types';
+import { HilbertSpace } from '../../src/core/hilbertSpace';
+import { MatrixOperator } from '../../src/operators/operator';
+import { PauliX, PauliY, PauliZ } from '../../src/operators/gates';
+import { createBasisState } from '../../src/states/states';
+import { Complex, Operator } from '../../src/core/types';
 
 // Demonstrates basic quantum operator operations
 function demoOperators() {

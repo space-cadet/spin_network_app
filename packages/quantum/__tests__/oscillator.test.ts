@@ -2,7 +2,9 @@
  * Tests for quantum harmonic oscillator operators
  */
 
-import { creationOp, destructionOp, numberOp, positionOp, momentumOp, harmonicOscillator } from '../oscillator';
+import { describe, it, expect } from 'vitest';
+
+import { creationOp, destructionOp, numberOp, positionOp, momentumOp, harmonicOscillator } from '../src/utils/oscillator';
 import { StateVector } from '../stateVector';
 import * as math from 'mathjs';
 

@@ -2,13 +2,15 @@
  * Tests for quantum measurement operations
  */
 
+import { describe, it, expect } from 'vitest';
+
 import { 
   ProjectionOperator, 
   expectationValue, 
   measureState 
-} from '../measurement';
-import { StateVector } from '../stateVector';
-import { MatrixOperator } from '../operator';
+} from '../src/operators/measurement';
+import { StateVector } from '../src/states/stateVector';
+import { MatrixOperator } from '../src/operators/operator';
 import * as math from 'mathjs';
 
 describe('Quantum Measurements', () => {

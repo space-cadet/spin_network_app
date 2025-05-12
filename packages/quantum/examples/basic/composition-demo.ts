@@ -1,4 +1,4 @@
-import { HilbertSpace } from '../../hilbertSpace';
+import { HilbertSpace } from '../../src/core/hilbertSpace';
 
 // Simple demonstration of Hilbert space composition
 function demoHilbertComposition() {

@@ -11,9 +11,9 @@ import {
   nestedCommutator,
   operatorsCommute,
   uncertaintyProduct
-} from '../../operatorAlgebra';
-import { PauliX, PauliY, PauliZ } from '../../gates';
-import { StateVector } from '../../stateVector';
+} from '../../src/operators/algebra';
+import { PauliX, PauliY, PauliZ } from '../../src/operators/gates';
+import { StateVector } from '../../src/states/stateVector';
 import * as math from 'mathjs';
 
 // Demonstrate commutators of Pauli matrices

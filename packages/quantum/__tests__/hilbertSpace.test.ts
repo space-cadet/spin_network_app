@@ -2,10 +2,12 @@
  * Tests for HilbertSpace class
  */
 
-import { HilbertSpace } from '../hilbertSpace';
+import { describe, it, expect } from 'vitest';
+
+import { HilbertSpace } from '../src/core/hilbertSpace';
 import { TEST_DIMS, TEST_SPACES, BASIS_STATES } from './utils/testFixtures';
 import { stateVectorApproxEqual } from './utils/testHelpers';
-import { StateVector } from '../stateVector';
+import { StateVector } from '../src/states/stateVector';
 import * as math from 'mathjs';
 
 describe('HilbertSpace', () => {

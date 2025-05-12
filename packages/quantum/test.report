@@ -1,0 +1,421 @@
+
+> @spin-network/quantum@0.1.0 test /Users/deepak/code/spin_network_app/packages/quantum
+> vitest run __tests__/
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v1.6.1 /Users/deepak/code/spin_network_app/packages/quantum
+
+ ✓ __tests__/stateVector.test.ts  (29 tests) 9ms
+ ✓ __tests__/gates.test.ts  (18 tests) 15ms
+ ✓ __tests__/operatorAlgebra.test.ts  (17 tests) 14ms
+ ❯ __tests__/densityMatrix.test.ts  (29 tests | 6 failed) 35ms
+   ❯ __tests__/densityMatrix.test.ts > DensityMatrix > Basic Operations > performs partial trace correctly
+     → Density matrix must have trace 1
+   ❯ __tests__/densityMatrix.test.ts > Quantum Channels > Kraus Channel Implementation > applies quantum channel correctly
+     → At least one Kraus operator is required
+   ❯ __tests__/densityMatrix.test.ts > Quantum Channels > Kraus Channel Implementation > preserves trace and hermiticity
+     → At least one Kraus operator is required
+   ❯ __tests__/densityMatrix.test.ts > Quantum Channels > Specific Channels > implements bit flip channel correctly
+     → At least one Kraus operator is required
+   ❯ __tests__/densityMatrix.test.ts > Quantum Channels > Specific Channels > implements phase flip channel correctly
+     → At least one Kraus operator is required
+   ❯ __tests__/densityMatrix.test.ts > Quantum Channels > Specific Channels > implements phase damping channel correctly
+     → At least one Kraus operator is required
+ ❯ __tests__/eigendecomposition.test.ts  (19 tests | 8 failed) 35ms
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Real Symmetric Matrices > computes correct eigenvalues and eigenvectors for 2x2 matrix
+     → expected false to be true // Object.is equality
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Real Symmetric Matrices > computes eigensystem for Pauli X matrix
+     → expected false to be true // Object.is equality
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Real Symmetric Matrices > correctly decomposes larger real symmetric matrices
+     → expected false to be true // Object.is equality
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Complex Hermitian Matrices > computes correct eigensystem for Pauli Y matrix
+     → expected false to be true // Object.is equality
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Complex Hermitian Matrices > handles general complex Hermitian matrices
+     → Cannot read properties of undefined (reading '0')
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Numerical Stability and Edge Cases > handles matrices with zeros
+     → expected false to be true // Object.is equality
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Quantum-Specific Applications > correctly decomposes Pauli Z matrix
+     → expected 1 to be less than 1e-10
+   ❯ __tests__/eigendecomposition.test.ts > Eigendecomposition > Quantum-Specific Applications > correctly decomposes a Hamiltonian
+     → expected false to be true // Object.is equality
+ ✓ __tests__/information.test.ts  (19 tests) 14ms
+ ✓ __tests__/matrixOperations.test.ts  (25 tests) 22ms
+ ✓ __tests__/operator.test.ts  (20 tests) 10ms
+ ❯ __tests__/matrixFunctions.test.ts  (5 tests | 2 failed) 33ms
+   ❯ __tests__/matrixFunctions.test.ts > matrixFunction > applies identity function to return the same matrix
+     → expected false to be true // Object.is equality
+   ❯ __tests__/matrixFunctions.test.ts > matrixFunction > applies square function to eigenvalues correctly
+     → expected false to be true // Object.is equality
+ ✓ __tests__/states.test.ts  (17 tests) 8ms
+ ✓ __tests__/hilbertSpace.test.ts  (20 tests) 8ms
+ ✓ __tests__/composition.test.ts  (13 tests) 10ms
+ ❯ __tests__/integration.test.ts  (8 tests | 1 failed) 16ms
+   ❯ __tests__/integration.test.ts > Quantum Integration Tests > Complex Quantum Circuits > creates and manipulates Bell states
+     → Unexpected type of argument in function conj (expected: number or Complex or BigNumber or Fraction or Array or Matrix or string or boolean, actual: Object, index: 0)
+ ❯ __tests__/hamiltonian.test.ts  (10 tests | 5 failed) 23ms
+   ❯ __tests__/hamiltonian.test.ts > Hamiltonian > Basic Hamiltonian operations > should correctly evolve states
+     → expected +0 to be close to 0.7071067811865475, received difference is 0.7071067811865475, but expected 0.005
+   ❯ __tests__/hamiltonian.test.ts > Hamiltonian > Spin Hamiltonian > should create correct spin Hamiltonian
+     → expected -1 to be close to +0, received difference is 1, but expected 0.005
+   ❯ __tests__/hamiltonian.test.ts > Hamiltonian > Heisenberg Hamiltonian > should create correct Heisenberg Hamiltonian
+     → expected 1 to be close to 0.75, received difference is 0.25, but expected 0.005
+   ❯ __tests__/hamiltonian.test.ts > Hamiltonian > Heisenberg Hamiltonian > evolves product and entangled states correctly
+     → expected +0 to be close to 1, received difference is 1, but expected 0.005
+   ❯ __tests__/hamiltonian.test.ts > Hamiltonian > Error handling > should throw on non-Hermitian terms when required
+     → expected [Function] to throw an error
+ ✓ __tests__/validation.test.ts  (15 tests) 4ms
+ ✓ __tests__/measurement.test.ts  (8 tests) 4ms
+ ✓ __tests__/oscillator.test.ts  (5 tests) 6ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 22 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  __tests__/densityMatrix.test.ts > DensityMatrix > Basic Operations > performs partial trace correctly
+Error: Density matrix must have trace 1
+ ❯ new DensityMatrixOperator src/states/densityMatrix.ts:37:13
+     35|     // console.log("Trace: ", tr);
+     36|     if (Math.abs(tr.re - 1) > 1e-10 || Math.abs(tr.im) > 1e-10) {
+     37|       throw new Error('Density matrix must have trace 1');
+       |             ^
+     38|     }
+     39| 
+ ❯ DensityMatrixOperator.partialTrace src/states/densityMatrix.ts:130:12
+ ❯ __tests__/densityMatrix.test.ts:123:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/22]⎯
+
+ FAIL  __tests__/densityMatrix.test.ts > Quantum Channels > Kraus Channel Implementation > applies quantum channel correctly
+Error: At least one Kraus operator is required
+ ❯ new KrausChannel src/states/densityMatrix.ts:234:13
+    232|     // Validate non-empty array of operators
+    233|     if (!krausOperators || krausOperators.length === 0) {
+    234|       throw new Error('At least one Kraus operator is required');
+       |             ^
+    235|     }
+    236| 
+ ❯ Module.createDepolarizingChannel src/states/densityMatrix.ts:292:10
+ ❯ __tests__/densityMatrix.test.ts:233:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/22]⎯
+
+ FAIL  __tests__/densityMatrix.test.ts > Quantum Channels > Kraus Channel Implementation > preserves trace and hermiticity
+Error: At least one Kraus operator is required
+ ❯ new KrausChannel src/states/densityMatrix.ts:234:13
+    232|     // Validate non-empty array of operators
+    233|     if (!krausOperators || krausOperators.length === 0) {
+    234|       throw new Error('At least one Kraus operator is required');
+       |             ^
+    235|     }
+    236| 
+ ❯ Module.createAmplitudeDampingChannel src/states/densityMatrix.ts:305:10
+ ❯ __tests__/densityMatrix.test.ts:248:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/22]⎯
+
+ FAIL  __tests__/densityMatrix.test.ts > Quantum Channels > Specific Channels > implements bit flip channel correctly
+Error: At least one Kraus operator is required
+ ❯ new KrausChannel src/states/densityMatrix.ts:234:13
+    232|     // Validate non-empty array of operators
+    233|     if (!krausOperators || krausOperators.length === 0) {
+    234|       throw new Error('At least one Kraus operator is required');
+       |             ^
+    235|     }
+    236| 
+ ❯ Module.createBitFlipChannel src/states/densityMatrix.ts:331:10
+ ❯ __tests__/densityMatrix.test.ts:271:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/22]⎯
+
+ FAIL  __tests__/densityMatrix.test.ts > Quantum Channels > Specific Channels > implements phase flip channel correctly
+Error: At least one Kraus operator is required
+ ❯ new KrausChannel src/states/densityMatrix.ts:234:13
+    232|     // Validate non-empty array of operators
+    233|     if (!krausOperators || krausOperators.length === 0) {
+    234|       throw new Error('At least one Kraus operator is required');
+       |             ^
+    235|     }
+    236| 
+ ❯ Module.createPhaseFlipChannel src/states/densityMatrix.ts:344:10
+ ❯ __tests__/densityMatrix.test.ts:284:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/22]⎯
+
+ FAIL  __tests__/densityMatrix.test.ts > Quantum Channels > Specific Channels > implements phase damping channel correctly
+Error: At least one Kraus operator is required
+ ❯ new KrausChannel src/states/densityMatrix.ts:234:13
+    232|     // Validate non-empty array of operators
+    233|     if (!krausOperators || krausOperators.length === 0) {
+    234|       throw new Error('At least one Kraus operator is required');
+       |             ^
+    235|     }
+    236| 
+ ❯ Module.createPhaseDampingChannel src/states/densityMatrix.ts:318:10
+ ❯ __tests__/densityMatrix.test.ts:300:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Real Symmetric Matrices > computes correct eigenvalues and eigenvectors for 2x2 matrix
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/eigendecomposition.test.ts:147:60
+    145|       
+    146|       // And verify the full decomposition
+    147|       expect(verifyDecomposition(matrix, values, vectors)).toBe(true);
+       |                                                            ^
+    148|     });
+    149| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Real Symmetric Matrices > computes eigensystem for Pauli X matrix
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/eigendecomposition.test.ts:168:60
+    166|       
+    167|       // Verify eigenvector properties
+    168|       expect(verifyDecomposition(pauliX, values, vectors)).toBe(true);
+       |                                                            ^
+    169|     });
+    170| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Real Symmetric Matrices > correctly decomposes larger real symmetric matrices
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/eigendecomposition.test.ts:211:38
+    209|       
+    210|       // Check eigenvector properties
+    211|       expect(isOrthonormal(vectors)).toBe(true);
+       |                                      ^
+    212|       
+    213|       // Verify each eigenvalue/eigenvector pair
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Complex Hermitian Matrices > computes correct eigensystem for Pauli Y matrix
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/eigendecomposition.test.ts:251:64
+    249|       // Verify eigenvector properties
+    250|       for (let i = 0; i < values.length; i++) {
+    251|         expect(verifyEigenPair(pauliY, values[i], vectors[i])).toBe(tr…
+       |                                                                ^
+    252|       }
+    253|       
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Complex Hermitian Matrices > handles general complex Hermitian matrices
+TypeError: Cannot read properties of undefined (reading '0')
+ ❯ __tests__/eigendecomposition.test.ts:277:51
+    275|       // Verify eigenpairs
+    276|       for (let i = 0; i < values.length; i++) {
+    277|         expect(verifyEigenPair(matrix, values[i], vectors[i])).toBe(tr…
+       |                                                   ^
+    278|       }
+    279|       
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Numerical Stability and Edge Cases > handles matrices with zeros
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/eigendecomposition.test.ts:446:60
+    444|       
+    445|       // Verify decomposition
+    446|       expect(verifyDecomposition(matrix, values, vectors)).toBe(true);
+       |                                                            ^
+    447|     });
+    448|     
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Quantum-Specific Applications > correctly decomposes Pauli Z matrix
+AssertionError: expected 1 to be less than 1e-10
+ ❯ __tests__/eigendecomposition.test.ts:507:38
+    505|       
+    506|       // |0⟩ should have first component ≈ 1
+    507|       expect(Math.abs(v0[0].re - 1)).toBeLessThan(1e-10);
+       |                                      ^
+    508|       expect(Math.abs(v0[1].re)).toBeLessThan(1e-10);
+    509|       
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/22]⎯
+
+ FAIL  __tests__/eigendecomposition.test.ts > Eigendecomposition > Quantum-Specific Applications > correctly decomposes a Hamiltonian
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/eigendecomposition.test.ts:563:69
+    561|       // Verify eigenpairs
+    562|       for (let i = 0; i < values.length; i++) {
+    563|         expect(verifyEigenPair(hamiltonian, values[i], vectors[i])).to…
+       |                                                                     ^
+    564|       }
+    565|       
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/22]⎯
+
+ FAIL  __tests__/hamiltonian.test.ts > Hamiltonian > Basic Hamiltonian operations > should correctly evolve states
+AssertionError: expected +0 to be close to 0.7071067811865475, received difference is 0.7071067811865475, but expected 0.005
+ ❯ __tests__/hamiltonian.test.ts:57:40
+     55|       
+     56|       // Should be (|0⟩ + i|1⟩)/√2
+     57|       expect(evolved.amplitudes[0].re).toBeCloseTo(1/Math.sqrt(2));
+       |                                        ^
+     58|       expect(evolved.amplitudes[0].im).toBeCloseTo(0);
+     59|       expect(evolved.amplitudes[1].re).toBeCloseTo(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/22]⎯
+
+ FAIL  __tests__/hamiltonian.test.ts > Hamiltonian > Spin Hamiltonian > should create correct spin Hamiltonian
+AssertionError: expected -1 to be close to +0, received difference is 1, but expected 0.005
+ ❯ __tests__/hamiltonian.test.ts:74:40
+     72|       
+     73|       // Should flip to |1⟩
+     74|       expect(evolved.amplitudes[0].re).toBeCloseTo(0);
+       |                                        ^
+     75|       expect(evolved.amplitudes[1].re).toBeCloseTo(1);
+     76|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/22]⎯
+
+ FAIL  __tests__/hamiltonian.test.ts > Hamiltonian > Heisenberg Hamiltonian > should create correct Heisenberg Hamiltonian
+AssertionError: expected 1 to be close to 0.75, received difference is 0.25, but expected 0.005
+ ❯ __tests__/hamiltonian.test.ts:101:25
+     99|       const upup = StateVector.computationalBasis(4, 0);
+    100|       const E_upup = H.expectationValue(upup);
+    101|       expect(E_upup.re).toBeCloseTo(0.75);  // Eigenstate with E = 3J/4
+       |                         ^
+    102| 
+    103|       // Test with singlet state (|↑↓⟩ - |↓↑⟩)/√2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/22]⎯
+
+ FAIL  __tests__/hamiltonian.test.ts > Hamiltonian > Heisenberg Hamiltonian > evolves product and entangled states correctly
+AssertionError: expected +0 to be close to 1, received difference is 1, but expected 0.005
+ ❯ __tests__/hamiltonian.test.ts:158:23
+    156|       const downup = StateVector.computationalBasis(4, 2);
+    157|       const overlap = math.abs(evolved_updown.innerProduct(downup));
+    158|       expect(overlap).toBeCloseTo(1);
+       |                       ^
+    159|     });
+    160|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/22]⎯
+
+ FAIL  __tests__/hamiltonian.test.ts > Hamiltonian > Error handling > should throw on non-Hermitian terms when required
+AssertionError: expected [Function] to throw an error
+ ❯ __tests__/hamiltonian.test.ts:188:35
+    186|         coefficient: math.complex({re: 1, im:  0}),
+    187|         operator: nonHermitian
+    188|       }], 'custom', false, true)).toThrow();  // requireHermitian = tr…
+       |                                   ^
+    189|     });
+    190|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/22]⎯
+
+ FAIL  __tests__/integration.test.ts > Quantum Integration Tests > Complex Quantum Circuits > creates and manipulates Bell states
+TypeError: Unexpected type of argument in function conj (expected: number or Complex or BigNumber or Fraction or Array or Matrix or string or boolean, actual: Object, index: 0)
+ ❯ Function.createError ../../node_modules/.pnpm/typed-function@4.2.1/node_modules/typed-function/lib/esm/typed-function.mjs:719:17
+ ❯ Function.typed.onMismatch ../../node_modules/.pnpm/mathjs@12.4.3/node_modules/mathjs/lib/esm/core/function/typed.js:386:28
+ ❯ Module.generic ../../node_modules/.pnpm/typed-function@4.2.1/node_modules/typed-function/lib/esm/typed-function.mjs:1446:20
+ ❯ Module.conj ../../node_modules/.pnpm/typed-function@4.2.1/node_modules/typed-function/lib/esm/typed-function.mjs:1472:22
+ ❯ StateVector.innerProduct src/states/stateVector.ts:57:25
+     55|     let result = math.complex({re: 0, im:  0});
+     56|     for (let i = 0; i < this.dimension; i++) {
+     57|       const conj = math.conj(this.amplitudes[i]);
+       |                         ^
+     58|       const prod = math.multiply(conj, other.amplitudes[i]);
+     59|       result = math.add(result, prod);
+ ❯ StateVector.norm src/states/stateVector.ts:68:39
+ ❯ StateVector.normalize src/states/stateVector.ts:76:30
+ ❯ Function.superposition src/states/stateVector.ts:175:70
+ ❯ HilbertSpace.superposition src/core/hilbertSpace.ts:128:24
+ ❯ __tests__/integration.test.ts:133:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { data: { category: 'wrongType', fn: 'conj', index: +0, actual: [ 'Object' ], expected: [ 'number', 'Complex', 'BigNumber', 'Fraction', 'Array', 'Matrix', 'string', 'boolean' ] } }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/22]⎯
+
+ FAIL  __tests__/matrixFunctions.test.ts > matrixFunction > applies identity function to return the same matrix
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/matrixFunctions.test.ts:38:43
+     36|     const result = matrixFunction(matrix, identityFn);
+     37|     // console.log(result);
+     38|     expect(matricesEqual(result, matrix)).toBe(true);
+       |                                           ^
+     39|   });
+     40|   
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/22]⎯
+
+ FAIL  __tests__/matrixFunctions.test.ts > matrixFunction > applies square function to eigenvalues correctly
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/matrixFunctions.test.ts:59:51
+     57|     ];
+     58|     
+     59|     expect(matricesEqual(result, expected, 1e-9)).toBe(true);
+       |                                                   ^
+     60|   });
+     61|   
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/22]⎯
+
+ Test Files  5 failed | 12 passed (17)
+      Tests  22 failed | 255 passed (277)
+   Start at  09:10:10
+   Duration  1.87s (transform 497ms, setup 2ms, collect 8.82s, tests 266ms, environment 2ms, prepare 1.17s)
+
+ ELIFECYCLE  Test failed. See above for more details.

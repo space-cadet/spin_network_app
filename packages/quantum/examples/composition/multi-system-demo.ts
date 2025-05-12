@@ -11,12 +11,12 @@ import {
   composeOperators,
   bipartiteSplit,
   partialTrace
-} from '../../composition';
-import { HilbertSpace } from '../../hilbertSpace';
-import { StateVector } from '../../stateVector';
-import { MatrixOperator } from '../../operator';
-import { PauliX, PauliY, PauliZ, Hadamard } from '../../gates';
-import { createBellState, createBasisState } from '../../states';
+} from '../../src/states/composite';
+import { HilbertSpace } from '../../src/core/hilbertSpace';
+import { StateVector } from '../../src/states/stateVector';
+import { MatrixOperator } from '../../src/operators/operator';
+import { PauliX, PauliY, PauliZ, Hadamard } from '../../src/operators/gates';
+import { createBellState, createBasisState } from '../../src/states/states';
 import * as math from 'mathjs';
 import { copy } from 'fs-extra';
 

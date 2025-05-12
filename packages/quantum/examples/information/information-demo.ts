@@ -13,10 +13,10 @@ import {
   linearEntropy,
   quantumRelativeEntropy,
   quantumMutualInformation
-} from '../../information';
-import { StateVector } from '../../stateVector';
-import { DensityMatrixOperator } from '../../densityMatrix';
-import { multiplyMatrices } from '../../matrixOperations';
+} from '../../src/utils/information';
+import { StateVector } from '../../src/states/stateVector';
+import { DensityMatrixOperator } from '../../src/states/densityMatrix';
+import { multiplyMatrices } from '../../src/utils/matrixOperations';
 import * as math from 'mathjs';
 
 // Helper to create density matrices from state vectors

@@ -2,8 +2,8 @@
  * Test helpers for quantum module tests
  */
 
-import { Complex, StateVector } from '../../types';
-import { HilbertSpace } from '../../hilbertSpace';
+import { Complex, StateVector } from '../../src/core/types';
+import { HilbertSpace } from '../../src/core/hilbertSpace';
 import * as math from 'mathjs';
 
 /**

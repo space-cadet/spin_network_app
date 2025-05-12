@@ -1,8 +1,8 @@
-import { HilbertSpace } from '../../hilbertSpace';
-import { createPlusState, createBasisState } from '../../states';
-import { ProjectionOperator } from '../../measurement';
-import { measureState } from '../../measurement';
-import { Complex, MeasurementOutcome, Operator } from '../../types';
+import { HilbertSpace } from '../../src/core/hilbertSpace';
+import { createPlusState, createBasisState } from '../../src/states/states';
+import { ProjectionOperator } from '../../src/operators/measurement';
+import { measureState } from '../../src/operators/measurement';
+import { Complex, MeasurementOutcome, Operator } from '../../src/core/types';
 
 // Demonstrates quantum measurement operations
 function demoMeasurement() {

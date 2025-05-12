@@ -1,5 +1,7 @@
-import { matrixFunction, matrixSquareRoot, matrixLogarithm, matrixPower, matrixSin, matrixCos } from '../matrixFunctions';
-import { Complex } from '../types';
+import { describe, it, expect } from 'vitest';
+
+import { matrixFunction, matrixSquareRoot, matrixLogarithm, matrixPower, matrixSin, matrixCos } from '../src/utils/matrixFunctions';
+import { Complex } from '../src/core/types';
 import * as math from 'mathjs';
 
 // Helper to compare complex matrices with tolerance
@@ -30,9 +32,9 @@ describe('matrixFunction', () => {
     ];
     
     const identityFn = (x: Complex): Complex => x;
-    console.log(identityFn(matrix));
+    // console.log(identityFn(matrix));
     const result = matrixFunction(matrix, identityFn);
-    console.log(result);
+    // console.log(result);
     expect(matricesEqual(result, matrix)).toBe(true);
   });
   
@@ -46,9 +48,9 @@ describe('matrixFunction', () => {
     const squareFn = (x: Complex): Complex => {
       return math.multiply(x, x) as Complex;
     };
-    console.log(squareFn(matrix));
+    // console.log(squareFn(matrix));
     const result = matrixFunction(matrix, squareFn);
-    console.log(result);
+    // console.log(result);
     const expected = [
       [math.complex({re: 5, im:  0}), math.complex({re: 4, im:  0})],
       [math.complex({re: 4, im:  0}), math.complex({re: 5, im:  0})]

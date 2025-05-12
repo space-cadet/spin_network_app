@@ -1,0 +1,976 @@
+=== Schmidt Decomposition Demonstration ===
+
+Schmidt decomposition of product state |00⟩:
+Schmidt coefficients: [ 1 ]
+Number of terms: 1
+This is a product state (1 Schmidt coefficient)
+
+Schmidt decomposition of Bell state (|00⟩ + |11⟩)/√2:
+Schmidt coefficients: [ 0.7071067811865475, 0.7071067811865475 ]
+Number of terms: 2
+This is maximally entangled (2 equal Schmidt coefficients)
+
+Schmidt decomposition of partially entangled state:
+√0.7|00⟩ + √0.3|11⟩:
+Schmidt coefficients: [ 0.8366600265340756, 0.5477225575051661 ]
+Number of terms: 2
+This is partially entangled (unequal coefficients)
+
+
+=== Entanglement Entropy Demonstration ===
+
+Entanglement entropy of product state |00⟩: 0
+Entanglement entropy of Bell state: 0.6931471805599454
+Should be ln(2) = 0.6931471805599453
+Entanglement entropy of partially entangled state: 0.6108643020548934
+Should be -0.7·ln(0.7) - 0.3·ln(0.3) = 0.6108643020548935
+
+Entanglement entropy of 3-qubit GHZ state (1:2 split): 0.6931471805599454
+Entanglement entropy of 3-qubit W state (1:2 split): 0.6365141682948128
+
+=== Concurrence Demonstration ===
+
+Concurrence of product state: 0.000000
+Concurrence of bell state: 1.000000
+Concurrence of partial state: 0.957348
+
+Concurrence properties:
+- 0 for product states
+- 1 for maximally entangled states (Bell states)
+- Between 0 and 1 for partially entangled states
+
+=== Negativity Demonstration ===
+
+Negativity of product state: 0.000000
+Negativity of bell state: 0.500000
+Negativity of partial state: 0.458258
+
+Negativity properties:
+- 0 for separable states
+- 0.5 for maximally entangled two-qubit states
+- Between 0 and 0.5 for partially entangled two-qubit states
+=== Pure State Fidelity Demonstration ===
+
+Fidelity between identical states |0⟩ and |0⟩:
+1
+Should be 1 (identical states have fidelity 1)
+
+Fidelity between orthogonal states |0⟩ and |1⟩:
+0
+Should be 0 (orthogonal states have fidelity 0)
+
+Fidelity between |0⟩ and |+⟩:
+0.4999999999999999
+Should be 0.5 (|⟨0|+⟩|² = |1/√2|² = 1/2)
+
+Fidelity between |1⟩ and |+⟩:
+0.4999999999999999
+Should be 0.5 (|⟨1|+⟩|² = |1/√2|² = 1/2)
+
+
+=== Mixed State Fidelity Demonstration ===
+
+Trace fidelity between pure states |0⟩⟨0| and |0⟩⟨0|:
+1
+Should be 1 (identical states have fidelity 1)
+
+Trace fidelity between pure states |0⟩⟨0| and |1⟩⟨1|:
+0
+Should be 0 (orthogonal pure states have fidelity 0)
+
+Trace fidelity between pure state |0⟩⟨0| and mixed state I/2:
+0.5000000000000001
+Should be 0.5 (Tr(|0⟩⟨0|·I/2) = 0.5)
+
+Trace fidelity between pure state |+⟩⟨+| and mixed state I/2:
+0.5000000052683559
+Should be 0.5 (any pure state has fidelity 0.5 with I/2)
+
+Trace fidelity between two different mixed states:
+0.958257569495584
+
+=== Trace Distance Demonstration ===
+
+Trace distance between identical states |0⟩⟨0| and |0⟩⟨0|:
+0
+Should be 0 (identical states have distance 0)
+
+Trace distance between orthogonal pure states |0⟩⟨0| and |1⟩⟨1|:
+1
+Should be 1 (orthogonal pure states have distance 1)
+
+Trace distance between pure state |0⟩⟨0| and mixed state I/2:
+0.5
+Should be 0.5 (pure state to maximally mixed)
+
+Trace distance between pure state |+⟩⟨+| and mixed state I/2:
+0.4999999999999999
+Should be 0.5 (pure state to maximally mixed)
+
+
+=== Entropy Measures Demonstration ===
+
+Von Neumann entropy of pure state |0⟩⟨0|:
+0
+Should be 0 (pure states have zero entropy)
+
+Von Neumann entropy of maximally mixed state I/2:
+0.6931471805599453
+Should be ln(2) = 0.6931471805599453 
+
+Von Neumann entropy of partially mixed state:
+0.6108643020548935
+Should be -0.7·ln(0.7) - 0.3·ln(0.3) = 0.6108643020548935 
+
+Linear entropy of pure state |0⟩⟨0|:
+0
+Should be 0 (pure states have zero linear entropy)
+
+Linear entropy of maximally mixed state I/2:
+0.5
+Should be 0.5 (1 - 1/d for d=2)
+
+Linear entropy of partially mixed state:
+0.42000000000000004
+Should be 1 - (0.7² + 0.3²) = 1 - 0.58 = 0.42
+
+
+=== Quantum Relative Entropy Demonstration ===
+
+Relative entropy S(ρ||σ) between identical states:
+0
+Should be 0 (identical states have zero relative entropy)
+
+Relative entropy S(ρ||σ) from pure to mixed state:
+0.6931471805599453
+Should be ln(2) = 0.6931471805599453 
+
+Relative entropy S(ρ||σ) from mixed to pure state:
+499.30685281944005
+
+Relative entropy S(ρ||σ) between different mixed states:
+0.087176693572389
+=== Pauli Matrix Commutator Algebra ===
+
+Computing [X, Y]:
+Matrix representation:
+[
+  [ Complex { re: 0, im: 2 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: -2 } ]
+]
+This should equal 2iZ
+
+Computing [Y, Z]:
+Matrix representation:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 2 } ],
+  [ Complex { re: 0, im: 2 }, Complex { re: 0, im: 0 } ]
+]
+This should equal 2iX
+
+Computing [Z, X]:
+Matrix representation:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 2, im: 0 } ],
+  [ Complex { re: -2, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+This should equal 2iY
+
+Check if X commutes with X: true
+Check if X commutes with Y: false
+Check if Y commutes with Z: false
+
+=== Pauli Matrix Anti-Commutator Algebra ===
+
+Computing {X, X}:
+Matrix representation:
+[
+  [ Complex { re: 2, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 2, im: 0 } ]
+]
+This should equal 2I
+
+Computing {X, Y}:
+Matrix representation:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+This should equal 0
+
+Computing {Y, Z}:
+Matrix representation:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+This should equal 0
+
+
+=== Nested Commutators ===
+
+Computing [X, [Y, Z]]:
+Matrix representation:
+[
+  [ Complex { re: -4, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 4, im: 0 } ]
+]
+
+Verifying Jacobi identity:
+[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] should equal 0
+Sum of terms:
+[
+  [ Complex { re: -4, im: 0 }, Complex { re: -4, im: 4 } ],
+  [ Complex { re: -4, im: -4 }, Complex { re: 4, im: 0 } ]
+]
+
+=== Uncertainty Principle ===
+
+Uncertainty product ΔY·ΔZ for |+⟩ state: 0.9999999999999998
+Commutator [Y, Z]:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 2 } ],
+  [ Complex { re: 0, im: 2 }, Complex { re: 0, im: 0 } ]
+]
+
+Uncertainty principle states:
+ΔY·ΔZ ≥ |⟨[Y,Z]⟩|/2 = |⟨2iX⟩|/2 = |⟨X⟩| = 1/2
+Our calculated uncertainty (0.9999999999999998) satisfies this bound.
+=== Uncertainty Principle Demonstration ===
+
+Uncertainty products for different states:
+----------------------------------------
+
+State: zeroState
+ΔX·ΔY = 1.000000
+Lower bound |⟨[X,Y]⟩|/2 = 1.000000
+Satisfies uncertainty principle: true
+ΔX·ΔZ = 0.000000
+Lower bound |⟨[X,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔY·ΔZ = 0.000000
+Lower bound |⟨[Y,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+
+State: oneState
+ΔX·ΔY = 1.000000
+Lower bound |⟨[X,Y]⟩|/2 = 1.000000
+Satisfies uncertainty principle: true
+ΔX·ΔZ = 0.000000
+Lower bound |⟨[X,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔY·ΔZ = 0.000000
+Lower bound |⟨[Y,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+
+State: plusState
+ΔX·ΔY = 0.000000
+Lower bound |⟨[X,Y]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔX·ΔZ = 0.000000
+Lower bound |⟨[X,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔY·ΔZ = 1.000000
+Lower bound |⟨[Y,Z]⟩|/2 = 1.000000
+Satisfies uncertainty principle: true
+
+State: minusState
+ΔX·ΔY = 0.000000
+Lower bound |⟨[X,Y]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔX·ΔZ = 0.000000
+Lower bound |⟨[X,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔY·ΔZ = 1.000000
+Lower bound |⟨[Y,Z]⟩|/2 = 1.000000
+Satisfies uncertainty principle: true
+
+State: plusIState
+ΔX·ΔY = 0.000000
+Lower bound |⟨[X,Y]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔX·ΔZ = 1.000000
+Lower bound |⟨[X,Z]⟩|/2 = 1.000000
+Satisfies uncertainty principle: true
+ΔY·ΔZ = 0.000000
+Lower bound |⟨[Y,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+
+State: minusIState
+ΔX·ΔY = 0.000000
+Lower bound |⟨[X,Y]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+ΔX·ΔZ = 1.000000
+Lower bound |⟨[X,Z]⟩|/2 = 1.000000
+Satisfies uncertainty principle: true
+ΔY·ΔZ = 0.000000
+Lower bound |⟨[Y,Z]⟩|/2 = 0.000000
+Satisfies uncertainty principle: true
+
+
+=== Projection Operators ===
+
+Creating and testing projection operators:
+----------------------------------------
+
+Projection onto |0⟩:
+[
+  [ Complex { re: 1, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+
+Testing P² = P:
+[
+  [ Complex { re: 1, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+
+Projection onto |+⟩:
+[
+  [
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 }
+  ],
+  [
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 }
+  ]
+]
+
+Applying projectors to states:
+
+|0⟩⟨0||0⟩ should give |0⟩:
+[ Complex { re: 1, im: 0 }, Complex { re: 0, im: 0 } ]
+
+|0⟩⟨0||1⟩ should give 0:
+[ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ]
+
+|+⟩⟨+||0⟩ should give (1/√2)|+⟩:
+[
+  Complex { re: 0.4999999999999999, im: 0 },
+  Complex { re: 0.4999999999999999, im: 0 }
+]
+
+
+=== Operator Generation ===
+
+Generating rotation operators:
+----------------------------
+
+Rotation around X by π/2:
+[
+  [
+    Complex { re: 0.7071067811865475, im: 0 },
+    Complex { re: 0, im: -0.7071067811865476 }
+  ],
+  [
+    Complex { re: 0, im: -0.7071067811865476 },
+    Complex { re: 0.7071067811865475, im: 0 }
+  ]
+]
+
+Rotation around Z by π/2:
+[
+  [
+    Complex { re: 0.7071067811865475, im: -0.7071067811865476 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0.7071067811865475, im: 0.7071067811865476 }
+  ]
+]
+
+Testing properties of generated operators:
+
+Is Rx normal operator? true
+
+Is Rx unitary? Rx·Rx† should be identity:
+[
+  [ Complex { re: 1, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 1, im: 0 } ]
+]
+=== Quantum Measurement Demo ===
+
+Initial state |+⟩: [
+  Complex { re: 0.7071067811865475, im: 0 },
+  Complex { re: 0.7071067811865475, im: 0 }
+]
+
+Projection onto |0⟩: [ Complex { re: 0.7071067811865475, im: 0 }, Complex { re: 0, im: 0 } ]
+
+Projection onto |1⟩: [ Complex { re: 0, im: 0 }, Complex { re: 0.7071067811865475, im: 0 } ]
+
+Measurement result: {
+  value: 1,
+  probability: 0.4999999999999999,
+  state: [ Complex { re: 1, im: 0 }, Complex { re: 0, im: 0 } ]
+}
+=== Hilbert Space Composition Demo ===
+
+Qubit 1 dimension: 2
+Qubit 1 basis: [ '|0⟩', '|1⟩' ]
+
+Composed space dimension: 4
+Composed space basis: [ '|0⟩⊗|0⟩', '|0⟩⊗|1⟩', '|1⟩⊗|0⟩', '|1⟩⊗|1⟩' ]
+
+Decomposed space 1 dimension: 2
+Decomposed space 2 dimension: 2
+=== Quantum State Demo ===
+
+State |0⟩: [ Complex { re: 1, im: 0 }, Complex { re: 0, im: 0 } ]
+State |1⟩: [ Complex { re: 0, im: 0 }, Complex { re: 1, im: 0 } ]
+
+Plus state |+⟩: [
+  Complex { re: 0.7071067811865475, im: 0 },
+  Complex { re: 0.7071067811865475, im: 0 }
+]
+Hadamard |0⟩: [
+  Complex { re: 0.7071067811865475, im: 0 },
+  Complex { re: 0.7071067811865475, im: 0 }
+]
+
+Overlap ⟨0|+⟩: Complex { re: 0.7071067811865475, im: 0 }
+=== Quantum Operator Demo ===
+
+Pauli X matrix:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 1, im: 0 } ],
+  [ Complex { re: 1, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+
+X adjoint equals X: true
+
+X⋅Y = iZ: [
+  [ Complex { re: 0, im: 1 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: -1 } ]
+]
+
+X⊗X: [
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 1, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 1, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 1, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 1, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 }
+  ]
+]
+
+X|0⟩ = |1⟩: [ Complex { re: 0, im: 0 }, Complex { re: 1, im: 0 } ]
+=== Hilbert Space Composition ===
+
+Creating composite Hilbert spaces:
+Two-qubit space dimension: 4
+Two-qubit basis states: [ '|0⟩⊗|0⟩', '|0⟩⊗|1⟩', '|1⟩⊗|0⟩', '|1⟩⊗|1⟩' ]
+
+Qubit-qutrit hybrid space dimension: 6
+Hybrid space basis states: [ '|0⟩⊗|0⟩', '|0⟩⊗|1⟩', '|0⟩⊗|2⟩', '|1⟩⊗|0⟩', '|1⟩⊗|1⟩', '|1⟩⊗|2⟩' ]
+
+Three-qubit space dimension: 8
+Three-qubit basis states: [
+  '|0⟩⊗|0⟩⊗|0⟩',
+  '|0⟩⊗|0⟩⊗|1⟩',
+  '|0⟩⊗|1⟩⊗|0⟩',
+  '|0⟩⊗|1⟩⊗|1⟩',
+  '|1⟩⊗|0⟩⊗|0⟩',
+  '|1⟩⊗|0⟩⊗|1⟩',
+  '|1⟩⊗|1⟩⊗|0⟩',
+  '|1⟩⊗|1⟩⊗|1⟩'
+]
+
+
+=== Quantum State Composition ===
+
+Composing quantum states:
+
+|0⟩ ⊗ |0⟩ = |00⟩:
+Dimension: 4
+Amplitudes: [
+  Complex { re: 1, im: 0 },
+  Complex { re: 0, im: 0 },
+  Complex { re: 0, im: 0 },
+  Complex { re: 0, im: 0 }
+]
+
+|0⟩ ⊗ |1⟩ = |01⟩:
+Dimension: 4
+Amplitudes: [
+  Complex { re: 0, im: 0 },
+  Complex { re: 1, im: 0 },
+  Complex { re: 0, im: 0 },
+  Complex { re: 0, im: 0 }
+]
+
+|+⟩ ⊗ |0⟩ = (|00⟩ + |10⟩)/√2:
+Dimension: 4
+Amplitudes: [
+  Complex { re: 0.7071067811865475, im: 0 },
+  Complex { re: 0, im: 0 },
+  Complex { re: 0.7071067811865475, im: 0 },
+  Complex { re: 0, im: 0 }
+]
+
+|+⟩ ⊗ |+⟩ = (|00⟩ + |01⟩ + |10⟩ + |11⟩)/2:
+Dimension: 4
+Amplitudes: [
+  Complex { re: 0.4999999999999999, im: 0 },
+  Complex { re: 0.4999999999999999, im: 0 },
+  Complex { re: 0.4999999999999999, im: 0 },
+  Complex { re: 0.4999999999999999, im: 0 }
+]
+
+Bell state (|00⟩ + |11⟩)/√2:
+Dimension: 4
+Amplitudes: [
+  Complex { re: 0.7071067811865475, im: 0 },
+  Complex { re: 0, im: 0 },
+  Complex { re: 0, im: 0 },
+  Complex { re: 0.7071067811865475, im: 0 }
+]
+Note: Bell state cannot be written as a tensor product of individual states!
+
+
+=== Quantum Operator Composition ===
+
+Composing quantum operators:
+
+X ⊗ Z:
+Dimension: 4
+Matrix:
+[
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 1, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: -0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: -1, im: 0 }
+  ],
+  [
+    Complex { re: 1, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: -1, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: -0, im: 0 }
+  ]
+]
+
+Z ⊗ X:
+Dimension: 4
+Matrix:
+[
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 1, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 1, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: -0, im: 0 },
+    Complex { re: -1, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0, im: 0 },
+    Complex { re: -1, im: 0 },
+    Complex { re: -0, im: 0 }
+  ]
+]
+
+H ⊗ H:
+Dimension: 4
+Matrix:
+[
+  [
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 }
+  ],
+  [
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: -0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: -0.4999999999999999, im: 0 }
+  ],
+  [
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: -0.4999999999999999, im: 0 },
+    Complex { re: -0.4999999999999999, im: 0 }
+  ],
+  [
+    Complex { re: 0.4999999999999999, im: 0 },
+    Complex { re: -0.4999999999999999, im: 0 },
+    Complex { re: -0.4999999999999999, im: 0 },
+    Complex { re: 0.4999999999999999, im: 0 }
+  ]
+]
+
+X ⊗ Y ⊗ Z:
+Dimension: 8
+
+
+=== Bipartite System Splitting ===
+
+Split 4-dimensional space into 2×2:
+Original space dimension: 4
+Original space basis: [ '|00⟩', '|01⟩', '|10⟩', '|11⟩' ]
+Subsystem A dimension: 2
+Subsystem A basis: [ '|00⟩', '|01⟩' ]
+Subsystem B dimension: 2
+Subsystem B basis: [ '|10⟩', '|11⟩' ]
+
+Split 6-dimensional space into 2×3:
+Original space dimension: 6
+Original space basis: [ '|0⟩', '|1⟩', '|2⟩', '|3⟩', '|4⟩', '|5⟩' ]
+Subsystem A dimension: 2
+subsystem A basis: [ '|0⟩', '|1⟩' ]
+Subsystem B dimension: 3
+subsystem B basis: [ '|3⟩', '|4⟩', '|5⟩' ]
+
+Split 8-dimensional space into 2×4:
+Original space dimension: 8
+Subsystem A dimension: 2
+Subsystem B dimension: 4
+
+
+=== Partial Trace Operations ===
+
+Using partial trace on tensor product operators:
+
+Partial trace of I_4 over first qubit:
+Result dimension: 2
+Result matrix:
+[
+  [ Complex { re: 4, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 4, im: 0 } ]
+]
+Result should be 2·I_2 where I_2 is 2×2 identity
+
+Partial trace of I_4 over second qubit:
+Result dimension: 2
+Result matrix:
+[
+  [ Complex { re: 4, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 4, im: 0 } ]
+]
+Result should be 2·I_2 where I_2 is 2×2 identity
+
+Partial trace of X⊗Z over first qubit:
+Result dimension: 2
+Result matrix:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+Result should be Tr(X)·Z = 0·Z = 0
+
+Partial trace of X⊗Z over second qubit:
+Result dimension: 2
+Result matrix:
+[
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ],
+  [ Complex { re: 0, im: 0 }, Complex { re: 0, im: 0 } ]
+]
+Result should be Tr(Z)·X = 0·X = 0
+
+Partial trace of Bell state density matrix:
+Result from tracing out first qubit:
+[
+  [
+    Complex { re: 0.9999999999999998, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0.9999999999999998, im: 0 }
+  ]
+]
+Should be maximally mixed state I/2
+
+Result from tracing out second qubit:
+[
+  [
+    Complex { re: 0.9999999999999998, im: 0 },
+    Complex { re: 0, im: 0 }
+  ],
+  [
+    Complex { re: 0, im: 0 },
+    Complex { re: 0.9999999999999998, im: 0 }
+  ]
+]
+Should be maximally mixed state I/2
+
+This confirms that each qubit in a Bell state is maximally mixed!
+Running Hamiltonian Examples
+
+Example 1: Single Spin in a Magnetic Field
+----------------------------------------
+Magnetic field B = (1, 1, 1)
+|B| = 1.7320508075688772
+Initial state: 0.7071067811865475|0⟩ + 0.7071067811865475|1⟩
+Energy expectation value: 1.000
+
+Time evolution:
+Theoretical initial energy: 1.000
+
+Time Evolution of Spin Components and Energy:
+Time (π) |    σx (num)    σx (theory)  |    σy (num)    σy (theory)  |    σz (num)    σz (theory)  |    E (num)    E (theory)
+-----------------------------------------------------------------------------------------------------------------------------
+   0.000 |    1.000000     1.000000 |    0.000000     0.000000 |    0.000000     0.000000 |    1.000000     1.000000
+   0.020 |    0.983625     0.983625 |    0.135364     0.135364 |   -0.118989    -0.118989 |    1.000000     1.000000
+   0.041 |    0.935304     0.935304 |    0.280454     0.280454 |   -0.215758    -0.215758 |    1.000000     1.000000
+   0.061 |    0.857412     0.857412 |    0.428141     0.428141 |   -0.285553    -0.285553 |    1.000000     1.000000
+   0.082 |    0.753774     0.753774 |    0.571170     0.571170 |   -0.324945    -0.324945 |    1.000000     1.000000
+   0.102 |    0.629482     0.629482 |    0.702516     0.702516 |   -0.331998    -0.331998 |    1.000000     1.000000
+   0.122 |    0.490642     0.490642 |    0.815726     0.815726 |   -0.306368    -0.306368 |    1.000000     1.000000
+   0.143 |    0.344074     0.344074 |    0.905239     0.905239 |   -0.249312    -0.249312 |    1.000000     1.000000
+   0.163 |    0.196978     0.196978 |    0.966656     0.966656 |   -0.163634    -0.163634 |    1.000000     1.000000
+   0.184 |    0.056581     0.056581 |    0.996961     0.996961 |   -0.053542    -0.053542 |    1.000000     1.000000
+   0.204 |   -0.070221    -0.070221 |    0.994666     0.994666 |    0.075555     0.075555 |    1.000000     1.000000
+   0.224 |   -0.177198    -0.177198 |    0.959883     0.959883 |    0.217316     0.217316 |    1.000000     1.000000
+   0.245 |   -0.259096    -0.259096 |    0.894320     0.894320 |    0.364775     0.364775 |    1.000000     1.000000
+   0.265 |   -0.311890    -0.311890 |    0.801199     0.801199 |    0.510691     0.510691 |    1.000000     1.000000
+   0.286 |   -0.332987    -0.332987 |    0.685094     0.685094 |    0.647893     0.647893 |    1.000000     1.000000
+   0.306 |   -0.321352    -0.321352 |    0.551709     0.551709 |    0.769643     0.769643 |    1.000000     1.000000
+   0.327 |   -0.277555    -0.277555 |    0.407596     0.407596 |    0.869959     0.869959 |    1.000000     1.000000
+   0.347 |   -0.203748    -0.203748 |    0.259835     0.259835 |    0.943913     0.943913 |    1.000000     1.000000
+   0.367 |   -0.103557    -0.103557 |    0.115684     0.115684 |    0.987873     0.987873 |    1.000000     1.000000
+   0.388 |    0.018096     0.018096 |   -0.017774    -0.017774 |    0.999678     0.999678 |    1.000000     1.000000
+   0.408 |    0.155235     0.155235 |   -0.133985    -0.133985 |    0.978749     0.978749 |    1.000000     1.000000
+   0.429 |    0.301124     0.301124 |   -0.227238    -0.227238 |    0.926114     0.926114 |    1.000000     1.000000
+   0.449 |    0.448594     0.448594 |   -0.292953    -0.292953 |    0.844359     0.844359 |    1.000000     1.000000
+   0.469 |    0.590403     0.590403 |   -0.327902    -0.327902 |    0.737499     0.737499 |    1.000000     1.000000
+   0.490 |    0.719583     0.719583 |   -0.330368    -0.330368 |    0.610785     0.610785 |    1.000000     1.000000
+   0.510 |    0.829788     0.829788 |   -0.300229    -0.300229 |    0.470441     0.470441 |    1.000000     1.000000
+   0.531 |    0.915605     0.915605 |   -0.238966    -0.238966 |    0.323361     0.323361 |    1.000000     1.000000
+   0.551 |    0.972818     0.972818 |   -0.149590    -0.149590 |    0.176772     0.176772 |    1.000000     1.000000
+   0.571 |    0.998616     0.998616 |   -0.036489    -0.036489 |    0.037873     0.037873 |    1.000000     1.000000
+   0.592 |    0.991732     0.991732 |    0.094778     0.094778 |   -0.086511    -0.086511 |    1.000000     1.000000
+   0.612 |    0.952505     0.952505 |    0.237765     0.237765 |   -0.190270    -0.190270 |    1.000000     1.000000
+   0.633 |    0.882860     0.882860 |    0.385447     0.385447 |   -0.268307    -0.268307 |    1.000000     1.000000
+   0.653 |    0.786220     0.786220 |    0.530569     0.530569 |   -0.316789    -0.316789 |    1.000000     1.000000
+   0.673 |    0.667332     0.667332 |    0.666001     0.666001 |   -0.333333    -0.333333 |    1.000000     1.000000
+   0.694 |    0.532036     0.532036 |    0.785091     0.785091 |   -0.317127    -0.317127 |    1.000000     1.000000
+   0.714 |    0.386979     0.386979 |    0.881988     0.881988 |   -0.268968    -0.268968 |    1.000000     1.000000
+   0.735 |    0.239287     0.239287 |    0.951933     0.951933 |   -0.191220    -0.191220 |    1.000000     1.000000
+   0.755 |    0.096214     0.096214 |    0.991489     0.991489 |   -0.087704    -0.087704 |    1.000000     1.000000
+   0.776 |   -0.035210    -0.035210 |    0.998713     0.998713 |    0.036496     0.036496 |    1.000000     1.000000
+   0.796 |   -0.148529    -0.148529 |    0.973251     0.973251 |    0.175278     0.175278 |    1.000000     1.000000
+   0.816 |   -0.238177    -0.238177 |    0.916352     0.916352 |    0.321825     0.321825 |    1.000000     1.000000
+   0.837 |   -0.299749    -0.299749 |    0.830812     0.830812 |    0.468936     0.468936 |    1.000000     1.000000
+   0.857 |   -0.330221    -0.330221 |    0.720834     0.720834 |    0.609387     0.609387 |    1.000000     1.000000
+   0.878 |   -0.328096    -0.328096 |    0.591820     0.591820 |    0.736276     0.736276 |    1.000000     1.000000
+   0.898 |   -0.293478    -0.293478 |    0.450108     0.450108 |    0.843370     0.843370 |    1.000000     1.000000
+   0.918 |   -0.228068    -0.228068 |    0.302659     0.302659 |    0.925409     0.925409 |    1.000000     1.000000
+   0.939 |   -0.135079    -0.135079 |    0.156717     0.156717 |    0.978363     0.978363 |    1.000000     1.000000
+   0.959 |   -0.019080    -0.019080 |    0.019451     0.019451 |    0.999629     0.999629 |    1.000000     1.000000
+   0.980 |    0.114232     0.114232 |   -0.102395    -0.102395 |    0.988163     0.988163 |    1.000000     1.000000
+   1.000 |    0.258307     0.258307 |   -0.202836    -0.202836 |    0.944529     0.944529 |    1.000000     1.000000
+
+Maximum Deviations from Theory:
+σx: 1.643e-14
+σy: 9.659e-15
+σz: 1.110e-14
+
+==================================================
+
+Example 2: Heisenberg Spin Chain
+------------------------------
+Initial state: |↑↓↑⟩
+Energy: -2.000
+
+Time evolution:
+
+t = 0.10:
+Magnetization per site: [ '-0.922', '0.845', '-0.922' ]
+Total energy: -2.000
+
+t = 0.50:
+Magnetization per site: [ '-0.116', '-0.769', '-0.116' ]
+Total energy: -2.000
+
+t = 1.00:
+Magnetization per site: [ '-0.982', '0.965', '-0.982' ]
+Total energy: -2.000
+
+t = 2.00:
+Magnetization per site: [ '-0.931', '0.861', '-0.931' ]
+Total energy: -2.000
+Quantum Harmonic Oscillator Demonstrations
+
+Example 1: Ground State Properties
+--------------------------------
+Ground state energy: 0.500 ℏω
+Ground state fidelity after period: 1.000000
+
+Example 2: Coherent State Evolution
+--------------------------------
+
+t = 0.00π:
+Energy: 1.500 ℏω
+First 5 state probabilities: [ '0.368', '0.368', '0.184', '0.061', '0.015' ]
+Average photon number ⟨n⟩: 1.000
+
+t = 0.50π:
+Energy: 1.500 ℏω
+First 5 state probabilities: [ '0.368', '0.368', '0.184', '0.061', '0.015' ]
+Average photon number ⟨n⟩: 1.000
+
+t = 1.00π:
+Energy: 1.500 ℏω
+First 5 state probabilities: [ '0.368', '0.368', '0.184', '0.061', '0.015' ]
+Average photon number ⟨n⟩: 1.000
+
+t = 1.50π:
+Energy: 1.500 ℏω
+First 5 state probabilities: [ '0.368', '0.368', '0.184', '0.061', '0.015' ]
+Average photon number ⟨n⟩: 1.000
+
+t = 2.00π:
+Energy: 1.500 ℏω
+First 5 state probabilities: [ '0.368', '0.368', '0.184', '0.061', '0.015' ]
+Average photon number ⟨n⟩: 1.000
+
+Example 3: Wavepacket Dynamics
+----------------------------
+
+t = 0.00π:
+Energy: 1.000 ℏω
+⟨x⟩: 0.707
+
+t = 0.25π:
+Energy: 1.000 ℏω
+⟨x⟩: 0.500
+
+t = 0.50π:
+Energy: 1.000 ℏω
+⟨x⟩: -0.000
+
+t = 0.75π:
+Energy: 1.000 ℏω
+⟨x⟩: -0.500
+
+t = 1.00π:
+Energy: 1.000 ℏω
+⟨x⟩: -0.707
+Spin Chain Dynamics Demonstrations
+
+Example 1: Two-Spin Heisenberg Evolution
+-------------------------------------
+Initial state |↑↓⟩
+Energy: -1.000
+
+Time Evolution Data:
+Time (π) | Energy(num) Energy(th) | ⟨σz₁⟩(num) ⟨σz₁⟩(th) | ⟨σz₂⟩(num) ⟨σz₂⟩(th) | ⟨σz₁σz₂⟩(num) ⟨σz₁σz₂⟩(th) | P↑↓(num) P↑↓(th)
+------------------------------------------------------------------------------------------------------------------------
+   0.000 |  -1.000000   -1.000000 |   1.000000    1.000000 |  -1.000000   -1.000000 |    -1.000000     -1.000000 | 1.000000  1.000000
+   0.041 |  -1.000000   -1.000000 |   0.871319    0.967295 |  -0.871319   -0.967295 |    -1.000000     -1.000000 | 0.935659  0.983647
+   0.082 |  -1.000000   -1.000000 |   0.518393    0.871319 |  -0.518393   -0.871319 |    -1.000000     -1.000000 | 0.759196  0.935659
+   0.122 |  -1.000000   -1.000000 |   0.032052    0.718349 |  -0.032052   -0.718349 |    -1.000000     -1.000000 | 0.516026  0.859175
+   0.163 |  -1.000000   -1.000000 |  -0.462538    0.518393 |   0.462538   -0.518393 |    -1.000000     -1.000000 | 0.268731  0.759196
+   0.204 |  -1.000000   -1.000000 |  -0.838088    0.284528 |   0.838088   -0.284528 |    -1.000000     -1.000000 | 0.080956  0.642264
+   0.245 |  -1.000000   -1.000000 |  -0.997945    0.032052 |   0.997945   -0.032052 |    -1.000000     -1.000000 | 0.001027  0.516026
+   0.286 |  -1.000000   -1.000000 |  -0.900969   -0.222521 |   0.900969    0.222521 |    -1.000000     -1.000000 | 0.049516  0.388740
+   0.327 |  -1.000000   -1.000000 |  -0.572117   -0.462538 |   0.572117    0.462538 |    -1.000000     -1.000000 | 0.213942  0.268731
+   0.367 |  -1.000000   -1.000000 |  -0.096023   -0.672301 |   0.096023    0.672301 |    -1.000000     -1.000000 | 0.451988  0.163850
+   0.408 |  -1.000000   -1.000000 |   0.404783   -0.838088 |  -0.404783    0.838088 |    -1.000000     -1.000000 | 0.702392  0.080956
+   0.449 |  -1.000000   -1.000000 |   0.801414   -0.949056 |  -0.801414    0.949056 |    -1.000000     -1.000000 | 0.900707  0.025472
+   0.490 |  -1.000000   -1.000000 |   0.991790   -0.997945 |  -0.991790    0.997945 |    -1.000000     -1.000000 | 0.995895  0.001027
+   0.531 |  -1.000000   -1.000000 |   0.926917   -0.981559 |  -0.926917    0.981559 |    -1.000000     -1.000000 | 0.963458  0.009220
+   0.571 |  -1.000000   -1.000000 |   0.623490   -0.900969 |  -0.623490    0.900969 |    -1.000000     -1.000000 | 0.811745  0.049516
+   0.612 |  -1.000000   -1.000000 |   0.159600   -0.761446 |  -0.159600    0.761446 |    -1.000000     -1.000000 | 0.579800  0.119277
+   0.653 |  -1.000000   -1.000000 |  -0.345365   -0.572117 |   0.345365    0.572117 |    -1.000000     -1.000000 | 0.327317  0.213942
+   0.694 |  -1.000000   -1.000000 |  -0.761446   -0.345365 |   0.761446    0.345365 |    -1.000000     -1.000000 | 0.119277  0.327317
+   0.735 |  -1.000000   -1.000000 |  -0.981559   -0.096023 |   0.981559    0.096023 |    -1.000000     -1.000000 | 0.009220  0.451988
+   0.776 |  -1.000000   -1.000000 |  -0.949056    0.159600 |   0.949056   -0.159600 |    -1.000000     -1.000000 | 0.025472  0.579800
+   0.816 |  -1.000000   -1.000000 |  -0.672301    0.404783 |   0.672301   -0.404783 |    -1.000000     -1.000000 | 0.163850  0.702392
+   0.857 |  -1.000000   -1.000000 |  -0.222521    0.623490 |   0.222521   -0.623490 |    -1.000000     -1.000000 | 0.388740  0.811745
+   0.898 |  -1.000000   -1.000000 |   0.284528    0.801414 |  -0.284528   -0.801414 |    -1.000000     -1.000000 | 0.642264  0.900707
+   0.939 |  -1.000000   -1.000000 |   0.718349    0.926917 |  -0.718349   -0.926917 |    -1.000000     -1.000000 | 0.859175  0.963458
+   0.980 |  -1.000000   -1.000000 |   0.967295    0.991790 |  -0.967295   -0.991790 |    -1.000000     -1.000000 | 0.983647  0.995895
+   1.020 |  -1.000000   -1.000000 |   0.967295    0.991790 |  -0.967295   -0.991790 |    -1.000000     -1.000000 | 0.983647  0.995895
+   1.061 |  -1.000000   -1.000000 |   0.718349    0.926917 |  -0.718349   -0.926917 |    -1.000000     -1.000000 | 0.859175  0.963458
+   1.102 |  -1.000000   -1.000000 |   0.284528    0.801414 |  -0.284528   -0.801414 |    -1.000000     -1.000000 | 0.642264  0.900707
+   1.143 |  -1.000000   -1.000000 |  -0.222521    0.623490 |   0.222521   -0.623490 |    -1.000000     -1.000000 | 0.388740  0.811745
+   1.184 |  -1.000000   -1.000000 |  -0.672301    0.404783 |   0.672301   -0.404783 |    -1.000000     -1.000000 | 0.163850  0.702392
+   1.224 |  -1.000000   -1.000000 |  -0.949056    0.159600 |   0.949056   -0.159600 |    -1.000000     -1.000000 | 0.025472  0.579800
+   1.265 |  -1.000000   -1.000000 |  -0.981559   -0.096023 |   0.981559    0.096023 |    -1.000000     -1.000000 | 0.009220  0.451988
+   1.306 |  -1.000000   -1.000000 |  -0.761446   -0.345365 |   0.761446    0.345365 |    -1.000000     -1.000000 | 0.119277  0.327317
+   1.347 |  -1.000000   -1.000000 |  -0.345365   -0.572117 |   0.345365    0.572117 |    -1.000000     -1.000000 | 0.327317  0.213942
+   1.388 |  -1.000000   -1.000000 |   0.159600   -0.761446 |  -0.159600    0.761446 |    -1.000000     -1.000000 | 0.579800  0.119277
+   1.429 |  -1.000000   -1.000000 |   0.623490   -0.900969 |  -0.623490    0.900969 |    -1.000000     -1.000000 | 0.811745  0.049516
+   1.469 |  -1.000000   -1.000000 |   0.926917   -0.981559 |  -0.926917    0.981559 |    -1.000000     -1.000000 | 0.963458  0.009220
+   1.510 |  -1.000000   -1.000000 |   0.991790   -0.997945 |  -0.991790    0.997945 |    -1.000000     -1.000000 | 0.995895  0.001027
+   1.551 |  -1.000000   -1.000000 |   0.801414   -0.949056 |  -0.801414    0.949056 |    -1.000000     -1.000000 | 0.900707  0.025472
+   1.592 |  -1.000000   -1.000000 |   0.404783   -0.838088 |  -0.404783    0.838088 |    -1.000000     -1.000000 | 0.702392  0.080956
+   1.633 |  -1.000000   -1.000000 |  -0.096023   -0.672301 |   0.096023    0.672301 |    -1.000000     -1.000000 | 0.451988  0.163850
+   1.673 |  -1.000000   -1.000000 |  -0.572117   -0.462538 |   0.572117    0.462538 |    -1.000000     -1.000000 | 0.213942  0.268731
+   1.714 |  -1.000000   -1.000000 |  -0.900969   -0.222521 |   0.900969    0.222521 |    -1.000000     -1.000000 | 0.049516  0.388740
+   1.755 |  -1.000000   -1.000000 |  -0.997945    0.032052 |   0.997945   -0.032052 |    -1.000000     -1.000000 | 0.001027  0.516026
+   1.796 |  -1.000000   -1.000000 |  -0.838088    0.284528 |   0.838088   -0.284528 |    -1.000000     -1.000000 | 0.080956  0.642264
+   1.837 |  -1.000000   -1.000000 |  -0.462538    0.518393 |   0.462538   -0.518393 |    -1.000000     -1.000000 | 0.268731  0.759196
+   1.878 |  -1.000000   -1.000000 |   0.032052    0.718349 |  -0.032052   -0.718349 |    -1.000000     -1.000000 | 0.516026  0.859175
+   1.918 |  -1.000000   -1.000000 |   0.518393    0.871319 |  -0.518393   -0.871319 |    -1.000000     -1.000000 | 0.759196  0.935659
+   1.959 |  -1.000000   -1.000000 |   0.871319    0.967295 |  -0.871319   -0.967295 |    -1.000000     -1.000000 | 0.935659  0.983647
+   2.000 |  -1.000000   -1.000000 |   1.000000    1.000000 |  -1.000000   -1.000000 |    -1.000000     -1.000000 | 1.000000  1.000000
+
+Maximum Deviations from Theory:
+Energy: 5.240e-14
+
+Example 2: Domain Wall Dynamics
+----------------------------
+Initial domain wall state |↑↑↑↓↓↓⟩
+Energy: 3.000
+Initial magnetization profile: [ '-1.000', '-1.000', '-1.000', '1.000', '1.000', '1.000' ]
+
+t = 0.50:
+Magnetization profile: [ '-0.966', '-0.778', '-0.292', '0.292', '0.778', '0.966' ]
+Approximate domain width: 6.00
+
+t = 1.00:
+Magnetization profile: [ '-0.489', '-0.785', '-0.196', '0.196', '0.785', '0.489' ]
+Approximate domain width: 6.00
+
+t = 2.00:
+Magnetization profile: [ '-0.127', '-0.153', '-0.075', '0.075', '0.153', '0.127' ]
+Approximate domain width: 6.00
+
+t = 4.00:
+Magnetization profile: [ '0.471', '0.657', '0.402', '-0.402', '-0.657', '-0.471' ]
+Approximate domain width: 6.00

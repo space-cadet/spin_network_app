@@ -5,8 +5,10 @@
  * types of matrices and validates mathematical properties.
  */
 
-import { eigenDecomposition, ComplexMatrix, adjoint, multiplyMatrices, isHermitian } from '../matrixOperations';
-import { Complex } from '../types';
+import { describe, it, expect } from 'vitest';
+
+import { eigenDecomposition, ComplexMatrix, adjoint, multiplyMatrices, isHermitian } from '../src/utils/matrixOperations';
+import { Complex } from '../src/core/types';
 import * as math from 'mathjs';
 
 // Helper to compare complex numbers with tolerance
