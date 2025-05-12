@@ -23,37 +23,37 @@ describe('DensityMatrix', () => {
   describe('Constructor', () => {
     it('creates valid density matrix from pure state', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
       expect(rho.dimension).toBe(2);
       const matrix = rho.toMatrix();
-      expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
-      expect(matrix[1][1]).toEqual(math.complex({re: 0, im:  0}));
+      expect(matrix[0][0]).toEqual(math.complex(1,  0));
+      expect(matrix[1][1]).toEqual(math.complex(0,  0));
     });
 
     it('validates trace equals 1', () => {
       const invalidMatrix = [
-        [math.complex({re: 2, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]
+        [math.complex(2,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0)]
       ];
       expect(() => new DensityMatrixOperator(invalidMatrix)).toThrow();
     });
 
     it('validates hermiticity', () => {
       const invalidMatrix = [
-        [math.complex({re: 1, im:  0}), math.complex({re: 1, im:  0})],
-        [math.complex({re: 0, im:  1}), math.complex({re: 0, im:  0})]
+        [math.complex(1,  0), math.complex(1,  0)],
+        [math.complex(0,  1), math.complex(0,  0)]
       ];
       expect(() => new DensityMatrixOperator(invalidMatrix)).toThrow();
     });
 
     it('validates positive semidefiniteness via purity', () => {
       const invalidMatrix = [
-        [math.complex({re: 2, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: -1, im:  0})]
+        [math.complex(2,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(-1,  0)]
       ];
       expect(() => new DensityMatrixOperator(invalidMatrix)).toThrow();
     });
@@ -62,8 +62,8 @@ describe('DensityMatrix', () => {
   describe('Basic Operations', () => {
     it('applies operator to state correctly', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       const result = rho.apply(state);
@@ -75,8 +75,8 @@ describe('DensityMatrix', () => {
 
     it('composes density matrices correctly', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       const composed = rho.compose(rho);
@@ -92,8 +92,8 @@ describe('DensityMatrix', () => {
 
     it('calculates adjoint correctly', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  1/Math.sqrt(2)}),
-        math.complex({re: 0, im:  0})
+        math.complex(1/Math.sqrt(2),  1/Math.sqrt(2)),
+        math.complex(0,  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       const adjoint = rho.adjoint();
@@ -112,10 +112,10 @@ describe('DensityMatrix', () => {
     it('performs partial trace correctly', () => {
       // Create a Bell state
       const state = new StateVector(4, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(0,  0),
+        math.complex(0,  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -130,15 +130,15 @@ describe('DensityMatrix', () => {
 
     it('calculates von Neumann entropy correctly', () => {
       // Pure state should have zero entropy
-      const pureState = new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]);
+      const pureState = new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]);
       const pureDensity = DensityMatrixOperator.fromPureState(pureState);
       expect(pureDensity.vonNeumannEntropy()).toBeCloseTo(0);
 
       // Maximally mixed state should have maximum entropy
       const mixedState = DensityMatrixOperator.mixedState(
         [
-          new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]),
-          new StateVector(2, [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})])
+          new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]),
+          new StateVector(2, [math.complex(0,  0), math.complex(1,  0)])
         ],
         [0.5, 0.5]
       );
@@ -146,8 +146,8 @@ describe('DensityMatrix', () => {
     });
 
     it('performs tensor product correctly', () => {
-      const state1 = new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]);
-      const state2 = new StateVector(2, [math.complex({re: 1/Math.sqrt(2), im:  0}), math.complex({re: 1/Math.sqrt(2), im:  0})]);
+      const state1 = new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]);
+      const state2 = new StateVector(2, [math.complex(1/Math.sqrt(2),  0), math.complex(1/Math.sqrt(2),  0)]);
       
       const rho1 = DensityMatrixOperator.fromPureState(state1);
       const rho2 = DensityMatrixOperator.fromPureState(state2);
@@ -167,8 +167,8 @@ describe('DensityMatrix', () => {
   describe('Mixed States', () => {
     it('creates valid mixed state', () => {
       const states = [
-        new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]),
-        new StateVector(2, [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})])
+        new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]),
+        new StateVector(2, [math.complex(0,  0), math.complex(1,  0)])
       ];
       const probs = [0.6, 0.4];
       
@@ -182,8 +182,8 @@ describe('DensityMatrix', () => {
 
     it('validates probability sum equals 1', () => {
       const states = [
-        new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]),
-        new StateVector(2, [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})])
+        new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]),
+        new StateVector(2, [math.complex(0,  0), math.complex(1,  0)])
       ];
       const probs = [0.5, 0.6];
       
@@ -192,8 +192,8 @@ describe('DensityMatrix', () => {
 
     it('validates matching dimensions', () => {
       const states = [
-        new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]),
-        new StateVector(3, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})])
+        new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]),
+        new StateVector(3, [math.complex(1,  0), math.complex(0,  0), math.complex(0,  0)])
       ];
       const probs = [0.5, 0.5];
       
@@ -204,8 +204,8 @@ describe('DensityMatrix', () => {
   describe('Operations', () => {
     it('calculates purity correctly', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -214,8 +214,8 @@ describe('DensityMatrix', () => {
 
     it('calculates trace correctly', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -233,7 +233,7 @@ describe('Quantum Channels', () => {
       const channel = createDepolarizingChannel(2, 0.5);
       
       // Create a pure state density matrix
-      const state = new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]);
+      const state = new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
       // Apply channel
@@ -247,8 +247,8 @@ describe('Quantum Channels', () => {
     it('preserves trace and hermiticity', () => {
       const channel = createAmplitudeDampingChannel(0.3);
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -269,7 +269,7 @@ describe('Quantum Channels', () => {
   describe('Specific Channels', () => {
     it('implements bit flip channel correctly', () => {
       const channel = createBitFlipChannel(1.0); // Complete bit flip
-      const state = new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]);
+      const state = new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
       const result = channel.apply(rho);
@@ -283,8 +283,8 @@ describe('Quantum Channels', () => {
     it('implements phase flip channel correctly', () => {
       const channel = createPhaseFlipChannel(1.0); // Complete phase flip
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -299,8 +299,8 @@ describe('Quantum Channels', () => {
     it('implements phase damping channel correctly', () => {
       const channel = createPhaseDampingChannel(0.5);
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -347,10 +347,10 @@ describe('Entanglement Measures', () => {
     it('correctly measures Bell state entanglement', () => {
       // Create Bell state density matrix
       const bellState = new StateVector(4, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(0,  0),
+        math.complex(0,  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(bellState);
       
@@ -365,17 +365,17 @@ describe('Entanglement Measures', () => {
       // Create Werner state: p|Φ⁺⟩⟨Φ⁺| + (1-p)I/4
       const p = 0.7;
       const bellState = new StateVector(4, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(0,  0),
+        math.complex(0,  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const bellDensity = DensityMatrixOperator.fromPureState(bellState);
       
       // Create maximally mixed state
       const identityMatrix = Array(4).fill(null).map((_, i) => 
         Array(4).fill(null).map((_, j) => 
-          i === j ? math.complex({re: 0.25, im:  0}) : math.complex({re: 0, im:  0})
+          i === j ? math.complex(0.25,  0) : math.complex(0,  0)
         )
       );
       const mixedState = new DensityMatrixOperator(identityMatrix);
@@ -402,8 +402,8 @@ describe('Entanglement Measures', () => {
 
     it('detects separable states', () => {
       // Create separable product state
-      const state1 = new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]);
-      const state2 = new StateVector(2, [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]);
+      const state1 = new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]);
+      const state2 = new StateVector(2, [math.complex(1,  0), math.complex(0,  0)]);
       
       const productState = state1.tensorProduct(state2);
       const rho = DensityMatrixOperator.fromPureState(productState);
@@ -416,8 +416,8 @@ describe('Entanglement Measures', () => {
   describe('Trace Fidelity', () => {
     it('equals 1 for identical states', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -428,9 +428,9 @@ describe('Entanglement Measures', () => {
   describe('Concurrence', () => {
     it('validates two-qubit requirement', () => {
       const state = new StateVector(3, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0),
+        math.complex(0,  0)
       ]).normalize();
       const rho = DensityMatrixOperator.fromPureState(state);
       
@@ -442,9 +442,9 @@ describe('Entanglement Measures', () => {
     it('validates bipartite requirement', () => {
       // Create a 3-dimensional state - this can't be split into a bipartite system
       const state = new StateVector(3, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0),
+        math.complex(0,  0)
       ]).normalize();
       const rho = DensityMatrixOperator.fromPureState(state);
       

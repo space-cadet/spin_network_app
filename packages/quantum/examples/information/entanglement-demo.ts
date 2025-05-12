@@ -24,10 +24,10 @@ function demoSchmidtDecomposition() {
   
   // Create a product state |00⟩
   const productState = new StateVector(4, [
-    math.complex({re: 1, im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: 0, im:  0})
+    math.complex(1,  0),
+    math.complex(0,  0),
+    math.complex(0,  0),
+    math.complex(0,  0)
   ]);
   
   console.log('Schmidt decomposition of product state |00⟩:');
@@ -47,10 +47,10 @@ function demoSchmidtDecomposition() {
   
   // Create a partially entangled state
   const partialState = new StateVector(4, [
-    math.complex({re: Math.sqrt(0.7), im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: Math.sqrt(0.3), im:  0})
+    math.complex(Math.sqrt(0.7),  0),
+    math.complex(0,  0),
+    math.complex(0,  0),
+    math.complex(Math.sqrt(0.3),  0)
   ]);
   
   console.log('Schmidt decomposition of partially entangled state:');
@@ -67,10 +67,10 @@ function demoEntanglementEntropy() {
   
   // Create a product state |00⟩
   const productState = new StateVector(4, [
-    math.complex({re: 1, im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: 0, im:  0})
+    math.complex(1,  0),
+    math.complex(0,  0),
+    math.complex(0,  0),
+    math.complex(0,  0)
   ]);
   
   // Create a Bell state (|00⟩ + |11⟩)/√2
@@ -78,10 +78,10 @@ function demoEntanglementEntropy() {
   
   // Create a partially entangled state
   const partialState = new StateVector(4, [
-    math.complex({re: Math.sqrt(0.7), im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: 0, im:  0}),
-    math.complex({re: Math.sqrt(0.3), im:  0})
+    math.complex(Math.sqrt(0.7),  0),
+    math.complex(0,  0),
+    math.complex(0,  0),
+    math.complex(Math.sqrt(0.3),  0)
   ]);
   
   // Calculate entanglement entropy for each state
@@ -111,7 +111,7 @@ function demoEntanglementEntropy() {
 function createDensityMatrix(state: StateVector): DensityMatrixOperator {
   const dim = state.dimension;
   const matrix = Array(dim).fill(null).map(() => 
-    Array(dim).fill(null).map(() => math.complex({re: 0, im:  0}))
+    Array(dim).fill(null).map(() => math.complex(0,  0))
   );
   
   // Normalize the state vector first
@@ -138,10 +138,10 @@ function demoConcurrence() {
   const states = {
     // Product state |00⟩ (ensure normalized)
     product: new StateVector(4, [
-      math.complex({re: 1, im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: 0, im:  0})
+      math.complex(1,  0),
+      math.complex(0,  0),
+      math.complex(0,  0),
+      math.complex(0,  0)
     ]),
     
     // Bell state (|00⟩ + |11⟩)/√2
@@ -149,10 +149,10 @@ function demoConcurrence() {
     
     // Partially entangled state √0.7|00⟩ + √0.3|11⟩
     partial: new StateVector(4, [
-      math.complex({re: Math.sqrt(0.7), im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: Math.sqrt(0.3), im:  0})
+      math.complex(Math.sqrt(0.7),  0),
+      math.complex(0,  0),
+      math.complex(0,  0),
+      math.complex(Math.sqrt(0.3),  0)
     ])
   };
   
@@ -177,10 +177,10 @@ function demoNegativity() {
   const states = {
     // Product state |00⟩
     product: new StateVector(4, [
-      math.complex({re: 1, im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: 0, im:  0})
+      math.complex(1,  0),
+      math.complex(0,  0),
+      math.complex(0,  0),
+      math.complex(0,  0)
     ]),
     
     // Bell state (|00⟩ + |11⟩)/√2
@@ -188,10 +188,10 @@ function demoNegativity() {
     
     // Partially entangled state √0.7|00⟩ + √0.3|11⟩
     partial: new StateVector(4, [
-      math.complex({re: Math.sqrt(0.7), im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: 0, im:  0}),
-      math.complex({re: Math.sqrt(0.3), im:  0})
+      math.complex(Math.sqrt(0.7),  0),
+      math.complex(0,  0),
+      math.complex(0,  0),
+      math.complex(Math.sqrt(0.3),  0)
     ])
   };
   

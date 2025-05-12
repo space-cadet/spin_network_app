@@ -17,14 +17,14 @@ export function matrixExponential(
   // Initialize result to identity matrix
   const result = Array(dim).fill(null).map((_, i) => 
     Array(dim).fill(null).map((_, j) => 
-      i === j ? math.complex({re: 1, im: 0}) : math.complex({re: 0, im: 0})
+      i === j ? math.complex(1, 0) : math.complex(0, 0)
     )
   );
 
   // Initialize term to identity
   let term = Array(dim).fill(null).map((_, i) => 
     Array(dim).fill(null).map((_, j) => 
-      i === j ? math.complex({re: 1, im: 0}) : math.complex({re: 0, im: 0})
+      i === j ? math.complex(1, 0) : math.complex(0, 0)
     )
   );
 
@@ -58,7 +58,7 @@ export function matrixExponential(
 export function multiplyMatrices(a: Complex[][], b: Complex[][]): Complex[][] {
   const dim = a.length;
   const result = Array(dim).fill(null).map(() => 
-    Array(dim).fill(null).map(() => math.complex({re: 0, im: 0}))
+    Array(dim).fill(null).map(() => math.complex(0, 0))
   );
 
   for (let i = 0; i < dim; i++) {
@@ -93,7 +93,7 @@ export function partialTrace(
 
   // Initialize result matrix
   const result = Array(remainingDim).fill(null).map(() =>
-    Array(remainingDim).fill(null).map(() => math.complex({re: 0, im: 0}))
+    Array(remainingDim).fill(null).map(() => math.complex(0, 0))
   );
 
   // TODO: Implement partial trace computation
@@ -116,13 +116,13 @@ export function singularValueDecomposition(
   return {
     U: Array(dim).fill(null).map((_, i) => 
       Array(dim).fill(null).map((_, j) => 
-        i === j ? math.complex({re: 1, im: 0}) : math.complex({re: 0, im: 0})
+        i === j ? math.complex(1, 0) : math.complex(0, 0)
       )
     ),
     S: Array(dim).fill(1),
     V: Array(dim).fill(null).map((_, i) => 
       Array(dim).fill(null).map((_, j) => 
-        i === j ? math.complex({re: 1, im: 0}) : math.complex({re: 0, im: 0})
+        i === j ? math.complex(1, 0) : math.complex(0, 0)
       )
     )
   };

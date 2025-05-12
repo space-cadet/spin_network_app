@@ -17,8 +17,8 @@ describe('Quantum Measurements', () => {
   describe('ProjectionOperator', () => {
     it('creates valid projection operator from state', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const projector = new ProjectionOperator(state);
       
@@ -26,22 +26,22 @@ describe('Quantum Measurements', () => {
       expect(projector.type).toBe('projection');
       
       const matrix = projector.toMatrix();
-      expect(matrix[0][0]).toEqual(math.complex({re: 1, im:  0}));
-      expect(matrix[0][1]).toEqual(math.complex({re: 0, im:  0}));
-      expect(matrix[1][0]).toEqual(math.complex({re: 0, im:  0}));
-      expect(matrix[1][1]).toEqual(math.complex({re: 0, im:  0}));
+      expect(matrix[0][0]).toEqual(math.complex(1,  0));
+      expect(matrix[0][1]).toEqual(math.complex(0,  0));
+      expect(matrix[1][0]).toEqual(math.complex(0,  0));
+      expect(matrix[1][1]).toEqual(math.complex(0,  0));
     });
 
     it('projects state correctly', () => {
       const basis = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const projector = new ProjectionOperator(basis);
       
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       
       const projected = projector.apply(state);
@@ -51,8 +51,8 @@ describe('Quantum Measurements', () => {
 
     it('is idempotent (P² = P)', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const projector = new ProjectionOperator(state);
       
@@ -70,8 +70,8 @@ describe('Quantum Measurements', () => {
 
     it('is hermitian (P† = P)', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       const projector = new ProjectionOperator(state);
       
@@ -91,13 +91,13 @@ describe('Quantum Measurements', () => {
   describe('expectationValue', () => {
     it('calculates expectation value correctly', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       
       const operator = new MatrixOperator([
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: -1, im:  0})]
+        [math.complex(1,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(-1,  0)]
       ], 'hermitian');
       
       const result = expectationValue(state, operator);
@@ -107,13 +107,13 @@ describe('Quantum Measurements', () => {
 
     it('gives real expectation values for hermitian operators', () => {
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       
       const operator = new MatrixOperator([
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})]
+        [math.complex(1,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(1,  0)]
       ], 'hermitian');
       
       const result = expectationValue(state, operator);
@@ -124,14 +124,14 @@ describe('Quantum Measurements', () => {
   describe('measureState', () => {
     it('performs projective measurement correctly', () => {
       const basis = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const projector = new ProjectionOperator(basis);
       
       const state = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       
       const result = measureState(state, projector);
@@ -147,20 +147,20 @@ describe('Quantum Measurements', () => {
 
     it('preserves measurement statistics', () => {
       const basis = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       const projector = new ProjectionOperator(basis);
       
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       
       const result = measureState(state, projector);
       expect(result.probability).toBeCloseTo(1);
-      expect(result.state.amplitudes[0]).toEqual(math.complex({re: 1, im:  0}));
-      expect(result.state.amplitudes[1]).toEqual(math.complex({re: 0, im:  0}));
+      expect(result.state.amplitudes[0]).toEqual(math.complex(1,  0));
+      expect(result.state.amplitudes[1]).toEqual(math.complex(0,  0));
     });
   });
 });

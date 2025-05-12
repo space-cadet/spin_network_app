@@ -153,7 +153,7 @@ export class Hamiltonian extends MatrixOperator {
             row.map((elem, j) => math.add(elem, scaledTerm[i][j]) as Complex)
           );
         }, Array(dimension).fill(null).map(() => 
-          Array(dimension).fill(null).map(() => math.complex({re: 0, im:  0}))
+          Array(dimension).fill(null).map(() => math.complex(0, 0))
         ));
 
         if (!isHermitian(matrix)) {
@@ -172,7 +172,7 @@ export class Hamiltonian extends MatrixOperator {
         row.map((elem, j) => math.add(elem, scaledTerm[i][j]))
       );
     }, Array(dimension).fill(null).map(() => 
-      Array(dimension).fill(null).map(() => math.complex({re: 0, im:  0}))
+      Array(dimension).fill(null).map(() => math.complex(0, 0))
     ));
     
     // Always use 'general' as the operator type, store Hamiltonian type separately
@@ -220,7 +220,7 @@ export class Hamiltonian extends MatrixOperator {
     const scaledMatrix = matrix.map(row => 
       row.map(element => {
         // Multiply by -i*t
-        return math.multiply(element, math.complex({re: 0, im:  -time})) as Complex;
+        return math.multiply(element, math.complex(0, -time)) as Complex;
       })
     );
     
@@ -233,7 +233,7 @@ export class Hamiltonian extends MatrixOperator {
       for (let j = 0; j < dim; j++) {
         if (!evolutionMatrix[i][j] || typeof evolutionMatrix[i][j].re !== 'number' || 
             typeof evolutionMatrix[i][j].im !== 'number') {
-          evolutionMatrix[i][j] = math.complex({re: i === j ? 1 : 0, im:  0});
+          evolutionMatrix[i][j] = math.complex(i === j ? 1 : 0, 0);
         }
       }
     }
@@ -343,15 +343,15 @@ export class Hamiltonian extends MatrixOperator {
     
     const terms: HamiltonianTerm[] = [
       {
-        coefficient: math.complex({re: Bx, im:  0}),
+        coefficient: math.complex(Bx, 0),
         operator: PauliX
       },
       {
-        coefficient: math.complex({re: By, im:  0}),
+        coefficient: math.complex(By, 0),
         operator: PauliY
       },
       {
-        coefficient: math.complex({re: Bz, im:  0}),
+        coefficient: math.complex(Bz, 0),
         operator: PauliZ
       }
     ];
@@ -397,7 +397,7 @@ export class Hamiltonian extends MatrixOperator {
     }
 
     const terms: HamiltonianTerm[] = [];
-    const coeff = math.complex({re: coupling, im:  0});
+    const coeff = math.complex(coupling, 0);
     const dimension = Math.pow(2, numSpins);
 
     // For each pair of neighboring spins
@@ -424,7 +424,7 @@ export class Hamiltonian extends MatrixOperator {
           console.error(`Error creating Heisenberg term: ${e.message}`);
           // Create fallback identity term as placeholder
           terms.push({
-            coefficient: math.complex({re: 0, im:  0}), // Zero coefficient
+            coefficient: math.complex(0, 0), // Zero coefficient
             operator: MatrixOperator.identity(dimension)
           });
         }
