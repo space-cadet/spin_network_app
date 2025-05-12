@@ -23,11 +23,13 @@
 - Creating abstract graph package as part of T64 restructuring
 - Implementing core graph functionality that integrates with quantum module
 - Evaluating library options vs custom implementation
+- Planning to create a test app to directly compare Graphology and Cytoscape.js
 
 **Files**:
-- `memory-bank/tasks/T64a.md` - Task definition
+- `memory-bank/tasks/T64a.md` - Task definition (updated with test app approach)
 - `memory-bank/implementation-details/graph-quantum-integration-plan.md` - Implementation plan
-- `packages/graph-core/` - Main implementation directory (to be created)
+- `packages/graph-core/` - Main implementation directory
+- `packages/graph-test-app/` - Test application directory (to be created)
 
 **Progress**:
 1. ✅ Created comprehensive task file
@@ -39,16 +41,25 @@
    - Created comparative feature table
    - Evaluated integration potential with quantum module
    - Added implementation considerations
-3. ⬜ Phase 1: Package Setup
-   - ⬜ Create directory structure
-   - ⬜ Configure package.json and tsconfig.json
-   - ⬜ Set up build system with Vite
-4. ⬜ Phase 2: Core Implementation
-5. ⬜ Phase 3: Graph Algorithms
-6. ⬜ Phase 4: Integration Support
-7. ⬜ Phase 5: Testing
+3. ✅ Developed approach for evaluating graph libraries
+   - Planned graph-test-app structure for direct comparison
+   - Defined UI components and layouts
+   - Created evaluation framework
+4. ⬜ Phase 0: Create Graph Testing App
+   - ⬜ Set up graph-test-app package structure
+   - ⬜ Define common interfaces in graph-core/src/core/types.ts
+   - ⬜ Create AbstractGraph interface in graph-core
+   - ⬜ Implement basic UI components (reusing template-core)
+   - ⬜ Implement Graphology adapter in graph-test-app
+   - ⬜ Implement Cytoscape.js adapter in graph-test-app
+   - ⬜ Create performance testing utilities
+5. ⬜ Phase 1: Package Setup
+6. ⬜ Phase 2: Core Implementation
+7. ⬜ Phase 3: Graph Algorithms
+8. ⬜ Phase 4: Integration Support
+9. ⬜ Phase 5: Testing
 
-**Notes**: Task created as part of T64 restructuring to focus specifically on the graph-core package implementation. Completed research on existing graph libraries to evaluate whether to use an existing library like Graphology or implement a custom solution. The comprehensive analysis suggests that Graphology would provide a good foundation, but we need to ensure proper integration with our quantum module requirements.
+**Notes**: Task created as part of T64 restructuring to focus specifically on the graph-core package implementation. After researching existing graph libraries (Graphology, Cytoscape.js), decided to create a dedicated test application to evaluate both libraries before finalizing implementation approach. The graph-test-app will use template-core components to create a consistent interface for testing both libraries with the same UI.
 
 **Dependencies**: T64
 

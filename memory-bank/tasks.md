@@ -35,6 +35,14 @@
 **Description**: Create a robust and reusable graph data structure package as part of the Graph-Quantum Integration Restructuring. This package will provide abstract graph algorithms and operations that can be integrated with quantum-specific extensions.
 **Status**: 🔄 **Last**: 2025-05-12 23:30 IST
 **Progress**: 
+- ⬜ Phase 0: Evaluation & Prototyping
+  - ⬜ Create a graph-test-app package for library evaluation
+  - ⬜ Define core interfaces in graph-core package
+  - ⬜ Implement Graphology adapter in graph-test-app
+  - ⬜ Implement Cytoscape adapter in graph-test-app
+  - ⬜ Compare performance metrics and API usability
+  - ⬜ Make implementation decision based on test results
+  - ⬜ Migrate chosen implementation to graph-core
 - ⬜ Phase 1: Package Setup
   - ⬜ Create directory structure
   - ⬜ Configure package.json and tsconfig.json
@@ -58,12 +66,13 @@
   - ⬜ Add performance tests for large graphs
   - ⬜ Create integration tests with the quantum package
 **Files**:
+- `packages/graph-test-app/` - Test application to evaluate graph libraries
 - `packages/graph-core/src/core/` - Core graph implementations
 - `packages/graph-core/src/algorithms/` - Graph algorithms
 - `packages/graph-core/src/utils/` - Utility functions
 - `packages/graph-core/__tests__/` - Test directory
 **Dependencies**: T64
-**Notes**: This task implements the graph-core component of the larger T64 Graph-Quantum Integration Restructuring project. The graph-core package provides the foundation for the new architectural approach by creating abstract graph structures that can later be extended with quantum-specific functionality in the spin-network package. The implementation will focus on creating a highly reusable graph library that integrates well with math.js and provides efficient algorithms for both small and large graph operations.
+**Notes**: This task implements the graph-core component of the larger T64 Graph-Quantum Integration Restructuring project. The implementation will start with a dedicated testing app to evaluate Graphology and Cytoscape.js libraries before committing to a specific implementation approach. The graph-test-app will provide a UI to interact with both libraries using the same interface, allowing direct comparison of performance, API usability, and integration potential.
 
 ### T65: Release @spin-network/quantum as Standalone NPM Package
 **Description**: Prepare and publish the @spin-network/quantum package to npm as a standalone package for public use.

@@ -151,9 +151,41 @@ This creates a clean separation where each package has a clear responsibility:
 
 ### 3.2 Phase 2: Create Graph Core Package
 
-#### 3.2.1 Graph Library Evaluation
+#### 3.2.1 Updated Approach: Library Evaluation Through Testing App
 
-We conducted a comprehensive analysis of available graph libraries to determine the best approach for implementing the graph-core package. The following table summarizes our findings:
+Based on our comprehensive analysis of available graph libraries, we've decided to take an incremental approach to implementation:
+
+1. First, implement a testing application to directly compare Graphology and Cytoscape.js
+2. Define core interfaces in the graph-core package from the start
+3. Implement concrete adapters in the testing app for both libraries
+4. Use the testing results to make an informed decision about which approach to use
+5. Migrate the chosen implementation to the graph-core package
+
+This approach allows us to:
+- Directly compare the APIs and performance of both libraries
+- Make data-driven decisions based on actual usage patterns
+- Start with the right abstractions from the beginning
+- Avoid committing prematurely to an implementation strategy
+
+##### Package Structure for Evaluation
+
+```
+/packages/graph-core/
+├── src/
+│   ├── core/
+│   │   ├── types.ts            # Common interfaces and types
+│   │   └── AbstractGraph.ts    # Interface definition for graphs
+│   └── index.ts                # Public exports
+
+/packages/graph-test-app/
+├── src/
+│   ├── App.tsx                 # Main application component
+│   ├── components/             # UI components
+│   ├── backends/               # Graph library implementations for testing
+│   │   ├── graphology/         # Graphology implementation
+│   │   └── cytoscape/          # Cytoscape implementation
+│   └── utils/                  # Utility functions
+```
 
 | Feature | Graphology | Cytoscape.js | ngraph.graph | Custom Implementation |
 |---------|------------|--------------|--------------|------------------------|
@@ -182,48 +214,9 @@ We conducted a comprehensive analysis of available graph libraries to determine 
 3. **Math.js Integration**: Current SpinNetworkGraph already implements matrix conversion methods
 4. **Performance**: For complex quantum graphs, performance will be critical
 
-**Recommended Approaches (in order of preference):**
-1. **Graphology-based Implementation**: Use Graphology as the foundation with custom adapters for quantum and math.js integration
-2. **Custom Implementation**: Continue with our current approach but with improved abstractions
-3. **Hybrid Approach**: Use Graphology for algorithms while maintaining custom implementation for quantum-specific features
-
 #### 3.2.2 Implementation Plan
 
-1. **Set up package structure**:
-   ```
-   packages/graph-core/
-   ├── package.json
-   ├── tsconfig.json
-   └── src/
-       ├── core/
-       │   ├── types.ts
-       │   ├── abstractGraph.ts
-       │   └── graphFactory.ts
-       ├── algorithms/
-       │   ├── traversal.ts
-       │   ├── paths.ts
-       │   └── centrality.ts
-       ├── utils/
-       │   ├── matrix.ts
-       │   └── serialization.ts
-       └── index.ts
-   ```
-
-2. **Configure dependencies**:
-   ```json
-   {
-     "name": "@spin-network/graph-core",
-     "version": "0.1.0",
-     "dependencies": {
-       "@spin-network/quantum": "^0.1.0",
-       "mathjs": "^12.1.0",
-       "graphology": "^0.26.0",
-       "graphology-types": "^0.24.8"
-     }
-   }
-   ```
-
-3. **Implement core graph interfaces**:
+1. **Set up core interfaces in graph-core**:
    ```typescript
    // packages/graph-core/src/core/types.ts
    export interface GraphNode {
@@ -259,10 +252,34 @@ We conducted a comprehensive analysis of available graph libraries to determine 
    }
    ```
 
-4. **Implement AbstractGraph** class:
-   - If using Graphology: Create an adapter that wraps Graphology's functionality
-   - If custom implementation: Refactor the current SpinNetworkGraph with proper abstraction
-   - Ensure matrix integration with math.js similar to current implementation
+2. **Implement adapters in the test app**:
+   ```typescript
+   // packages/graph-test-app/src/backends/graphology/GraphAdapter.ts
+   import { Graph, GraphNode, GraphEdge } from '@spin-network/graph-core';
+   import { Graph as GraphologyGraph } from 'graphology';
+   
+   export class GraphologyAdapter implements Graph {
+     private graph: GraphologyGraph;
+     
+     constructor() {
+       this.graph = new GraphologyGraph();
+     }
+     
+     // Implement Graph interface methods...
+   }
+   
+   // Similar implementation for CytoscapeAdapter
+   ```
+
+3. **Create test app UI components**:
+   - Implement GraphCanvas for visualization
+   - Create operations panel for graph manipulation
+   - Add performance measurement utilities
+   
+4. **Migration path after evaluation**:
+   - Move the chosen implementation to graph-core
+   - Expand with additional algorithms and utilities
+   - Add comprehensive testing
 
 ### 3.3 Phase 3: Create Tensor Core Package
 
