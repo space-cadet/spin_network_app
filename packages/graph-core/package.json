@@ -1,0 +1,26 @@
+{
+  "name": "@spin-network/graph-core",
+  "version": "0.1.0",
+  "description": "Abstract graph structures for spin networks",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@spin-network/quantum": "^0.1.0",
+    "graphology": "^0.26.0",
+    "graphology-types": "^0.24.8",
+    "mathjs": "^12.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0",
+    "vitest": "^1.0.0"
+  }
+}

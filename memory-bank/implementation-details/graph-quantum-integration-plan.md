@@ -151,6 +151,44 @@ This creates a clean separation where each package has a clear responsibility:
 
 ### 3.2 Phase 2: Create Graph Core Package
 
+#### 3.2.1 Graph Library Evaluation
+
+We conducted a comprehensive analysis of available graph libraries to determine the best approach for implementing the graph-core package. The following table summarizes our findings:
+
+| Feature | Graphology | Cytoscape.js | ngraph.graph | Custom Implementation |
+|---------|------------|--------------|--------------|------------------------|
+| **Core Features** |
+| License | MIT | MIT | MIT | N/A |
+| TypeScript Support | Excellent | Good (since 3.31.0) | Limited | Full Control |
+| Performance | Good | Good | Excellent | Depends on Implementation |
+| **Graph Types** |
+| Directed/Undirected/Mixed | ✅ | ✅ | Limited | Can Implement |
+| Multi-Graphs | ✅ | ✅ | ✅ | Can Implement |
+| Compound Graphs | ✅ | ✅ | ❌ | Can Implement |
+| **Algorithm Support** |
+| Traversal & Path Finding | ✅ | ✅ | ✅ | Need to Implement |
+| Centrality Measures | ✅ | ✅ | Limited | Need to Implement |
+| Graph Composition | ✅ | Limited | Limited | Need to Implement |
+| **Integration Potential** |
+| Math.js Compatibility | Via Custom Adapter | Via Custom Adapter | Via Custom Adapter | Direct Integration |
+| Quantum State Attachment | Via Extension | Via Extension | Via Extension | Native Support |
+| **Community & Support** |
+| Active Maintenance | ✅ | ✅ | Limited | N/A |
+| Documentation | Excellent | Excellent | Good | N/A |
+
+**Key Decision Factors:**
+1. **Integration with Quantum States**: All options would require custom adapters for quantum state attachment
+2. **Current Usage**: Cytoscape.js is already used in our UI components for visualization
+3. **Math.js Integration**: Current SpinNetworkGraph already implements matrix conversion methods
+4. **Performance**: For complex quantum graphs, performance will be critical
+
+**Recommended Approaches (in order of preference):**
+1. **Graphology-based Implementation**: Use Graphology as the foundation with custom adapters for quantum and math.js integration
+2. **Custom Implementation**: Continue with our current approach but with improved abstractions
+3. **Hybrid Approach**: Use Graphology for algorithms while maintaining custom implementation for quantum-specific features
+
+#### 3.2.2 Implementation Plan
+
 1. **Set up package structure**:
    ```
    packages/graph-core/
@@ -159,7 +197,15 @@ This creates a clean separation where each package has a clear responsibility:
    └── src/
        ├── core/
        │   ├── types.ts
-       │   └── abstractGraph.ts
+       │   ├── abstractGraph.ts
+       │   └── graphFactory.ts
+       ├── algorithms/
+       │   ├── traversal.ts
+       │   ├── paths.ts
+       │   └── centrality.ts
+       ├── utils/
+       │   ├── matrix.ts
+       │   └── serialization.ts
        └── index.ts
    ```
 
@@ -170,7 +216,9 @@ This creates a clean separation where each package has a clear responsibility:
      "version": "0.1.0",
      "dependencies": {
        "@spin-network/quantum": "^0.1.0",
-       "mathjs": "^12.1.0"
+       "mathjs": "^12.1.0",
+       "graphology": "^0.26.0",
+       "graphology-types": "^0.24.8"
      }
    }
    ```
@@ -192,10 +240,29 @@ This creates a clean separation where each package has a clear responsibility:
 
    export interface Graph {
      // Core graph interface methods
+     
+     // Matrix operations
+     toAdjacencyMatrix(): math.Matrix;
+     toLaplacianMatrix(weightFunction?: EdgeWeightFunction): math.Matrix;
+     
+     // Graph operations
+     addNode(node: GraphNode): Graph;
+     removeNode(nodeId: string): Graph;
+     addEdge(edge: GraphEdge): Graph;
+     removeEdge(edgeId: string): Graph;
+     
+     // Query operations
+     getNode(id: string): GraphNode | undefined;
+     getEdge(id: string): GraphEdge | undefined;
+     getAdjacentNodes(nodeId: string): GraphNode[];
+     getConnectedEdges(nodeId: string): GraphEdge[];
    }
    ```
 
-4. **Implement AbstractGraph** class based on current SpinNetworkGraph but with proper abstraction
+4. **Implement AbstractGraph** class:
+   - If using Graphology: Create an adapter that wraps Graphology's functionality
+   - If custom implementation: Refactor the current SpinNetworkGraph with proper abstraction
+   - Ensure matrix integration with math.js similar to current implementation
 
 ### 3.3 Phase 3: Create Tensor Core Package
 
@@ -408,12 +475,27 @@ The integrated system will support operations like:
 **Challenge**: Ensuring existing code continues to work during migration.
 **Solution**: Create compatibility layers and extensive testing.
 
+### 7.5 Library Integration Challenges
+
+**Challenge**: Integrating external graph libraries with quantum-specific features.
+**Solution**: Create appropriate adapter layers and thoroughly test integrations.
+
+Key considerations for library integration:
+1. Ensure consistent immutability patterns across the codebase
+2. Maintain efficient matrix operations with math.js
+3. Preserve the ability to attach quantum states to graph elements
+4. Support graph composition for building complex quantum networks
+5. Ensure type safety and comprehensive TypeScript support
+
 ## 8. Next Steps
 
 1. Create the quantum package structure in packages/
 2. Refactor and migrate lib/quantum code to the new structure
 3. Develop comprehensive tests for the quantum package
-4. Begin implementing graph-core
+4. Begin implementing graph-core package:
+   - First implement T64a with evaluation of graph library options
+   - If using Graphology, focus on creating adapters for math.js and quantum state integration
+   - If custom implementation, refactor current SpinNetworkGraph with improved abstractions
 
 ## 9. Conclusion
 

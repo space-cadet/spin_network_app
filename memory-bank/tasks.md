@@ -1,11 +1,11 @@
 # Tasks Master Reference
-*Last Updated: 2025-05-11 20:30 IST*
+*Last Updated: 2025-05-12 23:00 IST*
 
 ## Tasks Overview
-- **Active Tasks:** 26
+- **Active Tasks:** 28
 - **Paused Tasks:** 4  
 - **Completed Tasks:** 28
-- **Latest Task ID:** T64
+- **Latest Task ID:** T65
 
 ## Task Registry
 *Last Updated: 2025-05-11 20:30 IST*
@@ -13,7 +13,9 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
-| T64 | Graph-Quantum Integration Restructuring | ⬜ | HIGH | 2025-05-11 | [tasks/T64.md] |
+| T65 | Release @spin-network/quantum as Standalone NPM Package | ⬜ | HIGH | 2025-05-12 | [tasks/T65.md] |
+| T64a | Implement @spin-network/graph-core Package | 🔄 | HIGH | 2025-05-12 | [tasks/T64a.md] |
+| T64 | Graph-Quantum Integration Restructuring | 🔄 | HIGH | 2025-05-11 | [tasks/T64.md] |
 | T63 | Enhance Quantum Library Documentation | 🔄 | HIGH | 2025-05-11 | [tasks/T63.md] |
 | T61 | Implement Quantum Circuit Module | ⬜ | HIGH | 2025-05-09 | [tasks/T61.md] |
 | T62 | Fix eigenDecomposition Implementation | 🔄 | HIGH | 2025-05-10 | [tasks/T62.md] | Fixing mathjs complex number creation and eigenDecomposition implementation |
@@ -29,6 +31,65 @@
 | T52 | Document Library API Reorganization | 🔄 | HIGH | 2025-05-03 | [tasks/T52.md] |
 
 ## Task Details
+### T64a: Implement @spin-network/graph-core Package
+**Description**: Create a robust and reusable graph data structure package as part of the Graph-Quantum Integration Restructuring. This package will provide abstract graph algorithms and operations that can be integrated with quantum-specific extensions.
+**Status**: 🔄 **Last**: 2025-05-12 23:30 IST
+**Progress**: 
+- ⬜ Phase 1: Package Setup
+  - ⬜ Create directory structure
+  - ⬜ Configure package.json and tsconfig.json
+  - ⬜ Set up build system with Vite
+- ⬜ Phase 2: Core Implementation
+  - ⬜ Implement AbstractGraph class as the base interface
+  - ⬜ Develop GraphNode and GraphEdge interfaces
+  - ⬜ Create core data structure with Map-based adjacency lists
+  - ⬜ Implement graph immutability and copy-on-write
+- ⬜ Phase 3: Graph Algorithms
+  - ⬜ Implement traversal algorithms (BFS, DFS)
+  - ⬜ Add path finding algorithms (shortest path)
+  - ⬜ Create graph composition utilities (merge, extract subgraph)
+  - ⬜ Add centrality measures (degree, betweenness)
+- ⬜ Phase 4: Integration Support
+  - ⬜ Create adapters for math.js integration
+  - ⬜ Implement utilities for quantum state attachment
+  - ⬜ Add serialization and deserialization support
+- ⬜ Phase 5: Testing
+  - ⬜ Create unit tests for all core functionality
+  - ⬜ Add performance tests for large graphs
+  - ⬜ Create integration tests with the quantum package
+**Files**:
+- `packages/graph-core/src/core/` - Core graph implementations
+- `packages/graph-core/src/algorithms/` - Graph algorithms
+- `packages/graph-core/src/utils/` - Utility functions
+- `packages/graph-core/__tests__/` - Test directory
+**Dependencies**: T64
+**Notes**: This task implements the graph-core component of the larger T64 Graph-Quantum Integration Restructuring project. The graph-core package provides the foundation for the new architectural approach by creating abstract graph structures that can later be extended with quantum-specific functionality in the spin-network package. The implementation will focus on creating a highly reusable graph library that integrates well with math.js and provides efficient algorithms for both small and large graph operations.
+
+### T65: Release @spin-network/quantum as Standalone NPM Package
+**Description**: Prepare and publish the @spin-network/quantum package to npm as a standalone package for public use.
+**Status**: ⬜ **Last**: 2025-05-12 23:00 IST
+**Progress**: 
+- ⬜ Phase 1: Package Preparation
+  - ⬜ Verify and update package.json
+  - ⬜ Add publishConfig with public access
+  - ⬜ Create .npmignore file
+  - ⬜ Update README.md
+- ⬜ Phase 2: Pre-Release Testing
+  - ⬜ Create a tarball using npm pack
+  - ⬜ Test installation in a separate project
+- ⬜ Phase 3: Publication
+  - ⬜ Create/verify @spin-network organization
+  - ⬜ Publish the package to npm
+- ⬜ Phase 4: Post-Release
+  - ⬜ Tag the release in git
+  - ⬜ Create release documentation
+**Files**: 
+- `packages/quantum/package.json`
+- `packages/quantum/README.md`
+- `packages/quantum/.npmignore`
+**Dependencies**: T64, T63
+**Notes**: Will make the quantum mechanics library available as a standalone npm package for broader usage outside the spin network application.
+
 ### T64: Graph-Quantum Integration Restructuring
 **Description**: Redesign and restructure the library to create proper abstract graph tools that integrate with quantum module for building graph state vectors with quantum states on edges and intertwiner tensors on nodes.
 **Status**: ⬜ **Last**: 2025-05-11 20:30 IST
@@ -291,6 +352,8 @@
 | T38 | Implement Intertwiner Tensor Initialization | 2025-04-24 | T36, T20 |
 
 ## Dependencies
+- **T65** → Depends on → **T64, T63**
+- **T64a** → Depends on → **T64**
 - **T64** → Depends on → **T55, T56**
 - **T63** → Depends on → **T56**
 - **T62** → Depends on → **T60**
@@ -317,7 +380,8 @@
 - **T48** → None
 
 ## Priority Queue
-1. **T64**: Graph-Quantum Integration Restructuring - foundational library redesign
+1. **T65**: Release @spin-network/quantum as Standalone NPM Package
+2. **T64**: Graph-Quantum Integration Restructuring - foundational library redesign
 2. **T62**: Fix eigenDecomposition implementation for proper complex value handling
 3. **T61**: Implement quantum circuit module (circuit.ts)
 4. **T57**: Complete examples enhancement with comprehensive structure
@@ -344,6 +408,8 @@ Meta tasks are maintenance and cleanup tasks that sit outside the regular task n
 **Notes**: Periodic maintenance task to ensure documentation accuracy. Critical given the project's shift toward quantum library development and modular architecture. Successfully updated all key documents to reflect current quantum focus. Added comprehensive quantum technology details to techContext.md, updated TODO.md with prioritized quantum tasks, and enhanced main project files to accurately present the project's quantum capabilities.
 
 ## Recent Updates
+- 2025-05-12 23:30: Added T64a - Implement @spin-network/graph-core Package
+- 2025-05-12 23:00: Added T65 - Release @spin-network/quantum as Standalone NPM Package
 - 2025-05-11 22:00: Added META-1 - Memory Bank Content Update
 - 2025-05-11 20:30: Added T64 - Graph-Quantum Integration Restructuring
 - 2025-05-11 20:30: Created implementation plan for graph-quantum integration in memory-bank/implementation-details
