@@ -1,5 +1,5 @@
 {
-  "name": "@template-core",
+  "name": "@spin-network/template-core",
   "version": "0.1.0",
   "private": false,
   "main": "dist/index.js",

@@ -13,7 +13,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@spin-network/quantum": "^0.1.0",
+    "@spin-network/quantum": "workspace:^0.1.0",
     "graphology": "^0.26.0",
     "graphology-types": "^0.24.8",
     "mathjs": "^12.1.0"
