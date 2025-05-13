@@ -15,7 +15,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "preinstall": "npx only-allow pnpm",
     "generate:index": "NODE_OPTIONS='--loader ts-node/esm' node scripts/generate-component-index.ts",
-    "generate:map": "NODE_OPTIONS='--loader ts-node/esm' node scripts/generate_project_map.ts",
+    "generate:map": "NODE_OPTIONS='--loader ts-node/esm' node scripts/generate-project-map.ts",
     "convert:md": "NODE_OPTIONS='--loader ts-node/esm' node scripts/convert-md-to-html.ts",
     "test": "jest",
     "test:watch": "jest --watch"

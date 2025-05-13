@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { fileURLToPath } from 'url';
 import { glob } from 'glob';
 
 interface ComponentInfo {
@@ -8,6 +8,7 @@ interface ComponentInfo {
   path: string;
   type: string;
   relatedFiles: string[];
+  package?: string; // Optional package name for monorepo components
 }
 
 // --- Configuration ---
@@ -15,47 +16,105 @@ interface ComponentInfo {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const projectRoot = path.resolve(__dirname, '..'); // Assumes script is in 'scripts/' directory
-const componentsDir = path.join(projectRoot, 'src', 'components');
+const projectRoot = path.resolve(__dirname, '..');
 const outputFile = path.join(projectRoot, 'memory-bank/component_index.md');
-const filePattern = '**/*.tsx'; // Pattern to find component files
+
+// Define patterns and directories to search
+const componentPatterns = ['**/*.tsx', '**/*.jsx']; // Include both TSX and JSX files
+const excludePatterns = [
+  '**/node_modules/**',
+  '**/dist/**',
+  '**/build/**',
+  '**/coverage/**',
+  '**/.next/**'
+];
 // --- End Configuration ---
 
 async function findComponents(): Promise<ComponentInfo[]> {
-  const componentFiles = await glob(filePattern, { cwd: componentsDir, absolute: true });
+  console.log('Scanning project for components...');
   const components: ComponentInfo[] = [];
+
+  // Use glob to find all component files across the project
+  const componentFiles = await glob(componentPatterns, {
+    cwd: projectRoot,
+    absolute: true,
+    ignore: excludePatterns
+  });
 
   for (const absolutePath of componentFiles) {
     const relativePath = path.relative(projectRoot, absolutePath);
     const dirName = path.dirname(absolutePath);
-    const baseName = path.basename(absolutePath, '.tsx');
+    const baseName = path.basename(absolutePath, path.extname(absolutePath));
 
-    // Basic heuristic: Use filename as component name
-    // More complex logic could parse the file content if needed
-    const componentName = baseName;
-
-    // Check for related index.ts
-    const relatedFiles: string[] = [];
-    const indexTsPath = path.join(dirName, 'index.ts');
-    if (fs.existsSync(indexTsPath)) {
-       relatedFiles.push(path.relative(projectRoot, indexTsPath));
+    // Skip files we don't want to include
+    if (baseName.startsWith('.') || baseName.toLowerCase() === 'index') {
+      continue;
     }
 
-    // Exclude common files like .DS_Store if they somehow match
-    if (baseName.startsWith('.')) continue;
-     // Exclude index files themselves from being listed as components
-    if (baseName.toLowerCase() === 'index') continue;
+    // Determine the package/location context
+    const pathParts = relativePath.split(path.sep);
+    let packageName = '';
+    if (pathParts.includes('packages')) {
+      // For monorepo components, use the package name
+      const pkgIndex = pathParts.indexOf('packages');
+      if (pkgIndex + 1 < pathParts.length) {
+        packageName = pathParts[pkgIndex + 1];
+      }
+    } else if (pathParts.includes('src')) {
+      // For main source components
+      packageName = 'main';
+    } else {
+      // For other locations, use the top-level directory
+      packageName = pathParts[0];
+    }
+
+    // Check for related files
+    const relatedFiles: string[] = [];
+    const possibleRelatedFiles = [
+      path.join(dirName, 'index.ts'),
+      path.join(dirName, 'index.tsx'),
+      path.join(dirName, 'styles.css'),
+      path.join(dirName, 'styles.scss'),
+      path.join(dirName, `${baseName}.test.tsx`),
+      path.join(dirName, `${baseName}.test.ts`),
+      path.join(dirName, `${baseName}.css`),
+      path.join(dirName, `${baseName}.scss`)
+    ];
+
+    for (const file of possibleRelatedFiles) {
+      if (fs.existsSync(file)) {
+        relatedFiles.push(path.relative(projectRoot, file));
+      }
+    }
+
+    // Determine component type based on location and content
+    let type = 'React Component';
+    if (relativePath.includes('pages/')) {
+      type = 'Page Component';
+    } else if (relativePath.includes('layouts/')) {
+      type = 'Layout Component';
+    } else if (relativePath.includes('hooks/')) {
+      type = 'Custom Hook';
+    } else if (relativePath.includes('components/')) {
+      // Keep default type
+    }
 
     components.push({
-      name: componentName,
-      path: relativePath.replace(/\\/g, '/'), // Ensure forward slashes
-      type: 'React Component', // Basic assumption
+      name: baseName,
+      path: relativePath.replace(/\\/g, '/'),
+      type,
       relatedFiles: relatedFiles.map(p => p.replace(/\\/g, '/')),
+      package: packageName
     });
   }
 
-  // Sort alphabetically by component name for consistency
-  components.sort((a, b) => a.name.localeCompare(b.name));
+  // Sort components by package and then by name
+  components.sort((a, b) => {
+    if (a.package === b.package) {
+      return a.name.localeCompare(b.name);
+    }
+    return a.package?.localeCompare(b.package || '') || 0;
+  });
 
   return components;
 }
@@ -64,37 +123,48 @@ function generateMarkdown(components: ComponentInfo[]): string {
   const timestamp = new Date().toISOString();
   let markdown = `# Component Index\n`;
   markdown += `*Last Updated: ${timestamp} (Auto-generated)*\n\n`;
-  markdown += `This file maps conceptual component names to their primary file locations. Paths are relative to the project root (\`${projectRoot}\`).\n\n`;
+  markdown += `This file maps components across the entire project. Paths are relative to the project root (\`${projectRoot}\`).\n\n`;
 
-  markdown += `| Component Name                 | Primary File Path                                                     | Type/Description        | Related Files (Optional)                     |\n`;
-  markdown += `|--------------------------------|-----------------------------------------------------------------------|-------------------------|----------------------------------------------|\n`;
+  // Group components by package
+  const componentsByPackage = components.reduce((acc, comp) => {
+    const pkg = comp.package || 'other';
+    if (!acc[pkg]) {
+      acc[pkg] = [];
+    }
+    acc[pkg].push(comp);
+    return acc;
+  }, {} as Record<string, ComponentInfo[]>);
 
-  components.forEach(comp => {
-    const related = comp.relatedFiles.length > 0 ? `\`${comp.relatedFiles.join('`, `')}\`` : '-';
-    // Basic padding - adjust as needed for alignment
-    const namePadded = comp.name.padEnd(30);
-    const pathPadded = `\`${comp.path}\``.padEnd(70);
-    const typePadded = comp.type.padEnd(23);
+  // Generate section for each package
+  for (const [pkg, pkgComponents] of Object.entries(componentsByPackage)) {
+    markdown += `\n## ${pkg === 'main' ? 'Main Source' : pkg}\n\n`;
+    markdown += `| Component Name | Primary File Path | Type/Description | Related Files |\n`;
+    markdown += `|----------------|------------------|-----------------|---------------|\n`;
 
-    markdown += `| ${namePadded} | ${pathPadded} | ${typePadded} | ${related.padEnd(44)} |\n`;
-  });
+    pkgComponents.forEach(comp => {
+      const related = comp.relatedFiles.length > 0 ? `\`${comp.relatedFiles.join('`, `')}\`` : '-';
+      markdown += `| ${comp.name} | \`${comp.path}\` | ${comp.type} | ${related} |\n`;
+    });
+  }
 
   markdown += `\n## Notes\n`;
-  markdown += `- This index focuses on primary entry points or key files for components/features found via \`.tsx\` files.\n`;
+  markdown += `- This index includes components from across the entire project structure.\n`;
+  markdown += `- Component types are inferred based on their location in the project.\n`;
   markdown += `- This file is auto-generated by \`scripts/generate-component-index.ts\`. Do not edit manually.\n`;
   markdown += `- Keep this updated by running the script when components are added, moved, or renamed.\n`;
+  markdown += `- Related files may include tests, styles, and index files.\n`;
 
   return markdown;
 }
 
 async function run() {
   try {
-    console.log(`Scanning for components in: ${componentsDir}`);
+    console.log(`Scanning for components in the project...`);
     const components = await findComponents();
     console.log(`Found ${components.length} potential components.`);
 
     if (components.length === 0) {
-        console.warn("No components found. Check the 'componentsDir' and 'filePattern' configuration.");
+        console.warn("No components found. Check the 'componentPatterns' and 'excludePatterns' configuration.");
         return;
     }
 
