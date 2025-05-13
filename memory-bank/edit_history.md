@@ -1,4 +1,15 @@
 # Edit History
+*Last Updated: 2025-05-13 18:45 IST*
+
+## 2025-05-13
+### 18:45 - T64b: Standardized Layout Implementation
+- Created `/components/layout/SharedLayout.tsx` - Common layout with header and navigation
+- Created `/components/layout/ResizablePanelLayout.tsx` - Reusable panel layout
+- Modified `/pages/GraphPage.tsx` - Updated to use shared layout
+- Modified `/pages/QuantumPage.tsx` - Updated to use shared layout
+- Modified `tailwind.config.js` - Added primary color theme
+- Modified `routes/index.ts` - Updated routing configuration
+- Modified `App.tsx` - Added home route redirect
 *Last Updated: 2025-05-13 17:45 IST*
 
 ## 2025-05-13

@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@spin-network/template-core": "link:../template-core/src",
+    "@spin-network/template-core": "workspace:*",
     "cytoscape": "^3.26.0",
     "graphology": "^0.25.4",
     "graphology-types": "^0.24.7",
