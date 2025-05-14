@@ -16,7 +16,7 @@ import * as analysisModule from './analysis';
 import * as quantumModule from './quantum';
 import * as adaptersModule from './adapters';
 import * as utilsModule from './utils';
-import * as templatesModule from './templates';
+// import * as templatesModule from './templates';
 import * as ioModule from './io';
 
 // Export all modules for use in Node/module environments
@@ -26,7 +26,7 @@ export * from './analysis';
 export * as quantum from './quantum';
 export * from './adapters';
 export * from './utils';
-export * from './templates';
+// export * from './templates';
 export * from './io';
 
 // Import specific types and classes needed for factory functions
