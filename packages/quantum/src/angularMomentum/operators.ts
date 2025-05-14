@@ -3,9 +3,42 @@
  * Implements J₊, J₋, Jz, and J² operators for arbitrary angular momentum j
  */
 
-import { Complex, IOperator, OperatorType } from '../core/types';
+import { Complex, IOperator } from '../core/types';
 import { MatrixOperator } from '../operators/operator';
+import { expectationValue } from '../operators/measurement';
+import { StateVector } from '../states/stateVector';
+import { 
+  multiplyMatrices,
+  matrixExponential,
+  ComplexMatrix
+} from '../utils/matrixOperations';
 import * as math from 'mathjs';
+
+/**
+ * Creates an angular momentum state |j,m⟩
+ */
+function createAngularMomentumState(j: number, m: number): StateVector {
+  validateJ(j);
+  if (!isValidM(j, m)) {
+    throw new Error(`Invalid m=${m} for j=${j}`);
+  }
+
+  const dim = Math.floor(2 * j + 1);
+  const amplitudes = Array(dim).fill(null).map(() => math.complex(0, 0));
+  const idx = m + j;
+  amplitudes[idx] = math.complex(1, 0);
+
+  return new StateVector(dim, amplitudes, `|${j},${m}⟩`);
+}
+
+/**
+ * Creates a zero complex matrix of given dimension
+ */
+function createZeroMatrix(dim: number): ComplexMatrix {
+  return Array(dim).fill(null)
+    .map(() => Array(dim).fill(null)
+      .map(() => math.complex(0, 0)));
+}
 
 /**
  * Creates the raising operator J₊ for given angular momentum j
@@ -17,9 +50,7 @@ import * as math from 'mathjs';
 export function createJplus(j: number): IOperator {
   validateJ(j);
   const dim = Math.floor(2 * j + 1);
-  const matrix: Complex[][] = Array(dim).fill(null)
-    .map(() => Array(dim).fill(null)
-      .map(() => math.complex(0, 0)));
+  const matrix = createZeroMatrix(dim);
 
   // Fill matrix elements
   for (let m = -j; m < j; m++) {
@@ -42,9 +73,7 @@ export function createJplus(j: number): IOperator {
 export function createJminus(j: number): IOperator {
   validateJ(j);
   const dim = Math.floor(2 * j + 1);
-  const matrix: Complex[][] = Array(dim).fill(null)
-    .map(() => Array(dim).fill(null)
-      .map(() => math.complex(0, 0)));
+  const matrix = createZeroMatrix(dim);
 
   // Fill matrix elements
   for (let m = -j + 1; m <= j; m++) {
@@ -68,9 +97,7 @@ export function createJminus(j: number): IOperator {
 export function createJz(j: number): IOperator {
   validateJ(j);
   const dim = Math.floor(2 * j + 1);
-  const matrix: Complex[][] = Array(dim).fill(null)
-    .map(() => Array(dim).fill(null)
-      .map(() => math.complex(0, 0)));
+  const matrix = createZeroMatrix(dim);
 
   // Fill diagonal elements
   for (let m = -j; m <= j; m++) {
@@ -94,9 +121,7 @@ export function createJ2(j: number): IOperator {
   const dim = Math.floor(2 * j + 1);
   const eigenvalue = j * (j + 1);
   
-  const matrix: Complex[][] = Array(dim).fill(null)
-    .map(() => Array(dim).fill(null)
-      .map(() => math.complex(0, 0)));
+  const matrix = createZeroMatrix(dim);
 
   // Fill diagonal elements with j(j+1)
   for (let i = 0; i < dim; i++) {
@@ -199,7 +224,7 @@ export function createRotationOperator(
   const jMinus = createJminus(j);
   
   // Create Jy from J₊ and J₋
-  const jyMatrix: Complex[][] = jPlus.toMatrix().map((row, i) => 
+  const jyMatrix = jPlus.toMatrix().map((row, i) => 
     row.map((_, j) => {
       const plusElem = jPlus.toMatrix()[i][j];
       const minusElem = jMinus.toMatrix()[i][j];
@@ -209,7 +234,7 @@ export function createRotationOperator(
       ) as Complex;
     })
   );
-  const jy = new MatrixOperator(jyMatrix, { j });
+  const jy = new MatrixOperator(jyMatrix, 'general', true, { j });
   
   // Calculate rotation matrices
   const expAlpha = Object.assign(
@@ -233,65 +258,6 @@ export function createRotationOperator(
 }
 
 /**
- * Calculates matrix exponential e^A
- * Uses Taylor series approximation
- */
-function matrixExponential(matrix: Complex[][]): Complex[][] {
-  const dim = matrix.length;
-  let result = Array(dim).fill(null).map(() => 
-    Array(dim).fill(null).map((_, j) => 
-      j === _ ? math.complex(1, 0) : math.complex(0, 0)
-    )
-  );
-  
-  let term = result;
-  const maxIterations = 20;
-  
-  for (let n = 1; n <= maxIterations; n++) {
-    // Multiply term by A/n
-    term = multiplyMatrices(term, matrix).map(row => 
-      row.map(x => math.divide(x, math.complex(n, 0)))
-    );
-    
-    // Add to result
-    result = result.map((row, i) => 
-      row.map((x, j) => math.add(x, term[i][j]))
-    );
-    
-    // Check convergence
-    const normTerm = Math.max(...term.map(row => 
-      Math.max(...row.map(x => math.abs(x)))
-    ));
-    if (normTerm < 1e-10) break;
-  }
-  
-  return result;
-}
-
-/**
- * Multiplies two complex matrices
- */
-function multiplyMatrices(A: Complex[][], B: Complex[][]): Complex[][] {
-  const n = A.length;
-  const result = Array(n).fill(null).map(() => 
-    Array(n).fill(null).map(() => math.complex(0, 0))
-  );
-  
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      for (let k = 0; k < n; k++) {
-        result[i][j] = math.add(
-          result[i][j],
-          math.multiply(A[i][k], B[k][j])
-        );
-      }
-    }
-  }
-  
-  return result;
-}
-
-/**
  * Calculates expectation value ⟨j,m|O|j,m⟩ for an angular momentum operator
  * 
  * @param operator Angular momentum operator to calculate expectation for
@@ -299,17 +265,14 @@ function multiplyMatrices(A: Complex[][], B: Complex[][]): Complex[][] {
  * @param m Magnetic quantum number
  * @returns Complex expectation value
  */
-export function expectationValue(
+export function jmExpectationValue(
   operator: IOperator & { j: number },
   j: number,
   m: number
 ): Complex {
-  validateJ(j);
-  if (!isValidM(j, m)) {
-    throw new Error(`Invalid m=${m} for j=${j}`);
-  }
+  // Create the angular momentum state |j,m⟩
+  const state = createAngularMomentumState(j, m);
   
-  const idx = m + j;
-  const matrix = operator.toMatrix();
-  return matrix[idx][idx];
+  // Calculate ⟨j,m|O|j,m⟩ using the proper expectation value formula
+  return expectationValue(state, operator);
 }
