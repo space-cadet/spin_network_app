@@ -1,4 +1,14 @@
 # Edit History
+*Last Updated: 2025-05-15*
+
+## 2025-05-15
+### 12:30 - T64a: Implemented Core UI Structure
+- Modified `packages/graph-test-app/src/components/workspace/GraphWorkspace.tsx` - Added core layout and controls
+- Modified `packages/graph-test-app/src/components/layout/ResizablePanelLayout.tsx` - Added bottom panel support with persistence
+- Modified `packages/graph-test-app/src/components/panels/ControlPanel.tsx` - Enhanced with icons and better organization
+- Modified `packages/graph-test-app/src/components/workspace/ZoomControls.tsx` - Added zoom control buttons
+- Modified `packages/graph-test-app/src/store/graphSlice.ts` - Added basic graph state management
+- Modified `packages/graph-test-app/src/main.tsx` - Added Redux store integration
 *Last Updated: 2025-05-14 20:30 IST*
 
 ## 2025-05-14

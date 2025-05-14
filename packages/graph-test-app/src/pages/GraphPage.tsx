@@ -1,11 +1,10 @@
-// src/pages/GraphPage.tsx
 import React from 'react';
 import { Activity } from 'lucide-react';
 import { SharedLayout } from '../components/layout/SharedLayout';
 import { ResizablePanelLayout } from '../components/layout/ResizablePanelLayout';
 import { ControlPanel } from '../components/panels/ControlPanel';
-import { PropertiesPanel } from '../components/panels/PropertiesPanel';
-import { GraphCanvas } from '../components/graph/GraphCanvas';
+import { GraphWorkspace } from '../components/workspace/GraphWorkspace';
+import { GraphProperties } from '../components/panels/GraphProperties';
 
 const GraphPage: React.FC = () => {
   return (
@@ -16,8 +15,9 @@ const GraphPage: React.FC = () => {
       <ResizablePanelLayout
         panelPrefix="graph"
         leftPanel={<ControlPanel />}
-        mainPanel={<GraphCanvas />}
-        rightPanel={<PropertiesPanel />}
+        mainPanel={<GraphWorkspace />}
+        rightPanel={<GraphProperties />}
+        bottomPanel={<div className="p-4">Bottom Panel Content</div>}
       />
     </SharedLayout>
   );

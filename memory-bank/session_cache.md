@@ -1,4 +1,39 @@
 # Session Cache
+*Last Updated: 2025-05-15 12:30 IST*
+
+## Overview
+- Active: 1 | Focus: T64a
+- Session Type: Implementation
+- Status: 🔄 In Progress
+
+## Active Task
+### T64a: Implement @spin-network/graph-core Package
+**Status:** 🔄 
+**Progress**:
+1. ✅ Set up core UI structure
+   - ✅ Implemented ResizablePanelLayout with bottom panel
+   - ✅ Added persistent panel sizing
+   - ✅ Created basic graph visualization layout
+   - ✅ Enhanced control panel with icons
+2. 🔄 Next Steps:
+   - ⬜ Implement graph visualization
+   - ⬜ Add basic graph operations
+   - ⬜ Create performance monitoring
+
+**Current Context**:
+- Working on graph-test-app implementation
+- Testing panel layout and persistence
+- Preparing for graph library integration
+
+**Files Modified**:
+- `GraphWorkspace.tsx`
+- `ResizablePanelLayout.tsx`
+- `ControlPanel.tsx`
+- `ZoomControls.tsx`
+- `graphSlice.ts`
+- `main.tsx`
+
+**Notes**: UI structure in place, ready for graph library integration
 
 *Last Updated: May 14, 2025 14:15 IST*
 
