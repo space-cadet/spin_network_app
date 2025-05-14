@@ -489,10 +489,57 @@ packages/quantum/src/
 │   ├── unitary.ts     (Unitary operators)
 │   ├── hermitian.ts   (Hermitian operators)
 │   └── measurement.ts (Measurement operations)
+├── angularMomentum/   (NEW - Consolidated angular momentum module)
+│   ├── index.ts       (Public exports for the module)
+│   ├── operators.ts   (Angular momentum operators J₊, J₋, Jz, J²)
+│   ├── states.ts      (Angular momentum states |j,m⟩)
+│   ├── composition.ts (Angular momentum addition, Clebsch-Gordan)
+│   └── wignerSymbols.ts (3j, 6j, 9j symbols)
 ├── utils/
 │   ├── math.ts        (Math utilities)
 │   └── random.ts      (Quantum random utilities)
 └── index.ts           (Public exports)
+```
+
+### 4.1.1 Angular Momentum Module
+
+The angular momentum module provides a consolidated implementation of angular momentum algebra, crucial for spin network calculations. Key features include:
+
+1. **Core Angular Momentum Operators**:
+   - J₊, J₋, Jz operators for arbitrary j
+   - Total angular momentum operator J²
+   - Raising/lowering operator utilities
+   - Angular momentum eigenstates |j,m⟩
+   - Wigner-d matrices
+
+2. **Angular Momentum Composition**:
+   - Clebsch-Gordan coefficients
+   - Angular momentum addition (j₁ + j₂)
+   - Coupled basis states
+   - Momentum decomposition functions
+
+3. **Wigner Symbols**:
+   - 3j symbols
+   - 6j symbols
+   - 9j symbols
+   - Phase conventions handling
+   - Symmetry properties
+
+The module maintains clear boundaries while integrating seamlessly with the existing quantum library structure:
+
+```typescript
+// angularMomentum/operators.ts
+import { Operator } from '../core/types';
+import { Complex } from 'mathjs';
+
+export interface AngularMomentumOperator extends Operator {
+  j: number;  // Total angular momentum quantum number
+  type: 'Jplus' | 'Jminus' | 'Jz' | 'J2';
+}
+
+// Key implementations in separate files within angularMomentum/
+// maintaining clean module boundaries while leveraging existing
+// quantum library functionality
 ```
 
 ### 4.2 Clean API Design
