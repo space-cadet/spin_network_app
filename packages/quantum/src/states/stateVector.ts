@@ -14,14 +14,21 @@ export class StateVector implements IStateVector {
   readonly dimension: number;
   readonly amplitudes: Complex[];
   readonly basis?: string;
+  readonly properties?: Record<string, any>;
 
-  constructor(dimension: number, amplitudes?: Complex[], basis?: string) {
+  constructor(
+    dimension: number, 
+    amplitudes?: Complex[], 
+    basis?: string,
+    properties?: Record<string, any>
+  ) {
     validatePosDim(dimension);
     
     this.dimension = dimension;
     this.amplitudes = amplitudes || Array(dimension).fill(null)
       .map(() => math.complex(0, 0));
     this.basis = basis;
+    this.properties = properties;
 
     if (amplitudes) {
       validateAmps(amplitudes, dimension);
@@ -83,7 +90,7 @@ export class StateVector implements IStateVector {
       math.divide(amp, math.complex(currentNorm, 0)) as Complex
     );
 
-    return new StateVector(this.dimension, normalizedAmplitudes, this.basis);
+    return new StateVector(this.dimension, normalizedAmplitudes, this.basis, this.properties);
   }
 
   /**
@@ -108,7 +115,7 @@ export class StateVector implements IStateVector {
       newBasis = `${this.basis}⊗${other.basis}`;
     }
 
-    return new StateVector(newDimension, newAmplitudes, newBasis);
+    return new StateVector(newDimension, newAmplitudes, newBasis, this.properties);
   }
 
   /**

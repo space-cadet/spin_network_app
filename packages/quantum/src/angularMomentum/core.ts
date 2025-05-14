@@ -16,8 +16,12 @@ import * as math from 'mathjs';
 
 /**
  * Creates an angular momentum state |j,m⟩
+ * 
+ * @param j Total angular momentum quantum number
+ * @param m Magnetic quantum number
+ * @returns The state |j,m⟩ as a StateVector
  */
-function createAngularMomentumState(j: number, m: number): StateVector {
+export function createState(j: number, m: number): StateVector {
   validateJ(j);
   if (!isValidM(j, m)) {
     throw new Error(`Invalid m=${m} for j=${j}`);
@@ -94,6 +98,58 @@ export function createJminus(j: number): IOperator {
  * @param j Total angular momentum quantum number
  * @returns The Jz operator as a matrix
  */
+/**
+ * Creates the x-component operator Jx for given angular momentum j
+ * Jx = (J₊ + J₋)/2
+ * 
+ * @param j Total angular momentum quantum number
+ * @returns The Jx operator as a matrix
+ */
+export function createJx(j: number): IOperator {
+  const jPlus = createJplus(j);
+  const jMinus = createJminus(j);
+  
+  // Jx = (J₊ + J₋)/2
+  const matrix = jPlus.toMatrix().map((row, i) => 
+    row.map((_, j) => {
+      const plusElem = jPlus.toMatrix()[i][j];
+      const minusElem = jMinus.toMatrix()[i][j];
+      return math.multiply(
+        math.add(plusElem, minusElem),
+        0.5
+      ) as Complex;
+    })
+  );
+  
+  return new MatrixOperator(matrix, 'general', true, { j });
+}
+
+/**
+ * Creates the y-component operator Jy for given angular momentum j
+ * Jy = (J₊ - J₋)/(2i)
+ * 
+ * @param j Total angular momentum quantum number
+ * @returns The Jy operator as a matrix
+ */
+export function createJy(j: number): IOperator {
+  const jPlus = createJplus(j);
+  const jMinus = createJminus(j);
+  
+  // Jy = (J₊ - J₋)/(2i)
+  const matrix = jPlus.toMatrix().map((row, i) => 
+    row.map((_, j) => {
+      const plusElem = jPlus.toMatrix()[i][j];
+      const minusElem = jMinus.toMatrix()[i][j];
+      return math.multiply(
+        math.subtract(plusElem, minusElem),
+        math.complex(0, -0.5)
+      ) as Complex;
+    })
+  );
+  
+  return new MatrixOperator(matrix, 'general', true, { j });
+}
+
 export function createJz(j: number): IOperator {
   validateJ(j);
   const dim = Math.floor(2 * j + 1);
@@ -265,13 +321,38 @@ export function createRotationOperator(
  * @param m Magnetic quantum number
  * @returns Complex expectation value
  */
+/**
+ * Creates a coherent angular momentum state |j,θ,φ⟩
+ * This is an eigenstate of the angular momentum operator pointing in the direction (θ,φ)
+ * 
+ * @param j Total angular momentum quantum number
+ * @param theta Polar angle θ in radians
+ * @param phi Azimuthal angle φ in radians
+ * @returns The coherent state as a StateVector
+ */
+export function createCoherentState(j: number, theta: number, phi: number): StateVector {
+  validateJ(j);
+  
+  // Create rotation operator to rotate from |j,j⟩ to desired direction
+  const alpha = phi;
+  const beta = theta;
+  const gamma = 0;
+  const D = createRotationOperator(j, alpha, beta, gamma);
+  
+  // Start with highest weight state |j,j⟩
+  const highestState = createState(j, j);
+  
+  // Rotate to desired direction
+  return D.apply(highestState);
+}
+
 export function jmExpectationValue(
   operator: IOperator & { j: number },
   j: number,
   m: number
 ): Complex {
   // Create the angular momentum state |j,m⟩
-  const state = createAngularMomentumState(j, m);
+  const state = createState(j, m);
   
   // Calculate ⟨j,m|O|j,m⟩ using the proper expectation value formula
   return expectationValue(state, operator);

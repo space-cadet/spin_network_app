@@ -14,6 +14,7 @@ export interface IStateVector {
   dimension: number;      // Hilbert space dimension
   amplitudes: Complex[];  // State vector amplitudes in computational basis
   basis?: string;        // Optional basis label
+  properties?: Record<string, any>;  // Optional properties bag
 
   // State manipulation
   setState(index: number, value: Complex): void;

@@ -3,7 +3,7 @@
  * @module angularMomentum
  */
 
-export * from './operators';
-export * from './states';
+export * from './core';
+// export * from './states';
 export * from './composition';
 export * from './wignerSymbols';

@@ -283,27 +283,34 @@ Implementation of quantum system energy operators:
 ## Level 4: Angular Momentum
 Location: `src/angularMomentum/`
 
-### Operators (`operators.ts`)
-Angular momentum operator implementations:
+### Core (`core.ts`)
+Angular momentum implementation:
 
-**Core Functions:**
+**State Functions:**
+- `createState(j: number, m: number)`: Creates basis state |j,m⟩
+- `createCoherentState(j: number, theta: number, phi: number)`: Creates coherent state
+
+**Operator Functions:**
 - `createJplus(j: number)`: Creates raising operator J₊
 - `createJminus(j: number)`: Creates lowering operator J₋
-- `createJz(j: number)`: Creates z-component operator Jz
+- `createJz(j: number)`: Creates z-component Jz
+- `createJx(j: number)`: Creates x-component Jx
+- `createJy(j: number)`: Creates y-component Jy
 - `createJ2(j: number)`: Creates total angular momentum J²
 - `createJ2FromComponents(j: number)`: Alternative J² construction
-- `createRotationOperator(j, α, β, γ)`: Creates Wigner rotation operator
+- `createRotationOperator(j, α, β, γ)`: Creates Wigner rotation operator D(α,β,γ)
 
 **Utility Functions:**
 - `getValidM(j: number)`: Gets valid m values for given j
 - `isValidM(j: number, m: number)`: Checks if m is valid
 - `jmExpectationValue(operator, j, m)`: Calculates ⟨j,m|O|j,m⟩
 
-### States (`states.ts`)
-Angular momentum states and representations:
-- Angular momentum basis states |j,m⟩
-- State transformations
-- Coherent states
+**Features:**
+- Full angular momentum algebra implementation
+- Cartesian and spherical basis support
+- Rotation operator using Euler angles
+- Coherent state construction
+- Numerical stability for high j values
 
 ### Composition (`composition.ts`)
 Angular momentum addition:
