@@ -62,17 +62,17 @@ The old lib/ folder contents will be gradually deprecated as functionality is mi
 
 | **Current Name** | **Proposed Name** | **Reason for Change** |
 |------------------|-------------------|------------------------|
-| `SpinNetworkGraph` | `AbstractGraph` | The current name is tied specifically to spin networks, but we need an abstract graph structure that can be used for general purposes. |
-| `SimulationNode` | `GraphNode` | Remove the simulation-specific terminology to emphasize the abstract graph structure. |
-| `SimulationEdge` | `GraphEdge` | Same as above - remove simulation specificity. |
-| `SimulationGraph` | `Graph` | Make the interface name more general to represent any graph structure. |
-| `SimulationStateVector` | `NodeStateVector` | Clarify that this represents state values mapped to graph nodes. |
-| `GraphStateVector` | `AbstractNodeState` | Better reflects that this is an abstract representation of states on nodes. |
-| `TensorNode` | `IntertwinerNode` | More precisely describes what it represents - a node with an intertwiner tensor. |
-| `StateVectorEdge` | `QuantumEdge` | More descriptive name for an edge carrying quantum states. |
-| `WeightFunction` | `EdgeWeightFunction` | More specific about what is being weighted. |
-| `StandardWeightFunction` | `SpinWeightFunction` | Clarifies that these weight functions are specifically related to spin values. |
-| `intertwinerValue` property | `intertwinerIndex` | More accurate, as it's often an index into a basis of intertwiners. |
+| `SpinNetworkGraph` | `IGraph` | Base interface for all graph structures |
+| `SimulationNode` | `IGraphNode` | Base interface for all graph nodes |
+| `SimulationEdge` | `IGraphEdge` | Base interface for all graph edges |
+| `SimulationGraph` | `ITypedGraph` | Type-safe graph interface |
+| `SimulationStateVector` | `INodeState` | Interface for node states |
+| `GraphStateVector` | `IGraphState` | Interface for overall graph state |
+| `TensorNode` | `IIntertwinerNode` | Interface for nodes with intertwiner tensors |
+| `StateVectorEdge` | `IQuantumEdge` | Interface for edges with quantum states |
+| `WeightFunction` | `EdgeWeightFunction` | Type for edge weight calculations |
+| `StandardWeightFunction` | `SpinWeightFunction` | Type for spin-specific weight calculations |
+| `intertwinerValue` property | `intertwinerIndex` | More accurate property name |
 
 For new classes and interfaces that need to be created:
 
@@ -97,6 +97,82 @@ This creates a clean separation where each package has a clear responsibility:
 - graph-core: Abstract graph structures and algorithms
 - tensor-core: Tensor operations and manipulations
 - spin-network: Integration of quantum states with graph structures
+
+### 2.4 Extended Interface Structure
+
+The graph-core package will implement a hierarchical interface structure that supports multiple use cases:
+
+```typescript
+// Base interfaces for all graph elements
+interface IGraphElement {
+  readonly id: string;
+  readonly properties: IPropertyMap;
+}
+
+interface IGraphNode extends IGraphElement {
+  readonly type: string;
+}
+
+interface IGraphEdge extends IGraphElement {
+  readonly sourceId: string;
+  readonly targetId: string;
+  readonly directed: boolean;
+  readonly type: string;
+}
+
+// Type-safe graph elements
+interface ITypedNode<T extends string> extends IGraphNode {
+  readonly type: T;
+}
+
+interface ITypedEdge<T extends string> extends IGraphEdge {
+  readonly type: T;
+}
+
+// Higher dimensional structures
+interface IFace extends IGraphElement {
+  readonly edgeIds: readonly string[];
+  readonly nodeIds: readonly string[];
+}
+
+interface ISimplex extends IGraphElement {
+  readonly dimension: number;
+  readonly boundaryIds: readonly string[];
+  readonly coFaceIds: readonly string[];
+}
+
+// Specialized graph interfaces
+interface ITypedGraph<NodeType extends string, EdgeType extends string> extends IGraph {
+  // Type-safe operations
+}
+
+interface IOrderedGraph extends IGraph {
+  // Operations for ordered subgraphs (circuits)
+}
+
+interface ISimplicialGraph extends IGraph {
+  // Operations for faces and simplices
+}
+
+interface IRewriteableGraph extends IGraph {
+  // Pattern matching and rewrite operations
+}
+
+// Combined interface for full functionality
+interface IExtendedGraph<NodeType extends string, EdgeType extends string> 
+  extends ITypedGraph<NodeType, EdgeType>,
+          IOrderedGraph,
+          ISimplicialGraph,
+          IRewriteableGraph {
+}
+```
+
+This interface structure supports:
+1. **Type Safety**: Through `ITypedGraph<NodeType, EdgeType>`
+2. **Quantum Circuits**: Using `IOrderedGraph` for gate sequences
+3. **ZX-Calculus**: Using `ITypedGraph` and `IRewriteableGraph`
+4. **Pachner Moves**: Using `ISimplicialGraph` and `IRewriteableGraph`
+5. **Pattern Matching**: Through the rewrite rule system
 
 ## 3. Implementation Plan
 
@@ -219,36 +295,68 @@ This approach allows us to:
 1. **Set up core interfaces in graph-core**:
    ```typescript
    // packages/graph-core/src/core/types.ts
-   export interface GraphNode {
+   
+   // Base interfaces
+   export interface IGraphElement {
      readonly id: string;
-     readonly properties: Record<string, any>;
+     readonly properties: IPropertyMap;
    }
 
-   export interface GraphEdge {
-     readonly id: string;
+   export interface IGraphNode extends IGraphElement {
+     readonly type: string;
+   }
+
+   export interface IGraphEdge extends IGraphElement {
      readonly sourceId: string;
      readonly targetId: string;
-     readonly properties: Record<string, any>;
+     readonly directed: boolean;
+     readonly type: string;
    }
 
-   export interface Graph {
-     // Core graph interface methods
-     
-     // Matrix operations
-     toAdjacencyMatrix(): math.Matrix;
-     toLaplacianMatrix(weightFunction?: EdgeWeightFunction): math.Matrix;
-     
+   // Core graph interface
+   export interface IGraph {
+     readonly isDirected: boolean;
+     readonly nodeCount: number;
+     readonly edgeCount: number;
+
      // Graph operations
-     addNode(node: GraphNode): Graph;
-     removeNode(nodeId: string): Graph;
-     addEdge(edge: GraphEdge): Graph;
-     removeEdge(edgeId: string): Graph;
-     
+     addNode(node: IGraphNode): IGraph;
+     removeNode(nodeId: string): IGraph;
+     addEdge(edge: IGraphEdge): IGraph;
+     removeEdge(edgeId: string): IGraph;
+
      // Query operations
-     getNode(id: string): GraphNode | undefined;
-     getEdge(id: string): GraphEdge | undefined;
-     getAdjacentNodes(nodeId: string): GraphNode[];
-     getConnectedEdges(nodeId: string): GraphEdge[];
+     getNode(nodeId: string): IGraphNode | undefined;
+     getEdge(edgeId: string): IGraphEdge | undefined;
+     getNodes(): readonly IGraphNode[];
+     getEdges(): readonly IGraphEdge[];
+
+     // Matrix operations
+     toAdjacencyMatrix(weightFn?: EdgeWeightFunction): Matrix;
+     toLaplacianMatrix(weightFn?: EdgeWeightFunction): Matrix;
+   }
+
+   // Extended interfaces
+   export interface ITypedGraph<NodeType extends string, EdgeType extends string> extends IGraph {
+     addTypedNode(node: ITypedNode<NodeType>): ITypedGraph<NodeType, EdgeType>;
+     getTypedNode(nodeId: string): ITypedNode<NodeType> | undefined;
+     getNodesOfType(type: NodeType): readonly ITypedNode<NodeType>[];
+   }
+
+   export interface IOrderedGraph extends IGraph {
+     createOrderedSubgraph(elements: IGraphElement[]): IOrderedSubgraph;
+     getElementOrder(subgraphId: string, elementId: string): number | undefined;
+   }
+
+   export interface ISimplicialGraph extends IGraph {
+     addFace(face: IFace): ISimplicialGraph;
+     addSimplex(simplex: ISimplex): ISimplicialGraph;
+     getFacesByVertex(vertexId: string): readonly IFace[];
+   }
+
+   export interface IRewriteableGraph extends IGraph {
+     findMatches(pattern: IRewritePattern): readonly IMatch[];
+     applyRewrite(pattern: IRewritePattern, match: IMatch): IRewriteableGraph;
    }
    ```
 
@@ -439,7 +547,47 @@ We'll ensure the migration doesn't break existing code by:
    );
    ```
 
-### 5.2 Common Operations
+### 5.2 Specialized Graph Types
+
+The interface system supports multiple specialized graph types:
+
+1. **Spin Networks**:
+   ```typescript
+   type SpinNodeType = 'intertwiner' | 'boundary';
+   type SpinEdgeType = 'quantum' | 'classical';
+
+   interface ISpinNetwork extends ITypedGraph<SpinNodeType, SpinEdgeType>, ISimplicialGraph {
+     // Spin network specific operations
+     computeSpinFoam(): ISpinNetwork;
+     evaluateAmplitude(): Complex;
+   }
+   ```
+
+2. **Quantum Circuits**:
+   ```typescript
+   type CircuitNodeType = 'input' | 'gate' | 'measurement';
+   type CircuitEdgeType = 'qubit' | 'classical';
+
+   interface IQuantumCircuit extends ITypedGraph<CircuitNodeType, CircuitEdgeType>, IOrderedGraph {
+     // Circuit specific operations
+     addGate(gate: IQuantumGate): IQuantumCircuit;
+     simulate(): StateVector;
+   }
+   ```
+
+3. **ZX Diagrams**:
+   ```typescript
+   type ZXNodeType = 'Z' | 'X' | 'H';
+   type ZXEdgeType = 'simple' | 'hadamard';
+
+   interface IZXDiagram extends ITypedGraph<ZXNodeType, ZXEdgeType>, IRewriteableGraph {
+     // ZX-calculus specific operations
+     simplify(): IZXDiagram;
+     toCircuit(): IQuantumCircuit;
+   }
+   ```
+
+### 5.3 Common Operations
 
 The integrated system will support operations like:
 
