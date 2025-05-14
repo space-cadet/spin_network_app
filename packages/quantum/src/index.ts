@@ -23,3 +23,6 @@ export * from './utils/matrixOperations';
 export * from './utils/matrixFunctions';
 export * from './utils/information';
 export * from './utils/oscillator';
+
+// Export angular momentum module
+export * from './angularMomentum';

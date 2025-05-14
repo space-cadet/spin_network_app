@@ -37,7 +37,12 @@ export class MatrixOperator implements IOperator {
   private matrix: ComplexMatrix;
   private validateTypeConstraints: boolean;
 
-  constructor(matrix: ComplexMatrix, type: OperatorType = 'general', validateTypeConstraints: boolean = true) {
+  constructor(
+    matrix: ComplexMatrix, 
+    type: OperatorType = 'general', 
+    validateTypeConstraints: boolean = true,
+    additionalProps: Record<string, any> = {}
+  ) {
     validateMatDims(matrix);
     
     const dim = matrix.length;
@@ -51,6 +56,9 @@ export class MatrixOperator implements IOperator {
     // Deep clone the matrix using math.js
     this.matrix = matrix.map(row => row.map(elem => math.clone(elem)));
     this.validateTypeConstraints = validateTypeConstraints;
+
+    // Add any additional properties
+    Object.assign(this, additionalProps);
     
     // Validate type constraints only if requested
     if (validateTypeConstraints) {

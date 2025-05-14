@@ -11,6 +11,9 @@ A TypeScript library for quantum mechanical calculations and spin network simula
 - Hilbert space operations
 - Hamiltonian evolution
 - Quantum information tools
+- Angular momentum algebra (J₊, J₋, Jz, J²)
+- Wigner symbols (3j, 6j, 9j)
+- Angular momentum composition
 
 ## Core Components
 
@@ -109,6 +112,19 @@ Mixed state operations:
 - `trace(): Complex`
 - `purity(): number`
 - `vonNeumannEntropy(): number`
+
+### Angular Momentum
+Comprehensive angular momentum algebra:
+- `createJplus(j: number)` - Creates raising operator J₊
+- `createJminus(j: number)` - Creates lowering operator J₋
+- `createJz(j: number)` - Creates z-component operator Jz
+- `createJ2(j: number)` - Creates total angular momentum operator J²
+- `createAngularState(j: number, m: number)` - Creates |j,m⟩ eigenstate
+- `wignerD(j: number, α: number, β: number, γ: number)` - Wigner D-matrix
+- `clebschGordan(j1: number, m1: number, j2: number, m2: number, J: number, M: number)` - CG coefficients
+- `wigner3j(j1: number, j2: number, j3: number, m1: number, m2: number, m3: number)` - 3j symbols
+- `wigner6j(j1: number, j2: number, j3: number, l1: number, l2: number, l3: number)` - 6j symbols
+- `wigner9j(...)` - 9j symbols
 
 ## Examples
 

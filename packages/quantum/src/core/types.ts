@@ -34,7 +34,7 @@ export interface IStateVector {
 /**
  * Type of quantum operator (unitary, hermitian, etc)
  */
-export type OperatorType = 'unitary' | 'hermitian' | 'projection' | 'general';
+export type OperatorType = 'unitary' | 'hermitian' | 'projection' | 'general' | 'Jplus' | 'Jminus' | 'Jz' | 'J2';
 
 /**
  * Base interface for quantum operators
