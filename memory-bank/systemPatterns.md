@@ -60,6 +60,94 @@ The application component architecture follows a component-based approach with c
                   └─────────────────┘
 ```
 
+## Avoiding Overengineering
+
+### YAGNI (You Aren't Gonna Need It) First Principle
+Before implementing complex abstractions or patterns, always follow these steps:
+
+1. Start with Minimal Implementation
+   - Begin with direct library usage (e.g., Graphology, Sigma.js)
+   - Get basic functionality working first
+   - Validate core requirements work as expected
+
+2. Identify Actual Patterns
+   - Let patterns emerge from real usage
+   - Identify common code through actual implementation
+   - Look for repeated patterns in working code
+
+3. Add Abstractions Incrementally
+   - Only abstract what's actually being used
+   - Keep interfaces focused on current needs
+   - Avoid speculative features
+
+4. Test Real Use Cases
+   - Validate with actual usage scenarios
+   - Ensure abstractions solve real problems
+   - Remove unused complexity
+
+### Recent Example: Graph Visualization
+The graph visualization implementation provided a clear lesson in avoiding overengineering:
+
+Initial Overengineered Approach:
+```typescript
+// Complex abstraction layer before basic functionality
+interface IGraphAdapter<N, E> {
+  initialize(): void;
+  addNode<T extends N>(node: T): void;
+  addEdge<T extends E>(edge: T): void;
+  layout(): void;
+  // Many more speculative methods
+}
+
+class GraphologyAdapter implements IGraphAdapter<Node, Edge> {
+  // Complex implementation trying to handle all cases
+}
+
+class GraphManager {
+  // Complex state management
+  // Multiple layout algorithms
+  // Advanced features not yet needed
+}
+```
+
+Simplified Working Approach:
+```typescript
+// Direct use of libraries with minimal abstraction
+const graph = new Graphology();
+const renderer = new Sigma(graph, container, {
+  defaultNodeColor: '#6366f1',
+  defaultEdgeColor: '#94a3b8'
+});
+
+// Add test nodes
+graph.addNode('1', { x: 0, y: 0, label: 'Node 1' });
+graph.addNode('2', { x: 5, y: 5, label: 'Node 2' });
+
+// Add test edge
+graph.addEdge('1', '2');
+```
+
+### Lessons Learned
+1. Start Simple
+   - Use libraries directly first
+   - Add minimal wrapper code
+   - Focus on getting basic features working
+
+2. Validate Early
+   - Test core functionality quickly
+   - Get user feedback early
+   - Identify actual requirements
+
+3. Incremental Complexity
+   - Add features one at a time
+   - Keep changes small and focused
+   - Test each addition thoroughly
+
+4. Clear Decisions
+   - Document why simple approach was chosen
+   - Note what complexity was avoided
+   - Track future requirements separately
+
 ## Key Design Patterns
 
 ### 1. Component Composition

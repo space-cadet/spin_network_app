@@ -147,7 +147,31 @@
 - `packages/graph-core/src/utils/` - Utility functions
 - `packages/graph-core/__tests__/` - Test directory
 **Dependencies**: T64
-**Notes**: This task implements the graph-core component of the larger T64 Graph-Quantum Integration Restructuring project. The implementation will start with a dedicated testing app to evaluate Graphology and Cytoscape.js libraries before committing to a specific implementation approach. The graph-test-app will provide a UI to interact with both libraries using the same interface, allowing direct comparison of performance, API usability, and integration potential.
+**Notes**: 
+
+Initial Approach (Overengineered):
+The initial implementation attempted to create a complex abstraction layer before having basic functionality working:
+1. Created extensive type hierarchy before understanding actual usage patterns
+2. Built complex state management before having basic graph rendering
+3. Added multiple library adapters before proving one working implementation
+4. Implemented sophisticated layout algorithms before basic visualization
+5. Created comprehensive interface hierarchy without concrete use cases
+
+Corrected Approach:
+1. Start with minimal working implementation using Graphology directly
+2. Get basic graph visualization working with Sigma.js
+3. Add features incrementally based on actual needs
+4. Only abstract common patterns after they emerge from real usage
+5. Keep the implementation simple and focused on current requirements
+
+Key Lessons:
+1. YAGNI (You Aren't Gonna Need It) - Don't build features until they're actually needed
+2. Start simple and evolve the architecture based on real requirements
+3. Get basic functionality working before adding abstractions
+4. Test and validate core features before adding complexity
+5. Use existing library capabilities before creating custom implementations
+
+This task implements the graph-core component of the larger T64 Graph-Quantum Integration Restructuring project. The implementation now follows a more pragmatic approach, starting with basic graph visualization and adding features incrementally as needed.
 
 ### T65: Release @spin-network/quantum as Standalone NPM Package
 **Description**: Prepare and publish the @spin-network/quantum package to npm as a standalone package for public use.
