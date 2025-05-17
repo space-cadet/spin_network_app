@@ -17,13 +17,13 @@ type MathMatrix = math.Matrix;
 // Helper function to ensure math.js output is converted to Complex type
 function ensureComplex(value: math.MathType): Complex {
   if (typeof value === 'number') {
-    return math.complex({re: value, im:  0});
+    return math.complex(value,  0);
   }
   if (math.typeOf(value) === 'Complex') {
     return value as Complex;
   }
   if (typeof value === 'object' && value !== null && 're' in value && 'im' in value) {
-    return math.complex({re: (value as any).re, im:  (value as any).im});
+    return math.complex((value as any).re,  (value as any).im);
   }
   throw new Error(`Cannot convert ${math.typeOf(value)} to Complex`);
 }
@@ -81,7 +81,7 @@ export class MatrixOperator implements Operator {
         // Check if product is identity
         for (let i = 0; i < dim; i++) {
           for (let j = 0; j < dim; j++) {
-            const expected = i === j ? math.complex({re: 1, im:  0}) : math.complex({re: 0, im:  0});
+            const expected = i === j ? math.complex(1,  0) : math.complex(0,  0);
             const diff = math.subtract(productMatrix[i][j], expected);
             if (Number(math.abs(ensureComplex(diff))) > 1e-10) {
               throw new Error('Matrix is not unitary');
@@ -99,7 +99,7 @@ export class MatrixOperator implements Operator {
     validateMatchDims(state.dimension, this.dimension);
 
     const newAmplitudes = new Array(this.dimension).fill(null)
-      .map(() => math.complex({re: 0, im:  0}));
+      .map(() => math.complex(0,  0));
 
     // Apply matrix multiplication
     for (let i = 0; i < this.dimension; i++) {
@@ -151,17 +151,17 @@ export class MatrixOperator implements Operator {
     // Initialize result matrix with zeros
     const resultMatrix = Array(this.dimension).fill(null)
       .map(() => Array(this.dimension).fill(null)
-        .map(() => math.complex({re: 0, im:  0})));
+        .map(() => math.complex(0,  0)));
 
     // Manual matrix multiplication with explicit complex number handling
     for (let i = 0; i < this.dimension; i++) {
       for (let j = 0; j < this.dimension; j++) {
-        let sum = math.complex({re: 0, im:  0});
+        let sum = math.complex(0,  0);
         for (let k = 0; k < this.dimension; k++) {
           // Ensure proper complex multiplication
           const term = math.multiply(
-            math.complex({re: this.matrix[i][k].re, im:  this.matrix[i][k].im}),
-            math.complex({re: otherMatrix[k][j].re, im:  otherMatrix[k][j].im})
+            math.complex(this.matrix[i][k].re,  this.matrix[i][k].im),
+            math.complex(otherMatrix[k][j].re,  otherMatrix[k][j].im)
           );
           sum = math.add(sum, term) as Complex;
         }
@@ -191,14 +191,14 @@ export class MatrixOperator implements Operator {
     // Initialize adjoint matrix with proper dimensions
     const adjointMatrix = Array(this.dimension).fill(null)
       .map(() => Array(this.dimension).fill(null)
-        .map(() => math.complex({re: 0, im:  0})));
+        .map(() => math.complex(0,  0)));
 
     // Calculate adjoint elements with proper complex conjugate
     for (let i = 0; i < this.dimension; i++) {
       for (let j = 0; j < this.dimension; j++) {
         // Take complex conjugate and transpose
         const elem = this.matrix[j][i];
-        adjointMatrix[i][j] = math.complex({re: elem.re, im:  -elem.im});
+        adjointMatrix[i][j] = math.complex(elem.re,  -elem.im);
       }
     }
 
@@ -324,7 +324,7 @@ export class MatrixOperator implements Operator {
   static identity(dimension: number): MatrixOperator {
     const matrix = Array(dimension).fill(null)
       .map((_, i) => Array(dimension).fill(null)
-        .map((_, j) => i === j ? math.complex({re: 1, im:  0}) : math.complex({re: 0, im:  0}))
+        .map((_, j) => i === j ? math.complex(1,  0) : math.complex(0,  0))
       );
     return new MatrixOperator(matrix, 'unitary');
   }
@@ -335,7 +335,7 @@ export class MatrixOperator implements Operator {
   static zero(dimension: number): MatrixOperator {
     const matrix = Array(dimension).fill(null)
       .map(() => Array(dimension).fill(null)
-        .map(() => math.complex({re: 0, im:  0}))
+        .map(() => math.complex(0,  0))
       );
     return new MatrixOperator(matrix);
   }
@@ -360,8 +360,8 @@ export class MatrixOperator implements Operator {
     const sumMatrix = Array(this.dimension).fill(null)
       .map((_, i) => Array(this.dimension).fill(null)
         .map((_, j) => math.add(
-          math.complex({re: this.matrix[i][j].re, im:  this.matrix[i][j].im}),
-          math.complex({re: otherMatrix[i][j].re, im:  otherMatrix[i][j].im})
+          math.complex(this.matrix[i][j].re,  this.matrix[i][j].im),
+          math.complex(otherMatrix[i][j].re,  otherMatrix[i][j].im)
         ) as Complex)
       );
 
@@ -390,7 +390,7 @@ export class MatrixOperator implements Operator {
     // Initialize result matrix
     const resultMatrix = Array(remainingDim).fill(null)
       .map(() => Array(remainingDim).fill(null)
-        .map(() => math.complex({re: 0, im:  0})));
+        .map(() => math.complex(0,  0)));
 
     // Perform partial trace
     const traceRange = Array(this.dimension).fill(0)
@@ -437,7 +437,7 @@ export class MatrixOperator implements Operator {
       // Create full matrix for the eigenvector operator
       const matrix: ComplexMatrix = Array(this.dimension).fill(null)
         .map((_, i) => Array(this.dimension).fill(null)
-          .map((_, j) => i === j ? math.clone(v[i]) : math.complex({re: 0, im:  0})));
+          .map((_, j) => i === j ? math.clone(v[i]) : math.complex(0,  0)));
       
       return new MatrixOperator(matrix, 'general');
     });

@@ -35,7 +35,7 @@ export function subtractOperators(a: Operator, b: Operator): Operator {
   if (a.dimension !== b.dimension) {
     throw new Error('Operator dimensions do not match');
   }
-  return a.add(b.scale(math.complex({re: -1, im:  0})));
+  return a.add(b.scale(math.complex(-1,  0)));
 }
 
 /**
@@ -61,28 +61,28 @@ export function commutator(A: Operator, B: Operator): Operator {
   // Initialize result matrix
   const resultMatrix = Array(dim).fill(null)
     .map(() => Array(dim).fill(null)
-      .map(() => math.complex({re: 0, im:  0})));
+      .map(() => math.complex(0,  0)));
 
   // Calculate AB - BA directly with proper complex number handling
   for (let i = 0; i < dim; i++) {
     for (let j = 0; j < dim; j++) {
-      let ab = math.complex({re: 0, im:  0});
-      let ba = math.complex({re: 0, im:  0});
+      let ab = math.complex(0,  0);
+      let ba = math.complex(0,  0);
 
       for (let k = 0; k < dim; k++) {
         // Calculate AB term
         ab = math.add(ab, 
           math.multiply(
-            math.complex({re: matrixA[i][k].re, im:  matrixA[i][k].im}),
-            math.complex({re: matrixB[k][j].re, im:  matrixB[k][j].im})
+            math.complex(matrixA[i][k].re,  matrixA[i][k].im),
+            math.complex(matrixB[k][j].re,  matrixB[k][j].im)
           )
         ) as Complex;
 
         // Calculate BA term
         ba = math.add(ba,
           math.multiply(
-            math.complex({re: matrixB[i][k].re, im:  matrixB[i][k].im}),
-            math.complex({re: matrixA[k][j].re, im:  matrixA[k][j].im})
+            math.complex(matrixB[i][k].re,  matrixB[i][k].im),
+            math.complex(matrixA[k][j].re,  matrixA[k][j].im)
           )
         ) as Complex;
       }
@@ -117,28 +117,28 @@ export function antiCommutator(A: Operator, B: Operator): Operator {
   // Initialize result matrix
   const resultMatrix = Array(dim).fill(null)
     .map(() => Array(dim).fill(null)
-      .map(() => math.complex({re: 0, im:  0})));
+      .map(() => math.complex(0,  0)));
 
   // Calculate AB + BA directly with proper complex number handling
   for (let i = 0; i < dim; i++) {
     for (let j = 0; j < dim; j++) {
-      let ab = math.complex({re: 0, im:  0});
-      let ba = math.complex({re: 0, im:  0});
+      let ab = math.complex(0,  0);
+      let ba = math.complex(0,  0);
 
       for (let k = 0; k < dim; k++) {
         // Calculate AB term
         ab = math.add(ab, 
           math.multiply(
-            math.complex({re: matrixA[i][k].re, im:  matrixA[i][k].im}),
-            math.complex({re: matrixB[k][j].re, im:  matrixB[k][j].im})
+            math.complex(matrixA[i][k].re,  matrixA[i][k].im),
+            math.complex(matrixB[k][j].re,  matrixB[k][j].im)
           )
         ) as Complex;
 
         // Calculate BA term
         ba = math.add(ba,
           math.multiply(
-            math.complex({re: matrixB[i][k].re, im:  matrixB[i][k].im}),
-            math.complex({re: matrixA[k][j].re, im:  matrixA[k][j].im})
+            math.complex(matrixB[i][k].re,  matrixB[i][k].im),
+            math.complex(matrixA[k][j].re,  matrixA[k][j].im)
           )
         ) as Complex;
       }
@@ -229,15 +229,15 @@ export function BCHFormula(A: Operator, B: Operator, order: number = 2): Operato
   
   // First order: + 1/2[A,B]
   if (order >= 1) {
-    const firstOrder = commutator(A, B).scale(math.complex({re: 0.5, im:  0}));
+    const firstOrder = commutator(A, B).scale(math.complex(0.5,  0));
     result = addOperators(result, firstOrder);
   }
   
   // Second order: + 1/12[A,[A,B]] - 1/12[B,[A,B]]
   if (order >= 2) {
     const AB = commutator(A, B);
-    const AAB = commutator(A, AB).scale(math.complex({re: 1/12, im:  0}));
-    const BAB = commutator(B, AB).scale(math.complex({re: -1/12, im:  0}));
+    const AAB = commutator(A, AB).scale(math.complex(1/12,  0));
+    const BAB = commutator(B, AB).scale(math.complex(-1/12,  0));
     
     result = addOperators(result, AAB);
     result = addOperators(result, BAB);
@@ -340,7 +340,7 @@ export function isNormalOperator(A: Operator, tolerance: number = 1e-10): boolea
  */
 export function operatorFromGenerator(generator: Operator): Operator {
   // Scale generator by i
-  const iG = generator.scale(math.complex({re: 0, im:  1}));
+  const iG = generator.scale(math.complex(0,  1));
   
   // Use matrix exponential implementation from matrixOperations
   const matrix = iG.toMatrix();
@@ -358,7 +358,7 @@ export function operatorFromGenerator(generator: Operator): Operator {
 export function projectionOperator(state: StateVector): Operator {
   const dim = state.dimension;
   const matrix: Complex[][] = Array(dim).fill(null).map(() => 
-    Array(dim).fill(null).map(() => math.complex({re: 0, im:  0}))
+    Array(dim).fill(null).map(() => math.complex(0,  0))
   );
   
   // Compute |ψ⟩⟨ψ|

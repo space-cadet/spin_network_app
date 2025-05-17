@@ -16,7 +16,7 @@ describe('Hamiltonian', () => {
     beforeEach(() => {
       // Create a simple Hamiltonian H = σz
       H = new Hamiltonian(2, [{
-        coefficient: math.complex({re: 1, im:  0}),
+        coefficient: math.complex(1,  0),
         operator: PauliZ
       }], 'spin');
     });
@@ -44,8 +44,8 @@ describe('Hamiltonian', () => {
     test('should correctly evolve states', () => {
       // Create |+⟩ state = (|0⟩ + |1⟩)/√2
       const statePlus = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
 
       // Evolve for t = π/2 (quarter rotation)
@@ -100,10 +100,10 @@ describe('Hamiltonian', () => {
 
       // Test with singlet state (|↑↓⟩ - |↓↑⟩)/√2
       const singlet = new StateVector(4, [
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: -1/Math.sqrt(2), im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(0,  0),
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(-1/Math.sqrt(2),  0),
+        math.complex(0,  0)
       ]);
       const E_singlet = H.expectationValue(singlet);
       expect(E_singlet.re).toBeCloseTo(-0.75);  // Eigenstate with E = -3J/4
@@ -160,14 +160,14 @@ describe('Hamiltonian', () => {
   describe('Error handling', () => {
     test('should throw on dimension mismatch', () => {
       const H = new Hamiltonian(2, [{
-        coefficient: math.complex({re: 1, im:  0}),
+        coefficient: math.complex(1,  0),
         operator: PauliZ
       }]);
 
       const wrongState = new StateVector(3, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0),
+        math.complex(0,  0)
       ]);
 
       expect(() => H.evolveState(wrongState, 1)).toThrow();
@@ -176,12 +176,12 @@ describe('Hamiltonian', () => {
 
     test('should throw on non-Hermitian terms when required', () => {
       const nonHermitian = new MatrixOperator([
-        [math.complex({re: 1, im:  0}), math.complex({re: 1, im:  1})],
-        [math.complex({re: 1, im:  -1}), math.complex({re: 1, im:  0})]
+        [math.complex(1,  0), math.complex(1,  1)],
+        [math.complex(1,  -1), math.complex(1,  0)]
       ]);
 
       expect(() => new Hamiltonian(2, [{
-        coefficient: math.complex({re: 1, im:  0}),
+        coefficient: math.complex(1,  0),
         operator: nonHermitian
       }], 'custom', false, true)).toThrow();  // requireHermitian = true
     });

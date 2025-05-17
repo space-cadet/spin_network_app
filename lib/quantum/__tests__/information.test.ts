@@ -26,10 +26,10 @@ describe('Quantum Information', () => {
     it('decomposes a product state', () => {
       // Create |00⟩ state
       const state = new StateVector(4, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0),
+        math.complex(0,  0),
+        math.complex(0,  0)
       ]);
       
       // Decompose for 2x2 system
@@ -68,7 +68,7 @@ describe('Quantum Information', () => {
     });
     
     it('throws error for invalid dimensions', () => {
-      const state = new StateVector(4, Array(4).fill(math.complex({re: 0.5, im:  0})));
+      const state = new StateVector(4, Array(4).fill(math.complex(0.5,  0)));
       // Incorrect factorization: 4 ≠ 3 × 2
       expect(() => schmidtDecomposition(state, 3, 2)).toThrow();
     });
@@ -78,8 +78,8 @@ describe('Quantum Information', () => {
     it('calculates fidelity between identical states', () => {
       // Create |0⟩ state
       const state = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       
       // Fidelity with itself should be 1
@@ -90,13 +90,13 @@ describe('Quantum Information', () => {
     it('calculates fidelity between orthogonal states', () => {
       // Create |0⟩ and |1⟩ states
       const state0 = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       
       const state1 = new StateVector(2, [
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 1, im:  0})
+        math.complex(0,  0),
+        math.complex(1,  0)
       ]);
       
       // Fidelity between orthogonal states should be 0
@@ -107,14 +107,14 @@ describe('Quantum Information', () => {
     it('calculates fidelity for superposition states', () => {
       // Create |+⟩ = (|0⟩ + |1⟩)/√2
       const plusState = new StateVector(2, [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ]);
       
       // Create |0⟩ state
       const zeroState = new StateVector(2, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0)
       ]);
       
       // Fidelity should be 0.5
@@ -126,11 +126,11 @@ describe('Quantum Information', () => {
   describe('traceFidelity', () => {
     it('calculates fidelity between pure state density matrices', () => {
       // Create density matrices for |0⟩ and |+⟩
-      const zeroMatrix = [[math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})], 
-                          [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]];
+      const zeroMatrix = [[math.complex(1,  0), math.complex(0,  0)], 
+                          [math.complex(0,  0), math.complex(0,  0)]];
       
-      const plusMatrix = [[math.complex({re: 0.5, im:  0}), math.complex({re: 0.5, im:  0})], 
-                          [math.complex({re: 0.5, im:  0}), math.complex({re: 0.5, im:  0})]];
+      const plusMatrix = [[math.complex(0.5,  0), math.complex(0.5,  0)], 
+                          [math.complex(0.5,  0), math.complex(0.5,  0)]];
       
       const zeroDensity = new DensityMatrixOperator(zeroMatrix);
       const plusDensity = new DensityMatrixOperator(plusMatrix);
@@ -142,12 +142,12 @@ describe('Quantum Information', () => {
     
     it('calculates fidelity between mixed states', () => {
       // Create maximally mixed state I/2
-      const mixedMatrix = [[math.complex({re: 0.5, im:  0}), math.complex({re: 0, im:  0})], 
-                           [math.complex({re: 0, im:  0}), math.complex({re: 0.5, im:  0})]];
+      const mixedMatrix = [[math.complex(0.5,  0), math.complex(0,  0)], 
+                           [math.complex(0,  0), math.complex(0.5,  0)]];
       
       // Create pure state |0⟩⟨0|
-      const pureMatrix = [[math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})], 
-                          [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]];
+      const pureMatrix = [[math.complex(1,  0), math.complex(0,  0)], 
+                          [math.complex(0,  0), math.complex(0,  0)]];
       
       const mixedDensity = new DensityMatrixOperator(mixedMatrix);
       const pureDensity = new DensityMatrixOperator(pureMatrix);
@@ -161,11 +161,11 @@ describe('Quantum Information', () => {
   describe('traceDistance', () => {
     it('calculates trace distance between orthogonal pure states', () => {
       // Create density matrices for |0⟩ and |1⟩
-      const zeroMatrix = [[math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})], 
-                          [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]];
+      const zeroMatrix = [[math.complex(1,  0), math.complex(0,  0)], 
+                          [math.complex(0,  0), math.complex(0,  0)]];
       
-      const oneMatrix = [[math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})], 
-                         [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})]];
+      const oneMatrix = [[math.complex(0,  0), math.complex(0,  0)], 
+                         [math.complex(0,  0), math.complex(1,  0)]];
       
       const zeroDensity = new DensityMatrixOperator(zeroMatrix);
       const oneDensity = new DensityMatrixOperator(oneMatrix);
@@ -178,8 +178,8 @@ describe('Quantum Information', () => {
     
     it('calculates trace distance between identical states', () => {
       // Create density matrix for |0⟩
-      const zeroMatrix = [[math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})], 
-                          [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]];
+      const zeroMatrix = [[math.complex(1,  0), math.complex(0,  0)], 
+                          [math.complex(0,  0), math.complex(0,  0)]];
       
       const zeroDensity = new DensityMatrixOperator(zeroMatrix);
       
@@ -192,8 +192,8 @@ describe('Quantum Information', () => {
   describe('vonNeumannEntropy', () => {
     it('calculates entropy of pure state', () => {
       // Create density matrix for pure state |0⟩
-      const pureMatrix = [[math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})], 
-                          [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]];
+      const pureMatrix = [[math.complex(1,  0), math.complex(0,  0)], 
+                          [math.complex(0,  0), math.complex(0,  0)]];
       
       const pureDensity = new DensityMatrixOperator(pureMatrix);
       
@@ -204,8 +204,8 @@ describe('Quantum Information', () => {
     
     it('calculates entropy of maximally mixed state', () => {
       // Create maximally mixed state I/2
-      const mixedMatrix = [[math.complex({re: 0.5, im:  0}), math.complex({re: 0, im:  0})], 
-                           [math.complex({re: 0, im:  0}), math.complex({re: 0.5, im:  0})]];
+      const mixedMatrix = [[math.complex(0.5,  0), math.complex(0,  0)], 
+                           [math.complex(0,  0), math.complex(0.5,  0)]];
       
       const mixedDensity = new DensityMatrixOperator(mixedMatrix);
       
@@ -220,10 +220,10 @@ describe('Quantum Information', () => {
     it('calculates entanglement entropy of product state', () => {
       // Create product state |00⟩
       const productState = new StateVector(4, [
-        math.complex({re: 1, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0}),
-        math.complex({re: 0, im:  0})
+        math.complex(1,  0),
+        math.complex(0,  0),
+        math.complex(0,  0),
+        math.complex(0,  0)
       ]);
       
       // Entanglement entropy should be 0
@@ -256,8 +256,8 @@ describe('Quantum Information', () => {
   describe('linearEntropy', () => {
     it('calculates linear entropy of pure state', () => {
       // Create density matrix for pure state |0⟩
-      const pureMatrix = [[math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})], 
-                          [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]];
+      const pureMatrix = [[math.complex(1,  0), math.complex(0,  0)], 
+                          [math.complex(0,  0), math.complex(0,  0)]];
       
       const pureDensity = new DensityMatrixOperator(pureMatrix);
       
@@ -268,8 +268,8 @@ describe('Quantum Information', () => {
     
     it('calculates linear entropy of maximally mixed state', () => {
       // Create maximally mixed state I/2
-      const mixedMatrix = [[math.complex({re: 0.5, im:  0}), math.complex({re: 0, im:  0})], 
-                           [math.complex({re: 0, im:  0}), math.complex({re: 0.5, im:  0})]];
+      const mixedMatrix = [[math.complex(0.5,  0), math.complex(0,  0)], 
+                           [math.complex(0,  0), math.complex(0.5,  0)]];
       
       const mixedDensity = new DensityMatrixOperator(mixedMatrix);
       
@@ -283,10 +283,10 @@ describe('Quantum Information', () => {
     it('calculates concurrence of product state', () => {
       // Create product state |00⟩
       const productMatrix = [
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]
+        [math.complex(1,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)]
       ];
       
       const productDensity = new DensityMatrixOperator(productMatrix);
@@ -303,10 +303,10 @@ describe('Quantum Information', () => {
       
       // Create a properly normalized matrix
       const bellMatrix = [
-        [math.complex({re: 0.5, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0.5, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0.5, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0.5, im:  0})]
+        [math.complex(0.5,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0.5,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0.5,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0.5,  0)]
       ];
       
       const bellDensity = new DensityMatrixOperator(bellMatrix);

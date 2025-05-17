@@ -53,7 +53,7 @@ export function schmidtDecomposition(
   
   // Compute reduced density matrix ρB = TrA(|ψ⟩⟨ψ|)
   const reducedRhoB: Complex[][] = Array(dimB).fill(null).map(() => 
-    Array(dimB).fill(null).map(() => math.complex({re: 0, im:  0}))
+    Array(dimB).fill(null).map(() => math.complex(0,  0))
   );
   
   for (let i = 0; i < dimB; i++) {
@@ -101,7 +101,7 @@ export function schmidtDecomposition(
     // console.log('Calculated norm:', norm);
     
     const amplitudes = vector.map(v => 
-      math.divide(v, math.complex({re: norm, im:  0})) as Complex
+      math.divide(v, math.complex(norm,  0)) as Complex
     );
     // const amplitudes = math.divide(math.matrix(vector), norm).valueOf();
     return new StateVectorClass(dimB, amplitudes);
@@ -112,7 +112,7 @@ export function schmidtDecomposition(
     const schmidt = schmidtValues[idx];
     const v = vectors[i];
     
-    const amplitudes = Array(dimA).fill(null).map(() => math.complex({re: 0, im:  0}));
+    const amplitudes = Array(dimA).fill(null).map(() => math.complex(0,  0));
     
     // Calculate M|v⟩ and normalize
     for (let j = 0; j < dimA; j++) {
@@ -124,7 +124,7 @@ export function schmidtDecomposition(
     
     // Normalize by Schmidt value
     const finalAmps = amplitudes.map(a => 
-      math.divide(a, math.complex({re: schmidt, im:  0})) as Complex
+      math.divide(a, math.complex(schmidt,  0)) as Complex
     );
     
     return new StateVectorClass(dimA, finalAmps);
@@ -271,12 +271,12 @@ export function quantumRelativeEntropy(rho: DensityMatrix, sigma: DensityMatrix)
   
   // Convert eigenvalues to log values
   const logSigmaEigenvalues = sigmaEigenvalues.map(v => 
-    v.re > 1e-10 ? math.complex({re: Math.log(v.re), im:  0}) : math.complex({re: -1000, im:  0}) // Use a large negative number as approximation
+    v.re > 1e-10 ? math.complex(Math.log(v.re),  0) : math.complex(-1000,  0) // Use a large negative number as approximation
   );
   
   // Reconstruct log(σ) in the eigenbasis of σ
   const logSigma = Array(rho.dimension).fill(null).map(() => 
-    Array(rho.dimension).fill(null).map(() => math.complex({re: 0, im:  0}))
+    Array(rho.dimension).fill(null).map(() => math.complex(0,  0))
   );
   
   for (let i = 0; i < rho.dimension; i++) {
@@ -423,13 +423,13 @@ export function concurrence(rho: DensityMatrix): number {
   
   // Define σy⊗σy
   const sigmaY = [
-    [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  -1})],
-    [math.complex({re: 0, im:  1}), math.complex({re: 0, im:  0})]
+    [math.complex(0,  0), math.complex(0,  -1)],
+    [math.complex(0,  1), math.complex(0,  0)]
   ];
   
   // Calculate σy⊗σy
   const sigmaYY = Array(4).fill(null).map(() => 
-    Array(4).fill(null).map(() => math.complex({re: 0, im:  0}))
+    Array(4).fill(null).map(() => math.complex(0,  0))
   );
   
   for (let i1 = 0; i1 < 2; i1++) {
@@ -495,7 +495,7 @@ export function negativity(rho: DensityMatrix, dimA: number, dimB: number): numb
   
   // Calculate partial transpose with respect to subsystem A
   const rhoTA = Array(dimA * dimB).fill(null).map(() => 
-    Array(dimA * dimB).fill(null).map(() => math.complex({re: 0, im:  0}))
+    Array(dimA * dimB).fill(null).map(() => math.complex(0,  0))
   );
   
   for (let i1 = 0; i1 < dimA; i1++) {

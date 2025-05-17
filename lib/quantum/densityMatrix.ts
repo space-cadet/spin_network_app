@@ -78,7 +78,7 @@ export class DensityMatrixOperator implements DensityMatrix {
     const matrix = this.toMatrix();
     return matrix.reduce((sum, row, i) => 
       math.add(sum, row[i]) as Complex, 
-      math.complex({re: 0, im:  0})
+      math.complex(0,  0)
     );
   }
 
@@ -91,7 +91,7 @@ export class DensityMatrixOperator implements DensityMatrix {
     const matSquared = multiplyMatrices(matrix, matrix);
     
     // Sum diagonal elements
-    let trace = math.complex({re: 0, im:  0});
+    let trace = math.complex(0,  0);
     for (let i = 0; i < this.dimension; i++) {
       trace = math.add(trace, matSquared[i][i]) as Complex;
     }
@@ -157,7 +157,7 @@ export class DensityMatrixOperator implements DensityMatrix {
   static fromPureState(state: StateVector): DensityMatrix {
     const dim = state.dimension;
     const matrix = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => math.complex({re: 0, im:  0}))
+      Array(dim).fill(null).map(() => math.complex(0,  0))
     );
 
     // Compute |ψ⟩⟨ψ|
@@ -192,7 +192,7 @@ export class DensityMatrixOperator implements DensityMatrix {
 
     // Compute Σᵢ pᵢ|ψᵢ⟩⟨ψᵢ|
     const matrix = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => math.complex({re: 0, im:  0}))
+      Array(dim).fill(null).map(() => math.complex(0,  0))
     );
 
     for (let k = 0; k < states.length; k++) {
@@ -206,7 +206,7 @@ export class DensityMatrixOperator implements DensityMatrix {
               state.amplitudes[i],
               math.conj(state.amplitudes[j])
             ) as Complex,
-            math.complex({re: prob, im:  0})
+            math.complex(prob,  0)
           ) as Complex;
           matrix[i][j] = math.add(matrix[i][j], term) as Complex;
         }
@@ -257,7 +257,7 @@ export class KrausChannel implements QuantumChannel {
   apply(state: DensityMatrix): DensityMatrix {
     const dim = this.krausOperators[0].dimension;
     const result = Array(dim).fill(null).map(() => 
-      Array(dim).fill(null).map(() => math.complex({re: 0, im:  0}))
+      Array(dim).fill(null).map(() => math.complex(0,  0))
     );
 
     // Apply channel: ρ' = Σᵢ EᵢρEᵢ†
@@ -384,7 +384,7 @@ function isOperatorZero(operator: Operator, tolerance: number = 1e-10): boolean 
 function createIdentityOperator(dimension: number): Operator {
   const matrix = Array(dimension).fill(null).map((_, i) => 
     Array(dimension).fill(null).map((_, j) => 
-      i === j ? math.complex({re: 1, im:  0}) : math.complex({re: 0, im:  0})
+      i === j ? math.complex(1,  0) : math.complex(0,  0)
     )
   );
   return new MatrixOperator(matrix, 'unitary');
@@ -392,7 +392,7 @@ function createIdentityOperator(dimension: number): Operator {
 
 function createZeroOperator(dimension: number): Operator {
   const matrix = Array(dimension).fill(null).map(() => 
-    Array(dimension).fill(null).map(() => math.complex({re: 0, im:  0}))
+    Array(dimension).fill(null).map(() => math.complex(0,  0))
   );
   return new MatrixOperator(matrix);
 }

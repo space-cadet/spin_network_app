@@ -23,7 +23,7 @@ function verifyEigenPair(
 ): boolean {
   // Calculate Av
   const Av = matrix.map((row) => {
-    let sum = math.complex({re: 0, im:  0});
+    let sum = math.complex(0,  0);
     for (let j = 0; j < row.length; j++) {
       sum = math.add(sum, math.multiply(row[j], eigenvector[j])) as Complex;
     }
@@ -51,7 +51,7 @@ function isOrthonormal(vectors: ComplexMatrix | undefined, tolerance: number = 1
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       // Calculate dot product <vi|vj>
-      let dotProduct = math.complex({re: 0, im:  0});
+      let dotProduct = math.complex(0,  0);
       for (let k = 0; k < vectors[i].length; k++) {
         dotProduct = math.add(
           dotProduct,
@@ -84,7 +84,7 @@ function verifyDecomposition(
   // Create the diagonal matrix D from eigenvalues
   const D: ComplexMatrix = Array(n).fill(null).map((_, i) => 
     Array(n).fill(null).map((_, j) => 
-      i === j ? values[i] : math.complex({re: 0, im:  0})
+      i === j ? values[i] : math.complex(0,  0)
     )
   );
 
@@ -110,8 +110,8 @@ describe('Eigendecomposition', () => {
     it('computes correct eigenvalues and eigenvectors for 2x2 matrix', () => {
       // Simple 2x2 matrix with known eigenvalues
       const matrix: ComplexMatrix = [
-        [math.complex({re: 2, im:  0}), math.complex({re: 1, im:  0})],
-        [math.complex({re: 1, im:  0}), math.complex({re: 2, im:  0})]
+        [math.complex(2,  0), math.complex(1,  0)],
+        [math.complex(1,  0), math.complex(2,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {
@@ -147,8 +147,8 @@ describe('Eigendecomposition', () => {
 
     it('computes eigensystem for Pauli X matrix', () => {
       const pauliX: ComplexMatrix = [
-        [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})],
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]
+        [math.complex(0,  0), math.complex(1,  0)],
+        [math.complex(1,  0), math.complex(0,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(pauliX, {
@@ -169,9 +169,9 @@ describe('Eigendecomposition', () => {
     it('handles matrices with degenerate eigenvalues', () => {
       // Identity matrix - all eigenvalues are 1
       const identity: ComplexMatrix = [
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})]
+        [math.complex(1,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(1,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(1,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(identity, {
@@ -195,9 +195,9 @@ describe('Eigendecomposition', () => {
     
     it('correctly decomposes larger real symmetric matrices', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 1, im:  0}), math.complex({re: 2, im:  0}), math.complex({re: 3, im:  0})],
-        [math.complex({re: 2, im:  0}), math.complex({re: 4, im:  0}), math.complex({re: 5, im:  0})],
-        [math.complex({re: 3, im:  0}), math.complex({re: 5, im:  0}), math.complex({re: 6, im:  0})]
+        [math.complex(1,  0), math.complex(2,  0), math.complex(3,  0)],
+        [math.complex(2,  0), math.complex(4,  0), math.complex(5,  0)],
+        [math.complex(3,  0), math.complex(5,  0), math.complex(6,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {
@@ -226,8 +226,8 @@ describe('Eigendecomposition', () => {
   describe('Complex Hermitian Matrices', () => {
     it('computes correct eigensystem for Pauli Y matrix', () => {
       const pauliY: ComplexMatrix = [
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  -1})],
-        [math.complex({re: 0, im:  1}), math.complex({re: 0, im:  0})]
+        [math.complex(0,  0), math.complex(0,  -1)],
+        [math.complex(0,  1), math.complex(0,  0)]
       ];
       
       // Verify matrix is Hermitian
@@ -255,9 +255,9 @@ describe('Eigendecomposition', () => {
     
     it('handles general complex Hermitian matrices', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 2, im:  0}), math.complex({re: 1, im:  1}), math.complex({re: 0, im:  2})],
-        [math.complex({re: 1, im:  -1}), math.complex({re: 3, im:  0}), math.complex({re: 2, im:  1})],
-        [math.complex({re: 0, im:  -2}), math.complex({re: 2, im:  -1}), math.complex({re: 4, im:  0})]
+        [math.complex(2,  0), math.complex(1,  1), math.complex(0,  2)],
+        [math.complex(1,  -1), math.complex(3,  0), math.complex(2,  1)],
+        [math.complex(0,  -2), math.complex(2,  -1), math.complex(4,  0)]
       ];
       
       // Verify matrix is Hermitian
@@ -281,10 +281,10 @@ describe('Eigendecomposition', () => {
     
     it('decomposes projection matrices correctly', () => {
       // Construct |ψ⟩⟨ψ| for |ψ⟩ = (|0⟩ + |1⟩)/√2
-      const psi = [math.complex({re: 1/Math.sqrt(2), im:  0}), math.complex({re: 1/Math.sqrt(2), im:  0})];
+      const psi = [math.complex(1/Math.sqrt(2),  0), math.complex(1/Math.sqrt(2),  0)];
       const projector: ComplexMatrix = [
-        [math.complex({re: 0.5, im:  0}), math.complex({re: 0.5, im:  0})],
-        [math.complex({re: 0.5, im:  0}), math.complex({re: 0.5, im:  0})]
+        [math.complex(0.5,  0), math.complex(0.5,  0)],
+        [math.complex(0.5,  0), math.complex(0.5,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(projector, {computeEigenvectors: true});
@@ -300,7 +300,7 @@ describe('Eigendecomposition', () => {
       const eigenVector = vectors[mainEigen];
       
       // Check if eigenVector is proportional to psi (could have phase difference)
-      let dotProduct = math.complex({re: 0, im:  0});
+      let dotProduct = math.complex(0,  0);
       for (let i = 0; i < psi.length; i++) {
         dotProduct = math.add(
           dotProduct,
@@ -317,8 +317,8 @@ describe('Eigendecomposition', () => {
   describe('Complex Non-Hermitian Matrices', () => {
     it('computes correct eigensystem for a lower triangular matrix', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 1, im:  0}), math.complex({re: 2, im:  0})]
+        [math.complex(1,  0), math.complex(0,  0)],
+        [math.complex(1,  0), math.complex(2,  0)]
       ];
       
       // Verify matrix is not Hermitian
@@ -340,8 +340,8 @@ describe('Eigendecomposition', () => {
     
     it('handles a matrix with complex eigenvalues', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 1, im:  0}), math.complex({re: -1, im:  0})],
-        [math.complex({re: 1, im:  0}), math.complex({re: 1, im:  0})]
+        [math.complex(1,  0), math.complex(-1,  0)],
+        [math.complex(1,  0), math.complex(1,  0)]
       ];
       
       // This matrix has complex eigenvalues 1+i and 1-i
@@ -363,8 +363,8 @@ describe('Eigendecomposition', () => {
       // matrix = exp(i*t*σ_z) with t=π/4
       // Should have eigenvalues e^(iπ/4) and e^(-iπ/4)
       const matrix: ComplexMatrix = [
-        [math.complex({re: Math.cos(Math.PI/4), im:  Math.sin(Math.PI/4)}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: Math.cos(Math.PI/4), im:  -Math.sin(Math.PI/4)})]
+        [math.complex(Math.cos(Math.PI/4),  Math.sin(Math.PI/4)), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(Math.cos(Math.PI/4),  -Math.sin(Math.PI/4))]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true});
@@ -389,8 +389,8 @@ describe('Eigendecomposition', () => {
     it('handles matrices with nearly degenerate eigenvalues', () => {
       const epsilon = 1e-7;
       const matrix: ComplexMatrix = [
-        [math.complex({re: 1+epsilon, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})]
+        [math.complex(1+epsilon,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(1,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {
@@ -411,8 +411,8 @@ describe('Eigendecomposition', () => {
     
     it('handles large differences in magnitude', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 1e6, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 1e-6, im:  0})]
+        [math.complex(1e6,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(1e-6,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true});
@@ -428,8 +428,8 @@ describe('Eigendecomposition', () => {
     
     it('handles matrices with zeros', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})],
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})]
+        [math.complex(0,  0), math.complex(1,  0)],
+        [math.complex(1,  0), math.complex(0,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true});
@@ -447,8 +447,8 @@ describe('Eigendecomposition', () => {
     it('handles nilpotent matrices', () => {
       // A nilpotent matrix with all eigenvalues = 0
       const matrix: ComplexMatrix = [
-        [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]
+        [math.complex(0,  0), math.complex(1,  0)],
+        [math.complex(0,  0), math.complex(0,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true});
@@ -466,7 +466,7 @@ describe('Eigendecomposition', () => {
       }
       vectors.forEach(v => {
         const result = matrix.map(row => {
-          let sum = math.complex({re: 0, im:  0});
+          let sum = math.complex(0,  0);
           for (let j = 0; j < row.length; j++) {
             sum = math.add(sum, math.multiply(row[j], v[j])) as Complex;
           }
@@ -485,8 +485,8 @@ describe('Eigendecomposition', () => {
   describe('Quantum-Specific Applications', () => {
     it('correctly decomposes Pauli Z matrix', () => {
       const pauliZ: ComplexMatrix = [
-        [math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: -1, im:  0})]
+        [math.complex(1,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(-1,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(pauliZ, {computeEigenvectors: true});
@@ -514,8 +514,8 @@ describe('Eigendecomposition', () => {
       // exp(-i*σ_z*π/4) - critical for quantum time evolution
       const angle = Math.PI / 4;
       const evolutionOperator: ComplexMatrix = [
-        [math.complex({re: Math.cos(angle), im:  -Math.sin(angle)}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: Math.cos(angle), im:  Math.sin(angle)})]
+        [math.complex(Math.cos(angle),  -Math.sin(angle)), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(Math.cos(angle),  Math.sin(angle))]
       ];
       
       const { values, vectors } = eigenDecomposition(evolutionOperator, {computeEigenvectors: true});
@@ -538,10 +538,10 @@ describe('Eigendecomposition', () => {
     it('correctly decomposes a Hamiltonian', () => {
       // Heisenberg XY Hamiltonian term (similar to actual project code)
       const hamiltonian: ComplexMatrix = [
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 1, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})],
-        [math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0}), math.complex({re: 0, im:  0})]
+        [math.complex(0,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(1,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(1,  0), math.complex(0,  0), math.complex(0,  0)],
+        [math.complex(0,  0), math.complex(0,  0), math.complex(0,  0), math.complex(0,  0)]
       ];
       
       const { values, vectors } = eigenDecomposition(hamiltonian, {computeEigenvectors: true});
@@ -570,8 +570,8 @@ describe('Eigendecomposition', () => {
   describe('Eigenvalue-only Computation', () => {
     it('computes only eigenvalues when requested', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 2, im: 0}), math.complex({re: 1, im: 0})],
-        [math.complex({re: 1, im: 0}), math.complex({re: 2, im: 0})]
+        [math.complex(2, 0), math.complex(1, 0)],
+        [math.complex(1, 0), math.complex(2, 0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {
@@ -593,8 +593,8 @@ describe('Eigendecomposition', () => {
   describe('Orthogonality Options', () => {
     it('enforces orthogonality when requested', () => {
       const matrix: ComplexMatrix = [
-        [math.complex({re: 1, im: 0}), math.complex({re: 0, im: 0})],
-        [math.complex({re: 0, im: 0}), math.complex({re: 1, im: 0})]
+        [math.complex(1, 0), math.complex(0, 0)],
+        [math.complex(0, 0), math.complex(1, 0)]
       ];
       
       const { values, vectors } = eigenDecomposition(matrix, {

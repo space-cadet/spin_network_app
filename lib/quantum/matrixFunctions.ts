@@ -43,7 +43,7 @@ export function matrixFunction(
     // Construct the diagonal matrix of f(D)
     const fD = Array(dim).fill(null).map((_, i) => 
       Array(dim).fill(null).map((_, j) => 
-        i === j ? funcValues[i] : math.complex({re: 0, im:  0})
+        i === j ? funcValues[i] : math.complex(0,  0)
       )
     );
     
@@ -76,7 +76,7 @@ export function matrixLogarithm(matrix: Complex[][]): Complex[][] {
     const r = Math.sqrt(x.re * x.re + x.im * x.im);
     const theta = Math.atan2(x.im, x.re);
     
-    return math.complex({re: Math.log(r), im:  theta});
+    return math.complex(Math.log(r),  theta);
   });
 }
 
@@ -130,7 +130,7 @@ export function matrixPower(matrix: Complex[][], power: number): Complex[][] {
     const r = Math.pow(Math.sqrt(x.re * x.re + x.im * x.im), power);
     const theta = Math.atan2(x.im, x.re) * power;
     
-    return math.complex({re: r * Math.cos(theta), im:  r * Math.sin(theta)})});
+    return math.complex(r * Math.cos(theta),  r * Math.sin(theta))});
   };
 
 

@@ -164,7 +164,7 @@ function cleanupNumericalNoise(value: number): number {
  */
 function toMathMatrix(matrix: ComplexMatrix): math.Matrix {
     return math.matrix(matrix.map(row =>
-        row.map(x => math.complex({re: x.re, im:  x.im}))
+        row.map(x => math.complex(x.re,  x.im))
     ));
 }
 
@@ -849,7 +849,7 @@ export function scaleMatrix(matrix: ComplexMatrix, scalar: Complex): ComplexMatr
     }
 
     const matM = toMathMatrix(matrix);
-    const s = math.complex({re: scalar.re, im:  scalar.im});
+    const s = math.complex(scalar.re,  scalar.im);
     const result = math.multiply(matM, s);
     
     return fromMathMatrix(result);

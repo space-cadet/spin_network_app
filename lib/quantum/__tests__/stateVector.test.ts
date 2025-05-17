@@ -28,8 +28,8 @@ describe('StateVector', () => {
 
     it('creates state with given amplitudes', () => {
       const amps: Complex[] = [
-        math.complex({re: 1/Math.sqrt(2), im:  0}),
-        math.complex({re: 1/Math.sqrt(2), im:  0})
+        math.complex(1/Math.sqrt(2),  0),
+        math.complex(1/Math.sqrt(2),  0)
       ];
       const state = new StateVector(2, amps);
       expect(state.dimension).toBe(2);
@@ -47,7 +47,7 @@ describe('StateVector', () => {
     });
 
     it('validates amplitudes length', () => {
-      const amps = [math.complex({re: 1, im:  0})];
+      const amps = [math.complex(1,  0)];
       expect(() => new StateVector(2, amps)).toThrow();
     });
   });
@@ -56,7 +56,7 @@ describe('StateVector', () => {
     describe('setState/getState', () => {
       it('sets and gets state amplitudes', () => {
         const state = new StateVector(2);
-        const amp = math.complex({re: 1, im:  0});
+        const amp = math.complex(1,  0);
         
         state.setState(0, amp);
         expect(state.getState(0)).toEqual(amp);
@@ -64,7 +64,7 @@ describe('StateVector', () => {
 
       it('validates index bounds', () => {
         const state = new StateVector(2);
-        const amp = math.complex({re: 1, im:  0});
+        const amp = math.complex(1,  0);
         
         expect(() => state.setState(-1, amp)).toThrow();
         expect(() => state.setState(2, amp)).toThrow();
@@ -76,22 +76,22 @@ describe('StateVector', () => {
     describe('innerProduct', () => {
       it('computes inner product correctly', () => {
         const state1 = new StateVector(2, [
-          math.complex({re: 1, im:  0}),
-          math.complex({re: 0, im:  0})
+          math.complex(1,  0),
+          math.complex(0,  0)
         ]);
         const state2 = new StateVector(2, [
-          math.complex({re: 0, im:  0}),
-          math.complex({re: 1, im:  0})
+          math.complex(0,  0),
+          math.complex(1,  0)
         ]);
         
         const product = state1.innerProduct(state2);
-        expect(product).toEqual(math.complex({re: 0, im:  0}));
+        expect(product).toEqual(math.complex(0,  0));
       });
 
       it('computes self inner product', () => {
         const state = new StateVector(2, [
-          math.complex({re: 1/Math.sqrt(2), im:  0}),
-          math.complex({re: 1/Math.sqrt(2), im:  0})
+          math.complex(1/Math.sqrt(2),  0),
+          math.complex(1/Math.sqrt(2),  0)
         ]);
         
         const product = state.innerProduct(state);
@@ -109,8 +109,8 @@ describe('StateVector', () => {
     describe('norm', () => {
       it('computes norm correctly', () => {
         const state = new StateVector(2, [
-          math.complex({re: 1/Math.sqrt(2), im:  0}),
-          math.complex({re: 1/Math.sqrt(2), im:  0})
+          math.complex(1/Math.sqrt(2),  0),
+          math.complex(1/Math.sqrt(2),  0)
         ]);
         expect(state.norm()).toBeCloseTo(1);
       });
@@ -124,8 +124,8 @@ describe('StateVector', () => {
     describe('normalize', () => {
       it('normalizes state vector', () => {
         const state = new StateVector(2, [
-          math.complex({re: 2, im:  0}),
-          math.complex({re: 2, im:  0})
+          math.complex(2,  0),
+          math.complex(2,  0)
         ]);
         
         const normalized = state.normalize();
@@ -141,17 +141,17 @@ describe('StateVector', () => {
     describe('tensorProduct', () => {
       it('computes tensor product correctly', () => {
         const state1 = new StateVector(2, [
-          math.complex({re: 1, im:  0}),
-          math.complex({re: 0, im:  0})
+          math.complex(1,  0),
+          math.complex(0,  0)
         ]);
         const state2 = new StateVector(2, [
-          math.complex({re: 1, im:  0}),
-          math.complex({re: 0, im:  0})
+          math.complex(1,  0),
+          math.complex(0,  0)
         ]);
         
         const product = state1.tensorProduct(state2);
         expect(product.dimension).toBe(4);
-        expect(product.amplitudes[0]).toEqual(math.complex({re: 1, im:  0}));
+        expect(product.amplitudes[0]).toEqual(math.complex(1,  0));
         expect(product.amplitudes.slice(1).every(amp => 
           amp.re === 0 && amp.im === 0
         )).toBe(true);
@@ -174,16 +174,16 @@ describe('StateVector', () => {
 
       it('identifies non-zero state', () => {
         const state = new StateVector(2, [
-          math.complex({re: 1, im:  0}),
-          math.complex({re: 0, im:  0})
+          math.complex(1,  0),
+          math.complex(0,  0)
         ]);
         expect(state.isZero()).toBe(false);
       });
 
       it('handles numerical tolerance', () => {
         const state = new StateVector(2, [
-          math.complex({re: 1e-11, im:  1e-11}),
-          math.complex({re: 0, im:  0})
+          math.complex(1e-11,  1e-11),
+          math.complex(0,  0)
         ]);
         expect(state.isZero(1e-10)).toBe(true);
         expect(state.isZero(1e-12)).toBe(false);
@@ -195,8 +195,8 @@ describe('StateVector', () => {
     describe('computationalBasis', () => {
       it('creates valid computational basis state', () => {
         const state = StateVector.computationalBasis(2, 0);
-        expect(state.amplitudes[0]).toEqual(math.complex({re: 1, im:  0}));
-        expect(state.amplitudes[1]).toEqual(math.complex({re: 0, im:  0}));
+        expect(state.amplitudes[0]).toEqual(math.complex(1,  0));
+        expect(state.amplitudes[1]).toEqual(math.complex(0,  0));
         expectNormalized(state);
       });
 
@@ -229,8 +229,8 @@ describe('StateVector', () => {
     describe('superposition', () => {
       it('creates normalized superposition state', () => {
         const coeffs = [
-          math.complex({re: 1, im:  0}),
-          math.complex({re: 1, im:  0})
+          math.complex(1,  0),
+          math.complex(1,  0)
         ];
         const state = StateVector.superposition(coeffs);
         expectNormalized(state);
@@ -246,7 +246,7 @@ describe('StateVector', () => {
         const state = StateVector.equalSuperposition(2);
         expectNormalized(state);
         
-        const expectedAmp = math.complex({re: 1/Math.sqrt(2), im:  0});
+        const expectedAmp = math.complex(1/Math.sqrt(2),  0);
         state.amplitudes.forEach(amp => {
           expect(amp).toEqual(expectedAmp);
         });

@@ -1,6 +1,6 @@
-# Integrated Code Rules and Memory Bank System, v6.1 (Hierarchical Memory Bank Augmented)
+# Integrated Code Rules and Memory Bank System, v6.4 (Project Root Clarification)
 
-*Last Updated: April 22, 2025*
+*Last Updated: May 17, 2025*
 
 YOU WILL KEEP IT REALLY SIMPLE, STUPID (KIRSS). IF YOU THINK A SOLUTION IS SIMPLE ENOUGH, MAKE IT EVEN SIMPLER.
 YOU WILL NEVER UPDATE ANY FILES, INCLUDING MEMORY BANK FILES, WITHOUT EXPLICIT USER APPROVAL
@@ -23,6 +23,20 @@ YOU WILL GO SLOW AND STEADY. WHEN YOU THINK YOU'RE GOING SLOW, GO EVEN SLOWER.
 - Ensure project continuity across sessions
 - Support multiple concurrent tasks
 
+### 1.2 Project Structure
+
+The memory bank system requires clear definition of two key paths:
+
+1. **Project Root**: 
+   - Defined by environment variable `PROJECT_ROOT` or `.projectroot` file
+   - All project-related paths are relative to this directory
+   - Example: `/Users/username/code/myproject`
+
+2. **Memory Bank Root**: 
+   - Always located at `${PROJECT_ROOT}/memory-bank`
+   - Contains all memory bank system files and directories
+   - No other project files should be stored here
+
 ## 2. Hierarchical Memory Bank Structure
 
 ### 2.1 Overview
@@ -32,21 +46,22 @@ The hierarchical memory bank organizes files into a structured directory system 
 ### 2.2 Directory Structure
 
 ```
-memory-bank/
-├── activeContext.md      # Current task context
-├── changelog.md          # Log of changes across sessions
-├── edit_history.md       # File modification log (with task references)
-├── errorLog.md           # Error tracking (with task references)
-├── progress.md           # Implementation status
-├── projectbrief.md       # Project overview
-├── session_cache.md      # Multi-task session state
-├── systemPatterns.md     # Architecture and design patterns
-├── tasks.md              # Task registry and tracking
-├── techContext.md        # Technical implementation details
-├── archive/          # Archived files
-├── implementation-details/ # Detailed implementation notes
-├── templates/        # Template files for memory bank documents
-└── database/             # Hierarchical database for memory bank
+${PROJECT_ROOT}/                 # Project root directory
+└── memory-bank/                # Memory bank root
+    ├── activeContext.md        # Current task context
+    ├── changelog.md            # Log of changes across sessions
+    ├── edit_history.md        # File modification log (with task references)
+    ├── errorLog.md            # Error tracking (with task references)
+    ├── progress.md            # Implementation status
+    ├── projectbrief.md        # Project overview
+    ├── session_cache.md       # Multi-task session state
+    ├── systemPatterns.md      # Architecture and design patterns
+    ├── tasks.md              # Task registry and tracking
+    ├── techContext.md        # Technical implementation details
+    ├── archive/              # Archived files
+    ├── implementation-details/ # Detailed implementation notes
+    ├── templates/            # Template files for memory bank documents
+    └── database/             # Hierarchical database for memory bank
 ```
 
 ### 2.3 File Relationships
@@ -135,17 +150,23 @@ Individual session files in the `sessions/` directory track work done in a speci
    - File-specific details in wrong documents
    - Missing task ID references
 
-### 2.5 Maintenance Guidelines
+3. Project Structure Requirements:
+   - Project root must be clearly identified
+   - Memory bank must be in `memory-bank` directory under project root
+   - No duplicate directory names with "memory-bank"
+   - No project files inside memory bank directory
+
+### 2.7 Maintenance Guidelines
 
 * IMPORTANT: ALL file updates below require EXPLICIT user approval before implementation
 * Update `tasks.md` only after receiving approval, whenever task status changes
-* Update `edit_history.md` only after receiving approval, after each file change, with task ID reference
+* Update `edit_history.md` only after receiving approval, by APPENDING entries using block edits, with task ID reference and precise timestamp
 * Update `session_cache.md` only after receiving approval, when switching between tasks
 * Review `errorLog.md` weekly, but make no modifications without approval
 * Archive `session_cache.md` only after receiving approval, after all active tasks complete
 * Keep `progress.md` organized by task ID, updating only with explicit approval
 
-### 2.6 File Size Management Protocol
+### 2.8 File Size Management Protocol
 
 **NOTE: The following operations require explicit approval before implementation**
 
@@ -155,9 +176,47 @@ Individual session files in the `sessions/` directory track work done in a speci
    - When exceeding limit, move to `archive/` subfolder
    - Rename using format `edit_history_YYYY-MM.md`
 
+### 2.9 Session Cache Management
+
+1. **Session Cache Purpose**
+   - `session_cache.md` serves as a live snapshot of current session state
+   - Historical session data preserved in `sessions/` directory files
+   - Changes tracked in `edit_history.md`
+
+2. **Session Cache Contents**
+   - Current session metadata (start time, focus task)
+   - List of all active and paused tasks with current state
+   - Current progress and context for active tasks
+   - Links to relevant session files
+
+3. **Session Transition Protocol**
+   Before ending a session:
+   1. Create new session file in `sessions/[DATE]-[PERIOD].md`
+   2. Update `session_cache.md` to reflect final state
+   3. Add relevant entries to `edit_history.md`
+   
+4. **Session File Naming**
+   - Format: `sessions/YYYY-MM-DD-[PERIOD].md`
+   - Period: morning, afternoon, evening, or night
+   - Example: `sessions/2025-04-30-morning.md`
+
 ## 3. Integration with Development Workflow
 
-This system supports rapid task execution while maintaining documentation quality and balancing immediate needs with long-term project knowledge.
+### 3.1 GitHub Projects Integration
+
+The Memory Bank system integrates with GitHub Projects for team collaboration and task tracking. Key integration files:
+
+1. **Setup Guide**: 
+   - Located at `implementation-details/gh-project-init.md`
+   - Contains exact gh CLI commands for project setup
+   - Reference for initial GitHub Projects configuration
+
+2. **Integration Documentation**:
+   - Located at `implementation-details/github-integration/`
+   - Complete documentation of GitHub integration
+   - Templates and synchronization processes
+
+The system supports rapid task execution while maintaining documentation quality and balancing immediate needs with long-term project knowledge.
 
 ## 4. Tiered Knowledge Structure
 
@@ -187,25 +246,40 @@ Knowledge is organized in four tiers with task-oriented loading priorities:
    - `techContext.md` - Technical implementation details
    - Load only specific files when directly relevant to current task step
 
+
 ## 5. Documentation Decision Framework
 
-**IMPORTANT: All commands that modify files require explicit user approval before execution, unless such approval has already been explicitly given**
+### 5.1 Update Categories and Sequence
 
-| Change Type | Documentation Requirements |
-|-------------|----------------------------|
-| Task creation | Update `tasks.md` with new task ID and details |
-| Task status change | Update `tasks.md` with new status |
-| Task switching | Update `session_cache.md` to preserve context |
-| Interface changes | Update API docs, `activeContext.md` with task reference |
-| Implementation details | Code comments only, `edit_history.md` with task ID |
-| Architecture changes | Update `systemPatterns.md`, add task reference |
-| New features | Update `progress.md`, `projectbrief.md` with task reference |
-| Bug fixes | Update `progress.md` with task reference |
-| Refactoring | Minimal documentation unless patterns change |
-| Error resolution | Update `errorLog.md` with error details, fix, and task ID |
-| File modification | Update `edit_history.md` with file changes and task ID |
-| Multiple file edits | Update both `session_cache.md` and `edit_history.md` with task ID |
-| Ongoing work | Update `session_cache.md` with clear "in progress" indicators (🔄) |
+1. **Core Transaction Files** (Every Session, at the end of the session, only after user approval)
+   - tasks/[ID].md → tasks.md → session_cache.md
+   - sessions/[DATE].md → edit_history.md
+2. **Context Files** (When Changed, at the end of the session, only after user approval)
+   - activeContext.md (focus/approach changes)
+   - errorLog.md (error encounters)
+   - progress.md (milestone completion)
+   - changelog.md (feature/bug changes)
+3. **Architecture Files** (Design Changes Only. When prompted by user or when significant changes occur)
+   - systemPatterns.md (patterns)
+   - techContext.md (implementation)
+   - projectbrief.md (scope)
+
+### 5.2 Change Requirements
+
+| Change Type | Required Updates | Optional Updates |
+|-------------|------------------|------------------|
+| Task status | task file, tasks.md, session_cache.md | activeContext.md |
+| Task creation | tasks.md, new task file, session_cache.md | - |
+| Error fixes | errorLog.md, edit_history.md | changelog.md |
+| Features | changelog.md, edit_history.md, task files | projectbrief.md |
+| Architecture | systemPatterns.md, edit_history.md | techContext.md |
+| Multiple edits | edit_history.md, session_cache.md | - |
+
+### 5.3 Maintenance Rules
+- Rotate edit_history.md, errorLog.md at 500 lines
+- Archive completed tasks after 30 days
+- Maintain cross-references when archiving
+- All updates require explicit approval
 
 ## 6. Integrated Command System
 
@@ -239,7 +313,7 @@ Knowledge is organized in four tiers with task-oriented loading priorities:
 | `read_mb complete` | Load all Memory Bank files (rarely needed) |
 | `update_mb [file]` | Update specific file with minimal changes |
 | `log_error [title] [task_id]` | Record new error in errorLog.md |
-| `record_edits [task_id] [description]` | Add file mods to edit_history.md |
+| `record_edits [task_id] [description]` | Append new entry to edit_history.md (append-only, never overwrite) |
 | `read_errors [component]` | Load error history for specific component |
 | `read_task [task_id]` | Load task-specific information from tasks.md |
 
@@ -247,10 +321,11 @@ Knowledge is organized in four tiers with task-oriented loading priorities:
 
 | Command | Description |
 |---------|-------------|
-| `continue_session` | Flag continuation; prioritize session_cache.md |
-| `complete_session` | Mark session complete, update necessary docs |
-| `cache_session` | Create continuation point with minimal updates |
-| `start_session` | Begin new session with fresh timestamp |
+| `start_session` | Begin new session with fresh timestamp, create session file |
+| `continue_session` | Flag continuation; update session_cache.md with current focus |
+| `complete_session` | 1. Create session file 2. Update cache 3. Update edit history |
+| `cache_session` | Create continuation point in both session file and cache |
+| `rotate_sessions` | Archive sessions older than 30 days to archive/ |
 
 ### 6.5 Code Implementation Commands
 
@@ -302,6 +377,21 @@ Tool use is formatted using XML-style tags:
 ...
 </tool_name>
 ```
+
+### 8.2.0 Path Resolution
+
+1. **Absolute Paths**:
+   - Must be relative to `${PROJECT_ROOT}`
+   - Example: `src/main.js` refers to `${PROJECT_ROOT}/src/main.js`
+
+2. **Memory Bank Paths**:
+   - Must be relative to `${PROJECT_ROOT}/memory-bank`
+   - Example: `tasks/T123.md` refers to `${PROJECT_ROOT}/memory-bank/tasks/T123.md`
+
+3. **Path Resolution Rules**:
+   - Project files: Always relative to `${PROJECT_ROOT}`
+   - Memory bank files: Always relative to `${PROJECT_ROOT}/memory-bank`
+   - Never use absolute filesystem paths in documentation
 
 ### 8.2 File Operations
 
@@ -362,6 +452,22 @@ New content to replace with
 </edit_block>
 ```
 
+### 8.2.1 File Operation Prerequisites
+
+1. REQUIRED: Before ANY file operation:
+   - Check file existence using list_directory or read_file
+   - If file doesn't exist:
+     - Request explicit user approval to create
+     - Only create after receiving approval
+   - If file exists:
+     - Request explicit user approval to modify
+     - Only modify after receiving approval
+
+2. PROHIBITED:
+   - Creating files without checking existence
+   - Creating files without explicit user approval
+   - Modifying files without explicit user approval
+
 ## 9. Core File Structure Templates
 
 ### 9.1 tasks.md (Task Registry)
@@ -397,8 +503,15 @@ New content to replace with
 # Session Cache
 *Last Updated: [Timestamp]*
 
+## Current Session
+**Started**: [Timestamp]
+**Focus Task**: [Task ID]
+**Session File**: `sessions/[DATE]-[PERIOD].md`
+
 ## Overview
-- Active: [Count] | Paused: [Count] | Focus: [Task ID]
+- Active: [Count] | Paused: [Count]
+- Last Session: [Previous Session File]
+- Current Period: [morning/afternoon/evening/night]
 
 ## Task Registry
 - T1: [Brief] - 🔄
@@ -415,6 +528,11 @@ New content to replace with
 1. ✅ [Done]
 2. 🔄 [Current]
 3. ⬜ [Next]
+
+## Session History (Last 3)
+1. `sessions/[DATE]-[PERIOD].md`
+2. `sessions/[DATE]-[PERIOD].md`
+3. `sessions/[DATE]-[PERIOD].md`
 ```
 
 ### 9.3 edit_history.md

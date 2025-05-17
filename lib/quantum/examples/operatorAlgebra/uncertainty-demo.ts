@@ -21,38 +21,38 @@ import * as math from 'mathjs';
 function createTestStates() {
   // |0⟩ state
   const zeroState = new StateVector(2, [
-    math.complex({re: 1, im:  0}),
-    math.complex({re: 0, im:  0})
+    math.complex(1,  0),
+    math.complex(0,  0)
   ]);
   
   // |1⟩ state
   const oneState = new StateVector(2, [
-    math.complex({re: 0, im:  0}),
-    math.complex({re: 1, im:  0})
+    math.complex(0,  0),
+    math.complex(1,  0)
   ]);
   
   // |+⟩ = (|0⟩ + |1⟩)/√2 state (X eigenstate)
   const plusState = new StateVector(2, [
-    math.complex({re: 1/Math.sqrt(2), im:  0}),
-    math.complex({re: 1/Math.sqrt(2), im:  0})
+    math.complex(1/Math.sqrt(2),  0),
+    math.complex(1/Math.sqrt(2),  0)
   ]);
   
   // |-⟩ = (|0⟩ - |1⟩)/√2 state (X eigenstate)
   const minusState = new StateVector(2, [
-    math.complex({re: 1/Math.sqrt(2), im:  0}),
-    math.complex({re: -1/Math.sqrt(2), im:  0})
+    math.complex(1/Math.sqrt(2),  0),
+    math.complex(-1/Math.sqrt(2),  0)
   ]);
   
   // |+i⟩ = (|0⟩ + i|1⟩)/√2 state (Y eigenstate)
   const plusIState = new StateVector(2, [
-    math.complex({re: 1/Math.sqrt(2), im:  0}),
-    math.complex({re: 0, im:  1/Math.sqrt(2)})
+    math.complex(1/Math.sqrt(2),  0),
+    math.complex(0,  1/Math.sqrt(2))
   ]);
   
   // |-i⟩ = (|0⟩ - i|1⟩)/√2 state (Y eigenstate)
   const minusIState = new StateVector(2, [
-    math.complex({re: 1/Math.sqrt(2), im:  0}),
-    math.complex({re: 0, im:  -1/Math.sqrt(2)})
+    math.complex(1/Math.sqrt(2),  0),
+    math.complex(0,  -1/Math.sqrt(2))
   ]);
   
   return {
@@ -164,13 +164,13 @@ function demoOperatorGeneration() {
   console.log('----------------------------');
   
   // Rx(π/2) = e^(-iX·π/4)
-  const X_generator = PauliX.scale(math.complex({re: -Math.PI/4, im:  0}));
+  const X_generator = PauliX.scale(math.complex(-Math.PI/4,  0));
   const Rx = operatorFromGenerator(X_generator);
   console.log('\nRotation around X by π/2:');
   console.log(Rx.toMatrix());
   
   // Rz(π/2) = e^(-iZ·π/4)
-  const Z_generator = PauliZ.scale(math.complex({re: -Math.PI/4, im:  0}));
+  const Z_generator = PauliZ.scale(math.complex(-Math.PI/4,  0));
   const Rz = operatorFromGenerator(Z_generator);
   console.log('\nRotation around Z by π/2:');
   console.log(Rz.toMatrix());

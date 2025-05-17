@@ -29,8 +29,8 @@ function singleSpinExample() {
 
   // Create initial state |+⟩ = (|0⟩ + |1⟩)/√2
   const initialState = new StateVector(2, [
-    math.complex({re: 1/Math.sqrt(2), im:  0}),
-    math.complex({re: 1/Math.sqrt(2), im:  0})
+    math.complex(1/Math.sqrt(2),  0),
+    math.complex(1/Math.sqrt(2),  0)
   ]);
 
   // New: Create 50 evenly spaced time points from 0 to π
