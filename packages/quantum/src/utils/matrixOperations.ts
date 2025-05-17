@@ -19,7 +19,7 @@
  */
 
 import * as math from 'mathjs';
-import { Complex } from '../core/types';
+import { Complex, toComplex } from '../core/types';
 
 // ==================== Type Definitions ====================
 

@@ -22,7 +22,9 @@ export function complexApproxEqual(a: Complex, b: Complex, tolerance: number = 1
  */
 export function stateVectorApproxEqual(a: IStateVector, b: IStateVector, tolerance: number = 1e-10): boolean {
   if (a.dimension !== b.dimension) return false;
-  return a.amplitudes.every((amp, i) => complexApproxEqual(amp, b.amplitudes[i], tolerance));
+  const aAmps = a.getAmplitudes();
+  const bAmps = b.getAmplitudes();
+  return aAmps.every((amp, i) => complexApproxEqual(amp, bAmps[i], tolerance));
 }
 
 /**

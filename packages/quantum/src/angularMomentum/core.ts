@@ -3,7 +3,7 @@
  * Implements J₊, J₋, Jz, and J² operators for arbitrary angular momentum j
  */
 
-import { Complex, IOperator } from '../core/types';
+import { Complex, IOperator, toComplex } from '../core/types';
 import { MatrixOperator } from '../operators/operator';
 import { expectationValue } from '../operators/measurement';
 import { StateVector } from '../states/stateVector';
@@ -110,18 +110,19 @@ export function createJx(j: number): IOperator {
   const jMinus = createJminus(j);
   
   // Jx = (J₊ + J₋)/2
-  const matrix = jPlus.toMatrix().map((row, i) => 
-    row.map((_, j) => {
-      const plusElem = jPlus.toMatrix()[i][j];
-      const minusElem = jMinus.toMatrix()[i][j];
-      return math.multiply(
-        math.add(plusElem, minusElem),
-        0.5
-      ) as Complex;
-    })
+  const plusMatrix = jPlus.toMatrix();
+  const minusMatrix = jMinus.toMatrix();
+  
+  const matrix = plusMatrix.map((row, i) => 
+    row.map((_, j) => 
+      math.multiply(
+        math.add(plusMatrix[i][j], minusMatrix[i][j]),
+        math.complex(0.5, 0)
+      ) as Complex
+    )
   );
   
-  return new MatrixOperator(matrix, 'general', true, { j });
+  return new MatrixOperator(matrix, 'hermitian', true, { j });
 }
 
 /**
@@ -255,8 +256,12 @@ export function getValidM(j: number): number[] {
  */
 export function isValidM(j: number, m: number): boolean {
   validateJ(j);
-  // m must be between -j and +j
-  return m >= -j && m <= j && Math.abs(m - Math.round(m)) < 1e-10;
+  // m must be between -j and +j and be properly quantized
+  // For j = 1/2, m can be ±1/2
+  // For j = 1, m can be -1, 0, 1
+  // Step size is always 1
+  const mStep = m + j;  // Convert to 0-based index
+  return m >= -j && m <= j && Math.abs(mStep - Math.round(mStep)) < 1e-10;
 }
 
 /**

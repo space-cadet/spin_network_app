@@ -2,7 +2,7 @@
  * Quantum state vector implementation
  */
 
-import { Complex, IStateVector } from '../core/types';
+import { Complex, IStateVector, toComplex } from '../core/types';
 import * as math from 'mathjs';
 import { 
   validatePosDim, 
@@ -61,8 +61,8 @@ export class StateVector implements IStateVector {
 
     let result: Complex = math.complex(0, 0);
     for (let i = 0; i < this.dimension; i++) {
-      const conj = math.conj(this.amplitudes[i]);
-      const prod = math.multiply(conj, other.amplitudes[i]);
+      const conj = math.conj(toComplex(this.amplitudes[i]));
+      const prod = math.multiply(conj, toComplex(other.amplitudes[i]));
       result = math.add(result, prod) as Complex;
     }
     return result;
@@ -87,7 +87,7 @@ export class StateVector implements IStateVector {
     }
 
     const normalizedAmplitudes = this.amplitudes.map(amp => 
-      math.divide(amp, math.complex(currentNorm, 0)) as Complex
+      math.divide(toComplex(amp), math.complex(currentNorm, 0)) as Complex
     );
 
     return new StateVector(this.dimension, normalizedAmplitudes, this.basis, this.properties);
@@ -128,12 +128,52 @@ export class StateVector implements IStateVector {
   }
 
   /**
+   * Get a copy of the amplitudes array
+   */
+  getAmplitudes(): Complex[] {
+    return [...this.amplitudes];
+  }
+
+  /**
+   * Check if this state vector equals another within tolerance
+   */
+  equals(other: IStateVector, tolerance: number = 1e-10): boolean {
+    if (this.dimension !== other.dimension) {
+      return false;
+    }
+
+    return this.amplitudes.every((amp, i) => {
+      const diff = math.subtract(amp, other.getState(i)) as Complex;
+      const absDiff = math.abs(diff) as number;
+      return absDiff < tolerance;
+    });
+  }
+
+  /**
+   * Scale the state vector by a complex number
+   * @param factor Complex scaling factor
+   * @returns New scaled state vector
+   */
+  scale(factor: Complex): IStateVector {
+    const scaledAmplitudes = this.amplitudes.map(amp =>
+      math.multiply(toComplex(amp), toComplex(factor)) as Complex
+    );
+    return new StateVector(
+      this.dimension, 
+      scaledAmplitudes, 
+      this.basis, 
+      this.properties ? {...this.properties} : undefined
+    );
+  }
+
+  
+  /**
    * Returns array representation of state vector
    */
   toArray(): Complex[] {
     return [...this.amplitudes];
   }
-
+  
   /**
    * Returns string representation of state vector
    */

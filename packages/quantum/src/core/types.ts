@@ -4,8 +4,27 @@
 
 import { Complex } from 'mathjs';
 
+import * as math from 'mathjs';
+
 // Direct export of math.js Complex type
 export type { Complex } from 'mathjs';
+
+/**
+ * Helper functions for complex number handling
+ */
+export function toComplex(value: number | Complex | {re: number, im: number}): Complex {
+  if (typeof value === 'number') {
+    return math.complex(value, 0);
+  }
+  if ('re' in value && 'im' in value) {
+    return math.complex(value.re, value.im);
+  }
+  return value as Complex;
+}
+
+export function ensureComplex(value: Complex): Complex {
+  return toComplex(value);
+}
 
 /**
  * Represents a quantum state vector
@@ -19,13 +38,16 @@ export interface IStateVector {
   // State manipulation
   setState(index: number, value: Complex): void;
   getState(index: number): Complex;
+  getAmplitudes(): Complex[];
 
   // Quantum operations
   innerProduct(other: IStateVector): Complex;
   norm(): number;
   normalize(): IStateVector;
   tensorProduct(other: IStateVector): IStateVector;
-
+  scale(factor: Complex): IStateVector;
+  equals(other: IStateVector, tolerance?: number): boolean;
+  
   // Utility methods
   isZero(tolerance?: number): boolean;
   toArray(): Complex[];
