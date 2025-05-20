@@ -261,7 +261,16 @@ export class MatrixOperator implements IOperator {
    * Returns matrix representation
    */
   toMatrix(): ComplexMatrix {
-    return this.matrix.map(row => row.map(elem => math.clone(elem)));
+    // Create new matrix with explicit positive zeros
+  return this.matrix.map(row => 
+    row.map(elem => 
+      // Ensure positive zero in real and imaginary parts
+      math.complex(
+        elem.re === 0 ? 0 : elem.re,
+        elem.im === 0 ? 0 : elem.im
+      )
+    )
+  );
   }
 
   /**

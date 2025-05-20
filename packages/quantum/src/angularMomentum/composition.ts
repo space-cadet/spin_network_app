@@ -5,7 +5,7 @@
 
 import { Complex, IOperator, toComplex } from '../core/types';
 import { StateVector } from '../states/stateVector';
-import { createState, validateJ, isValidM } from './core';
+import { createJmState, validateJ, isValidM } from './core';
 import * as math from 'mathjs';
 
 // Core type for Clebsch-Gordan coefficients (sparse map)

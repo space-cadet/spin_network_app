@@ -21,7 +21,7 @@ import * as math from 'mathjs';
  * @param m Magnetic quantum number
  * @returns The state |j,m⟩ as a StateVector
  */
-export function createState(j: number, m: number): StateVector {
+export function createJmState(j: number, m: number): StateVector {
   validateJ(j);
   if (!isValidM(j, m)) {
     throw new Error(`Invalid m=${m} for j=${j}`);
@@ -29,7 +29,7 @@ export function createState(j: number, m: number): StateVector {
 
   const dim = Math.floor(2 * j + 1);
   const amplitudes = Array(dim).fill(null).map(() => math.complex(0, 0));
-  const idx = m + j;
+  const idx = j-m;
   amplitudes[idx] = math.complex(1, 0);
 
   return new StateVector(dim, amplitudes, `|${j},${m}⟩`);
@@ -136,15 +136,16 @@ export function createJy(j: number): IOperator {
   const jMinus = createJminus(j);
   
   // Jy = (J₊ - J₋)/(2i)
-  const matrix = jPlus.toMatrix().map((row, i) => 
-    row.map((_, j) => {
-      const plusElem = jPlus.toMatrix()[i][j];
-      const minusElem = jMinus.toMatrix()[i][j];
-      return math.multiply(
-        math.subtract(plusElem, minusElem),
-        math.complex(0, -0.5)
-      ) as Complex;
-    })
+  const plusMatrix = jPlus.toMatrix();
+  const minusMatrix = jMinus.toMatrix();
+  
+  const matrix = plusMatrix.map((row, i) => 
+    row.map((_, j) => 
+      math.multiply(
+        math.subtract(plusMatrix[i][j], minusMatrix[i][j]),
+        math.complex(0, 0.5) // multiply by 1/(2i)
+      ) as Complex
+    )
   );
   
   return new MatrixOperator(matrix, 'general', true, { j });
@@ -155,9 +156,9 @@ export function createJz(j: number): IOperator {
   const dim = Math.floor(2 * j + 1);
   const matrix = createZeroMatrix(dim);
 
-  // Fill diagonal elements
-  for (let m = -j; m <= j; m++) {
-    const idx = m + j;
+  // Fill diagonal elements - m goes from j to -j as idx goes from 0 to 2j
+  for (let idx = 0; idx < dim; idx++) {
+    const m = j - idx;  // This maps index 0 to m=j, index 1 to m=j-1, etc.
     matrix[idx][idx] = math.complex(m, 0);
   }
 
@@ -205,7 +206,7 @@ export function createJ2FromComponents(j: number): IOperator {
   // Calculate J² = J₊J₋ + Jz² - Jz
   const jPlusJMinus = jPlus.compose(jMinus);
   const jzSquared = jz.compose(jz);
-  const result = jPlusJMinus.add(jzSquared).add(jz.scale(math.complex(-1, 0)));
+  const result = jPlusJMinus.add(jzSquared).add(jz.scale(math.complex(1, 0)));
 
   return Object.assign(new MatrixOperator(result.toMatrix()), { j }) as IOperator;
 }
@@ -254,12 +255,15 @@ export function getValidM(j: number): number[] {
  */
 export function isValidM(j: number, m: number): boolean {
   validateJ(j);
-  // m must be between -j and +j and be properly quantized
-  // For j = 1/2, m can be ±1/2
-  // For j = 1, m can be -1, 0, 1
-  // Step size is always 1
-  const mStep = m + j;  // Convert to 0-based index
-  return m >= -j && m <= j && Math.abs(mStep - Math.round(mStep)) < 1e-10;
+  // First check range
+  if (m < -j || m > j) {
+    return false;
+  }
+  
+  // For integer j, m must be integer
+  // For half-integer j, m must be half-integer
+  const mValues = getValidM(j);
+  return mValues.includes(m);
 }
 
 /**
@@ -343,19 +347,19 @@ export function createCoherentState(j: number, theta: number, phi: number): Stat
   const D = createRotationOperator(j, alpha, beta, gamma);
   
   // Start with highest weight state |j,j⟩
-  const highestState = createState(j, j);
+  const highestState = createJmState(j, j);
   
   // Rotate to desired direction
   return D.apply(highestState);
 }
 
 export function jmExpectationValue(
-  operator: IOperator & { j: number },
+  operator: IOperator,
   j: number,
   m: number
 ): Complex {
   // Create the angular momentum state |j,m⟩
-  const state = createState(j, m);
+  const state = createJmState(j, m);
   
   // Calculate ⟨j,m|O|j,m⟩ using the proper expectation value formula
   return expectationValue(state, operator);

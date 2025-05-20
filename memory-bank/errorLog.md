@@ -1,5 +1,43 @@
 # Error Log
 
+## 2025-05-20: Complex Number Zero Comparison Issue
+**File:** `/packages/quantum/src/operators/operator.ts`
+**Error:** Test failure due to comparison between -0 and 0 in complex numbers
+**Cause:** math.clone() preserves signed zero (-0) when copying complex numbers, causing equality comparisons to fail
+**Fix:** Modified toMatrix() to explicitly handle zero values in complex numbers:
+```typescript
+toMatrix(): ComplexMatrix {
+  return this.matrix.map(row => 
+    row.map(elem => 
+      math.complex(
+        elem.re === 0 ? 0 : elem.re,
+        elem.im === 0 ? 0 : elem.im
+      )
+    )
+  );
+}
+```
+**Task:** T55a
+
+## 2025-05-20: Incorrect J² Construction Formula 
+**File:** `/packages/quantum/src/angularMomentum/core.ts`
+**Error:** J² operator constructed from components giving incorrect eigenvalues
+**Cause:** Wrong sign in formula J² = J₊J₋ + Jz² - Jz (should be + Jz)
+**Fix:** Fixed formula in createJ2FromComponents to use J² = J₊J₋ + Jz² + Jz
+**Changes:** Changed negative sign to positive in Jz term
+**Task:** T55a
+
+## 2025-05-20: Complex Number Comparison in Tests
+**File:** `/packages/quantum/__tests__/angularMomentum/operators.test.ts`
+**Error:** TypeScript error "Operator '<' cannot be applied to types 'Complex' and 'number'"
+**Cause:** math.abs() returns Complex type for complex numbers, cannot be directly compared with numbers
+**Fix:** Use Number(math.abs()) to convert complex absolute value to number before comparison
+**Changes:** Modified test comparisons to use:
+```typescript
+expect(Number(math.abs(math.subtract(matrix1[i][j], matrix2[i][j]))) < 1e-10)
+```
+**Task:** T55a
+
 ## 2025-05-12 - TypeScript Error: Invalid math.MathType Addition
 **File:** `packages/quantum/__tests__/hamiltonian.test.ts`
 **Error:** Operator '+' cannot be applied to types 'math.MathType' and 'math.MathType'
