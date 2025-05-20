@@ -1,4 +1,16 @@
 # Edit History
+*Last Updated: 2025-05-21 00:00 IST*
+
+## 2025-05-21
+### 00:00 - T55a: Add basis state representation features
+- Modified `packages/quantum/src/states/stateVector.ts`:
+  - Added toAngularString() and toComputationalString() methods 
+  - Added proper j value validation and basis state formatting
+
+- Modified `packages/quantum/examples/angularBasisConversion.ts`:
+  - Created comprehensive example file
+  - Added demonstrations for j=1/2, j=1, and j=3/2 systems
+  - Fixed basis conversion ordering and representation
 
 ## 2025-05-20 23:15 IST - T55a: Angular Momentum Composition Implementation
 - Modified `composition.test.ts` - Fixed complex number comparisons in tests
@@ -6,14 +18,12 @@
   - Enhanced numerical stability using log-factorial
   - Special case handling for j₁=1, j₂=1/2
   - Better handling of near-zero amplitudes
-*Last Updated: 2025-05-20*
 
 ## 2025-05-20 19:30 IST - T55a
 - Modified `src/angularMomentum/core.ts` - Fixed J₊, J₋, Jz, and J² operator implementations
 - Modified `__tests__/angularMomentum/states.test.ts` - Fixed all test failures
 - Modified `__tests__/angularMomentum/composition.test.ts` - Fixed all test failures
 - Modified `docs/angular-momentum-implementation.md` - Added comprehensive documentation of fixes
-*Last Updated: 2025-05-20*
 
 ## 2025-05-20 19:30 IST - T55a: Angular Momentum Implementation
 - Fixed all test failures in states.test.ts and composition.test.ts

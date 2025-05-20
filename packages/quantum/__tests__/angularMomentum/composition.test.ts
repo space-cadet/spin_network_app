@@ -74,6 +74,10 @@ describe('Angular Momentum Composition', () => {
     const state2 = createJmState(0.5, 0.5);
     const combined = addAngularMomenta(state1, 0.5, state2, 0.5);
 
+    console.log('state1:', state1.toString());
+    console.log('state2:', state2.toString());
+    console.log('Combined state:', combined.toString());
+
     it('should create combined state with correct dimension', () => {
       // The result should be of dimension 4 (2*(0+1)+1 = 3 for j=1 + 1 for j=0)
       expect(combined.dimension).toBe(4);

@@ -193,6 +193,49 @@ export class StateVector implements IStateVector {
   }
 
   /**
+   * Returns string representation in computational basis |n⟩
+   */
+  toComputationalString(): string {
+    const components = this.amplitudes
+      .map((amp, i) => {
+        if ((math.abs(amp) as unknown as number) < 1e-10) {
+          return '';
+        }
+        const sign = i === 0 ? '' : ' + ';
+        return `${sign}${amp.toString()}|${i}⟩`;
+      })
+      .filter(s => s !== '')
+      .join('');
+
+    return components || '0';
+  }
+
+  /**
+   * Returns string representation in angular momentum basis |j,m⟩
+   * @param j Total angular momentum quantum number
+   */
+  toAngularString(j: number): string {
+    const dim = Math.floor(2 * j + 1);
+    if (this.dimension !== dim) {
+      throw new Error(`State dimension ${this.dimension} does not match 2j+1 = ${dim}`);
+    }
+
+    const components = this.amplitudes
+      .map((amp, n) => {
+        if ((math.abs(amp) as unknown as number) < 1e-10) {
+          return '';
+        }
+        const m = -j + n;  // Convert index to m value
+        const sign = n === 0 ? '' : ' + ';
+        return `${sign}${amp.toString()}|${j},${m}⟩`;
+      })
+      .filter(s => s !== '')
+      .join('');
+
+    return components || '0';
+  }
+
+  /**
    * Creates a computational basis state |i⟩
    */
   static computationalBasis(dimension: number, index: number): StateVector {

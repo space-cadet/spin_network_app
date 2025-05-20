@@ -36,6 +36,107 @@ export function createJmState(j: number, m: number): StateVector {
 }
 
 /**
+ * Converts a state vector from computational basis to angular momentum basis
+ * For j=1/2: |0⟩ -> |1/2,-1/2⟩, |1⟩ -> |1/2,1/2⟩
+ * 
+ * @param state State vector in computational basis
+ * @param j Total angular momentum quantum number 
+ * @returns State vector in angular momentum basis
+ */
+export function computationalToAngularBasis(state: StateVector, j: number): StateVector {
+  validateJ(j);
+  const dim = Math.floor(2 * j + 1);
+  
+  // Check input dimension matches 2j+1
+  if (state.dimension !== dim) {
+    throw new Error(`State dimension ${state.dimension} does not match 2j+1 = ${dim}`);
+  }
+
+  // Create new array for amplitudes in angular momentum basis
+  const newAmplitudes = Array(dim).fill(null).map(() => math.complex(0, 0));
+  
+  // Map each computational basis state to angular momentum basis
+  // |n⟩ maps to |j,m⟩ where m = -j + n
+  for (let n = 0; n < dim; n++) {
+    const m = -j + n;
+    // In angular basis array, index increases with m
+    // For m = -j, index = 0
+    // For m = j, index = 2j
+    const angularIndex = m + j;
+    newAmplitudes[angularIndex] = state.amplitudes[n];
+  }
+
+  // Create labels for basis states
+  const labels: string[] = [];
+  for (let m = -j; m <= j; m++) {
+    labels.push(`|${j},${m}⟩`);
+  }
+
+  return new StateVector(dim, newAmplitudes, 'angular');
+}
+
+/**
+ * Converts a state vector from angular momentum basis to computational basis
+ * For j=1/2: |1/2,-1/2⟩ -> |0⟩, |1/2,1/2⟩ -> |1⟩
+ * 
+ * @param state State vector in angular momentum basis
+ * @param j Total angular momentum quantum number
+ * @returns State vector in computational basis 
+ */
+export function angularToComputationalBasis(state: StateVector, j: number): StateVector {
+  validateJ(j);
+  const dim = Math.floor(2 * j + 1);
+
+  // Check input dimension matches 2j+1
+  if (state.dimension !== dim) {
+    throw new Error(`State dimension ${state.dimension} does not match 2j+1 = ${dim}`);
+  }
+
+  // Create new array for amplitudes in computational basis
+  const newAmplitudes = Array(dim).fill(null).map(() => math.complex(0, 0));
+  
+  // Map each angular momentum basis state to computational basis
+  // |j,m⟩ maps to |n⟩ where n = m + j
+  for (let m = -j; m <= j; m++) {
+    const n = m + j;
+    // Index in angular basis array goes from -j to +j
+    const angularIndex = dim - 1 - (j + m);
+    newAmplitudes[n] = state.amplitudes[angularIndex];
+  }
+
+  // Create computational basis labels
+  const labels: string[] = [];
+  for (let i = 0; i < dim; i++) {
+    labels.push(`|${i}⟩`);
+  }
+
+  return new StateVector(dim, newAmplitudes, 'computational');
+}
+
+/**
+ * Attempts to identify the basis of a state vector based on its label format
+ * 
+ * @param state State vector to identify basis for
+ * @returns 'angular' for angular momentum basis, 'computational' for computational basis, 
+ *          or 'unknown' if basis cannot be determined
+ */
+export function identifyBasis(state: StateVector): string {
+  const str = state.toString();
+  
+  // Check for angular momentum basis format |j,m⟩
+  if (str.match(/\|\d+\/?\d*,[-+]?\d+\/?\d*⟩/)) {
+    return 'angular';
+  }
+  
+  // Check for computational basis format |n⟩
+  if (str.match(/\|\d+⟩/)) {
+    return 'computational';
+  }
+
+  return 'unknown';
+}
+
+/**
  * Creates a zero complex matrix of given dimension
  */
 function createZeroMatrix(dim: number): ComplexMatrix {
@@ -97,6 +198,20 @@ export function createJminus(j: number): IOperator {
  * @param j Total angular momentum quantum number
  * @returns The Jz operator as a matrix
  */
+export function createJz(j: number): IOperator {
+  validateJ(j);
+  const dim = Math.floor(2 * j + 1);
+  const matrix = createZeroMatrix(dim);
+
+  // Fill diagonal elements - m goes from j to -j as idx goes from 0 to 2j
+  for (let idx = 0; idx < dim; idx++) {
+    const m = -j + (dim - 1 - idx);
+    matrix[idx][idx] = math.complex(m, 0);
+  }
+
+  return new MatrixOperator(matrix, 'hermitian', true, { j });
+}
+
 /**
  * Creates the x-component operator Jx for given angular momentum j
  * Jx = (J₊ + J₋)/2
@@ -149,20 +264,6 @@ export function createJy(j: number): IOperator {
   );
   
   return new MatrixOperator(matrix, 'general', true, { j });
-}
-
-export function createJz(j: number): IOperator {
-  validateJ(j);
-  const dim = Math.floor(2 * j + 1);
-  const matrix = createZeroMatrix(dim);
-
-  // Fill diagonal elements - m goes from j to -j as idx goes from 0 to 2j
-  for (let idx = 0; idx < dim; idx++) {
-    const m = -j + (dim - 1 - idx);
-    matrix[idx][idx] = math.complex(m, 0);
-  }
-
-  return new MatrixOperator(matrix, 'hermitian', true, { j });
 }
 
 /**
@@ -328,6 +429,18 @@ export function createRotationOperator(
  * @param m Magnetic quantum number
  * @returns Complex expectation value
  */
+export function jmExpectationValue(
+  operator: IOperator,
+  j: number,
+  m: number
+): Complex {
+  // Create the angular momentum state |j,m⟩
+  const state = createJmState(j, m);
+  
+  // Calculate ⟨j,m|O|j,m⟩ using the proper expectation value formula
+  return expectationValue(state, operator);
+}
+
 /**
  * Creates a coherent angular momentum state |j,θ,φ⟩
  * This is an eigenstate of the angular momentum operator pointing in the direction (θ,φ)
@@ -351,16 +464,4 @@ export function createCoherentState(j: number, theta: number, phi: number): Stat
   
   // Rotate to desired direction
   return D.apply(highestState);
-}
-
-export function jmExpectationValue(
-  operator: IOperator,
-  j: number,
-  m: number
-): Complex {
-  // Create the angular momentum state |j,m⟩
-  const state = createJmState(j, m);
-  
-  // Calculate ⟨j,m|O|j,m⟩ using the proper expectation value formula
-  return expectationValue(state, operator);
 }
