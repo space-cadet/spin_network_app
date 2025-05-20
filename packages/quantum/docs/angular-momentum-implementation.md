@@ -293,3 +293,37 @@ Challenges with TypeScript and math.js:
 3. Cohen-Tannoudji, C. "Quantum Mechanics"
 4. The mathematical background in "clebsch-gordan-algorithm.md"
 5. The data structure analysis in "clebsch-gordan-data-structures.md"
+
+## 9. Clebsch-Gordan Coefficient JSON Data File
+
+A precomputed JSON file, `cg-sparse-j1-j2-leq-2.json`, is provided in the `docs/` directory for efficient lookup and testing of Clebsch-Gordan coefficients for all cases with j₁, j₂ ≤ 2.
+
+### 9.1 Format
+
+The file uses a sparse map format, where each key is a string of the form:
+
+```
+"j1,m1,j2,m2,j,m"
+```
+
+and the value is the corresponding Clebsch-Gordan coefficient (as a number, real-valued, with phase convention matching the implementation).
+
+#### Example:
+```json
+{
+  "1,1,1,0,2,1": 0.7071,
+  "1,0,1,1,2,1": 0.7071,
+  ...
+}
+```
+
+- Only nonzero coefficients are included.
+- All quantum numbers are represented as numbers (including half-integers, e.g., 0.5).
+- This format is highly efficient for lookup and storage, and is suitable for both testing and runtime use in the quantum library.
+
+### 9.2 Usage
+
+- The JSON file can be loaded and queried directly for any allowed (j₁, m₁, j₂, m₂, j, m) combination.
+- This approach avoids the need for recursive calculation or large nested objects, and is especially useful for test validation and rapid prototyping.
+
+See also: `cg-sparse-j1-j2-leq-2.json` in the `docs/` directory.

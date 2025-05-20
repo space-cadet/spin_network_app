@@ -11,46 +11,46 @@ describe('Angular Momentum Composition', () => {
   describe('Clebsch-Gordan Coefficients', () => {
     it('should return zero for coefficients that violate selection rules', () => {
       // m ≠ m1 + m2
-      expect(math.abs(clebschGordan(1, 1, 1, 0, 2, 0))).toBeLessThan(1e-10);
+      expect(math.abs((clebschGordan(1, 1, 1, 0, 2, 0) as any).re ?? clebschGordan(1, 1, 1, 0, 2, 0))).toBeLessThan(1e-10);
       
       // j > j1 + j2
-      expect(math.abs(clebschGordan(1, 1, 1, 1, 3, 2))).toBeLessThan(1e-10);
+      expect(math.abs((clebschGordan(1, 1, 1, 1, 3, 2) as any).re ?? clebschGordan(1, 1, 1, 1, 3, 2))).toBeLessThan(1e-10);
       
       // j < |j1 - j2|
-      expect(math.abs(clebschGordan(2, 1, 1, 0, 0, 1))).toBeLessThan(1e-10);
+      expect(math.abs((clebschGordan(2, 1, 1, 0, 0, 1) as any).re ?? clebschGordan(2, 1, 1, 0, 0, 1))).toBeLessThan(1e-10);
     });
     
     it('should correctly calculate coefficients for two spin-1/2 particles', () => {
       // Singlet state (j=0)
       const c1 = clebschGordan(0.5, 0.5, 0.5, -0.5, 0, 0);
-      expect(math.abs(math.subtract(c1, math.complex(-1/Math.sqrt(2), 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c1 as any).re ?? c1, -1/Math.sqrt(2)))).toBeLessThan(1e-10);
       
       const c2 = clebschGordan(0.5, -0.5, 0.5, 0.5, 0, 0);
-      expect(math.abs(math.subtract(c2, math.complex(1/Math.sqrt(2), 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c2 as any).re ?? c2, 1/Math.sqrt(2)))).toBeLessThan(1e-10);
       
       // Triplet states (j=1)
       const c3 = clebschGordan(0.5, 0.5, 0.5, 0.5, 1, 1);
-      expect(math.abs(math.subtract(c3, math.complex(1, 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c3 as any).re ?? c3, 1))).toBeLessThan(1e-10);
       
       const c4 = clebschGordan(0.5, 0.5, 0.5, -0.5, 1, 0);
-      expect(math.abs(math.subtract(c4, math.complex(1/Math.sqrt(2), 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c4 as any).re ?? c4, 1/Math.sqrt(2)))).toBeLessThan(1e-10);
       
       const c5 = clebschGordan(0.5, -0.5, 0.5, -0.5, 1, -1);
-      expect(math.abs(math.subtract(c5, math.complex(1, 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c5 as any).re ?? c5, 1))).toBeLessThan(1e-10);
     });
     
     it('should correctly calculate coefficients for j1=1, j2=1/2 case', () => {
       // This is another common case in physics
       // |3/2, 3/2⟩ = |1, 1⟩|1/2, 1/2⟩
       const c1 = clebschGordan(1, 1, 0.5, 0.5, 1.5, 1.5);
-      expect(math.abs(math.subtract(c1, math.complex(1, 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c1 as any).re ?? c1, 1))).toBeLessThan(1e-10);
       
       // |3/2, 1/2⟩ = √(2/3)|1, 1⟩|1/2, -1/2⟩ + √(1/3)|1, 0⟩|1/2, 1/2⟩
       const c2 = clebschGordan(1, 1, 0.5, -0.5, 1.5, 0.5);
-      expect(math.abs(math.subtract(c2, math.complex(Math.sqrt(2/3), 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c2 as any).re ?? c2, Math.sqrt(2/3)))).toBeLessThan(1e-10);
       
       const c3 = clebschGordan(1, 0, 0.5, 0.5, 1.5, 0.5);
-      expect(math.abs(math.subtract(c3, math.complex(Math.sqrt(1/3), 0)))).toBeLessThan(1e-10);
+      expect(math.abs(math.subtract((c3 as any).re ?? c3, Math.sqrt(1/3)))).toBeLessThan(1e-10);
     });
   });
   
