@@ -1,0 +1,63 @@
+
+> @spin-network/quantum@0.1.0 test /Users/deepak/code/spin_network_app/packages/quantum
+> vitest run __tests__/angularMomentum/composition.test.ts
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v1.6.1 /Users/deepak/code/spin_network_app/packages/quantum
+
+ ❯ __tests__/angularMomentum/composition.test.ts  (8 tests | 2 failed) 6ms
+   ❯ __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Angular Momentum Addition > should have correct amplitude for |j=1, m=1⟩ component
+     → expected 1 to be less than 1e-10
+   ❯ __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Angular Momentum Addition > should have zero amplitude for third component
+     → expected 1 to be less than 1e-10
+stdout | __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Clebsch-Gordan Coefficients > should return zero for coefficients that violate selection rules
+CG Rule Violation (m ≠ m1 + m2): j1=1, m1=1, j2=1, m2=0, j=2, m=0 => CG = Complex { re: 0, im: 0 }
+CG Rule Violation (j > j1 + j2): j1=1, m1=1, j2=1, m2=1, j=3, m=2 => CG = Complex { re: 0, im: 0 }
+CG Rule Violation (j < |j1 - j2|): j1=2, m1=1, j2=1, m2=0, j=0, m=1 => CG = Complex { re: 0, im: 0 }
+
+stdout | __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Clebsch-Gordan Coefficients > should correctly calculate coefficients for two spin-1/2 particles
+CG Singlet state: j1=1/2, m1=1/2, j2=1/2, m2=-1/2, j=0, m=0 => CG = Complex { re: -0.7071067811865475, im: 0 } Expected: -1/√2 = -0.7071067811865475
+CG Singlet state: j1=1/2, m1=-1/2, j2=1/2, m2=1/2, j=0, m=0 => CG = Complex { re: 0.7071067811865475, im: 0 } Expected: 1/√2 = 0.7071067811865475
+CG Triplet state (m=1): j1=1/2, m1=1/2, j2=1/2, m2=1/2, j=1, m=1 => CG = Complex { re: 1, im: 0 } Expected: 1
+CG Triplet state (m=0): j1=1/2, m1=1/2, j2=1/2, m2=-1/2, j=1, m=0 => CG = Complex { re: 0.7071067811865475, im: 0 } Expected: 1/√2 = 0.7071067811865475
+CG Triplet state (m=-1): j1=1/2, m1=-1/2, j2=1/2, m2=-1/2, j=1, m=-1 => CG = Complex { re: 1, im: 0 } Expected: 1
+
+stdout | __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Clebsch-Gordan Coefficients > should correctly calculate coefficients for j1=1, j2=1/2 case
+CG j1=1, j2=1/2 case: j1=1, m1=1, j2=1/2, m2=1/2, j=3/2, m=3/2 => CG = Complex { re: 1, im: 0 } Expected: 1
+CG j1=1, j2=1/2 case: j1=1, m1=1, j2=1/2, m2=-1/2, j=3/2, m=1/2 => CG = Complex { re: 0.816496580927726, im: 0 } Expected: √(2/3) = 0.816496580927726
+CG j1=1, j2=1/2 case: j1=1, m1=0, j2=1/2, m2=1/2, j=3/2, m=1/2 => CG = Complex { re: 0.5773502691896257, im: 0 } Expected: √(1/3) = 0.5773502691896257
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Angular Momentum Addition > should have correct amplitude for |j=1, m=1⟩ component
+AssertionError: expected 1 to be less than 1e-10
+ ❯ __tests__/angularMomentum/composition.test.ts:85:53
+     83|       // The first element should be 1 (|j=1, m=1⟩ component)
+     84|       const diff = math.subtract(combined.amplitudes[0], math.complex(…
+     85|       expect(math.abs(diff.re) + math.abs(diff.im)).toBeLessThan(1e-10…
+       |                                                     ^
+     86|     });
+     87| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Angular Momentum Addition > should have zero amplitude for third component
+AssertionError: expected 1 to be less than 1e-10
+ ❯ __tests__/angularMomentum/composition.test.ts:93:48
+     91| 
+     92|     it('should have zero amplitude for third component', () => {
+     93|       expect(math.abs(combined.amplitudes[2])).toBeLessThan(1e-10);
+       |                                                ^
+     94|     });
+     95| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  23:08:43
+   Duration  501ms (transform 63ms, setup 0ms, collect 345ms, tests 6ms, environment 0ms, prepare 38ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

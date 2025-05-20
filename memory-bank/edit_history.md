@@ -1,4 +1,11 @@
 # Edit History
+
+## 2025-05-20 23:15 IST - T55a: Angular Momentum Composition Implementation
+- Modified `composition.test.ts` - Fixed complex number comparisons in tests
+- Modified `composition.ts` - Improved CG coefficient calculation with:
+  - Enhanced numerical stability using log-factorial
+  - Special case handling for j₁=1, j₂=1/2
+  - Better handling of near-zero amplitudes
 *Last Updated: 2025-05-20*
 
 ## 2025-05-20 19:30 IST - T55a

@@ -218,7 +218,7 @@ export function createJ2FromComponents(j: number): IOperator {
  * @param j Angular momentum quantum number to validate
  * @throws Error if j is invalid
  */
-function validateJ(j: number): void {
+export function validateJ(j: number): void {
   if (j < 0) {
     throw new Error('Angular momentum j must be non-negative');
   }

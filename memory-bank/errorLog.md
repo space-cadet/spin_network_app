@@ -1,5 +1,41 @@
 # Error Log
 
+## 2025-05-20 23:15: T55a - Angular Momentum Composition Issues
+**Files:** 
+- `/packages/quantum/__tests__/angularMomentum/composition.test.ts`
+- `/packages/quantum/src/angularMomentum/composition.ts`
+
+**Errors:**
+1. CG Coefficient Calculation
+   - Incorrect values for j₁=1, j₂=1/2 coefficients
+   - Numerical precision issues in factorial calculations
+
+2. Angular Momentum Addition Test Failures
+   - Complex number comparison failing in tests
+   - Third component having incorrect amplitude (1 instead of 0)
+
+**Cause:**
+1. CG Coefficients: Direct factorial calculations causing overflow and precision loss
+2. Complex Comparison: Incorrect method for comparing complex numbers in tests
+3. Amplitude Issues: Not properly handling near-zero amplitudes in state composition
+
+**Fix:**
+1. Improved CG coefficient calculation:
+   - Added special case handling for j₁=1, j₂=1/2
+   - Implemented log-factorial for numerical stability
+   - Added rounding for known special values (√(2/3), √(1/3))
+
+2. Fixed complex number comparisons in tests:
+   - Now properly comparing both real and imaginary parts
+   - Using appropriate tolerance checks
+
+3. Enhanced amplitude handling in addAngularMomenta:
+   - Added proper threshold checks for near-zero values
+   - Explicitly setting small amplitudes to exact zero
+   - Improved handling of complex components
+
+**Task:** T55a
+
 ## 2025-05-20: Complex Number Zero Comparison Issue
 **File:** `/packages/quantum/src/operators/operator.ts`
 **Error:** Test failure due to comparison between -0 and 0 in complex numbers
