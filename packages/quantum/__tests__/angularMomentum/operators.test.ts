@@ -58,11 +58,16 @@ describe('Angular Momentum Operators', () => {
     it('should have correct J± matrix elements', () => {
       const jplusMatrix = jplus.toMatrix();
       const jminusMatrix = jminus.toMatrix();
+
+      console.log('J+:', jplus.toString());
+      console.log('J-:', jminus.toString());
+
+      console.log(jplusMatrix)
       
-      expect(jplusMatrix[0][1]).toEqual(math.complex(0, 0));
-      expect(jplusMatrix[1][0]).toEqual(math.complex(1, 0));
-      expect(jminusMatrix[0][1]).toEqual(math.complex(1, 0));
-      expect(jminusMatrix[1][0]).toEqual(math.complex(0, 0));
+      expect(jplusMatrix[0][1]).toEqual(math.complex(1, 0));
+      expect(jplusMatrix[1][0]).toEqual(math.complex(0, 0));
+      expect(jminusMatrix[0][1]).toEqual(math.complex(0, 0));
+      expect(jminusMatrix[1][0]).toEqual(math.complex(1, 0));
     });
 
     it('should have correct Jx matrix elements', () => {
@@ -74,8 +79,8 @@ describe('Angular Momentum Operators', () => {
     it('should have correct Jy matrix elements', () => {
       const matrix = jy.toMatrix();
 
-      // console.log('Jy:', jy.toString());
-      // console.log('Matrix:', matrix);
+      console.log('Jy:', jy.toString());
+      console.log('Matrix:', matrix);
 
       expect(matrix[0][1]).toEqual(math.complex(0, -1/2));
       expect(matrix[1][0]).toEqual(math.complex(0, 1/2));
@@ -90,6 +95,8 @@ describe('Angular Momentum Operators', () => {
       const jz = createJz(j);
       const state = createJmState(j, 1/2);
       const result = jz.apply(state);
+
+      console.log('Jz', jz.toString());
 
       // console.log(result, typeof result);
       
@@ -113,12 +120,16 @@ describe('Angular Momentum Operators', () => {
     const jy = createJy(j);
     const jz = createJz(j);
 
+    console.log('Jx:', jx.toString());
+    console.log('Jy:', jy.toString());
+    console.log('Jz:', jz.toString());
+
     it('should satisfy [Jx,Jy] = iJz', () => {
       const commutator = jx.compose(jy).add(jy.compose(jx).scale(math.complex(-1, 0)));
       const expectedResult = jz.scale(math.complex(0, 1));
       
-      // console.log('Commutator:', commutator.toString());
-      // console.log('Expected Result:', expectedResult.toString());
+      console.log('Commutator:', commutator.toString());
+      console.log('Expected Result:', expectedResult.toString());
 
       const matrix1 = commutator.toMatrix();
       const matrix2 = expectedResult.toMatrix();

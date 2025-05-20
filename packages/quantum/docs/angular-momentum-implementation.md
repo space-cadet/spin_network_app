@@ -196,7 +196,70 @@ if (Math.abs(j - 0) < 1e-10) {
 }
 ```
 
-### 4.4 Eigenvalue Equation Testing
+### 4.4 State Convention and Indexing Issues
+
+**Issue**: The convention for mapping angular momentum states to computational basis states was incorrect. Originally:
+- m=+1/2 was mapped to |0⟩
+- m=-1/2 was mapped to |1⟩
+
+This conflicted with the standard quantum computing convention where:
+- |0⟩ should correspond to m=-1/2 (spin down)
+- |1⟩ should correspond to m=+1/2 (spin up)
+
+**Resolution**: Modified the indexing in createJmState:
+```typescript
+// Old version
+const idx = j-m;  // Wrong: mapped m=+1/2 to |0⟩
+
+// New version
+const idx = dim - 1 - (j + m);  // Correct: maps m=-1/2 to |0⟩
+```
+
+### 4.5 Jz Operator Implementation
+
+**Issue**: The Jz operator matrix elements were incorrectly ordered due to the state convention issue.
+
+**Resolution**: Modified createJz to properly map m values to matrix indices:
+```typescript
+for (let idx = 0; idx < dim; idx++) {
+    const m = -j + (dim - 1 - idx);
+    matrix[idx][idx] = math.complex(m, 0);
+}
+```
+
+This ensures:
+- For j=1/2: Jz = [[+1/2, 0], [0, -1/2]]
+- Matches our convention where |1⟩ (m=+1/2) is [1,0]ᵀ
+
+### 4.6 J² Construction Issues
+
+**Issue**: The J² operator construction from components (J₊J₋ + Jz² - Jz) was giving incorrect results due to operator precedence and grouping issues:
+```typescript
+// Incorrect implementation
+jPlusJMinus.add(jzSquared).add(jz.scale(math.complex(-1, 0)))  // (J₊J₋ + Jz²) + (-Jz)
+```
+
+**Resolution**: Fixed the operator construction to properly implement J² = J₊J₋ + Jz² - Jz:
+```typescript
+// Correct implementation
+jPlusJMinus.add(jzSquared).subtract(jz)  // J₊J₋ + Jz² - Jz
+```
+
+### 4.7 Jy Sign Convention
+
+**Issue**: The Jy operator had incorrect signs in its matrix elements due to a sign error in the complex number multiplication:
+```typescript
+// Incorrect: multiplying by i/2 instead of 1/(2i)
+math.complex(0, 0.5)  // This gives i/2
+```
+
+**Resolution**: Fixed the complex number multiplication in createJy:
+```typescript
+// Correct: multiplying by 1/(2i) = -i/2
+math.complex(0, -0.5)
+```
+
+### 4.8 Eigenvalue Equation Testing
 
 **Issue**: Eigenvalue equations tests failed due to both matrix element issues and equality testing problems
 

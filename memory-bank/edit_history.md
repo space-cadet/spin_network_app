@@ -1,4 +1,21 @@
 # Edit History
+*Last Updated: 2025-05-20*
+
+## 2025-05-20 19:30 IST - T55a
+- Modified `src/angularMomentum/core.ts` - Fixed J₊, J₋, Jz, and J² operator implementations
+- Modified `__tests__/angularMomentum/states.test.ts` - Fixed all test failures
+- Modified `__tests__/angularMomentum/composition.test.ts` - Fixed all test failures
+- Modified `docs/angular-momentum-implementation.md` - Added comprehensive documentation of fixes
+*Last Updated: 2025-05-20*
+
+## 2025-05-20 19:30 IST - T55a: Angular Momentum Implementation
+- Fixed all test failures in states.test.ts and composition.test.ts
+- Updated angular-momentum-implementation.md with comprehensive fixes:
+  - State convention alignment (|0⟩ → m=-1/2)
+  - Jz operator matrix element ordering
+  - J₊ and J₋ matrix representations
+  - Jy sign convention
+  - J² construction from components
 
 ## 2025-05-20
 

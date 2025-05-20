@@ -29,7 +29,7 @@ export function createJmState(j: number, m: number): StateVector {
 
   const dim = Math.floor(2 * j + 1);
   const amplitudes = Array(dim).fill(null).map(() => math.complex(0, 0));
-  const idx = j-m;
+  const idx = dim - 1 - (j + m);
   amplitudes[idx] = math.complex(1, 0);
 
   return new StateVector(dim, amplitudes, `|${j},${m}⟩`);
@@ -58,8 +58,8 @@ export function createJplus(j: number): IOperator {
 
   // Fill matrix elements (for j=1/2, this gives [[0,0],[1,0]])
   for (let m = -j; m < j; m++) {
-    const row = m + j + 1;
-    const col = m + j;
+    const col = m + j + 1;
+    const row = m + j;
     const element = Math.sqrt(j * (j + 1) - m * (m + 1));
     matrix[row][col] = math.complex(element, 0);
   }
@@ -81,8 +81,8 @@ export function createJminus(j: number): IOperator {
 
   // Fill matrix elements (for j=1/2, this gives [[0,1],[0,0]])
   for (let m = -j + 1; m <= j; m++) {
-    const row = m + j - 1;
-    const col = m + j;
+    const col = m + j - 1;
+    const row = m + j;
     const element = Math.sqrt(j * (j + 1) - m * (m - 1));
     matrix[row][col] = math.complex(element, 0);
   }
@@ -143,7 +143,7 @@ export function createJy(j: number): IOperator {
     row.map((_, j) => 
       math.multiply(
         math.subtract(plusMatrix[i][j], minusMatrix[i][j]),
-        math.complex(0, 0.5) // multiply by 1/(2i)
+        math.complex(0, -0.5) // multiply by 1/(2i)
       ) as Complex
     )
   );
@@ -158,7 +158,7 @@ export function createJz(j: number): IOperator {
 
   // Fill diagonal elements - m goes from j to -j as idx goes from 0 to 2j
   for (let idx = 0; idx < dim; idx++) {
-    const m = j - idx;  // This maps index 0 to m=j, index 1 to m=j-1, etc.
+    const m = -j + (dim - 1 - idx);
     matrix[idx][idx] = math.complex(m, 0);
   }
 
@@ -206,7 +206,7 @@ export function createJ2FromComponents(j: number): IOperator {
   // Calculate J² = J₊J₋ + Jz² - Jz
   const jPlusJMinus = jPlus.compose(jMinus);
   const jzSquared = jz.compose(jz);
-  const result = jPlusJMinus.add(jzSquared).add(jz.scale(math.complex(1, 0)));
+  const result = jPlusJMinus.add(jzSquared).add(jz.scale(math.complex(-1, 0)));
 
   return Object.assign(new MatrixOperator(result.toMatrix()), { j }) as IOperator;
 }

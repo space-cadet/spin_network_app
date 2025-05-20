@@ -36,11 +36,6 @@ describe('Angular Momentum States', () => {
       const stateUp = createJmState(1/2, 1/2);
       const components = stateUp.getAmplitudes();
 
-      console.log('State:', stateUp.toString());
-      console.log('Components:', components);
-      
-      console.log(math.subtract(components[0], math.complex(1, 0)).re);
-
       expect(Number(math.abs(math.subtract(components[0], math.complex(1, 0)))) < 1e-10).toBe(true);
       expect(Number(math.abs(components[1])) < 1e-10).toBe(true);
     });
@@ -48,6 +43,11 @@ describe('Angular Momentum States', () => {
     it('should have correct components for |1/2,-1/2⟩', () => {
       const stateDown = createJmState(1/2, -1/2);
       const components = stateDown.getAmplitudes();
+
+      // console.log('State:', stateDown.toString());
+      // console.log('Components:', components);
+      
+      // console.log(Number(math.abs(math.subtract(components[0], math.complex(1, 0)))));
       
       expect(Number(math.abs(components[0])) < 1e-10).toBe(true);
       expect(Number(math.abs(math.subtract(components[1], math.complex(1, 0)))) < 1e-10).toBe(true);
@@ -64,10 +64,6 @@ describe('Angular Momentum States', () => {
       const state = createJmState(j, -0.5);
       const raised = jplus.apply(state);
 
-      console.log('Raising operator:', jplus.toString());
-      console.log('State:', state.toString());
-      console.log('Raised state:', raised.toString());
-      
       // Compare with |j,m+1⟩ scaled by √(j(j+1)-m(m+1))
       const expectedState = createJmState(j, 0.5);
 
@@ -79,10 +75,9 @@ describe('Angular Momentum States', () => {
     it('should correctly lower states', () => {
       const state = createJmState(j, 0.5);
       const lowered = jminus.apply(state);
-      const expectedNorm = Math.sqrt(j*(j+1) - (-1)*0);
-      
+    
       // Compare with |j,m-1⟩ scaled by √(j(j+1)-m(m-1))
-      const expectedState = createJmState(j, -0.5).scale(math.complex(expectedNorm, 0));
+      const expectedState = createJmState(j, -0.5);
       expect(lowered.equals(expectedState)).toBe(true);
     });
 
