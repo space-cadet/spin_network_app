@@ -56,10 +56,10 @@ export function createJplus(j: number): IOperator {
   const dim = Math.floor(2 * j + 1);
   const matrix = createZeroMatrix(dim);
 
-  // Fill matrix elements
+  // Fill matrix elements (for j=1/2, this gives [[0,0],[1,0]])
   for (let m = -j; m < j; m++) {
-    const row = m + j;
-    const col = m + j + 1;
+    const row = m + j + 1;
+    const col = m + j;
     const element = Math.sqrt(j * (j + 1) - m * (m + 1));
     matrix[row][col] = math.complex(element, 0);
   }
@@ -79,16 +79,15 @@ export function createJminus(j: number): IOperator {
   const dim = Math.floor(2 * j + 1);
   const matrix = createZeroMatrix(dim);
 
-  // Fill matrix elements
+  // Fill matrix elements (for j=1/2, this gives [[0,1],[0,0]])
   for (let m = -j + 1; m <= j; m++) {
-    const row = m + j;
-    const col = m + j - 1;
+    const row = m + j - 1;
+    const col = m + j;
     const element = Math.sqrt(j * (j + 1) - m * (m - 1));
     matrix[row][col] = math.complex(element, 0);
   }
 
-  const op = new MatrixOperator(matrix);
-  return Object.assign(op, { j }) as IOperator;
+  return new MatrixOperator(matrix, 'general', true, { j });
 }
 
 /**
@@ -162,8 +161,7 @@ export function createJz(j: number): IOperator {
     matrix[idx][idx] = math.complex(m, 0);
   }
 
-  const op = new MatrixOperator(matrix);
-  return Object.assign(op, { j }) as IOperator;
+  return new MatrixOperator(matrix, 'hermitian', true, { j });
 }
 
 /**

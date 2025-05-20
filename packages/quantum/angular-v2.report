@@ -1,0 +1,173 @@
+
+> @spin-network/quantum@0.1.0 test /Users/deepak/code/spin_network_app/packages/quantum
+> vitest run __tests__/angularMomentum/composition.test.ts __tests__/angularMomentum/operators.test.ts __tests__/angularMomentum/states.test.ts __tests__/angularMomentum/wignerSymbols.test.ts
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v1.6.1 /Users/deepak/code/spin_network_app/packages/quantum
+
+ ❯ __tests__/angularMomentum/wignerSymbols.test.ts  (0 test) 2ms
+ ❯ __tests__/angularMomentum/composition.test.ts  (4 tests | 3 failed) 5ms
+   ❯ __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Clebsch-Gordan Coefficients > should correctly calculate coefficients for two spin-1/2 particles
+     → expected 0.7071067811865475 to be less than 1e-10
+   ❯ __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Clebsch-Gordan Coefficients > should correctly calculate coefficients for j1=1, j2=1/2 case
+     → expected 1 to be less than 1e-10
+   ❯ __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Angular Momentum Addition > should correctly add two spin-1/2 states
+     → expected 1 to be less than 1e-10
+ ❯ __tests__/angularMomentum/operators.test.ts  (11 tests | 2 failed) 10ms
+   ❯ __tests__/angularMomentum/operators.test.ts > Angular Momentum Operators > j=1/2 Matrix Representations > should have correct Jz matrix elements
+     → expected Complex{ re: -0.5, im: +0 } to deeply equal Complex{ re: 0.5, im: +0 }
+   ❯ __tests__/angularMomentum/operators.test.ts > Angular Momentum Operators > j=1/2 Matrix Representations > should have correct Jy matrix elements
+     → expected Complex{ re: +0, im: 0.5 } to deeply equal Complex{ re: +0, im: -0.5 }
+stdout | __tests__/angularMomentum/operators.test.ts > Angular Momentum Operators > Eigenvalue Equations > should satisfy Jz eigenvalue equation
+StateVector {
+  dimension: 2,
+  amplitudes: [ Complex { re: 0, im: 0 }, Complex { re: 0.5, im: 0 } ],
+  basis: '|1⟩',
+  properties: undefined
+} object
+
+ ❯ __tests__/angularMomentum/states.test.ts  (10 tests | 2 failed) 10ms
+   ❯ __tests__/angularMomentum/states.test.ts > Angular Momentum States > j=1/2 State Vectors > should have correct components for |1/2,1/2⟩
+     → expected false to be true // Object.is equality
+   ❯ __tests__/angularMomentum/states.test.ts > Angular Momentum States > j=1/2 State Vectors > should have correct components for |1/2,-1/2⟩
+     → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  __tests__/angularMomentum/wignerSymbols.test.ts [ __tests__/angularMomentum/wignerSymbols.test.ts ]
+Error: No test found in suite __tests__/angularMomentum/wignerSymbols.test.ts
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  __tests__/angularMomentum/wignerSymbols.test.ts > Wigner Symbols
+Error: No test found in suite Wigner Symbols
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Clebsch-Gordan Coefficients > should correctly calculate coefficients for two spin-1/2 particles
+AssertionError: expected 0.7071067811865475 to be less than 1e-10
+ ❯ __tests__/angularMomentum/composition.test.ts:26:77
+     24|       // Singlet state (j=0)
+     25|       const c1 = clebschGordan(0.5, 0.5, 0.5, -0.5, 0, 0);
+     26|       expect(math.abs(math.subtract(c1, math.complex(-1/Math.sqrt(2), …
+       |                                                                             ^
+     27|       
+     28|       const c2 = clebschGordan(0.5, -0.5, 0.5, 0.5, 0, 0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Clebsch-Gordan Coefficients > should correctly calculate coefficients for j1=1, j2=1/2 case
+AssertionError: expected 1 to be less than 1e-10
+ ❯ __tests__/angularMomentum/composition.test.ts:46:63
+     44|       // |3/2, 3/2⟩ = |1, 1⟩|1/2, 1/2⟩
+     45|       const c1 = clebschGordan(1, 1, 0.5, 0.5, 1.5, 1.5);
+     46|       expect(math.abs(math.subtract(c1, math.complex(1, 0)))).toBeLess…
+       |                                                               ^
+     47|       
+     48|       // |3/2, 1/2⟩ = √(2/3)|1, 1⟩|1/2, -1/2⟩ + √(1/3)|1, 0⟩|1/2, 1/2⟩
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  __tests__/angularMomentum/composition.test.ts > Angular Momentum Composition > Angular Momentum Addition > should correctly add two spin-1/2 states
+AssertionError: expected 1 to be less than 1e-10
+ ❯ __tests__/angularMomentum/composition.test.ts:70:83
+     68|       
+     69|       // The first element should be 1 (|j=1, m=1⟩ component)
+     70|       expect(math.abs(math.subtract(combined.amplitudes[0], math.compl…
+       |                                                                                   ^
+     71|       
+     72|       // The other elements should be 0 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  __tests__/angularMomentum/operators.test.ts > Angular Momentum Operators > j=1/2 Matrix Representations > should have correct Jz matrix elements
+AssertionError: expected Complex{ re: -0.5, im: +0 } to deeply equal Complex{ re: 0.5, im: +0 }
+
+- Expected
++ Received
+
+  Object {
+    "im": 0,
+    "mathjs": "Complex",
+-   "re": 0.5,
++   "re": -0.5,
+  }
+
+ ❯ __tests__/angularMomentum/operators.test.ts:48:28
+     46|     it('should have correct Jz matrix elements', () => {
+     47|       const matrix = jz.toMatrix();
+     48|       expect(matrix[0][0]).toEqual(math.complex(1/2, 0));
+       |                            ^
+     49|       expect(matrix[1][1]).toEqual(math.complex(-1/2, 0));
+     50|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  __tests__/angularMomentum/operators.test.ts > Angular Momentum Operators > j=1/2 Matrix Representations > should have correct Jy matrix elements
+AssertionError: expected Complex{ re: +0, im: 0.5 } to deeply equal Complex{ re: +0, im: -0.5 }
+
+- Expected
++ Received
+
+  Object {
+-   "im": -0.5,
++   "im": 0.5,
+    "mathjs": "Complex",
+    "re": 0,
+  }
+
+ ❯ __tests__/angularMomentum/operators.test.ts:70:28
+     68|     it('should have correct Jy matrix elements', () => {
+     69|       const matrix = jy.toMatrix();
+     70|       expect(matrix[0][1]).toEqual(math.complex(0, -1/2));
+       |                            ^
+     71|       expect(matrix[1][0]).toEqual(math.complex(0, 1/2));
+     72|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  __tests__/angularMomentum/states.test.ts > Angular Momentum States > j=1/2 State Vectors > should have correct components for |1/2,1/2⟩
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/angularMomentum/states.test.ts:39:82
+     37|       const components = stateUp.getAmplitudes();
+     38|       
+     39|       expect(math.abs(math.subtract(components[0], math.complex(1, 0))…
+       |                                                                                  ^
+     40|       expect(math.abs(components[1]) < 1e-10).toBe(true);
+     41|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  __tests__/angularMomentum/states.test.ts > Angular Momentum States > j=1/2 State Vectors > should have correct components for |1/2,-1/2⟩
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ __tests__/angularMomentum/states.test.ts:47:47
+     45|       const components = stateDown.getAmplitudes();
+     46|       
+     47|       expect(math.abs(components[0]) < 1e-10).toBe(true);
+       |                                               ^
+     48|       expect(math.abs(math.subtract(components[1], math.complex(1, 0))…
+     49|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+ Test Files  4 failed (4)
+      Tests  7 failed | 18 passed (25)
+   Start at  14:11:05
+   Duration  829ms (transform 115ms, setup 0ms, collect 1.38s, tests 27ms, environment 0ms, prepare 225ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
