@@ -93,6 +93,8 @@ describe('HilbertSpace', () => {
       it('creates valid basis states', () => {
         const space = TEST_SPACES.QUBIT;
         const state0 = space.computationalBasisState(0);
+        console.log(space, "\n", state0, "\n", BASIS_STATES.QUBIT_0);
+        console.log(stateVectorApproxEqual(state0, BASIS_STATES.QUBIT_0))
         expect(stateVectorApproxEqual(state0, BASIS_STATES.QUBIT_0)).toBe(true);
       });
 

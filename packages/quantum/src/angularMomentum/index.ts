@@ -6,4 +6,4 @@
 export * from './core';
 // export * from './states';
 export * from './composition';
-export * from './wignerSymbols';
+// export * from './wignerSymbols';

@@ -100,6 +100,43 @@ export class MatrixOperator implements IOperator {
     }
   }
 
+  // Add this method to the MatrixOperator class
+  /**
+   * Returns a string representation of the operator in matrix form
+   * @param precision Number of decimal places (default: 3)
+   */
+  toString(precision: number = 3): string {
+    const rows = this.matrix.map(row => {
+      return row.map(element => {
+        const re = element.re.toFixed(precision);
+        const im = element.im.toFixed(precision);
+        if (Math.abs(element.im) < Math.pow(10, -precision)) {
+          return `${re}`;
+        }
+        return `${re}${Number(im) >= 0 ? '+' : ''}${im}i`;
+      }).join('\t');
+    });
+
+    // Find the maximum width of any element for padding
+    const maxWidth = Math.max(...rows.map(row => 
+      Math.max(...row.split('\t').map(el => el.length))
+    ));
+
+    // Add padding and format with brackets
+    const paddedRows = rows.map(row => 
+      '│ ' + row.split('\t')
+        .map(el => el.padStart(maxWidth))
+        .join('  ') + ' │'
+    );
+
+    // Create top and bottom borders
+    const borderLine = '─'.repeat(maxWidth * this.dimension + 2 * this.dimension + 1);
+    const topBorder = `┌${borderLine}┐`;
+    const bottomBorder = `└${borderLine}┘`;
+
+    return [topBorder, ...paddedRows, bottomBorder].join('\n');
+  }
+
   /**
    * Applies operator to state vector: |ψ'⟩ = O|ψ⟩
    */

@@ -144,7 +144,7 @@ export class StateVector implements IStateVector {
 
     return this.amplitudes.every((amp, i) => {
       const diff = math.subtract(amp, other.getState(i)) as Complex;
-      const absDiff = math.abs(diff) as number;
+      const absDiff = math.abs(diff).re;
       return absDiff < tolerance;
     });
   }

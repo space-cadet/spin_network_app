@@ -503,44 +503,94 @@ packages/quantum/src/
 
 ### 4.1.1 Angular Momentum Module
 
-The angular momentum module provides a consolidated implementation of angular momentum algebra, crucial for spin network calculations. Key features include:
+The angular momentum module implements a consolidated system for angular momentum algebra, crucial for spin network calculations. At its core is a recursive algorithm for computing Clebsch-Gordan coefficients, which are fundamental to angular momentum coupling.
 
-1. **Core Angular Momentum Operators**:
-   - J₊, J₋, Jz operators for arbitrary j
-   - Total angular momentum operator J²
+#### Core Components
+
+1. **Angular Momentum Operators**:
+   ```typescript
+   export interface AngularMomentumOperator extends Operator {
+     j: number;  // Total angular momentum quantum number
+     type: 'Jplus' | 'Jminus' | 'Jz' | 'J2';
+   }
+   ```
+
+   - $J_+, J_-, J_z$ operators for arbitrary $j$
+   - Total angular momentum operator $J^2$
    - Raising/lowering operator utilities
-   - Angular momentum eigenstates |j,m⟩
+   - Angular momentum eigenstates $|j,m\rangle$
    - Wigner-d matrices
 
-2. **Angular Momentum Composition**:
-   - Clebsch-Gordan coefficients
-   - Angular momentum addition (j₁ + j₂)
-   - Coupled basis states
-   - Momentum decomposition functions
+2. **Clebsch-Gordan Coefficient Calculation**:
+   Implements recursive algorithm with the following steps:
 
-3. **Wigner Symbols**:
-   - 3j symbols
-   - 6j symbols
-   - 9j symbols
+   a) For maximum $j$ ($j = j_1 + j_2$):
+      - Start with $\begin{pmatrix} j_1 & j_2 & j_1+j_2 \\ j_1 & j_2 & j_1+j_2 \end{pmatrix} = 1$
+      - Apply lowering operator $J_- = J_-(1) + J_-(2)$:
+        $J_-|j,j\rangle = \sqrt{2j}|j,j-1\rangle = \sqrt{2j_1}|j_1-1,j_2\rangle + \sqrt{2j_2}|j_1,j_2-1\rangle$
+      - Generate coefficients:
+        $\begin{pmatrix} j_1 & j_2 & j_1+j_2 \\ j_1-1 & j_2 & j_1+j_2-1 \end{pmatrix} = \sqrt{\frac{j_1}{j_1+j_2}}$
+        $\begin{pmatrix} j_1 & j_2 & j_1+j_2 \\ j_1 & j_2-1 & j_1+j_2-1 \end{pmatrix} = \sqrt{\frac{j_2}{j_1+j_2}}$
+
+   b) For $j = j_1 + j_2 - 1$:
+      - Express state as $|j,j\rangle = \alpha|j_1,j_2-1\rangle + \beta|j_1-1,j_2\rangle$
+      - Using normalization ($\alpha^2 + \beta^2 = 1$) and Condon-Shortley convention ($\alpha \geq 0$)
+      - Apply $J_+$ to find:
+        $\alpha = \sqrt{\frac{j_1}{j_1+j_2}}$, $\beta = -\sqrt{\frac{j_2}{j_1+j_2}}$
+
+   c) Continue process until $j = |j_1 - j_2|$
+
+3. **Properties and Validation**:
+   - Selection rules: $m = m_1 + m_2$, $|j_1 - j_2| \leq j \leq j_1 + j_2$
+   - Reality: All coefficients are real numbers
+   - Bounds: $|\begin{pmatrix} j_1 & j_2 & j \\ m_1 & m_2 & m \end{pmatrix}| \leq 1$
+   - Recursion relation for validation
+
+4. **Angular Momentum Composition**:
+   ```typescript
+   export interface AngularMomentumComposition {
+     addAngularMomenta(j1: number, state1: StateVector, j2: number, state2: StateVector): StateVector;
+     decomposeAngularState(state: StateVector, j1: number, j2: number): StateVector[];
+   }
+   ```
+
+5. **Wigner Symbols**:
+   - 3j symbols from CG coefficients
+   - 6j symbols for recoupling
+   - 9j symbols for complex coupling
    - Phase conventions handling
    - Symmetry properties
 
-The module maintains clear boundaries while integrating seamlessly with the existing quantum library structure:
+#### Implementation Strategy
 
-```typescript
-// angularMomentum/operators.ts
-import { Operator } from '../core/types';
-import { Complex } from 'mathjs';
+1. **Core Classes**:
+   ```typescript
+   // angularMomentum/clebschGordan.ts
+   export class ClebschGordanCalculator {
+     // Implements recursive algorithm
+     calculate(j1: number, m1: number, j2: number, m2: number, j: number, m: number): number;
+     private generateMaximalJ(j1: number, j2: number): CoefficientTable;
+     private applyLoweringOperator(table: CoefficientTable): CoefficientTable;
+   }
 
-export interface AngularMomentumOperator extends Operator {
-  j: number;  // Total angular momentum quantum number
-  type: 'Jplus' | 'Jminus' | 'Jz' | 'J2';
-}
+   // angularMomentum/composition.ts
+   export class AngularMomentumComposer implements AngularMomentumComposition {
+     private cgCalculator: ClebschGordanCalculator;
+     // Implementation of composition methods
+   }
+   ```
 
-// Key implementations in separate files within angularMomentum/
-// maintaining clean module boundaries while leveraging existing
-// quantum library functionality
-```
+2. **Optimization**:
+   - Cache commonly used coefficients
+   - Symmetry properties for reduced calculations
+   - Numerical stability checks
+   - Error bounds maintenance
+
+3. **Testing Strategy**:
+   - Known value validation
+   - Symmetry property verification
+   - Numerical stability tests
+   - Edge case handling
 
 ### 4.2 Clean API Design
 

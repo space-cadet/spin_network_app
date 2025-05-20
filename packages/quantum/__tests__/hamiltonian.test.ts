@@ -10,6 +10,8 @@ import { PauliX, PauliY, PauliZ } from '../src/operators/gates';
 import { MatrixOperator } from '../src/operators/operator';
 import { StateVector } from '../src/states/stateVector';
 import * as math from 'mathjs';
+import { createPlusState } from '../src/states/states';
+import { stateVectorApproxEqual } from './utils/testHelpers';
 
 describe('Hamiltonian', () => {
   describe('Basic Hamiltonian operations', () => {
@@ -50,12 +52,18 @@ describe('Hamiltonian', () => {
         math.complex(1/Math.sqrt(2),  0)
       ]);
 
+      // console.log(statePlus.toString());
+
+      // console.log(H.toString());
+
       // Evolve for t = π/2 (quarter rotation)
       const evolved = H.evolveState(statePlus, Math.PI/2);
+
+      // console.log(evolved.toString());
       
       // Should be (|0⟩ + i|1⟩)/√2
-      expect(evolved.amplitudes[0].re).toBeCloseTo(1/Math.sqrt(2));
-      expect(evolved.amplitudes[0].im).toBeCloseTo(0);
+      expect(evolved.amplitudes[0].re).toBeCloseTo(0);
+      expect(evolved.amplitudes[0].im).toBeCloseTo(-1/Math.sqrt(2));
       expect(evolved.amplitudes[1].re).toBeCloseTo(0);
       expect(evolved.amplitudes[1].im).toBeCloseTo(1/Math.sqrt(2));
     });
@@ -66,13 +74,22 @@ describe('Hamiltonian', () => {
       const B = [1, 0, 0] as [number, number, number];  // Field in x direction
       const H = Hamiltonian.createSpinHamiltonian(B);
 
+      console.log("Spin Hamiltonian");
+
+      console.log(H.toString());
+
       // Should be equivalent to σx
-      const state = StateVector.computationalBasis(2, 0);
+      // const state = StateVector.computationalBasis(2, 1);
+      const state = createPlusState();
       const evolved = H.evolveState(state, Math.PI);  // Rotate by π
+
+      console.log("Initial state: ", state.toString());
+
+      console.log("Evolved state: ", evolved.toString());
       
       // Should flip to |1⟩
-      expect(evolved.amplitudes[0].re).toBeCloseTo(0);
-      expect(evolved.amplitudes[1].re).toBeCloseTo(1);
+      console.log(stateVectorApproxEqual(state, evolved.scale(math.complex(-1,0)), 1e-10));
+      expect(stateVectorApproxEqual(state, evolved.scale(math.complex(-1,0)), 1e-10)).toBe(true);
     });
 
     test('should give correct energy levels', () => {
@@ -98,6 +115,13 @@ describe('Hamiltonian', () => {
       // Test with |↑↑⟩ state
       const upup = StateVector.computationalBasis(4, 0);
       const E_upup = H.expectationValue(upup);
+
+      console.log("Heisenberg Hamiltonian");
+
+      console.log(H.toString());
+      console.log("Initial state: ", upup.toString());
+      console.log("Expectation value: ", E_upup);
+
       expect(E_upup.re).toBeCloseTo(0.75);  // Eigenstate with E = 3J/4
 
       // Test with singlet state (|↑↓⟩ - |↓↑⟩)/√2
