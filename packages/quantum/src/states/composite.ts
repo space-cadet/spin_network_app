@@ -6,7 +6,7 @@ import { HilbertSpace } from '../core/hilbertSpace';
 import { IOperator } from '../core/types';
 import { IStateVector } from '../core/types';
 import { StateVector } from './stateVector';
-import { validateMatchDims } from '../utils/validation';
+import { validateMatchDims, validatePartialTrace } from '../utils/validation';
 
 /**
  * Composes multiple Hilbert spaces via tensor product
@@ -64,17 +64,23 @@ export function bipartiteSplit(
 }
 
 /**
- * Performs partial trace over specified subsystems
+ * Wrapper for partial trace operation that handles composite systems.
+ * This function provides a convenient interface for performing partial trace
+ * operations on composite quantum systems.
+ * 
+ * @param operator - The quantum operator to perform partial trace on
+ * @param dims - Array of dimensions for each subsystem
+ * @param traceOutIndices - Indices of subsystems to trace out
+ * @returns Reduced operator after tracing out specified subsystems
  */
 export function partialTrace(
   operator: IOperator,
   dims: number[],
   traceOutIndices: number[]
 ): IOperator {
-  // Total dimension should match operator dimension
-  const totalDim = dims.reduce((a, b) => a * b, 1);
-  validateMatchDims(totalDim, operator.dimension);
-
-  // Validation and implementation handled by operator's partialTrace
+  // Use standardized validation
+  validatePartialTrace(dims, operator.dimension, traceOutIndices);
+  
+  // Delegate to operator's implementation
   return operator.partialTrace(dims, traceOutIndices);
 }

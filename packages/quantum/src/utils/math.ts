@@ -68,36 +68,6 @@ export function multiplyMatrices(a: Complex[][], b: Complex[][]): Complex[][] {
 }
 
 /**
- * Computes the partial trace of a density matrix
- */
-export function partialTrace(
-  matrix: Complex[][],
-  dims: number[],
-  traceOutIndices: number[]
-): Complex[][] {
-  // Validate dimensions
-  const totalDim = dims.reduce((a, b) => a * b, 1);
-  if (matrix.length !== totalDim) {
-    throw new Error('Matrix dimension does not match subsystem dimensions');
-  }
-
-  // Calculate remaining dimensions
-  const remainingDims = dims.filter((_, i) => !traceOutIndices.includes(i));
-  const remainingDim = remainingDims.reduce((a, b) => a * b, 1);
-
-  // Initialize result matrix
-  const result = Array(remainingDim).fill(null).map(() =>
-    Array(remainingDim).fill(null).map(() => math.complex(0, 0))
-  );
-
-  // TODO: Implement partial trace computation
-  // This is a placeholder for the actual implementation
-  // The full implementation would require tensor network operations
-
-  return result;
-}
-
-/**
  * Computes the singular value decomposition of a matrix
  * Note: This is a placeholder for a proper SVD implementation
  */

@@ -943,6 +943,42 @@ export function addMatrices(a: ComplexMatrix, b: ComplexMatrix): ComplexMatrix {
  * @returns Scaled matrix
  * @throws Error if matrix is invalid
  */
+/**
+ * Normalizes a matrix by dividing by its trace
+ * This is particularly useful for density matrices which must have trace 1
+ * 
+ * @param matrix Input matrix
+ * @returns Normalized matrix with trace 1
+ * @throws Error if matrix is invalid or has zero trace
+ */
+export function normalizeMatrix(matrix: ComplexMatrix): ComplexMatrix {
+    const validation = validateMatrix(matrix);
+    if (!validation.valid) {
+        throw new Error(`Invalid matrix: ${validation.error}`);
+    }
+
+    const squareValidation = validateSquareMatrix(matrix);
+    if (!squareValidation.valid) {
+        throw new Error(squareValidation.error);
+    }
+
+    // Calculate trace
+    let trace = math.complex(0, 0);
+    for (let i = 0; i < matrix.length; i++) {
+        trace = math.add(trace, matrix[i][i]) as Complex;
+    }
+
+    // Check if trace is zero
+    if (Math.abs(trace.re) < NUMERICAL_THRESHOLD && 
+        Math.abs(trace.im) < NUMERICAL_THRESHOLD) {
+        throw new Error('Cannot normalize matrix with zero trace');
+    }
+
+    // Scale matrix by 1/trace
+    const scalar = math.divide(1, trace) as Complex;
+    return scaleMatrix(matrix, scalar);
+}
+
 export function scaleMatrix(matrix: ComplexMatrix, scalar: Complex): ComplexMatrix {
     const validation = validateMatrix(matrix);
     if (!validation.valid) {

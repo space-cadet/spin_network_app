@@ -4,7 +4,7 @@
 
 import { Complex, IStateVector, OperatorType, IOperator } from '../core/types';
 import { StateVector } from '../states/stateVector';
-import { validateMatDims, validateMatchDims } from '../utils/validation';
+import { validateMatDims, validateMatchDims, validatePartialTrace } from '../utils/validation';
 import { eigenDecomposition } from '../utils/matrixOperations';
 import * as math from 'mathjs';
 
@@ -439,28 +439,41 @@ export class MatrixOperator implements IOperator {
   }
 
   /**
-   * Performs partial trace over specified subsystems
+   * Performs partial trace operation over specified quantum subsystems
+   * 
+   * In quantum mechanics, the partial trace is an operation that reduces the dimensionality of
+   * a quantum system by "tracing out" (removing) certain subsystems. This is a fundamental
+   * operation used to obtain the reduced density matrix of a composite system.
+   * 
+   * @example
+   * // For a 4-dimensional system (2⊗2) representing two qubits:
+   * // Get reduced density matrix by tracing out the second qubit
+   * const reducedOperator = operator.partialTrace([2, 2], [1]);
+   * 
+   * @example
+   * // For an 8-dimensional system (2⊗2⊗2) representing three qubits:
+   * // Trace out the first and third qubits
+   * const reducedOperator = operator.partialTrace([2, 2, 2], [0, 2]);
+   * 
+   * @param dims - Array of dimensions for each subsystem. Product must equal this.dimension
+   * @param traceOutIndices - Array of indices indicating which subsystems to trace out
+   * @returns A new operator representing the reduced system after partial trace
+   * @throws Error if dimensions are invalid or indices are out of bounds
    */
   partialTrace(dims: number[], traceOutIndices: number[]): IOperator {
-    // Validate dimensions
-    const totalDim = dims.reduce((a, b) => a * b, 1);
-    if (totalDim !== this.dimension) {
-      throw new Error('Product of subsystem dimensions must equal total dimension');
-    }
-
-    // Validate trace indices
-    if (!traceOutIndices.every(i => i >= 0 && i < dims.length)) {
-      throw new Error('Invalid trace out indices');
-    }
+    // Use standardized validation
+    validatePartialTrace(dims, this.dimension, traceOutIndices);
 
     // Calculate remaining dimension after trace
     const remainingDim = dims.filter((_, i) => !traceOutIndices.includes(i))
       .reduce((a, b) => a * b, 1);
 
     // Initialize result matrix
-    const resultMatrix = Array(remainingDim).fill(null)
-      .map(() => Array(remainingDim).fill(null)
-        .map(() => math.complex(0, 0)));
+    const resultMatrix = createZeroMatrix(remainingDim);
+    
+    // Array(remainingDim).fill(null)
+    //   .map(() => Array(remainingDim).fill(null)
+    //     .map(() => math.complex(0, 0)));
 
     // Perform partial trace
     const traceRange = Array(this.dimension).fill(0)

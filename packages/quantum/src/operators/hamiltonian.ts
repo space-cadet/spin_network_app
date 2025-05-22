@@ -61,7 +61,8 @@ export type HamiltonianType =
   | 'harmonic'      
   | 'spin'          
   | 'interaction'    
-  | 'custom';        
+  | 'custom'
+  | 'non-hermitian';        
 
 /**
  * Represents a single term in a Hamiltonian expansion

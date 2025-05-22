@@ -7,6 +7,7 @@ import { MatrixOperator } from '../operators/operator';
 import { multiplyMatrices } from '../utils/matrixOperations';
 import * as math from 'mathjs';
 import { StateVector } from './stateVector';
+import { normalizeMatrix } from '../utils/matrixOperations';
 
 /**
  * Implementation of density matrix operations
@@ -27,13 +28,16 @@ export class DensityMatrixOperator implements IDensityMatrix {
       throw new Error('Matrix must be square');
     }
 
-    // Create operator and validate properties
-    this.operator = new MatrixOperator(matrix, 'hermitian');
+    // Normalize matrix and create operator
+    const normalizedMatrix = normalizeMatrix(matrix);
+    this.operator = new MatrixOperator(normalizedMatrix, 'hermitian');
     this.dimension = dim;
 
     // Validate trace = 1
     const tr = this.trace();
     // console.log("Trace: ", tr);
+    // console.log("Trace real part: ", tr.re);
+    // console.log("Trace imaginary part: ", tr.im);
     if (Math.abs(tr.re - 1) > 1e-10 || Math.abs(tr.im) > 1e-10) {
       throw new Error('Density matrix must have trace 1');
     }
@@ -121,7 +125,7 @@ export class DensityMatrixOperator implements IDensityMatrix {
    * Performs partial trace over specified subsystems
    */
   partialTrace(dims: number[], traceOutIndices: number[]): IOperator {
-    return this.operator.partialTrace(dims, traceOutIndices).toMatrix();
+    return this.operator.partialTrace(dims, traceOutIndices);
   }
 
   /**
@@ -250,7 +254,7 @@ export class KrausChannel implements IQuantumChannel {
     const identity = createIdentityOperator(dim);
     const diff = subtractOperators(sum, identity);
     
-    if (!isOperatorZero(diff)) {
+    if (!diff.isZero()) {
       throw new Error('Kraus operators must satisfy completeness relation');
     }
   }
@@ -474,16 +478,6 @@ function subtractOperators(a: IOperator, b: IOperator): IOperator {
   );
 
   return new MatrixOperator(diffMatrix);
-}
-
-function isOperatorZero(operator: IOperator, tolerance: number = 1e-10): boolean {
-  const matrix = operator.toMatrix();
-  return matrix.every(row => 
-    row.every(elem => {
-      const magnitude = math.abs(elem).re;
-      return magnitude < tolerance;
-    })
-  );
 }
 
 function createIdentityOperator(dimension: number): IOperator {

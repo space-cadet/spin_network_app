@@ -99,7 +99,7 @@ export interface IMeasurementOutcome {
  */
 export interface IDensityMatrix extends IOperator {
   trace(): Complex;                                    // Calculate trace
-  partialTrace(dims: number[], traceOutIndices: number[]): IDensityMatrix;  // Partial trace
+  partialTrace(dims: number[], traceOutIndices: number[]): IOperator;  // Partial trace
   purity(): number;                                    // Calculate purity
   vonNeumannEntropy(): number;                        // Calculate entropy
 }

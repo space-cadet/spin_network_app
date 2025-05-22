@@ -14,22 +14,7 @@ import {
   multiplyMatrices
 } from '../src/utils/matrixOperations';
 import { Complex } from '../src/core/types';
-
-// Helper for formatting complex numbers
-function formatComplex(c: Complex): string {
-  if (Math.abs(c.im) < 1e-10) {
-    return c.re.toFixed(4);
-  }
-  const sign = c.im >= 0 ? '+' : '';
-  return `${c.re.toFixed(4)}${sign}${c.im.toFixed(4)}i`;
-}
-
-// Helper for formatting matrices
-function formatMatrix(matrix: ComplexMatrix): string {
-  return '[\n  ' + matrix.map(row => 
-    '[' + row.map(formatComplex).join(', ') + ']'
-  ).join(',\n  ') + '\n]';
-}
+import { formatComplex, formatMatrix } from './utils/testHelpers';
 
 // Verify that Av = λv for each eigenpair
 function verifyEigenpairs(matrix: ComplexMatrix, values: Complex[], vectors: ComplexMatrix): void {

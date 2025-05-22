@@ -13,7 +13,7 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
-| T55b | Testing and Debugging Quantum Module | 🔄 | HIGH | 2025-05-22 | [tasks/T55b.md] | Fixed nestedCommutator implementation, added zero operator testing, implemented all Kraus operators, resolved partialTrace consistency |
+| T55b | Testing and Debugging Quantum Module | 🔄 | HIGH | 2025-05-22 | [tasks/T55b.md] | Fixed nestedCommutator implementation, added zero operator testing, implemented all Kraus operators, resolved partialTrace consistency, fixed Heisenberg Hamiltonian tests |
 | T55a | Implement Angular Momentum Algebra | 🔄 | HIGH | 2025-05-14 | [tasks/T55a.md] | Fixed basis conversion implementation, added StateVector basis-specific string methods |
 | T65 | Release @spin-network/quantum as Standalone NPM Package | ⬜ | HIGH | 2025-05-12 | [tasks/T65.md] |
 | T64b | Implement Quantum Module Demo Page in graph-test-app | 🔄 | HIGH | 2025-05-13 | [tasks/T64b.md] | Basic panel components implemented, working on quantum state management |
@@ -621,6 +621,7 @@ Meta tasks are maintenance and cleanup tasks that sit outside the regular task n
 **Notes**: Periodic maintenance task to ensure documentation accuracy. Critical given the project's shift toward quantum library development and modular architecture. Successfully updated all key documents to reflect current quantum focus. Added comprehensive quantum technology details to techContext.md, updated TODO.md with prioritized quantum tasks, and enhanced main project files to accurately present the project's quantum capabilities. On 2025-05-14, consolidated session_cache.md to remove duplicates and restructured to match template format for better organization.
 
 ## Recent Updates
+- 2025-05-22 23:15: Updated T55b - Fixed Heisenberg Hamiltonian tests, corrected expectation value calculations and phase evolution verification
 - 2025-05-22 22:15: Updated T55b - Added zero operator testing methods, implemented all Kraus operators for quantum channels, resolved partialTrace signature consistency
 - 2025-05-22 19:30: Updated T55b - Created comprehensive eigenDecomposition test file with visual logging, identified test failures requiring precision fixes
 - 2025-05-22 18:30: Added T55b - Testing and Debugging Quantum Module, fixed nestedCommutator implementation and added simplified interface

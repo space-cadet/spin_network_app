@@ -5,7 +5,24 @@
 import { Complex, IStateVector } from '../../src/core/types';
 import { StateVector } from '../../src/states/stateVector';
 import { HilbertSpace } from '../../src/core/hilbertSpace';
+import { ComplexMatrix } from '../../src/utils/matrixOperations';
 import * as math from 'mathjs';
+
+// Helper for formatting complex numbers
+export function formatComplex(c: Complex): string {
+  if (Math.abs(c.im) < 1e-10) {
+    return c.re.toFixed(4);
+  }
+  const sign = c.im >= 0 ? '+' : '';
+  return `${c.re.toFixed(4)}${sign}${c.im.toFixed(4)}i`;
+}
+
+// Helper for formatting matrices
+export function formatMatrix(matrix: ComplexMatrix): string {
+  return '[\n  ' + matrix.map(row => 
+    '[' + row.map(formatComplex).join(', ') + ']'
+  ).join(',\n  ') + '\n]';
+}
 
 /**
  * Checks if two complex numbers are approximately equal

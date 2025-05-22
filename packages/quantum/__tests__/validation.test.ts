@@ -23,7 +23,7 @@ describe('Validation Utilities', () => {
 
     test('rejects empty matrix', () => {
       const matrix: Complex[][] = [];
-      expect(() => validateMatDims(matrix)).toThrow('Empty matrix provided');
+      expect(() => validateMatDims(matrix)).toThrow('Invalid matrix: empty or undefined');
     });
 
     test('rejects non-square matrix', () => {
