@@ -9,6 +9,8 @@ import * as math from 'mathjs';
 // Direct export of math.js Complex type
 export type { Complex } from 'mathjs';
 
+import { StateVector } from '../states/stateVector';
+
 /**
  * Helper functions for complex number handling
  */
@@ -67,7 +69,7 @@ export interface IOperator {
   type: OperatorType;    // Type of operator
   
   // Core operations
-  apply(state: IStateVector): IStateVector;  // Apply operator to state
+  apply(state: IStateVector): StateVector;  // Apply operator to state
   compose(other: IOperator): IOperator;      // Compose with another operator  
   adjoint(): IOperator;                     // Hermitian conjugate
   toMatrix(): Complex[][];                 // Matrix representation

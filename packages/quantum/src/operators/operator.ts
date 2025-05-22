@@ -140,7 +140,7 @@ export class MatrixOperator implements IOperator {
   /**
    * Applies operator to state vector: |ψ'⟩ = O|ψ⟩
    */
-  apply(state: IStateVector): IStateVector {
+  apply(state: IStateVector): StateVector {
     validateMatchDims(state.dimension, this.dimension);
 
     const newAmplitudes = new Array(this.dimension).fill(null)

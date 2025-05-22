@@ -4,6 +4,8 @@
 
 import { describe, it, expect } from 'vitest';
 
+import { zeroMatrix } from '../src/utils/matrixOperations';
+
 import { 
   commutator, 
   antiCommutator, 
@@ -21,6 +23,7 @@ import { MatrixOperator } from '../src/operators/operator';
 import { StateVector } from '../src/states/stateVector';
 import { PauliX, PauliY, PauliZ } from '../src/operators/gates';
 import * as math from 'mathjs';
+import { isEqual } from 'lodash';
 
 describe('Operator Algebra', () => {
   describe('commutator', () => {
@@ -96,12 +99,13 @@ describe('Operator Algebra', () => {
       // The result should be proportional to PauliY, but the exact structure 
       // depends on the implementation details of the nested commutator
       const matrix = result.toMatrix();
+
+      console.log('Matrix representation:', matrix);
+
+      console.log('Zero matrix:', zeroMatrix(2, 2));
       
-      // Just verify that the result is non-zero
-      const hasNonZeroElement = matrix.some(row => 
-        row.some(elem => math.abs(elem).re > 1e-10)
-      );
-      expect(hasNonZeroElement).toBe(true);
+      // Matrix should be zero
+      expect(isEqual(matrix, zeroMatrix(2,2))).toBe(true);
     });
 
     it('throws error for invalid indices', () => {

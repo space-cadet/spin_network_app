@@ -408,11 +408,28 @@ function addAngularMomenta(state1: StateVector, j1: number, state2: StateVector,
   const totalDim = Math.floor(Math.pow(j1 + j2 + 1, 2) - Math.pow(Math.abs(j1 - j2), 2));
   const resultAmplitudes: Complex[] = [];
   
-  // Add states in order of decreasing j and decreasing m
+  // Find the dominant j and m values from the state amplitudes
+  let maxJ = jMin;
+  let maxM = -maxJ;
+  let maxAmplitude = 0;
+  
+  // First pass: find the maximum amplitude and its j,m values
   for (let j = jMax; j >= jMin; j--) {
     for (let m = j; m >= -j; m--) {
       const amp = resultStates[j.toString()][m.toString()];
-      // Only add non-zero amplitudes (within numerical precision)
+      const magnitude = math.abs((amp as any).re ?? amp);
+      if (magnitude > maxAmplitude) {
+        maxAmplitude = magnitude;
+        maxJ = j;
+        maxM = m;
+      }
+    }
+  }
+  
+  // Second pass: build the state vector in order of decreasing j and decreasing m
+  for (let j = jMax; j >= jMin; j--) {
+    for (let m = j; m >= -j; m--) {
+      const amp = resultStates[j.toString()][m.toString()];
       if (math.abs((amp as any).re ?? amp) > 1e-12 || math.abs((amp as any).im ?? 0) > 1e-12) {
         resultAmplitudes.push(amp);
       } else {
@@ -421,7 +438,10 @@ function addAngularMomenta(state1: StateVector, j1: number, state2: StateVector,
     }
   }
   
-  return new StateVector(totalDim, resultAmplitudes, `|(${j1},${j2})j,m⟩`);
+  // Create basis label with actual j,m values
+  const basisLabel = `|(${j1},${j2}),${maxJ},${maxM}⟩`;
+  
+  return new StateVector(totalDim, resultAmplitudes, basisLabel);
 }
 
 /**

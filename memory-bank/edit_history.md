@@ -1,5 +1,22 @@
 # Edit History
-*Last Updated: 2025-05-21 00:00 IST*
+*Last Updated: 2025-05-22 18:30 IST*
+
+## 2025-05-22
+### 18:30 - T55b: Fixed Nested Commutator Implementation and Enhanced Documentation
+- Modified `packages/quantum/src/operators/algebra.ts`:
+  - Fixed `nestedCommutator` implementation with correct processing order from innermost to outermost
+  - Added `createNestedCommutator` function for simpler interface usage
+  - Enhanced documentation with concrete examples and clear caveats
+  - Added explanation of limitations (nested vs branched structures)
+- Modified `packages/quantum/examples/operatorAlgebra/commutator-demo.ts`:
+  - Updated to demonstrate both index-based and simplified methods
+  - Added comparison between original and new approaches
+  - Verified Jacobi identity calculation with both methods
+- Created `packages/quantum/run_tests.sh`:
+  - Shell script to automatically run all test files including subdirectories
+  - Records passing tests in `passing` file and failing tests in `failing` file
+  - Uses `find` command to locate all `.test.ts` files recursively
+- Task Reference: T55b - Testing and Debugging Quantum Module
 
 ## 2025-05-21
 ### 00:00 - T55a: Add basis state representation features

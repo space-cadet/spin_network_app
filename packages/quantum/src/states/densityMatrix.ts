@@ -6,6 +6,7 @@ import { Complex, IStateVector, OperatorType, IDensityMatrix, IQuantumChannel, I
 import { MatrixOperator } from '../operators/operator';
 import { multiplyMatrices } from '../utils/matrixOperations';
 import * as math from 'mathjs';
+import { StateVector } from './stateVector';
 
 /**
  * Implementation of density matrix operations
@@ -46,7 +47,7 @@ export class DensityMatrixOperator implements IDensityMatrix {
   /**
    * Applies density matrix to state vector
    */
-  apply(state: IStateVector): IStateVector {
+  apply(state: IStateVector): StateVector {
     return this.operator.apply(state);
   }
 

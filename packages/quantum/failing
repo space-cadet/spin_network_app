@@ -1,0 +1,10 @@
+matrixFunctions.test.ts
+hamiltonian.test.ts
+composition.test.ts
+wignerSymbols.test.ts
+composition_visualization.test.ts
+eigendecomposition.test.ts
+integration.test.ts
+densityMatrix.test.ts
+eigen.test.ts
+operatorAlgebra.test.ts

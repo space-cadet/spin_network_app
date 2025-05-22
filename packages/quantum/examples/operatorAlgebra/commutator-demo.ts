@@ -9,6 +9,7 @@ import {
   commutator, 
   antiCommutator,
   nestedCommutator,
+  createNestedCommutator,
   operatorsCommute,
   uncertaintyProduct
 } from '../../src/operators/algebra';
@@ -77,6 +78,9 @@ function demoAntiCommutators() {
 function demoNestedCommutators() {
   console.log('\n=== Nested Commutators ===\n');
   
+  // Using original index-based method
+  console.log('=== Using Original Index-Based Method ===');
+  
   // [X, [Y, Z]] = [X, 2iX] = 0
   console.log('Computing [X, [Y, Z]]:');
   const ops = [PauliX, PauliY, PauliZ];
@@ -89,13 +93,37 @@ function demoNestedCommutators() {
   console.log('\nVerifying Jacobi identity:');
   console.log('[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] should equal 0');
   
-  const term1 = nestedCommutator([PauliX, PauliY, PauliZ], [[0, 1], [1, 2]]);
-  const term2 = nestedCommutator([PauliY, PauliZ, PauliX], [[0, 1], [1, 2]]);
-  const term3 = nestedCommutator([PauliZ, PauliX, PauliY], [[0, 1], [1, 2]]);
+  const term1 = createNestedCommutator([PauliX,PauliY,PauliZ]);
+  // nestedCommutator([PauliX, PauliY, PauliZ], [[0, 1], [1, 2]]);
+  const term2 = createNestedCommutator([PauliY,PauliZ,PauliX]);
+  // nestedCommutator([PauliY, PauliZ, PauliX], [[0, 1], [1, 2]]);
+  const term3 = createNestedCommutator([PauliZ,PauliX,PauliY]);
+  // nestedCommutator([PauliZ, PauliX, PauliY], [[0, 1], [1, 2]]);
   
   const sum = term1.add(term2.add(term3));
   console.log('Sum of terms:');
   console.log(sum.toMatrix());
+  
+  // Using the simpler interface
+  console.log('\n=== Using Simplified Method ===');
+  
+  // [X, [Y, Z]]
+  console.log('Computing [X, [Y, Z]] with simplified method:');
+  const nestedSimple = createNestedCommutator([PauliX, PauliY, PauliZ]);
+  console.log('Matrix representation:');
+  console.log(nestedSimple.toMatrix());
+  
+  // Jacobi identity with simplified method
+  console.log('\nVerifying Jacobi identity with simplified method:');
+  console.log('[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] should equal 0');
+  
+  const term1Simple = createNestedCommutator([PauliX, PauliY, PauliZ]);
+  const term2Simple = createNestedCommutator([PauliY, PauliZ, PauliX]);
+  const term3Simple = createNestedCommutator([PauliZ, PauliX, PauliY]);
+  
+  const sumSimple = term1Simple.add(term2Simple.add(term3Simple));
+  console.log('Sum of terms:');
+  console.log(sumSimple.toMatrix());
 }
 
 // Demonstrate uncertainty principle using commutators

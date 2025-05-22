@@ -157,8 +157,30 @@ export function antiCommutator(A: IOperator, B: IOperator): IOperator {
  * Useful for higher-order perturbation theory and quantum field calculations.
  * 
  * @param ops Array of operators to use in nested commutator
- * @param indices Array of pairs of indices specifying the commutator structure
+ * @param indices Array of pairs of indices specifying the commutator structure.
+ *        Each pair [a, b] creates a commutator between operators.
+ *        Pairs are processed from last to first (innermost to outermost).
+ *        IMPORTANT: This function only supports strictly nested commutators of the form [A,[B,[C,D]]], not branched structures like [[A,B],[C,D]].
+ *        
+ * @example
+ * // For a structure [A,[B,C]] with ops = [A, B, C]
+ * // indices = [[0, 1], [1, 2]]
+ * // 1. First computes [B,C] using indices [1,2] (last pair)
+ * // 2. Then computes [A,[B,C]] using [0,1] (first pair)
+ * 
+ * @example
+ * // For the Jacobi identity [X,[Y,Z]] + [Y,[Z,X]] + [Z,[X,Y]]
+ * // term1 = nestedCommutator([X, Y, Z], [[0, 1], [1, 2]])
+ * // term2 = nestedCommutator([Y, Z, X], [[0, 1], [1, 2]])
+ * // term3 = nestedCommutator([Z, X, Y], [[0, 1], [1, 2]])
+ * 
+ * @note For the LAST (innermost) pair: both indices refer to operators in the ops array
+ * @note For ALL OTHER pairs: the first index refers to an operator in the ops array, 
+ *       while the second operand is always the result of the previous calculation
+ *       
  * @returns The resulting operator from the nested commutator structure
+ * 
+ * @see createNestedCommutator - For a more intuitive way to create nested commutators
  */
 export function nestedCommutator(ops: IOperator[], indices: number[][]): IOperator {
   if (ops.length < 2 || indices.length < 1) {
@@ -171,21 +193,27 @@ export function nestedCommutator(ops: IOperator[], indices: number[][]): IOperat
     throw new Error('All operators must have the same dimension');
   }
   
-  // Process nested commutators from innermost to outermost
-  let result = ops[indices[indices.length - 1][0]];
+  // Start with the innermost commutator
+  const lastPair = indices[indices.length - 1];
+  const [innerA, innerB] = lastPair;
   
-  // Work backwards through indices to compute nested structure
-  for (let i = indices.length - 1; i >= 0; i--) {
+  if (innerA < 0 || innerB < 0 || innerA >= ops.length || innerB >= ops.length) {
+    throw new Error('Invalid operator indices');
+  }
+  
+  // Calculate the innermost commutator [A, B]
+  let result = commutator(ops[innerA], ops[innerB]);
+  
+  // Work backwards through remaining indices to compute nested structure
+  for (let i = indices.length - 2; i >= 0; i--) {
     const [a, b] = indices[i];
-    if (a < 0 || b < 0 || a >= ops.length || b >= ops.length) {
-      throw new Error('Invalid operator indices');
+    if (a < 0 || a >= ops.length) {
+      throw new Error('Invalid operator index');
     }
     
-    // If we're not at the innermost level, use previous result as left operand
-    const A = i === indices.length - 1 ? ops[a] : result;
-    const B = ops[b];
-    
-    result = commutator(A, B);
+    // For each subsequent level, the first index refers to an operator in ops array
+    // and the second operand is always the result from the previous calculation
+    result = commutator(ops[a], result);
   }
   
   return result;
@@ -347,6 +375,44 @@ export function operatorFromGenerator(generator: IOperator): IOperator {
   const expMatrix = matrixExponential(matrix);
   
   return new MatrixOperator(expMatrix, 'unitary');
+}
+
+/**
+ * Creates a nested commutator in a more intuitive way
+ * 
+ * This function provides a simpler interface for creating nested commutators
+ * compared to the more complex indexing scheme used by nestedCommutator.
+ * 
+ * @param ops Array of operators in the exact order they should appear in the commutator
+ * @returns The resulting operator from the nested commutator structure
+ * 
+ * @example
+ * // To compute [X, [Y, Z]]:
+ * createNestedCommutator([X, Y, Z]);
+ * 
+ * // To compute [A, [B, [C, D]]]:
+ * createNestedCommutator([A, B, C, D]);
+ */
+export function createNestedCommutator(ops: IOperator[]): IOperator {
+  if (ops.length < 3) {
+    throw new Error('Need at least three operators for a nested commutator');
+  }
+  
+  // Check all operators have same dimension
+  const dim = ops[0].dimension;
+  if (!ops.every(op => op.dimension === dim)) {
+    throw new Error('All operators must have the same dimension');
+  }
+  
+  // Start with the innermost commutator [ops[n-2], ops[n-1]]
+  let result = commutator(ops[ops.length - 2], ops[ops.length - 1]);
+  
+  // Work backwards through remaining operators
+  for (let i = ops.length - 3; i >= 0; i--) {
+    result = commutator(ops[i], result);
+  }
+  
+  return result;
 }
 
 /**
