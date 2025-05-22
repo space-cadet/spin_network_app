@@ -11,3 +11,4 @@ states.test.ts
 stateVector.test.ts
 hilbertSpace.test.ts
 validation.test.ts
+operatorAlgebra.test.ts

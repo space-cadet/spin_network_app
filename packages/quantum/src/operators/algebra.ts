@@ -284,19 +284,21 @@ export function BCHFormula(A: IOperator, B: IOperator, order: number = 2): IOper
  */
 export function operatorsCommute(A: IOperator, B: IOperator, tolerance: number = 1e-10): boolean {
   const comm = commutator(A, B);
-  const matrix = comm.toMatrix();
+  // const matrix = comm.toMatrix();
   
   // Check if all elements are close to zero
-  for (const row of matrix) {
-    for (const elem of row) {
-      const magnitude = math.abs(elem).re;
-      if (magnitude > tolerance) {
-        return false;
-      }
-    }
+  // for (const row of matrix) {
+  //   for (const elem of row) {
+  //     const magnitude = math.abs(elem).re;
+  //     if (magnitude > tolerance) {
+  //       return false;
+  //     }
+  //   }
+  // }
+  if (comm.isZero()) {
+    return true;
   }
-  
-  return true;
+  return false;
 }
 
 /**

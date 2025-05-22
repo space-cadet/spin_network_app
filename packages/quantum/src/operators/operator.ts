@@ -28,6 +28,22 @@ function ensureComplex(value: math.MathType): Complex {
   throw new Error(`Cannot convert ${math.typeOf(value)} to Complex`);
 }
 
+/**
+ * Creates a zero matrix of the specified dimension
+ * @param dimension The dimension of the square matrix
+ * @returns A dimension x dimension matrix filled with complex zeros
+ */
+export function createZeroMatrix(dimension: number): Complex[][] {
+  if (dimension <= 0 || !Number.isInteger(dimension)) {
+    throw new Error('Dimension must be a positive integer');
+  }
+  
+  return Array(dimension).fill(null)
+    .map(() => Array(dimension).fill(null)
+      .map(() => math.complex(0, 0))
+    );
+}
+
 /** 
  * Implementation of operator using matrix representation
  */
@@ -527,6 +543,23 @@ export class MatrixOperator implements IOperator {
       const proj = new MatrixOperator([vectorMatrix], 'projection');
       return sum ? sum.add(proj) : proj;
     });
+  }
+
+  /**
+   * Tests whether the operator is identically zero
+   * @param tolerance Numerical tolerance for zero comparison (default: 1e-12)
+   * @returns true if all matrix elements are within tolerance of zero
+   */
+  isZero(tolerance: number = 1e-12): boolean {
+    for (let i = 0; i < this.dimension; i++) {
+      for (let j = 0; j < this.dimension; j++) {
+        const element = this.matrix[i][j];
+        if (Math.abs(element.re) > tolerance || Math.abs(element.im) > tolerance) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
 

@@ -405,9 +405,9 @@ export function quantumMutualInformation(
   const jointEntropy = vonNeumannEntropy(rhoAB);
   
   // Calculate reduced density matrices
-  // Note: partial trace implementation needed
-  const rhoA = rhoAB.partialTrace([dimA, dimB]);
-  const rhoB = rhoAB.partialTrace([dimB, dimA]);
+  // Trace out subsystem B to get rhoA, trace out subsystem A to get rhoB
+  const rhoA = rhoAB.partialTrace([dimA, dimB], [1]); // Trace out subsystem B (index 1)
+  const rhoB = rhoAB.partialTrace([dimA, dimB], [0]); // Trace out subsystem A (index 0)
   
   // Calculate entropies of reduced states
   const entropyA = vonNeumannEntropy(rhoA);
@@ -558,7 +558,7 @@ export function quantumDiscord(rho: IDensityMatrix, dimA: number, dimB: number):
   const mutualInfo = quantumMutualInformation(rho, dimA, dimB);
   
   // Calculate reduced density matrix for subsystem B
-  const rhoB = rho.partialTrace([dimA, dimB]);
+  const rhoB = rho.partialTrace([dimA, dimB], [0]); // Trace out subsystem A (index 0)
   
   // For a complete implementation, we would need to minimize
   // over all projective measurements on subsystem B.

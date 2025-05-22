@@ -98,14 +98,14 @@ describe('Operator Algebra', () => {
       
       // The result should be proportional to PauliY, but the exact structure 
       // depends on the implementation details of the nested commutator
-      const matrix = result.toMatrix();
+      // const matrix = result.toMatrix();
 
-      console.log('Matrix representation:', matrix);
+      console.log('Matrix representation:', result);
 
-      console.log('Zero matrix:', zeroMatrix(2, 2));
+      // console.log('Zero matrix:', zeroMatrix(2, 2));
       
       // Matrix should be zero
-      expect(isEqual(matrix, zeroMatrix(2,2))).toBe(true);
+      expect(result.isZero()).toBe(true);
     });
 
     it('throws error for invalid indices', () => {
@@ -126,6 +126,8 @@ describe('Operator Algebra', () => {
 
     it('returns false for non-commuting operators', () => {
       // X and Y don't commute
+      console.log(commutator(PauliX, PauliY).toMatrix());
+      console.log(operatorsCommute(PauliX, PauliY));
       expect(operatorsCommute(PauliX, PauliY)).toBe(false);
       
       // Y and Z don't commute

@@ -7,4 +7,3 @@ eigendecomposition.test.ts
 integration.test.ts
 densityMatrix.test.ts
 eigen.test.ts
-operatorAlgebra.test.ts

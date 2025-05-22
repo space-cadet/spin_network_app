@@ -120,15 +120,8 @@ export class DensityMatrixOperator implements IDensityMatrix {
   /**
    * Performs partial trace over specified subsystems
    */
-  partialTrace(subsystemDimensions: number[]): IDensityMatrix {
-    // Validate dimensions multiply to total dimension
-    const totalDim = subsystemDimensions.reduce((a, b) => a * b, 1);
-    if (totalDim !== this.dimension) {
-      throw new Error('Invalid subsystem dimensions');
-    }
-
-    const reducedMatrix = this.operator.partialTrace(subsystemDimensions, [1]).toMatrix();
-    return new DensityMatrixOperator(reducedMatrix);
+  partialTrace(dims: number[], traceOutIndices: number[]): IOperator {
+    return this.operator.partialTrace(dims, traceOutIndices).toMatrix();
   }
 
   /**
@@ -223,6 +216,13 @@ export class DensityMatrixOperator implements IDensityMatrix {
   tensorProduct(other: IOperator): IOperator {
     return this.operator.tensorProduct(other);
   }
+
+  /**
+   * Tests whether the density matrix is identically zero
+   */
+  isZero(tolerance?: number): boolean {
+    return this.operator.isZero(tolerance);
+  }
 }
 
 /**
@@ -282,66 +282,167 @@ export class KrausChannel implements IQuantumChannel {
 
 /**
  * Creates a depolarizing channel
+ * For qubits: ρ → (1-p)ρ + p/3(XρX + YρY + ZρZ)
  */
 export function createDepolarizingChannel(dimension: number, p: number): IQuantumChannel {
   if (p < 0 || p > 1) {
     throw new Error('Probability must be between 0 and 1');
   }
 
-  // TODO: Implement Kraus operators for depolarizing channel
+  if (dimension !== 2) {
+    throw new Error('Depolarizing channel currently only implemented for qubits (dimension=2)');
+  }
+
+  // Kraus operators for depolarizing channel
   const krausOperators: IOperator[] = [];
+
+  // E0 = √(1-p) * I
+  const E0Matrix = [
+    [math.complex(Math.sqrt(1 - p), 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(Math.sqrt(1 - p), 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E0Matrix));
+
+  // E1 = √(p/3) * X
+  const sqrt_p_3 = Math.sqrt(p / 3);
+  const E1Matrix = [
+    [math.complex(0, 0), math.complex(sqrt_p_3, 0)],
+    [math.complex(sqrt_p_3, 0), math.complex(0, 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E1Matrix));
+
+  // E2 = √(p/3) * Y
+  const E2Matrix = [
+    [math.complex(0, 0), math.complex(0, -sqrt_p_3)],
+    [math.complex(0, sqrt_p_3), math.complex(0, 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E2Matrix));
+
+  // E3 = √(p/3) * Z
+  const E3Matrix = [
+    [math.complex(sqrt_p_3, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(-sqrt_p_3, 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E3Matrix));
+
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates an amplitude damping channel
+ * Models energy decay: |1⟩ → |0⟩ with probability γ
  */
 export function createAmplitudeDampingChannel(gamma: number): IQuantumChannel {
   if (gamma < 0 || gamma > 1) {
     throw new Error('Damping parameter must be between 0 and 1');
   }
 
-  // TODO: Implement Kraus operators for amplitude damping
+  // Kraus operators for amplitude damping
   const krausOperators: IOperator[] = [];
+
+  // E0 = |0⟩⟨0| + √(1-γ)|1⟩⟨1|
+  const E0Matrix = [
+    [math.complex(1, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(Math.sqrt(1 - gamma), 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E0Matrix));
+
+  // E1 = √γ|0⟩⟨1|
+  const E1Matrix = [
+    [math.complex(0, 0), math.complex(Math.sqrt(gamma), 0)],
+    [math.complex(0, 0), math.complex(0, 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E1Matrix));
+
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates a phase damping channel
+ * Models pure dephasing without energy loss
  */
 export function createPhaseDampingChannel(gamma: number): IQuantumChannel {
   if (gamma < 0 || gamma > 1) {
     throw new Error('Damping parameter must be between 0 and 1');
   }
 
-  // TODO: Implement Kraus operators for phase damping
+  // Kraus operators for phase damping
   const krausOperators: IOperator[] = [];
+
+  // E0 = |0⟩⟨0| + √(1-γ)|1⟩⟨1|
+  const E0Matrix = [
+    [math.complex(1, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(Math.sqrt(1 - gamma), 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E0Matrix));
+
+  // E1 = √γ|1⟩⟨1|
+  const E1Matrix = [
+    [math.complex(0, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(Math.sqrt(gamma), 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E1Matrix));
+
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates a bit flip channel
+ * Applies X gate with probability p: ρ → (1-p)ρ + pXρX
  */
 export function createBitFlipChannel(p: number): IQuantumChannel {
   if (p < 0 || p > 1) {
     throw new Error('Probability must be between 0 and 1');
   }
 
-  // TODO: Implement Kraus operators for bit flip
+  // Kraus operators for bit flip channel
   const krausOperators: IOperator[] = [];
+
+  // E0 = √(1-p) * I
+  const E0Matrix = [
+    [math.complex(Math.sqrt(1 - p), 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(Math.sqrt(1 - p), 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E0Matrix));
+
+  // E1 = √p * X
+  const sqrtP = Math.sqrt(p);
+  const E1Matrix = [
+    [math.complex(0, 0), math.complex(sqrtP, 0)],
+    [math.complex(sqrtP, 0), math.complex(0, 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E1Matrix));
+
   return new KrausChannel(krausOperators);
 }
 
 /**
  * Creates a phase flip channel
+ * Applies Z gate with probability p: ρ → (1-p)ρ + pZρZ
  */
 export function createPhaseFlipChannel(p: number): IQuantumChannel {
   if (p < 0 || p > 1) {
     throw new Error('Probability must be between 0 and 1');
   }
 
-  // TODO: Implement Kraus operators for phase flip
+  // Kraus operators for phase flip channel
   const krausOperators: IOperator[] = [];
+
+  // E0 = √(1-p) * I
+  const E0Matrix = [
+    [math.complex(Math.sqrt(1 - p), 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(Math.sqrt(1 - p), 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E0Matrix));
+
+  // E1 = √p * Z
+  const sqrtP = Math.sqrt(p);
+  const E1Matrix = [
+    [math.complex(sqrtP, 0), math.complex(0, 0)],
+    [math.complex(0, 0), math.complex(-sqrtP, 0)]
+  ];
+  krausOperators.push(new MatrixOperator(E1Matrix));
+
   return new KrausChannel(krausOperators);
 }
 

@@ -80,6 +80,9 @@ export interface IOperator {
   scale(scalar: Complex): IOperator;        // Scale operator by complex number
   add(other: IOperator): IOperator;          // Add two operators
   eigenDecompose(): { values: Complex[]; vectors: IOperator[] };
+  
+  // Utility methods
+  isZero(tolerance?: number): boolean;      // Test if operator is identically zero
 }
 
 /**
@@ -96,7 +99,7 @@ export interface IMeasurementOutcome {
  */
 export interface IDensityMatrix extends IOperator {
   trace(): Complex;                                    // Calculate trace
-  partialTrace(subsystemDimensions: number[]): IDensityMatrix;  // Partial trace
+  partialTrace(dims: number[], traceOutIndices: number[]): IDensityMatrix;  // Partial trace
   purity(): number;                                    // Calculate purity
   vonNeumannEntropy(): number;                        // Calculate entropy
 }
