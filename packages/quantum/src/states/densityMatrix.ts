@@ -259,6 +259,10 @@ export class KrausChannel implements IQuantumChannel {
     }
   }
 
+  public getOperators(): IOperator[] {
+    return [...this.krausOperators];
+  }
+
   apply(state: IDensityMatrix): IDensityMatrix {
     const dim = this.krausOperators[0].dimension;
     const result = Array(dim).fill(null).map(() => 

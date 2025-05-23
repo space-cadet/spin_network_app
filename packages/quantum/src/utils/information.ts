@@ -328,7 +328,7 @@ export function quantumRelativeEntropy(rho: IDensityMatrix, sigma: IDensityMatri
  * @param rho Density matrix
  * @returns Entropy value (non-negative)
  */
-export function vonNeumannEntropy(rho: IDensityMatrix): number {
+export function vonNeumannEntropy(rho: IOperator): number {
   const matrix = rho.toMatrix();
   const { values } = eigenDecomposition(matrix);
   

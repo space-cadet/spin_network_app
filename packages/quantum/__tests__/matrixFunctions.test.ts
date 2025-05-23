@@ -4,18 +4,26 @@ import { matrixFunction, matrixSquareRoot, matrixLogarithm, matrixPower, matrixS
 import { Complex } from '../src/core/types';
 import * as math from 'mathjs';
 
+// Helper to compare complex numbers with tolerance
+function complexEqual(
+  a: Complex,
+  b: Complex,
+  tolerance: number = 1e-10
+): boolean {
+  return Math.abs(a.re - b.re) < tolerance && Math.abs(a.im - b.im) < tolerance;
+}
+
 // Helper to compare complex matrices with tolerance
 function matricesEqual(
-    a: Complex[][],
-    b: Complex[][],
-    tolerance: number = 1e-10
-  ): boolean {
+  a: Complex[][],
+  b: Complex[][],
+  tolerance: number = 1e-10
+): boolean {
   if (a.length !== b.length || a[0].length !== b[0].length) return false;
   
   for (let i = 0; i < a.length; i++) {
     for (let j = 0; j < a[0].length; j++) {
-      if (Math.abs(a[i][j].re - b[i][j].re) > tolerance || 
-          Math.abs(a[i][j].im - b[i][j].im) > tolerance) {
+      if (!complexEqual(a[i][j], b[i][j], tolerance)) {
         return false;
       }
     }
@@ -32,9 +40,11 @@ describe('matrixFunction', () => {
     ];
     
     const identityFn = (x: Complex): Complex => x;
-    // console.log(identityFn(matrix));
+    
+    console.log(matrix);
+
     const result = matrixFunction(matrix, identityFn);
-    // console.log(result);
+    console.log(result);
     expect(matricesEqual(result, matrix)).toBe(true);
   });
   

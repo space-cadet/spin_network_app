@@ -17,6 +17,7 @@ import {
 } from '../src/utils/matrixOperations';
 import { Complex } from '../src/core/types';
 import * as math from 'mathjs';
+import { StateVector } from '../src/states/stateVector';
 
 // Helper to compare complex numbers accounting for -0/0 differences
 function complexEqual(a: Complex, b: Complex, tolerance: number = 1e-10): boolean {
@@ -47,8 +48,8 @@ describe('Matrix Operations', () => {
       ];
       
       const result = multiplyMatrices(a, b);
-      expect(result[0][0]).toEqual(math.complex(2,  0));
-      expect(result[1][1]).toEqual(math.complex(2,  0));
+      expect(complexEqual(result[0][0], math.complex(2,  0))).toBe(true);
+      expect(complexEqual(result[1][1], math.complex(2,  0))).toBe(true);
     });
 
     it('handles complex matrix multiplication', () => {
@@ -63,13 +64,13 @@ describe('Matrix Operations', () => {
       
       const result = multiplyMatrices(a, b);
       // For [0][0]: (0+i)(1+0i) + (1+0i)(0-i) = i + (-i) = 0
-      expect(result[0][0]).toEqual(math.complex(0,  0));
+      expect(complexEqual(result[0][0], math.complex(0,  0))).toBe(true);
       // For [0][1]: (0+i)(0+i) + (1+0i)(1+0i) = -1 + 1 = 0
-      expect(result[0][1]).toEqual(math.complex(0,  0));
+      expect(complexEqual(result[0][1], math.complex(0,  0))).toBe(true);
       // For [1][0]: (1+0i)(1+0i) + (0-i)(0-i) = 1 + (-1) = 0
-      expect(result[1][0]).toEqual(math.complex(0,  0));
+      expect(complexEqual(result[1][0], math.complex(0,  0))).toBe(true);
       // For [1][1]: (1+0i)(0+i) + (0-i)(1+0i) = i + (-i) = 0 
-      expect(result[1][1]).toEqual(math.complex(0,  0));
+      expect(complexEqual(result[1][1], math.complex(0,  0))).toBe(true);
     });
 
     it('throws error for invalid dimensions', () => {
@@ -87,10 +88,10 @@ describe('Matrix Operations', () => {
       ];
       
       const result = matrixExponential(matrix);
-      expect(result[0][0]).toEqual(math.complex(1,  0));
-      expect(result[1][1]).toEqual(math.complex(1,  0));
-      expect(result[0][1]).toEqual(math.complex(0,  0));
-      expect(result[1][0]).toEqual(math.complex(0,  0));
+      expect(complexEqual(result[0][0], math.complex(1,  0))).toBe(true);
+      expect(complexEqual(result[1][1], math.complex(1,  0))).toBe(true);
+      expect(complexEqual(result[0][1], math.complex(0,  0))).toBe(true);
+      expect(complexEqual(result[1][0], math.complex(0,  0))).toBe(true);
     });
 
     it('computes exponential of diagonal matrix', () => {
@@ -124,8 +125,8 @@ describe('Matrix Operations', () => {
       const result = tensorProduct(a, b);
       expect(result.length).toBe(4);
       expect(result[0].length).toBe(4);
-      expect(result[0][0]).toEqual(math.complex(2,  0));
-      expect(result[3][3]).toEqual(math.complex(2,  0));
+      expect(complexEqual(result[0][0], math.complex(2,  0))).toBe(true);
+      expect(complexEqual(result[3][3], math.complex(2,  0))).toBe(true);
     });
 
     it('throws error for invalid dimensions', () => {
@@ -175,10 +176,10 @@ describe('Matrix Operations', () => {
       ];
       
       const result = addMatrices(a, b);
-      expect(result[0][0]).toEqual(math.complex(2,  0));
-      expect(result[0][1]).toEqual(math.complex(0,  0));
-      expect(result[1][0]).toEqual(math.complex(0,  0));
-      expect(result[1][1]).toEqual(math.complex(2,  0));
+      expect(complexEqual(result[0][0], math.complex(2,  0))).toBe(true);
+      expect(complexEqual(result[0][1], math.complex(0,  0))).toBe(true);
+      expect(complexEqual(result[1][0], math.complex(0,  0))).toBe(true);
+      expect(complexEqual(result[1][1], math.complex(2,  0))).toBe(true);
     });
 
     it('throws error for mismatched dimensions', () => {
@@ -197,8 +198,8 @@ describe('Matrix Operations', () => {
       const scalar = math.complex(2,  0);
       
       const result = scaleMatrix(matrix, scalar);
-      expect(result[0][0]).toEqual(math.complex(2,  0));
-      expect(result[0][1]).toEqual(math.complex(0,  2));
+      expect(complexEqual(result[0][0], math.complex(2,  0))).toBe(true);
+      expect(complexEqual(result[0][1], math.complex(0,  2))).toBe(true);
     });
 
     it('scales matrix by complex number', () => {
@@ -209,8 +210,8 @@ describe('Matrix Operations', () => {
       const scalar = math.complex(0,  1);
       
       const result = scaleMatrix(matrix, scalar);
-      expect(result[0][0]).toEqual(math.complex(0,  1));
-      expect(result[0][1]).toEqual(math.complex(-1,  0));
+      expect(complexEqual(result[0][0], math.complex(0,  1))).toBe(true);
+      expect(complexEqual(result[0][1], math.complex(-1,  0))).toBe(true);
     });
 
     it('throws error for invalid matrix', () => {
@@ -279,6 +280,12 @@ describe('Matrix Operations', () => {
         [math.complex(1,  0), math.complex(2,  0)]
       ];
       const { values, vectors } = eigenDecomposition(matrix, {computeEigenvectors: true, enforceOrthogonality: true});
+
+      // vector = new StateVector();
+
+      // for (vector in vectors) {
+      //   console.log(vector);
+      // }
       
       // Since we explicitly requested eigenvectors, they should be defined
       if (!vectors) {
@@ -319,8 +326,7 @@ describe('Matrix Operations', () => {
       for (let j = 0; j < Av.length; j++) {
         // console.log('Av:', Av[j]);
         // console.log('λv:', lambdaV[j]);
-        expect(Math.abs(Av[j].re - lambdaV[j].re)).toBeLessThan(1e-10);
-        expect(Math.abs(Av[j].im - lambdaV[j].im)).toBeLessThan(1e-10);
+        expect(complexEqual(Av[j], lambdaV[j])).toBe(true);
       }
     }
     });

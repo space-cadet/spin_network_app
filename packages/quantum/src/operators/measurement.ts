@@ -43,6 +43,13 @@ export class ProjectionOperator implements IOperator {
         return 'projection';
     }
 
+    /**
+     * Tests whether the density matrix is identically zero
+     */
+    isZero(tolerance?: number): boolean {
+        return this._operator.isZero(tolerance);
+    }
+
     apply(state: StateVector): StateVector {
         return this._operator.apply(state);
     }

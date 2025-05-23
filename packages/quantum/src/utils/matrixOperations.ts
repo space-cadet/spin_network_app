@@ -474,6 +474,8 @@ export function eigenDecomposition(
                 vector: math.MathCollection;
             }[];
 
+            // let vectors = eigenvectors;
+
             // Sort eigenvectors to match eigenvalue order
             const sortedEigenvectors = eigenvectors.sort((a, b) => {
                 const aVal = math.isNumber(a.value) ? a.value

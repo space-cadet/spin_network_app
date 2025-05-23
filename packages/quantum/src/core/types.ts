@@ -109,4 +109,5 @@ export interface IDensityMatrix extends IOperator {
  */
 export interface IQuantumChannel {
   apply(state: IDensityMatrix): IDensityMatrix;         // Apply channel to state
+  getOperators(): IOperator[];                            // Get operator representation
 }

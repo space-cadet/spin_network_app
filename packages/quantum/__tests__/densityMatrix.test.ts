@@ -119,17 +119,17 @@ describe('DensityMatrix', () => {
       const reduced = rho.partialTrace([2, 2], [1]);
       const matrix = new DensityMatrixOperator(reduced.toMatrix());
 
-      console.log('State:', state.toString());
+      // console.log('State:', state.toString());
 
-      console.log('Rho:', formatMatrix(rho.toMatrix()));
+      // console.log('Rho:', formatMatrix(rho.toMatrix()));
 
-      console.log('Reduced density matrix:', formatMatrix(matrix.toMatrix()));
+      // console.log('Reduced density matrix:', formatMatrix(matrix.toMatrix()));
 
-      console.log('Trace:', rho.trace());
+      // console.log('Trace:', rho.trace());
 
       // Access the matrix data properly through the toMatrix() method
       const matrixData = matrix.toMatrix();
-      console.log(matrixData[0][0].re, matrixData[1][1].re);
+      // console.log(matrixData[0][0].re, matrixData[1][1].re);
 
       expect(matrixData[0][0].re).toBeCloseTo(0.5);
       expect(matrixData[1][1].re).toBeCloseTo(0.5);
@@ -297,15 +297,19 @@ describe('Quantum Channels', () => {
       ]);
       const rho = DensityMatrixOperator.fromPureState(state);
       
+      // Should flip the sign of the off-diagonal elements
       const result = channel.apply(rho);
-      
-      // Should eliminate off-diagonal elements
+    
       const matrix = result.toMatrix();
+
+      console.log('Channel:', channel.getOperators().toString());
+      console.log('State:', state.toString());
+      console.log('Rho:', formatMatrix(rho.toMatrix()));
 
       console.log('Phase flip result:', formatMatrix(matrix));
 
-      expect(matrix[0][1].re).toBeCloseTo(0);
-      expect(matrix[1][0].re).toBeCloseTo(0);
+      expect(matrix[0][1].re).toBeCloseTo(-0.5);
+      expect(matrix[1][0].re).toBeCloseTo(-0.5);
     });
 
     it('implements phase damping channel correctly', () => {
