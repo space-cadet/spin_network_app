@@ -62,6 +62,5 @@ tmp/*
 __pycache__
 __marimo__
 .ipynb*
-
 # report files I use for debugging
 */**/*.report
