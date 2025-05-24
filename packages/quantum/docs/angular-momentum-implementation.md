@@ -2,111 +2,6 @@
 
 *Last Updated: 2025-05-24*
 
-## T66 Robust Fix: Metadata-Based StateVector System
-
-*Added: 2025-05-24*
-
-### Problem Summary
-The T66 multi-spin coupling issue was caused by a fundamental limitation in the angular momentum state analysis system. The `extractJComponent()` function required explicit `j1, j2` parameters to analyze composite states, but for multi-spin chains (3+ spins), these parameters became impossible to track accurately.
-
-### Robust Solution: Self-Describing States
-Implemented a comprehensive metadata system that makes StateVector objects self-describing for angular momentum structure:
-
-#### Core Components Added:
-
-1. **StateVector Metadata System** (`packages/quantum/src/states/stateVector.ts`):
-   ```typescript
-   interface AngularMomentumMetadata {
-     type: 'angular_momentum';
-     j: number;                    // Total angular momentum
-     mRange: [number, number];     // [mMin, mMax] range
-     couplingHistory: CouplingRecord[];
-     jComponents: Map<number, JComponentMetadata>;
-     isComposite: boolean;
-   }
-   ```
-
-2. **Enhanced createJmState()** (`packages/quantum/src/angularMomentum/core.ts`):
-   - Automatically attaches metadata to single spin states
-   - Provides complete angular momentum structure information
-
-3. **Fixed addAngularMomenta()** (`packages/quantum/src/angularMomentum/composition.ts`):
-   - **Critical Bug Fix**: Fixed amplitude indexing to only include actual non-zero J components
-   - Added comprehensive metadata calculation and inheritance
-   - Ensured proper state normalization
-
-4. **Enhanced stateAnalysis Functions** (`packages/quantum/src/angularMomentum/stateAnalysis.ts`):
-   - `analyzeAngularState()` now uses metadata when available, falls back to legacy parameters
-   - `extractJComponent()` uses direct metadata-based extraction for perfect accuracy
-   - Eliminated parameter dependency for multi-spin states
-
-5. **Simplified MultiSpinState** (`packages/quantum/src/angularMomentum/multiSpinState.ts`):
-   - Synchronized `availableJ` tracking with actual StateVector metadata
-   - Removed parameter dependency in `extractJComponent()`
-
-### Key Fixes Applied:
-
-#### 1. Amplitude Indexing Bug (Most Critical)
-**Problem**: Metadata assumed all possible J values existed, but amplitude array only contained non-zero components.
-
-**Fix**:
-```typescript
-// Only add to metadata if component has non-zero amplitudes
-for (let j = jMax; j >= jMin; j -= 0.5) {
-  const dimension = Math.floor(2 * j + 1);
-  let hasNonZeroAmplitudes = false;
-  
-  for (let mIndex = 0; mIndex < dimension; mIndex++) {
-    const amp = resultAmplitudes[amplitudeIndex + mIndex];
-    if (math.abs(amp) > 1e-12) {
-      hasNonZeroAmplitudes = true;
-      break;
-    }
-  }
-  
-  if (hasNonZeroAmplitudes) {
-    jComponents.set(j, { j, startIndex: amplitudeIndex, dimension, normalizationFactor: 1 });
-  }
-}
-```
-
-#### 2. Metadata-State Synchronization
-**Problem**: `MultiSpinState.availableJ` calculated via triangle inequalities didn't match actual state content.
-
-**Fix**:
-```typescript
-// Use actual metadata instead of calculated values
-const metadata = coupledState.getAngularMomentumMetadata();
-const actualAvailableJ = metadata ? new Set(metadata.jComponents.keys()) : newAvailableJ;
-```
-
-#### 3. State Normalization
-**Problem**: Unnormalized states (norm=2.0) affected extraction accuracy.
-
-**Fix**:
-```typescript
-// Normalize result states in addAngularMomenta
-const unnormalizedResult = new StateVector(totalDim, resultAmplitudes, basisLabel);
-const result = unnormalizedResult.normalize();
-```
-
-### Results Achieved:
-- **✅ T66 Core Problem RESOLVED**: Multi-spin J-component extraction now works perfectly
-- **✅ All States Normalized**: Every state has norm=1.0
-- **✅ Metadata Consistency**: availableJ matches actual state content
-- **✅ Backwards Compatibility**: Legacy parameter-based functions still work
-- **✅ Scalable Architecture**: Works for unlimited number of coupled spins
-
-### Test Results:
-```
-Test 7: J-component extraction from multi-spin state
-✅ SUCCESS: Extracted J=1.5 component - dimension: 4, norm: 1.000000
-```
-
-This robust fix transforms the angular momentum system from parameter-dependent to self-contained, enabling unlimited multi-spin coupling and perfectly accurate J-component extraction.
-
----
-
 This document describes the implementation of angular momentum algebra in the quantum library, including design choices, algorithms, data structures, and encountered issues during development.
 
 ## 1. Implementation Overview
@@ -187,7 +82,31 @@ Angular momentum states are represented as state vectors in the standard |j,m⟩
   }
   ```
 
-### 2.3 Clebsch-Gordan Coefficient Calculation
+### 2.3 Metadata-Based StateVector System
+
+To enable unlimited multi-spin coupling and eliminate parameter dependencies, a comprehensive metadata system was implemented:
+
+- **Choice**: Self-describing StateVector objects with angular momentum metadata
+- **Rationale**: Eliminates the need for explicit j1, j2 parameters in multi-spin state analysis, enables scalable multi-spin coupling
+- **Implementation**:
+  ```typescript
+  interface AngularMomentumMetadata {
+    type: 'angular_momentum';
+    j: number;                    // Total angular momentum
+    mRange: [number, number];     // [mMin, mMax] range
+    couplingHistory: CouplingRecord[];
+    jComponents: Map<number, JComponentMetadata>;
+    isComposite: boolean;
+  }
+  ```
+
+Key benefits:
+- **Scalability**: Works for unlimited number of coupled spins
+- **Accuracy**: Metadata synchronizes with actual state content
+- **Backwards Compatibility**: Legacy parameter-based functions still work
+- **Self-Contained**: States carry complete structure information
+
+### 2.4 Clebsch-Gordan Coefficient Calculation
 
 For Clebsch-Gordan coefficients, multiple approaches were considered:
 
@@ -252,6 +171,38 @@ The angular momentum addition algorithm combines two quantum states using Clebsc
    - Sum over m1, m2 contributions using CG coefficients
    - Add to the result state
 3. Return the combined state
+
+### 3.5 Multi-Spin State Analysis and Extraction
+
+The metadata-based system enables robust multi-spin state analysis:
+
+**Key Algorithm Features**:
+1. **Metadata-Based Analysis**: Uses StateVector metadata when available, falls back to legacy parameters
+2. **Amplitude Indexing Synchronization**: Only includes J components with actual non-zero amplitudes
+3. **Direct Extraction**: J-component extraction uses metadata indices for perfect accuracy
+
+**Critical Implementation Details**:
+```typescript
+// Only add to metadata if component has non-zero amplitudes
+for (let j = jMax; j >= jMin; j -= 0.5) {
+  const dimension = Math.floor(2 * j + 1);
+  let hasNonZeroAmplitudes = false;
+  
+  for (let mIndex = 0; mIndex < dimension; mIndex++) {
+    const amp = resultAmplitudes[amplitudeIndex + mIndex];
+    if (math.abs(amp) > 1e-12) {
+      hasNonZeroAmplitudes = true;
+      break;
+    }
+  }
+  
+  if (hasNonZeroAmplitudes) {
+    jComponents.set(j, { j, startIndex: amplitudeIndex, dimension, normalizationFactor: 1 });
+  }
+}
+```
+
+This ensures perfect synchronization between metadata and actual state content, enabling unlimited multi-spin coupling.
 
 ## 4. Issues and Resolutions
 
@@ -372,6 +323,72 @@ math.complex(0, -0.5)
 1. Fixed operator matrix elements
 2. Improved equality testing in StateVector class
 3. Ensured proper handling of operator application to states
+
+### 4.9 Critical Indexing Consistency Issues
+
+**Issue**: Multiple indexing inconsistencies were discovered across the angular momentum module that caused incorrect quantum calculations. The core problem was that different functions used different indexing conventions for the same physical states.
+
+**Specific Problems Identified**:
+
+1. **State Creation vs. Composition Indexing Mismatch**:
+   - `createJmState()` used: `idx = dim - 1 - (j + m)` (reverse ordering)
+   - `addAngularMomenta()` used: `idx = m + j` (forward ordering)
+   - This caused incorrect amplitude retrieval during state coupling
+
+2. **Basis Conversion Inconsistency**:
+   - `computationalToAngularBasis()` used: `angularIndex = m + j`
+   - `angularToComputationalBasis()` used: `angularIndex = dim - 1 - (j + m)`
+   - Round-trip conversions would fail due to opposite indexing conventions
+
+3. **Operator Matrix Construction Mismatch**:
+   - Operators `createJplus()` and `createJminus()` used: `row = m + j, col = m + j ± 1`
+   - States used: `idx = dim - 1 - (j + m)`
+   - This caused operators to act on wrong state indices (e.g., J₊|1/2⟩ → |-1/2⟩ instead of 0)
+
+**Root Cause**: The module mixed two different indexing conventions:
+- **Forward ordering**: Lower indices for lower m values (m + j)
+- **Reverse ordering**: Lower indices for higher m values (dim - 1 - (j + m))
+
+**Comprehensive Resolution**:
+
+1. **Standardized on Reverse Ordering Convention**:
+   ```typescript
+   // Consistent indexing: idx = dim - 1 - (j + m)
+   // For j=1/2: |1/2,1/2⟩ at index 0, |1/2,-1/2⟩ at index 1
+   ```
+
+2. **Fixed Composition Functions**:
+   ```typescript
+   // Fixed in addAngularMomenta()
+   const dim1 = Math.floor(2 * j1 + 1);
+   const idx1 = dim1 - 1 - Math.floor(j1 + m1);  // Was: m1 + j1
+   const amp1 = state1.amplitudes[idx1];
+   ```
+
+3. **Fixed Basis Conversion**:
+   ```typescript
+   // Fixed in computationalToAngularBasis()
+   const angularIndex = dim - 1 - (j + m);  // Was: m + j
+   newAmplitudes[angularIndex] = state.amplitudes[n];
+   ```
+
+4. **Fixed Operator Matrix Construction**:
+   ```typescript
+   // Fixed in createJplus()
+   const fromStateIdx = dim - 1 - (j + m);         // |j,m⟩
+   const toStateIdx = dim - 1 - (j + (m + 1));     // |j,m+1⟩
+   matrix[fromStateIdx][toStateIdx] = math.complex(element, 0);
+   ```
+
+**Verification**: Created comprehensive indexing test suite (`indexing.test.ts`) with 25+ tests covering:
+- State creation consistency
+- Operator action verification
+- Matrix element validation
+- Basis conversion round-trips
+- Angular momentum coupling
+- Cross-consistency checks
+
+**Impact**: These fixes were critical for correct quantum calculations. Without them, angular momentum operations would produce physically incorrect results, making the entire angular momentum algebra unreliable.
 
 ## 5. Ongoing Challenges
 

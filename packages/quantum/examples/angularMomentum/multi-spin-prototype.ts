@@ -141,6 +141,6 @@ function testMultiSpinPrototype() {
 export { testMultiSpinPrototype, testStateAnalysis };
 
 // Run test if called directly
-if (require.main === module) {
+// if (require.main === module) {
   testMultiSpinPrototype();
-}
+// }

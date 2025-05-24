@@ -3,6 +3,13 @@
 
 ### 2025-05-24
 
+#### 19:15 - T55a: Critical Angular Momentum Indexing Fixes
+- Fixed `packages/quantum/src/angularMomentum/composition.ts` - Changed indexing from `m + j` to `dim - 1 - (j + m)` for consistent state addressing across coupling functions
+- Fixed `packages/quantum/src/angularMomentum/core.ts` - Corrected basis conversion and operator matrix indexing to use consistent `dim - 1 - (j + m)` convention
+- Created `packages/quantum/__tests__/angularMomentum/indexing.test.ts` - Comprehensive 25+ test suite validating indexing consistency across all angular momentum operations
+- Updated `packages/quantum/docs/angular-momentum-implementation.md` - Integrated critical indexing fixes into project knowledge documentation
+- **CRITICAL FIXES**: Resolved 4 major indexing inconsistencies that would cause incorrect quantum calculations in angular momentum operations
+
 #### 23:45 - T66: COMPLETE RESOLUTION - Robust Fix Implementation  
 - Enhanced `packages/quantum/src/states/stateVector.ts` - Added metadata system with setAngularMomentumMetadata(), getAngularMomentumMetadata(), hasAngularMomentumStructure()
 - Enhanced `packages/quantum/src/angularMomentum/core.ts` - Updated createJmState() to attach angular momentum metadata to single spin states

@@ -2,8 +2,8 @@
 *Last Updated: 2025-05-24 22:30 IST*
 
 ## Current Session
-**Started**: 2025-05-24 22:00 IST
-**Focus Task**: T66 - Multi-Spin Coupling and Intertwiner Implementation (**FULLY RESOLVED**)
+**Started**: 2025-05-24 19:00 IST
+**Focus Task**: T55a - Angular Momentum Indexing Fixes (**CRITICAL FIXES APPLIED**)
 **Session File**: `sessions/2025-05-24-evening.md`
 
 ## Overview
@@ -125,27 +125,28 @@
 
 ### T55a: Implement Angular Momentum Algebra
 **Status:** 🔄 **Priority:** HIGH
-**Started:** 2025-05-14 **Last**: 2025-05-23 15:45 IST
-**Context**: Created comprehensive angular momentum basic demo replacing TODO stub
+**Started:** 2025-05-14 **Last**: 2025-05-24 19:15 IST
+**Context**: **CRITICAL INDEXING FIXES APPLIED** - Fixed major indexing inconsistencies across angular momentum module
 **Files**: 
-- `packages/quantum/examples/angularMomentum/basic.ts`
-- `packages/quantum/src/states/stateVector.ts`
-- `packages/quantum/examples/angularBasisConversion.ts`
-- `memory-bank/tasks/T55a.md`
-- `memory-bank/tasks.md`
-- `memory-bank/edit_history.md`
+- `packages/quantum/src/angularMomentum/composition.ts` - FIXED: Indexing from `m + j` to `dim - 1 - (j + m)`
+- `packages/quantum/src/angularMomentum/core.ts` - FIXED: Basis conversion and operator matrix indexing
+- `packages/quantum/__tests__/angularMomentum/indexing.test.ts` - NEW: 25+ comprehensive indexing tests
+- `packages/quantum/docs/angular-momentum-implementation.md` - UPDATED: Integrated indexing fixes documentation
+- `memory-bank/tasks/T55a.md` - UPDATED: Progress with critical fixes
 **Progress**:
 1. ✅ Fixed operator construction and matrix representations
 2. ✅ Fixed CG coefficient calculations
 3. ✅ Added basis conversion methods
 4. ✅ Added basis-specific string representations
-5. ✅ Created comprehensive angular momentum basic demo:
-   - ✅ Demonstrates |j,m⟩ state creation for j=1/2 and j=1 systems
-   - ✅ Shows operator matrix representations (J₊, J₋, Jz, J²)
-   - ✅ Validates operator actions and eigenvalue equations
-   - ✅ Includes expectation value calculations for verification
-   - ✅ Provides educational structure with clear explanations
-6. 🔄 Implementing remaining angular momentum features (composition, wignerSymbols demos)
+5. ✅ Created comprehensive angular momentum basic demo
+6. ✅ **CRITICAL INDEXING FIXES (2025-05-24)**:
+   - ✅ **Identified 4 major indexing inconsistencies** across angular momentum module
+   - ✅ **Fixed composition.ts coupling functions**: Changed from `m + j` to `dim - 1 - (j + m)` indexing
+   - ✅ **Fixed basis conversion functions**: Standardized `computationalToAngularBasis()` indexing
+   - ✅ **Fixed operator matrix construction**: Corrected J₊/J₋ operators to use consistent state indexing
+   - ✅ **Created comprehensive test suite**: 25+ tests in `indexing.test.ts` covering all scenarios
+   - ✅ **Updated documentation**: Integrated fixes into implementation knowledge base
+7. 🔄 Debugging indexing test failures and implementation refinement
 
 ## Session History (Last 3)
 1. `sessions/2025-05-20-evening.md`

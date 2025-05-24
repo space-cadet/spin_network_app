@@ -387,11 +387,13 @@ function addAngularMomenta(state1: StateVector, j1: number, state2: StateVector,
         }
         
         // Get the amplitude of the |j1,m1⟩ state
-        const idx1 = Math.floor(m1 + j1);
+        const dim1 = Math.floor(2 * j1 + 1);
+        const idx1 = dim1 - 1 - Math.floor(j1 + m1);
         const amp1 = state1.amplitudes[idx1];
         
         // Get the amplitude of the |j2,m2⟩ state
-        const idx2 = Math.floor(m2 + j2);
+        const dim2 = Math.floor(2 * j2 + 1);
+        const idx2 = dim2 - 1 - Math.floor(j2 + m2);
         const amp2 = state2.amplitudes[idx2];
         
         // Multiply by the coefficient and add to the result
@@ -561,8 +563,8 @@ function decomposeAngularState(state: StateVector, j1: number, j2: number): Map<
         }
         
         // Calculate index in uncoupled basis
-        const idx1 = Math.floor(m1 + j1);
-        const idx2 = Math.floor(m2 + j2);
+        const idx1 = dim1 - 1 - Math.floor(j1 + m1);
+        const idx2 = dim2 - 1 - Math.floor(j2 + m2);
         const uncoupledIdx = idx1 * dim2 + idx2;
         
         // Add contribution to the uncoupled state

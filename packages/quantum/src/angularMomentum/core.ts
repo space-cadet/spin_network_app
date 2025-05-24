@@ -82,10 +82,8 @@ export function computationalToAngularBasis(state: StateVector, j: number): Stat
   // |n⟩ maps to |j,m⟩ where m = -j + n
   for (let n = 0; n < dim; n++) {
     const m = -j + n;
-    // In angular basis array, index increases with m
-    // For m = -j, index = 0
-    // For m = j, index = 2j
-    const angularIndex = m + j;
+    // Use consistent indexing convention: higher m values get lower indices
+    const angularIndex = dim - 1 - (j + m);
     newAmplitudes[angularIndex] = state.amplitudes[n];
   }
 
@@ -180,12 +178,13 @@ export function createJplus(j: number): IOperator {
   const dim = Math.floor(2 * j + 1);
   const matrix = createZeroMatrix(dim);
 
-  // Fill matrix elements (for j=1/2, this gives [[0,0],[1,0]])
+  // Fill matrix elements - use consistent indexing with states
   for (let m = -j; m < j; m++) {
-    const col = m + j + 1;
-    const row = m + j;
+    // States use: idx = dim - 1 - (j + m)
+    const fromStateIdx = dim - 1 - (j + m);         // |j,m⟩
+    const toStateIdx = dim - 1 - (j + (m + 1));     // |j,m+1⟩
     const element = Math.sqrt(j * (j + 1) - m * (m + 1));
-    matrix[row][col] = math.complex(element, 0);
+    matrix[fromStateIdx][toStateIdx] = math.complex(element, 0);
   }
 
   return new MatrixOperator(matrix, 'general', true, { j });
@@ -203,12 +202,13 @@ export function createJminus(j: number): IOperator {
   const dim = Math.floor(2 * j + 1);
   const matrix = createZeroMatrix(dim);
 
-  // Fill matrix elements (for j=1/2, this gives [[0,1],[0,0]])
+  // Fill matrix elements - use consistent indexing with states  
   for (let m = -j + 1; m <= j; m++) {
-    const col = m + j - 1;
-    const row = m + j;
+    // States use: idx = dim - 1 - (j + m)
+    const fromStateIdx = dim - 1 - (j + m);         // |j,m⟩
+    const toStateIdx = dim - 1 - (j + (m - 1));     // |j,m-1⟩
     const element = Math.sqrt(j * (j + 1) - m * (m - 1));
-    matrix[row][col] = math.complex(element, 0);
+    matrix[fromStateIdx][toStateIdx] = math.complex(element, 0);
   }
 
   return new MatrixOperator(matrix, 'general', true, { j });

@@ -298,6 +298,6 @@ export {
 };
 
 // If running directly, execute tests
-if (require.main === module) {
+// if (require.main === module) {
   runMultiSpinTests();
-}
+// }
