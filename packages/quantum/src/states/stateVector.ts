@@ -190,6 +190,34 @@ export class StateVector implements IStateVector {
     );
   }
 
+  /**
+   * Add another state vector to this one
+   * @param other The state vector to add
+   * @returns New state vector representing the sum
+   */
+  add(other: IStateVector): IStateVector {
+    if (this.dimension !== other.dimension) {
+      throw new Error(`Cannot add state vectors with different dimensions: ${this.dimension} vs ${other.dimension}`);
+    }
+
+    const sumAmplitudes = this.amplitudes.map((amp, i) =>
+      math.add(toComplex(amp), toComplex(other.getState(i))) as Complex
+    );
+
+    // Generate new basis label if appropriate
+    let newBasis: string | undefined;
+    if (this.basis && other.basis) {
+      newBasis = `(${this.basis}) + (${other.basis})`;
+    }
+
+    return new StateVector(
+      this.dimension, 
+      sumAmplitudes, 
+      newBasis, 
+      this.properties ? {...this.properties} : undefined
+    );
+  }
+
   
   /**
    * Returns array representation of state vector

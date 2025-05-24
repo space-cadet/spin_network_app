@@ -48,6 +48,7 @@ export interface IStateVector {
   normalize(): IStateVector;
   tensorProduct(other: IStateVector): IStateVector;
   scale(factor: Complex): IStateVector;
+  add(other: IStateVector): IStateVector;
   equals(other: IStateVector, tolerance?: number): boolean;
   
   // Utility methods

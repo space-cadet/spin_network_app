@@ -184,7 +184,8 @@ export function createJplus(j: number): IOperator {
     const fromStateIdx = dim - 1 - (j + m);         // |j,m⟩
     const toStateIdx = dim - 1 - (j + (m + 1));     // |j,m+1⟩
     const element = Math.sqrt(j * (j + 1) - m * (m + 1));
-    matrix[fromStateIdx][toStateIdx] = math.complex(element, 0);
+    // Matrix element: ⟨j,m+1| J₊ |j,m⟩ 
+    matrix[toStateIdx][fromStateIdx] = math.complex(element, 0);
   }
 
   return new MatrixOperator(matrix, 'general', true, { j });
@@ -208,7 +209,8 @@ export function createJminus(j: number): IOperator {
     const fromStateIdx = dim - 1 - (j + m);         // |j,m⟩
     const toStateIdx = dim - 1 - (j + (m - 1));     // |j,m-1⟩
     const element = Math.sqrt(j * (j + 1) - m * (m - 1));
-    matrix[fromStateIdx][toStateIdx] = math.complex(element, 0);
+    // Matrix element: ⟨j,m-1| J₋ |j,m⟩
+    matrix[toStateIdx][fromStateIdx] = math.complex(element, 0);
   }
 
   return new MatrixOperator(matrix, 'general', true, { j });

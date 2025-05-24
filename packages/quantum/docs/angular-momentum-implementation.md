@@ -390,6 +390,69 @@ math.complex(0, -0.5)
 
 **Impact**: These fixes were critical for correct quantum calculations. Without them, angular momentum operations would produce physically incorrect results, making the entire angular momentum algebra unreliable.
 
+### 4.10 Session Fixes (2025-05-24)
+
+During a focused debugging session, three critical issues were identified and resolved:
+
+#### Issue #1: Missing StateVector `add` Method
+**Problem**: The `add` method was not implemented in the StateVector class, causing "add is not a function" errors in tests that attempted to create superpositions by adding existing states.
+
+**Solution**: 
+- Implemented `add` method in StateVector class:
+  ```typescript
+  add(other: IStateVector): IStateVector {
+    if (this.dimension !== other.dimension) {
+      throw new Error(`Cannot add state vectors with different dimensions`);
+    }
+    const sumAmplitudes = this.amplitudes.map((amp, i) =>
+      math.add(toComplex(amp), toComplex(other.getState(i))) as Complex
+    );
+    return new StateVector(this.dimension, sumAmplitudes, newBasis, this.properties);
+  }
+  ```
+- Updated IStateVector interface to include the `add` method signature
+
+**Impact**: Enabled natural superposition construction (e.g., `state1.scale(c1).add(state2.scale(c2))`) and fixed completeness relation tests.
+
+#### Issue #2: Operator Matrix Indexing Error
+**Problem**: The J+ and J- operators had incorrect matrix element placement, causing ladder operations to fail. The console output showed:
+- State Down: `+ 1|1⟩` (should be `|-1/2⟩`)
+- Raised: `0` (should be `|1/2⟩`)
+- Expected: `1|0⟩` (should be `|1/2⟩`)
+
+**Root Cause**: Matrix elements were placed at `matrix[fromStateIdx][toStateIdx]` instead of `matrix[toStateIdx][fromStateIdx]`, causing incorrect matrix multiplication results.
+
+**Solution**: Fixed matrix element placement in both operators:
+```typescript
+// J+ operator: J+|j,m⟩ = √(j(j+1) - m(m+1)) |j,m+1⟩
+matrix[toStateIdx][fromStateIdx] = math.complex(element, 0);
+
+// J- operator: J-|j,m⟩ = √(j(j+1) - m(m-1)) |j,m-1⟩
+matrix[toStateIdx][fromStateIdx] = math.complex(element, 0);
+```
+
+**Impact**: J+ and J- operators now correctly perform ladder operations, enabling proper angular momentum state transitions.
+
+#### Issue #3: MathJS Type Handling
+**Problem**: TypeScript compilation errors when using `math.abs()` on Complex numbers in tests, with error messages about MathJsChain type mismatches.
+
+**Solution**: Used direct property access instead of function calls:
+```typescript
+// Instead of: Number(math.abs(matrix[i][j]))
+// Use: matrix[i][j].re (for real parts)
+```
+
+**Impact**: Resolved all TypeScript compilation errors in the indexing test suite.
+
+#### Key Lessons Learned:
+1. **Never change working code to match tests**: The implementation should be the source of truth, not the test expectations.
+2. **Focus on root causes**: Apparent test failures often indicate real implementation issues rather than test problems.
+3. **Matrix indexing matters**: In quantum mechanics, the placement of matrix elements directly affects physical operations.
+4. **Simple solutions first**: Sometimes the fix is much simpler than initially thought (like using `.re` property).
+
+#### Final Result:
+All indexing tests now pass, confirming that the angular momentum module has consistent indexing throughout and correctly implements quantum mechanical operations.
+
 ## 5. Ongoing Challenges
 
 ### 5.1 Remaining Test Failures

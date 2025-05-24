@@ -30,6 +30,8 @@ import {
 
 import { StateVector } from '../../src/states/stateVector';
 
+import { formatComplex, formatMatrix } from '../utils/testHelpers'
+
 describe('Angular Momentum Indexing Consistency', () => {
   
   describe('State Creation Indexing', () => {
@@ -98,6 +100,10 @@ describe('Angular Momentum Indexing Consistency', () => {
       const state_down = createJmState(j, -0.5);
       const raised = jplus.apply(state_down);
       const expected = createJmState(j, 0.5);
+
+      // console.log("State Down: ", state_down.toString());
+      // console.log("Raised: ", raised.toString());
+      // console.log("Expected: ", expected.toString());
       
       expect(raised.equals(expected, 1e-10)).toBe(true);
       
@@ -157,6 +163,10 @@ describe('Angular Momentum Indexing Consistency', () => {
       // J+|-1⟩ = √2|0⟩
       const raised_from_down = jplus.apply(state_down);
       const expected_zero_scaled = state_zero.scale(math.complex(Math.sqrt(2), 0));
+
+      // console.log(raised_from_down);
+      // console.log(expected_zero_scaled);
+
       expect(raised_from_down.equals(expected_zero_scaled, 1e-10)).toBe(true);
       
       // J+|0⟩ = √2|1⟩  
@@ -180,13 +190,15 @@ describe('Angular Momentum Indexing Consistency', () => {
       const j = 0.5;
       const jplus = createJplus(j);
       const matrix = jplus.toMatrix();
+
+      console.log(formatMatrix(matrix));
       
       // With our indexing: |1/2⟩ at idx=0, |-1/2⟩ at idx=1
       // J+ should connect |-1/2⟩ to |1/2⟩, so matrix[1][0] should be non-zero
-      expect(Number(math.abs(matrix[0][0]))).toBeCloseTo(0, 10);
-      expect(Number(math.abs(matrix[0][1]))).toBeCloseTo(0, 10);
-      expect(Number(math.abs(matrix[1][0]))).toBeCloseTo(1, 10);
-      expect(Number(math.abs(matrix[1][1]))).toBeCloseTo(0, 10);
+      expect(matrix[0][0].re).toBeCloseTo(0, 10);
+      expect(matrix[0][1].re).toBeCloseTo(1, 10);
+      expect(matrix[1][0].re).toBeCloseTo(0, 10);
+      expect(matrix[1][1].re).toBeCloseTo(0, 10);
     });
 
     it('should have correct J- matrix elements for j=1/2', () => {
@@ -194,23 +206,27 @@ describe('Angular Momentum Indexing Consistency', () => {
       const jminus = createJminus(j);
       const matrix = jminus.toMatrix();
       
+      console.log(formatMatrix(matrix));
+
       // J- should connect |1/2⟩ to |-1/2⟩, so matrix[0][1] should be non-zero
-      expect(Number(math.abs(matrix[0][0]))).toBeCloseTo(0, 10);
-      expect(Number(math.abs(matrix[0][1]))).toBeCloseTo(1, 10);
-      expect(Number(math.abs(matrix[1][0]))).toBeCloseTo(0, 10);
-      expect(Number(math.abs(matrix[1][1]))).toBeCloseTo(0, 10);
+      expect(matrix[0][0].re).toBeCloseTo(0, 10);
+      expect(matrix[0][1].re).toBeCloseTo(0, 10);
+      expect(matrix[1][0].re).toBeCloseTo(1, 10);
+      expect(matrix[1][1].re).toBeCloseTo(0, 10);
     });
 
     it('should have correct Jz matrix elements for j=1/2', () => {
       const j = 0.5;
       const jz = createJz(j);
       const matrix = jz.toMatrix();
+
+      console.log(formatMatrix(matrix));
       
       // Diagonal matrix with eigenvalues
-      expect(Number(math.re(matrix[0][0]))).toBeCloseTo(0.5, 10);
-      expect(Number(math.abs(matrix[0][1]))).toBeCloseTo(0, 10);
-      expect(Number(math.abs(matrix[1][0]))).toBeCloseTo(0, 10);
-      expect(Number(math.re(matrix[1][1]))).toBeCloseTo(-0.5, 10);
+      expect(matrix[0][0].re).toBeCloseTo(0.5, 10);
+      expect(matrix[0][1].re).toBeCloseTo(0, 10);
+      expect(matrix[1][0].re).toBeCloseTo(0, 10);
+      expect(matrix[1][1].re).toBeCloseTo(-0.5, 10);
     });
   });
 
