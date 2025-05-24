@@ -13,10 +13,24 @@
 - Meta Tasks: META-2 (Component Index Maintenance)
 
 ## Task Registry
+### T67: Tetrahedron Quantum State Construction
+**Status:** 🆕 **Priority:** HIGH
+**Started:** 2025-05-24 **Last**: 2025-05-24 23:50 IST
+**Context**: Ready to start - builds on T66 multi-spin coupling foundation
+**Files**: 
+- `memory-bank/tasks/T67.md`
+**Progress**:
+1. ✅ **TASK CREATED**: Complete technical specification documented
+2. ✅ **DEPENDENCIES RESOLVED**: T66 Phase 1 complete, multi-spin coupling foundation ready
+3. ✅ **REQUIREMENTS DEFINED**: Vertex constraints, edge-face coherence, tetrahedron assembly
+4. ⬜ **PHASE 1**: Vertex constraint enforcement (J=0 at 4-valent vertices)
+5. ⬜ **PHASE 2**: Edge-face coherence (shared edge consistency)
+6. ⬜ **PHASE 3**: Tetrahedron assembly (4 triangular faces → 3D structure)
+
 ### T66: Multi-Spin Coupling and Intertwiner Implementation
-**Status:** ✅ **Priority:** HIGH
-**Started:** 2025-05-24 **Last**: 2025-05-24 23:45 IST
-**Context**: **T66 FULLY RESOLVED** - Implemented robust fix with metadata-based StateVector system
+**Status:** 🔄 **Priority:** MEDIUM (API Polish)
+**Started:** 2025-05-24 **Last**: 2025-05-24 23:50 IST
+**Context**: **CORE PROBLEM SOLVED** - Multi-spin coupling working, ready for T67
 **Files**: 
 - `memory-bank/tasks/T66.md`
 - `packages/quantum/src/angularMomentum/stateAnalysis.ts` - NEW: Core state decomposition
