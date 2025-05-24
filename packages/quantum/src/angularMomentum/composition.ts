@@ -441,34 +441,69 @@ function addAngularMomenta(state1: StateVector, j1: number, state2: StateVector,
   // Create basis label with actual j,m values
   const basisLabel = `|(${j1},${j2}),${maxJ},${maxM}⟩`;
   
-  // Create angular momentum metadata for state analysis
-  const angularMomentumProperties = {
-    type: 'angular_momentum',
-    j1: j1,
-    j2: j2,
-    possibleJ: [] as number[],
-    amplitudeMapping: [] as { j: number, m: number, index: number }[]
+  // Create the result state and normalize it
+  const unnormalizedResult = new StateVector(totalDim, resultAmplitudes, basisLabel);
+  const result = unnormalizedResult.normalize();
+  
+  // Get coupling history from input states
+  const history1 = state1.getAngularMomentumMetadata()?.couplingHistory || [];
+  const history2 = state2.getAngularMomentumMetadata()?.couplingHistory || [];
+  
+  // Calculate J component layout based on ACTUAL non-zero amplitudes
+  const jComponents = new Map();
+  let amplitudeIndex = 0;
+  
+  // Build metadata only for J components that actually have non-zero amplitudes
+  for (let j = jMax; j >= jMin; j -= 0.5) {
+    const dimension = Math.floor(2 * j + 1);
+    
+    // Check if this J component has any non-zero amplitudes
+    let hasNonZeroAmplitudes = false;
+    for (let mIndex = 0; mIndex < dimension; mIndex++) {
+      if (amplitudeIndex + mIndex < resultAmplitudes.length) {
+        const amp = resultAmplitudes[amplitudeIndex + mIndex];
+        if (math.abs((amp as any).re ?? amp) > 1e-12 || math.abs((amp as any).im ?? 0) > 1e-12) {
+          hasNonZeroAmplitudes = true;
+          break;
+        }
+      }
+    }
+    
+    // Only add to metadata if component exists
+    if (hasNonZeroAmplitudes) {
+      jComponents.set(j, {
+        j: j,
+        startIndex: amplitudeIndex,
+        dimension: dimension,
+        normalizationFactor: 1
+      });
+    }
+    
+    amplitudeIndex += dimension;
+  }
+  
+  // Create comprehensive angular momentum metadata
+  const metadata = {
+    type: 'angular_momentum' as const,
+    j: jMax, // Maximum possible J
+    mRange: [-jMax, jMax] as [number, number],
+    couplingHistory: [
+      ...history1,
+      ...history2,
+      {
+        operation: 'coupling' as const,
+        j1: j1,
+        j2: j2,
+        resultJ: Array.from({ length: Math.floor(2 * (jMax - jMin) + 1) }, (_, i) => jMin + i * 0.5),
+        timestamp: Date.now()
+      }
+    ],
+    jComponents: jComponents,
+    isComposite: true
   };
   
-  // Store possible J values
-  for (let j = jMin; j <= jMax; j += 0.5) {
-    angularMomentumProperties.possibleJ.push(j);
-  }
-  
-  // Store amplitude mapping for state analysis
-  let amplitudeIndex = 0;
-  for (let j = jMax; j >= jMin; j -= 0.5) {
-    for (let m = j; m >= -j; m -= 1) {
-      angularMomentumProperties.amplitudeMapping.push({ 
-        j: j, 
-        m: m, 
-        index: amplitudeIndex 
-      });
-      amplitudeIndex++;
-    }
-  }
-  
-  return new StateVector(totalDim, resultAmplitudes, basisLabel, angularMomentumProperties);
+  result.setAngularMomentumMetadata(metadata);
+  return result;
 }
 
 /**

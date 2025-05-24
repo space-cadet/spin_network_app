@@ -10,6 +10,30 @@ import {
   validateAmps 
 } from '../utils/validation';
 
+export interface AngularMomentumMetadata {
+  type: 'angular_momentum';
+  j: number;                    // Total angular momentum
+  mRange: [number, number];     // [mMin, mMax] range  
+  couplingHistory: CouplingRecord[];
+  jComponents: Map<number, JComponentMetadata>;
+  isComposite: boolean;
+}
+
+export interface CouplingRecord {
+  operation: 'single' | 'coupling';
+  j1?: number;
+  j2?: number;
+  resultJ: number[];
+  timestamp: number;
+}
+
+export interface JComponentMetadata {
+  j: number;
+  startIndex: number;           // Where this J component starts in amplitude array
+  dimension: number;            // 2j+1
+  normalizationFactor: number;
+}
+
 export class StateVector implements IStateVector {
   readonly dimension: number;
   readonly amplitudes: Complex[];
@@ -278,5 +302,30 @@ export class StateVector implements IStateVector {
     const coefficients = Array(dimension).fill(coefficient);
     
     return new StateVector(dimension, coefficients, '|+⟩');
+  }
+
+  /**
+  * Sets angular momentum metadata for this state
+  */
+  setAngularMomentumMetadata(metadata: AngularMomentumMetadata): void {
+    if (!this.properties) {
+      (this as any).properties = {};
+    }
+    (this as any).properties.angularMomentumMetadata = metadata;
+  }
+
+  /**
+   * Gets angular momentum metadata if present
+   */
+  getAngularMomentumMetadata(): AngularMomentumMetadata | null {
+    return this.properties?.angularMomentumMetadata || null;
+  }
+
+  /**
+   * Checks if this state has angular momentum structure
+   */
+  hasAngularMomentumStructure(): boolean {
+    const metadata = this.getAngularMomentumMetadata();
+    return metadata?.type === 'angular_momentum';
   }
 }

@@ -69,8 +69,8 @@ interface ExtractedJComponent {
  * what j-components are present in a composite angular momentum state.
  * 
  * @param state The state vector to analyze
- * @param j1 First angular momentum (if known from coupling history)
- * @param j2 Second angular momentum (if known from coupling history)
+ * @param j1 First angular momentum (if known from coupling history) - optional for backwards compatibility
+ * @param j2 Second angular momentum (if known from coupling history) - optional for backwards compatibility
  * @returns Analysis results showing j-component structure
  */
 function analyzeAngularState(
@@ -79,7 +79,15 @@ function analyzeAngularState(
   j2?: number
 ): AngularStateAnalysis {
   
-  // Check if we have coupling information in state properties
+  // First try to get metadata from the state itself
+  const metadata = state.getAngularMomentumMetadata();
+  
+  if (metadata) {
+    // Use metadata-based analysis (preferred)
+    return analyzeFromMetadata(state, metadata);
+  }
+  
+  // Fallback to legacy analysis requiring j1, j2 parameters
   const properties = (state as any).properties;
   let couplingInfo: { j1: number; j2: number } | undefined;
   
@@ -134,6 +142,94 @@ function analyzeAngularState(
     isPure,
     couplingInfo
   };
+}
+
+/**
+ * Analyzes angular momentum state using metadata (preferred method)
+ */
+function analyzeFromMetadata(state: StateVector, metadata: any): AngularStateAnalysis {
+  const components = new Map<number, JComponentInfo>();
+  let dominantJ: number | null = null;
+  let dominantMagnitude = 0;
+  
+  // Analyze each J component from metadata
+  for (const [j, componentMetadata] of metadata.jComponents) {
+    const componentInfo = analyzeJComponentFromMetadata(state, j, componentMetadata);
+    components.set(j, componentInfo);
+    
+    if (componentInfo.isPresent && componentInfo.magnitude > dominantMagnitude) {
+      dominantMagnitude = componentInfo.magnitude;
+      dominantJ = j;
+    }
+  }
+  
+  // Determine if this is a pure state
+  const presentComponents = Array.from(components.values()).filter(c => c.isPresent);
+  const isPure = presentComponents.length === 1;
+  
+  // Get latest coupling info from history
+  const latestCoupling = getLatestCoupling(metadata.couplingHistory);
+  
+  return {
+    isAngularMomentum: true,
+    components,
+    dominantJ,
+    isPure,
+    couplingInfo: latestCoupling
+  };
+}
+
+/**
+ * Analyzes a J component using metadata
+ */
+function analyzeJComponentFromMetadata(
+  state: StateVector,
+  j: number,
+  componentMetadata: any
+): JComponentInfo {
+  const dimension = componentMetadata.dimension;
+  const startIndex = componentMetadata.startIndex;
+  const mStates = new Map<number, Complex>();
+  let totalAmplitudeSquared = 0;
+  
+  // Extract amplitudes for each m value of this j-component
+  for (let mIndex = 0; mIndex < dimension; mIndex++) {
+    const m = j - mIndex; // m goes from +j to -j
+    const amplitudeIndex = startIndex + mIndex;
+    
+    if (amplitudeIndex < state.dimension) {
+      const amplitude = state.amplitudes[amplitudeIndex];
+      mStates.set(m, amplitude);
+      totalAmplitudeSquared += (math.abs(amplitude) as unknown as number) ** 2;
+    } else {
+      mStates.set(m, math.complex(0, 0));
+    }
+  }
+  
+  const magnitude = Math.sqrt(totalAmplitudeSquared);
+  const totalAmplitude = math.complex(magnitude, 0);
+  
+  return {
+    j: j,
+    dimension,
+    totalAmplitude,
+    magnitude,
+    mStates,
+    isPresent: magnitude > 1e-10
+  };
+}
+
+/**
+ * Gets the latest coupling information from coupling history
+ */
+function getLatestCoupling(couplingHistory: any[]): { j1: number; j2: number } | undefined {
+  for (let i = couplingHistory.length - 1; i >= 0; i--) {
+    const record = couplingHistory[i];
+    if (record.operation === 'coupling' && record.j1 !== undefined && record.j2 !== undefined) {
+      return { j1: record.j1, j2: record.j2 };
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -221,8 +317,8 @@ function analyzeJComponent(
  * 
  * @param state Composite state containing multiple j-components
  * @param targetJ The j value to extract
- * @param j1 First original angular momentum (if known)
- * @param j2 Second original angular momentum (if known)
+ * @param j1 First original angular momentum (optional for backwards compatibility)
+ * @param j2 Second original angular momentum (optional for backwards compatibility)
  * @returns Extracted pure j-component state, or null if not present
  */
 function extractJComponent(
@@ -232,7 +328,14 @@ function extractJComponent(
   j2?: number
 ): ExtractedJComponent | null {
   
-  // First analyze the state to understand its structure
+  // First try metadata-based extraction (preferred)
+  const metadata = state.getAngularMomentumMetadata();
+  
+  if (metadata) {
+    return extractJComponentFromMetadata(state, targetJ, metadata);
+  }
+  
+  // Fallback to legacy analysis
   const analysis = analyzeAngularState(state, j1, j2);
   
   if (!analysis.isAngularMomentum) {
@@ -272,6 +375,75 @@ function extractJComponent(
     j: targetJ,
     normalizationFactor: 1 / norm,
     originalMagnitude: componentInfo.magnitude
+  };
+}
+
+/**
+ * Extracts J component using metadata (preferred method)
+ */
+function extractJComponentFromMetadata(
+  state: StateVector,
+  targetJ: number,
+  metadata: any
+): ExtractedJComponent | null {
+  
+  const componentMetadata = metadata.jComponents.get(targetJ);
+  
+  if (!componentMetadata) {
+    return null;
+  }
+  
+  const { startIndex, dimension } = componentMetadata;
+  
+  // Extract amplitudes directly using metadata indices
+  const pureAmplitudes: Complex[] = [];
+  let totalAmplitudeSquared = 0;
+  
+  for (let i = 0; i < dimension; i++) {
+    const amplitudeIndex = startIndex + i;
+    if (amplitudeIndex < state.dimension) {
+      const amplitude = state.amplitudes[amplitudeIndex];
+      pureAmplitudes.push(amplitude);
+      totalAmplitudeSquared += (math.abs(amplitude) as unknown as number) ** 2;
+    } else {
+      pureAmplitudes.push(math.complex(0, 0));
+    }
+  }
+  
+  const magnitude = Math.sqrt(totalAmplitudeSquared);
+  
+  if (magnitude < 1e-10) {
+    return null; // Component is essentially zero
+  }
+  
+  // Create the pure state vector
+  const pureState = new StateVector(dimension, pureAmplitudes, `|${targetJ}⟩`);
+  
+  // Add metadata to extracted state
+  const extractedMetadata = {
+    type: 'angular_momentum' as const,
+    j: targetJ,
+    mRange: [-targetJ, targetJ] as [number, number],
+    couplingHistory: [...metadata.couplingHistory],
+    jComponents: new Map([[targetJ, {
+      j: targetJ,
+      startIndex: 0,
+      dimension: dimension,
+      normalizationFactor: 1
+    }]]),
+    isComposite: false
+  };
+  
+  pureState.setAngularMomentumMetadata(extractedMetadata);
+  
+  // Normalize the extracted component
+  const normalizedState = pureState.normalize();
+  
+  return {
+    state: normalizedState,
+    j: targetJ,
+    normalizationFactor: 1 / magnitude,
+    originalMagnitude: magnitude
   };
 }
 

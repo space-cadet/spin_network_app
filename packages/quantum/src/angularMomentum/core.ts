@@ -13,6 +13,7 @@ import {
   ComplexMatrix
 } from '../utils/matrixOperations';
 import * as math from 'mathjs';
+import { AngularMomentumMetadata } from '../states/stateVector';
 
 /**
  * Creates an angular momentum state |j,m⟩
@@ -32,7 +33,29 @@ export function createJmState(j: number, m: number): StateVector {
   const idx = dim - 1 - (j + m);
   amplitudes[idx] = math.complex(1, 0);
 
-  return new StateVector(dim, amplitudes, `|${j},${m}⟩`);
+  const state = new StateVector(dim, amplitudes, `|${j},${m}⟩`);
+  
+  // Add angular momentum metadata
+  const metadata: AngularMomentumMetadata = {
+    type: 'angular_momentum' as const,
+    j: j,
+    mRange: [-j, j] as [number, number],
+    couplingHistory: [{
+      operation: 'single' as const,
+      resultJ: [j],
+      timestamp: Date.now()
+    }],
+    jComponents: new Map([[j, {
+      j: j,
+      startIndex: 0,
+      dimension: dim,
+      normalizationFactor: 1
+    }]]),
+    isComposite: false
+  };
+  
+  state.setAngularMomentumMetadata(metadata);
+  return state;
 }
 
 /**

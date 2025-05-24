@@ -118,12 +118,16 @@ class MultiSpinState {
         timestamp: Date.now()
       };
       
+      // Get actual available J values from the metadata
+      const metadata = coupledState.getAngularMomentumMetadata();
+      const actualAvailableJ = metadata ? new Set(metadata.jComponents.keys()) : newAvailableJ;
+      
       return new MultiSpinState(
         [...this.spins, j],
         [...this.mValues, m],
         coupledState,
         [...this.couplingHistory, couplingStep],
-        newAvailableJ
+        actualAvailableJ
       );
       
     } else {
@@ -169,12 +173,16 @@ class MultiSpinState {
         timestamp: Date.now()
       };
       
+      // Get actual available J values from the metadata
+      const metadata = coupledState.getAngularMomentumMetadata();
+      const actualAvailableJ = metadata ? new Set(metadata.jComponents.keys()) : newAvailableJ;
+      
       return new MultiSpinState(
         [...this.spins, j],
         [...this.mValues, m],
         coupledState,
         [...this.couplingHistory, couplingStep],
-        newAvailableJ
+        actualAvailableJ
       );
     }
   }
@@ -189,7 +197,7 @@ class MultiSpinState {
       return null;
     }
     
-    // Use the real state analysis implementation
+    // Use the metadata-based state analysis implementation (no j1,j2 parameters needed)
     const extracted = extractJComponent(this.currentState, targetJ);
     return extracted ? extracted.state : null;
   }
