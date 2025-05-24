@@ -6,4 +6,6 @@
 export * from './core';
 // export * from './states';
 export * from './composition';
+export * from './stateAnalysis';
+export * from './multiSpinState';
 // export * from './wignerSymbols';

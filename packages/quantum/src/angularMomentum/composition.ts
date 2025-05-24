@@ -441,7 +441,34 @@ function addAngularMomenta(state1: StateVector, j1: number, state2: StateVector,
   // Create basis label with actual j,m values
   const basisLabel = `|(${j1},${j2}),${maxJ},${maxM}⟩`;
   
-  return new StateVector(totalDim, resultAmplitudes, basisLabel);
+  // Create angular momentum metadata for state analysis
+  const angularMomentumProperties = {
+    type: 'angular_momentum',
+    j1: j1,
+    j2: j2,
+    possibleJ: [] as number[],
+    amplitudeMapping: [] as { j: number, m: number, index: number }[]
+  };
+  
+  // Store possible J values
+  for (let j = jMin; j <= jMax; j += 0.5) {
+    angularMomentumProperties.possibleJ.push(j);
+  }
+  
+  // Store amplitude mapping for state analysis
+  let amplitudeIndex = 0;
+  for (let j = jMax; j >= jMin; j -= 0.5) {
+    for (let m = j; m >= -j; m -= 1) {
+      angularMomentumProperties.amplitudeMapping.push({ 
+        j: j, 
+        m: m, 
+        index: amplitudeIndex 
+      });
+      amplitudeIndex++;
+    }
+  }
+  
+  return new StateVector(totalDim, resultAmplitudes, basisLabel, angularMomentumProperties);
 }
 
 /**
