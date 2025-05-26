@@ -75,6 +75,9 @@ function validateWigner3j(j1: number, j2: number, j3: number, m1: number, m2: nu
  * (j1  j2  j3) = (-1)^(j1-j2-m3) / sqrt(2*j3+1) * ⟨j1,m1;j2,m2|j3,-m3⟩
  * (m1  m2  m3)
  * 
+ * Based on verified formula from Sage/SymPy documentation:
+ * ⟨j₁ m₁ j₂ m₂ | j₃ m₃⟩ = (-1)^(j₁-j₂+m₃) * √(2j₃+1) * Wigner3j(j₁, j₂, j₃, m₁, m₂, -m₃)
+ * 
  * @param j1 First angular momentum
  * @param j2 Second angular momentum
  * @param j3 Third angular momentum
@@ -93,6 +96,7 @@ export function wigner3j(
   }
   
   // Get Clebsch-Gordan coefficient ⟨j1,m1;j2,m2|j3,-m3⟩
+  // NOTE: Critical fix - using -m3 as the last argument
   const cgCoeff = clebschGordan(j1, m1, j2, m2, j3, -m3);
   
   // Phase factor: (-1)^(j1-j2-m3)
