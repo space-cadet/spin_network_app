@@ -5,7 +5,10 @@ measurement.test.ts
 operator.test.ts
 composition.test.ts
 composition.test.ts
+operators.test.ts
+states.test.ts
 composition_visualization.test.ts
+indexing.test.ts
 eigenSorting.test.ts
 information.test.ts
 matrixOperations.test.ts

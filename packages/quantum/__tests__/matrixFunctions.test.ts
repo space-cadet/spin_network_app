@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { matrixFunction, matrixSquareRoot, matrixLogarithm, matrixPower, matrixSin, matrixCos } from '../src/utils/matrixFunctions';
 import { Complex } from '../src/core/types';
 import * as math from 'mathjs';
+import { formatMatrix } from './utils/testHelpers';
 
 // Helper to compare complex numbers with tolerance
 function complexEqual(
@@ -41,10 +42,10 @@ describe('matrixFunction', () => {
     
     const identityFn = (x: Complex): Complex => x;
     
-    console.log(matrix);
+    console.log(formatMatrix(matrix));
 
     const result = matrixFunction(matrix, identityFn);
-    console.log(result);
+    console.log(formatMatrix(result));
     expect(matricesEqual(result, matrix)).toBe(true);
   });
   
@@ -58,9 +59,9 @@ describe('matrixFunction', () => {
     const squareFn = (x: Complex): Complex => {
       return math.multiply(x, x) as Complex;
     };
-    // console.log(squareFn(matrix));
+    console.log(formatMatrix(matrix));
     const result = matrixFunction(matrix, squareFn);
-    // console.log(result);
+    console.log(formatMatrix(result));
     const expected = [
       [math.complex(5,  0), math.complex(4,  0)],
       [math.complex(4,  0), math.complex(5,  0)]

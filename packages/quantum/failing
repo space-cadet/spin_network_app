@@ -1,7 +1,5 @@
 matrixFunctions.test.ts
-operators.test.ts
 wignerSymbols.test.ts
-states.test.ts
 eigendecomposition.test.ts
 integration.test.ts
 eigen.test.ts
