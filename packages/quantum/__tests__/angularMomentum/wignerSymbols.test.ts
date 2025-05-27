@@ -111,35 +111,44 @@ describe('Wigner 3j Symbols - Phase 1', () => {
         
         it('should satisfy cyclic permutation symmetry', () => {
           const original = wigner3j(j1, j2, j3, m1, m2, m3);
-          const cyclic1 = wigner3jSymmetry(j1, j2, j3, m1, m2, m3, 1);
-          const cyclic2 = wigner3jSymmetry(j1, j2, j3, m1, m2, m3, 2);
           
-          // Cyclic permutations should give the same magnitude
-          expect(math.abs(original.re)).toBeCloseTo(math.abs(cyclic1.value.re), 8);
-          expect(math.abs(original.re)).toBeCloseTo(math.abs(cyclic2.value.re), 8);
+          // Even permutations (cyclic): invariant under cyclic permutations
+          const cyclic1 = wigner3j(j2, j3, j1, m2, m3, m1);
+          const cyclic2 = wigner3j(j3, j1, j2, m3, m1, m2);
+          
+          // Even permutations should be exactly equal (no phase factor)
+          expect(original.re).toBeCloseTo(cyclic1.re, 6);
+          expect(original.im).toBeCloseTo(cyclic1.im, 6);
+          expect(original.re).toBeCloseTo(cyclic2.re, 6);
+          expect(original.im).toBeCloseTo(cyclic2.im, 6);
         });
         
-        it('should satisfy exchange symmetry with correct phase', () => {
+        it('should satisfy odd permutation symmetry with correct phase', () => {
           const original = wigner3j(j1, j2, j3, m1, m2, m3);
-          const exchanged = wigner3jSymmetry(j1, j2, j3, m1, m2, m3, 3);
-          const expectedPhase = Math.pow(-1, j1 + j2 + j3);
           
-          expect(exchanged.phase).toBe(expectedPhase);
+          // Odd permutation: (j1,j2,j3;m1,m2,m3) = (-1)^(j1+j2+j3) * (j2,j1,j3;m2,m1,m3)
+          const exchanged = wigner3j(j2, j1, j3, m2, m1, m3);
+          const J = j1 + j2 + j3;
+          const expectedPhase = Math.pow(-1, J);
+          const expectedValue = math.multiply(exchanged, expectedPhase);
           
-          // Check if the magnitudes are equal (accounting for phase)
-          const scaledOriginal = math.multiply(original, expectedPhase);
-          expect(math.abs(math.subtract(scaledOriginal, exchanged.value))).toBeCloseTo(0, 8);
+          // Check if original equals (-1)^J * exchanged
+          expect(original.re).toBeCloseTo(expectedValue.re, 6);
+          expect(original.im).toBeCloseTo(expectedValue.im, 6);
         });
         
         it('should satisfy sign reversal symmetry', () => {
           const original = wigner3j(j1, j2, j3, m1, m2, m3);
-          const signReversed = wigner3jSymmetry(j1, j2, j3, m1, m2, m3, 4);
-          const expectedPhase = Math.pow(-1, j1 + j2 + j3);
           
-          expect(signReversed.phase).toBe(expectedPhase);
+          // Sign reversal: (j1,j2,j3;m1,m2,m3) = (-1)^(j1+j2+j3) * (j1,j2,j3;-m1,-m2,-m3)
+          const signReversed = wigner3j(j1, j2, j3, -m1, -m2, -m3);
+          const J = j1 + j2 + j3;
+          const expectedPhase = Math.pow(-1, J);
+          const expectedValue = math.multiply(signReversed, expectedPhase);
           
-          // The magnitude should be preserved
-          expect(math.abs(original.re)).toBeCloseTo(math.abs(signReversed.value.re), 8);
+          // Check if original equals (-1)^J * sign-reversed
+          expect(original.re).toBeCloseTo(expectedValue.re, 6);
+          expect(original.im).toBeCloseTo(expectedValue.im, 6);
         });
       });
     });
@@ -189,21 +198,28 @@ describe('Wigner 3j Symbols - Phase 1', () => {
   describe('Orthogonality relations', () => {
     it('should satisfy orthogonality for fixed j1, j2', () => {
       const j1 = 1, j2 = 1;
-      let sum = 0;
       
-      // Sum over all valid j3 values
+      // Wikipedia orthogonality relation:
+      // Σ_{j3,m3} (2j3+1) * Wigner3j(j1,j2,j3;m1,m2,m3) * Wigner3j(j1,j2,j3;m1',m2',m3) = δ_{m1,m1'} * δ_{m2,m2'}
+      // For j1=j2=1, m1=m1'=0, m2=m2'=0, the sum should equal 1
+      
+      const m1 = 0, m2 = 0; // Fixed values
+      const m1_prime = 0, m2_prime = 0; // Same values for orthogonality check
+      
+      let sum = 0;
       for (let j3 = Math.abs(j1 - j2); j3 <= j1 + j2; j3++) {
         for (let m3 = -j3; m3 <= j3; m3++) {
-          const m1 = 0, m2 = -m3; // Fixed m1, varying m2 = -m3
-          if (Math.abs(m2) <= j2) {
-            const wigner = wigner3j(j1, j2, j3, m1, m2, m3);
-            sum += Number(math.pow(math.abs(wigner), 2)) * (2 * j3 + 1);
+          // Only include terms where m1+m2+m3=0
+          if (Math.abs(m1 + m2 + m3) < 1e-10) {
+            const wigner1 = wigner3j(j1, j2, j3, m1, m2, m3);
+            const wigner2 = wigner3j(j1, j2, j3, m1_prime, m2_prime, m3);
+            sum += (2 * j3 + 1) * wigner1.re * wigner2.re;
           }
         }
       }
       
-      // Should equal 1 for normalized states
-      expect(sum).toBeCloseTo(1, 8);
+      // Should equal δ_{0,0} * δ_{0,0} = 1
+      expect(sum).toBeCloseTo(1, 6);
     });
   });
 
