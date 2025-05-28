@@ -1,10 +1,11 @@
 import React from 'react';
-import { Activity, Plus, Link, GitBranch, Share2 } from 'lucide-react';
+import { Activity, Plus, Link, GitBranch, Share2, Grid } from 'lucide-react';
 import { BackendSelector } from '../common/BackendSelector';
+import { GraphBuilderControls } from './GraphBuilderControls';
 
-export const ControlPanel: React.FC = () => {
+export const ControlPanel: React.FC = () => { 
   return (
-    <div className="p-4 h-full flex flex-col">
+    <div className="p-4 h-full flex flex-col overflow-y-auto">
       <div className="flex items-center gap-2 mb-6">
         <Activity className="w-5 h-5 text-blue-500" />
         <h2 className="text-lg font-semibold">Graph Controls</h2>
@@ -20,6 +21,14 @@ export const ControlPanel: React.FC = () => {
 
       {/* Control Buttons - Grouped by functionality */}
       <div className="space-y-6">
+        {/* Graph Builders */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+            <Grid className="w-4 h-4" />
+            Graph Builders
+          </label>
+          <GraphBuilderControls />
+        </div>
         {/* Graph Structure Controls */}
         <div className="space-y-2">
           <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">

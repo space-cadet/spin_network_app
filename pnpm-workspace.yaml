@@ -1,5 +1,5 @@
 packages:
-  - packages/quantum
+  - packages/*
 onlyBuiltDependencies:
   - esbuild
 overrides:
