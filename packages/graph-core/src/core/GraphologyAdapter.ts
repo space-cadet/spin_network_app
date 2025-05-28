@@ -1,5 +1,5 @@
 import Graphology from 'graphology';
-import { IGraph, IGraphNode, IGraphEdge, IPropertyMap, ITraversalOptions } from './types';
+import { IGraph, IGraphNode, IGraphElement, IGraphEdge, IPropertyMap, ITraversalOptions } from './types';
 import { Matrix, matrix } from 'mathjs';
 
 export class GraphologyAdapter implements IGraph {
@@ -8,6 +8,11 @@ export class GraphologyAdapter implements IGraph {
   // Expose the internal Graphology instance for Sigma
   getGraphologyInstance(): Graphology {
     return this.graph;
+  }
+
+  // Allow setting the internal graph (used by builders)
+  setGraph(graph: Graphology): void {
+    this.graph = graph;
   }
 
   constructor() {
@@ -151,13 +156,24 @@ export class GraphologyAdapter implements IGraph {
   toLaplacianMatrix(): Matrix {
     const adj = this.toAdjacencyMatrix();
     const n = adj.size()[0];
-    const degree = matrix(Array(n).fill(0).map((_, i) => 
-      adj.subset(matrix([i]), matrix(Array(n).fill(1))).valueOf()[0]
-    ));
     
-    return matrix(degree.map((d, i) => 
-      Array(n).fill(0).map((_, j) => i === j ? d : -adj.get([i, j]))
-    ));
+    // Calculate degree matrix (sum of each row)
+    const degrees = Array(n).fill(0).map((_, i) => {
+      let sum = 0;
+      for (let j = 0; j < n; j++) {
+        sum += adj.get([i, j]);
+      }
+      return sum;
+    });
+    
+    // Create Laplacian matrix: L = D - A
+    const laplacian = Array(n).fill(0).map((_, i) => 
+      Array(n).fill(0).map((_, j) => 
+        i === j ? degrees[i] : -adj.get([i, j])
+      )
+    );
+    
+    return matrix(laplacian);
   }
 
   hasNode(nodeId: string): boolean {
