@@ -2,9 +2,9 @@
 *Last Updated: 2025-05-29 02:00 IST*
 
 ## Current Session
-**Started**: 2025-05-29 01:45 IST
-**Focus Task**: T64c - Graph UI Package Creation
-**Session File**: `sessions/2025-05-29-night.md`
+**Started**: 2025-05-29 08:20 IST
+**Focus Task**: T64a - Graph Core Type Safety Improvements
+**Session File**: `sessions/2025-05-29-morning.md`
 
 ## Overview
 - Active: 32 | Paused: 4
@@ -13,6 +13,21 @@
 - Meta Tasks: META-2 (Component Index Maintenance)
 
 ## Task Registry
+
+### T64a: Implement @spin-network/graph-core Package
+**Status**: 🔄 **Priority**: HIGH
+**Started**: 2025-05-29 **Last**: 2025-05-29 08:23 IST
+**Context**: Enhanced type safety and error handling in GraphologyAdapter
+**Files**:
+- `packages/graph-core/src/core/GraphologyAdapter.ts` - Added type safety, fixed return types, improved error handling
+- `packages/graph-test-app/src/components/graph/GraphManager/index.tsx` - Fixed Sigma settings types
+**Progress**:
+- ✅ Added GraphNodeAttributes and GraphEdgeAttributes types
+- ✅ Removed unsafe type assertions
+- ✅ Fixed method return types to properly implement IGraph
+- ✅ Improved error handling and null checks
+- ✅ Cleaned up unused imports and variables
+- ✅ Fixed Sigma settings type issues in GraphManager
 
 ### T64c: Implement @spin-network/graph-ui Package
 **Status**: 🔄 **Priority**: HIGH

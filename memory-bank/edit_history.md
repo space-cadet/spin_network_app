@@ -1,7 +1,12 @@
 # Edit History
-*Last Updated: 2025-05-29 16:30 IST*
+*Last Updated: 2025-05-29 08:30 IST*
 
 ## 2025-05-29
+
+### [08:23] - T64a: GraphologyAdapter Type Safety Improvements
+- Modified `packages/graph-core/src/core/GraphologyAdapter.ts` - Added proper type safety with GraphNodeAttributes and GraphEdgeAttributes, removed unsafe type assertions, fixed method return types, improved error handling, and cleaned up unused imports
+- Modified `packages/graph-test-app/src/components/graph/GraphManager/index.tsx` - Fixed Sigma settings type issues and removed duplicate properties
+- Updated `memory-bank/tasks/T64a.md` - Documented GraphologyAdapter improvements with detailed completion checklist
 
 ### [01:57] - T64c: Graph UI Package Creation
 - Created `packages/graph-ui/` - New package for graph visualization components

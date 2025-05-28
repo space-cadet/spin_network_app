@@ -1,7 +1,6 @@
 import Graphology from 'graphology';
 import { 
   empty as emptyGenerator, 
-  complete as completeGenerator, 
   path as pathGenerator 
 } from 'graphology-generators/classic';
 import { erdosRenyi } from 'graphology-generators/random';
@@ -16,8 +15,30 @@ export function empty(nodeCount: number): GraphologyAdapter {
 
 export function complete(nodeCount: number): GraphologyAdapter {
   const adapter = new GraphologyAdapter();
-  const generatedGraph = completeGenerator(Graphology, nodeCount);
-  adapter.setGraph(generatedGraph);
+  
+  // First create all nodes
+  for (let i = 0; i < nodeCount; i++) {
+    adapter.addNode({
+      id: `n${i}`,
+      type: 'default',
+      properties: {}
+    });
+  }
+  
+  // Then create edges between all pairs of nodes
+  for (let i = 0; i < nodeCount; i++) {
+    for (let j = i + 1; j < nodeCount; j++) {
+      adapter.addEdge({
+        id: `e${i}-${j}`,
+        sourceId: `n${i}`,
+        targetId: `n${j}`,
+        type: 'default',
+        directed: false,
+        properties: {}
+      });
+    }
+  }
+  
   return adapter;
 }
 

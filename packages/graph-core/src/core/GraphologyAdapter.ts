@@ -1,23 +1,51 @@
+import { matrix, Matrix } from 'mathjs';
 import Graphology from 'graphology';
-import { IGraph, IGraphNode, IGraphElement, IGraphEdge, IPropertyMap, ITraversalOptions } from './types';
-import { Matrix, matrix } from 'mathjs';
+import { IGraph, IGraphNode, IGraphEdge, IGraphElement, IPropertyMap, EdgeWeightFunction, ITraversalOptions } from './types';
+
+type GraphNodeAttributes = {
+  type: string;
+  [key: string]: any;
+};
+
+type GraphEdgeAttributes = {
+  type: string;
+  directed: boolean;
+  [key: string]: any;
+};
 
 export class GraphologyAdapter implements IGraph {
-  private graph: Graphology;
+  private graph: Graphology<GraphNodeAttributes, GraphEdgeAttributes>;
+
+  constructor() {
+    this.graph = new Graphology<GraphNodeAttributes, GraphEdgeAttributes>({
+      allowSelfLoops: true,
+      multi: false,
+      type: 'undirected'
+    });
+  }
 
   // Expose the internal Graphology instance for Sigma
   getGraphologyInstance(): Graphology {
-    return this.graph;
+    return this.graph as unknown as Graphology;
   }
 
   // Allow setting the internal graph (used by builders)
-  setGraph(graph: Graphology): void {
-    this.graph = graph;
+  setGraph(graph: Graphology): IGraph {
+    // Validate that all edges have valid source and target nodes
+    graph.forEachEdge((_edge, _attributes, source, target) => {
+      if (!graph.hasNode(source)) {
+        throw new Error(`Graph.edge: could not find the "${source}" source node in the graph.`);
+      }
+      if (!graph.hasNode(target)) {
+        throw new Error(`Graph.edge: could not find the "${target}" target node in the graph.`);
+      }
+    });
+    
+    this.graph = graph as unknown as Graphology<GraphNodeAttributes, GraphEdgeAttributes>;
+    return this;
   }
 
-  constructor() {
-    this.graph = new Graphology();
-  }
+
 
   get isDirected(): boolean {
     return this.graph.type === 'directed';
@@ -35,7 +63,7 @@ export class GraphologyAdapter implements IGraph {
     this.graph.addNode(node.id, { 
       ...node.properties,
       type: node.type 
-    });
+    } as GraphNodeAttributes);
     return this;
   }
 
@@ -47,12 +75,19 @@ export class GraphologyAdapter implements IGraph {
   }
 
   addEdge(edge: IGraphEdge): IGraph {
+    // Validate that source and target nodes exist
+    if (!this.hasNode(edge.sourceId)) {
+      throw new Error(`Graph.edge: could not find the "${edge.sourceId}" source node in the graph.`);
+    }
+    if (!this.hasNode(edge.targetId)) {
+      throw new Error(`Graph.edge: could not find the "${edge.targetId}" target node in the graph.`);
+    }
+
     this.graph.addEdge(edge.sourceId, edge.targetId, {
-      id: edge.id,
       ...edge.properties,
       type: edge.type,
       directed: edge.directed
-    });
+    } as GraphEdgeAttributes);
     return this;
   }
 
@@ -69,8 +104,8 @@ export class GraphologyAdapter implements IGraph {
     const attributes = this.graph.getNodeAttributes(nodeId);
     return {
       id: nodeId,
-      type: attributes.type || 'default',
-      properties: this.extractProperties(attributes)
+      type: attributes?.type || 'default',
+      properties: attributes ? this.extractProperties(attributes) : {}
     };
   }
 
@@ -84,9 +119,9 @@ export class GraphologyAdapter implements IGraph {
       id: edgeId,
       sourceId,
       targetId,
-      type: attributes.type || 'default',
-      directed: attributes.directed ?? false,
-      properties: this.extractProperties(attributes)
+      type: attributes?.type || 'default',
+      directed: attributes?.directed ?? false,
+      properties: attributes ? this.extractProperties(attributes) : {}
     };
   }
 
@@ -98,34 +133,41 @@ export class GraphologyAdapter implements IGraph {
     return this.graph.edges().map(edgeId => this.getEdge(edgeId)!);
   }
 
-  getAdjacentNodes(nodeId: string, options?: ITraversalOptions): readonly IGraphNode[] {
+  getAdjacentNodes(nodeId: string, _options?: ITraversalOptions): readonly IGraphNode[] {
     const neighbors = this.graph.neighbors(nodeId);
     return neighbors.map(id => this.getNode(id)!);
   }
 
-  getConnectedEdges(nodeId: string, options?: ITraversalOptions): readonly IGraphEdge[] {
+  getConnectedEdges(nodeId: string, _options?: ITraversalOptions): readonly IGraphEdge[] {
     const edges = this.graph.edges(nodeId);
     return edges.map(id => this.getEdge(id)!);
   }
 
-  findPath(fromId: string, toId: string, options?: ITraversalOptions): readonly IGraphElement[] {
-    // Basic path finding - can be enhanced with Dijkstra later
-    const path: IGraphElement[] = [];
-    const visited = new Set<string>();
-    const queue: Array<{ id: string; path: IGraphElement[] }> = [{ id: fromId, path: [] }];
+  findPath(fromId: string, toId: string, _options?: ITraversalOptions): readonly IGraphElement[] {
+    // Basic BFS implementation
+    const queue: Array<{node: string, path: IGraphElement[]}> = [{node: fromId, path: []}];
+    const visited = new Set<string>([fromId]);
 
     while (queue.length > 0) {
-      const { id, path: currentPath } = queue.shift()!;
-      if (id === toId) return currentPath;
+      const {node, path} = queue.shift()!;
+      
+      if (node === toId) {
+        return path;
+      }
 
-      if (!visited.has(id)) {
-        visited.add(id);
-        const node = this.getNode(id)!;
-        const newPath = [...currentPath, node];
-
-        for (const neighborId of this.graph.neighbors(id)) {
-          if (!visited.has(neighborId)) {
-            queue.push({ id: neighborId, path: newPath });
+      const neighbors = this.graph.neighbors(node) || [];
+      for (const neighbor of neighbors) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          const edgeId = this.graph.edge(node, neighbor) || this.graph.edge(neighbor, node);
+          if (edgeId) {
+            const edge = this.getEdge(edgeId);
+            if (edge) {
+              queue.push({
+                node: neighbor,
+                path: [...path, edge]
+              });
+            }
           }
         }
       }
@@ -134,46 +176,49 @@ export class GraphologyAdapter implements IGraph {
     return [];
   }
 
-  toAdjacencyMatrix(): Matrix {
+  toAdjacencyMatrix(weightFn?: EdgeWeightFunction): Matrix {
     const nodes = this.graph.nodes();
-    const n = nodes.length;
-    const data = Array(n).fill(0).map(() => Array(n).fill(0));
+    const size = nodes.length;
+    const data: number[][] = Array(size).fill(0).map(() => Array(size).fill(0));
     
     const nodeIndex = new Map(nodes.map((id, index) => [id, index]));
     
-    this.graph.forEachEdge((edge, attributes, source, target) => {
-      const i = nodeIndex.get(source)!;
-      const j = nodeIndex.get(target)!;
-      data[i][j] = 1;
-      if (!attributes.directed) {
-        data[j][i] = 1;
+    this.graph.forEachEdge((edgeId, _attributes, source, target) => {
+      const i = nodeIndex.get(source);
+      const j = nodeIndex.get(target);
+      
+      if (i === undefined || j === undefined) return;
+      
+      const edge = this.getEdge(edgeId);
+      if (!edge) return;
+      
+      const weight = weightFn ? weightFn(edge) : 1;
+      
+      data[i][j] = weight;
+      if (!this.isDirected) {
+        data[j][i] = weight;
       }
     });
-
+    
     return matrix(data);
   }
 
-  toLaplacianMatrix(): Matrix {
-    const adj = this.toAdjacencyMatrix();
-    const n = adj.size()[0];
+  toLaplacianMatrix(weightFn?: EdgeWeightFunction): Matrix {
+    const adjMatrix = this.toAdjacencyMatrix(weightFn);
+    const size = adjMatrix.size()[0];
+    const laplacian = adjMatrix.clone();
     
-    // Calculate degree matrix (sum of each row)
-    const degrees = Array(n).fill(0).map((_, i) => {
-      let sum = 0;
-      for (let j = 0; j < n; j++) {
-        sum += adj.get([i, j]);
+    // Subtract the adjacency matrix from the degree matrix
+    for (let i = 0; i < size; i++) {
+      let degree = 0;
+      for (let j = 0; j < size; j++) {
+        if (i === j) continue;
+        degree += adjMatrix.get([i, j]);
       }
-      return sum;
-    });
+      laplacian.set([i, i], degree);
+    }
     
-    // Create Laplacian matrix: L = D - A
-    const laplacian = Array(n).fill(0).map((_, i) => 
-      Array(n).fill(0).map((_, j) => 
-        i === j ? degrees[i] : -adj.get([i, j])
-      )
-    );
-    
-    return matrix(laplacian);
+    return laplacian;
   }
 
   hasNode(nodeId: string): boolean {
@@ -184,11 +229,11 @@ export class GraphologyAdapter implements IGraph {
     return this.graph.hasEdge(edgeId);
   }
 
-  areNodesAdjacent(sourceId: string, targetId: string): boolean {
+  areNodesAdjacent(sourceId: string, targetId: string, _options?: ITraversalOptions): boolean {
     return this.graph.hasEdge(sourceId, targetId);
   }
 
-  getNodeDegree(nodeId: string): number {
+  getNodeDegree(nodeId: string, _options?: ITraversalOptions): number {
     return this.graph.degree(nodeId);
   }
 
@@ -203,8 +248,9 @@ export class GraphologyAdapter implements IGraph {
     return this;
   }
 
-  private extractProperties(attributes: any): IPropertyMap {
+  private extractProperties(attributes: GraphNodeAttributes | GraphEdgeAttributes): IPropertyMap {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { type, directed, ...properties } = attributes;
-    return properties;
+    return properties as IPropertyMap;
   }
 }
