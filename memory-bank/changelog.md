@@ -1,5 +1,35 @@
 # Spin Network Visualization and Diffusion App - Changelog
 
+## [2025-05-29]
+
+### Added
+- Created new @spin-network/graph-ui package (T64c)
+  - Migrated GraphCanvas with improved type safety
+  - Implemented useGraphInstance hook
+  - Added component structure for controls
+- Implemented comprehensive graph builders in graph-core (T64a)
+  - Added 10 graph types including lattices
+  - Integrated with Redux for state management
+  - Added automatic layout positioning
+- Created new Intertwiner Module task (T69)
+  - Designed module structure
+  - Planned integration with quantum framework
+
+### Enhanced
+- Improved type safety in GraphologyAdapter (T64a)
+  - Added proper type definitions
+  - Fixed method return types
+  - Enhanced error handling
+- Advanced Wigner Symbols implementation (T55c)
+  - Completed 3j symbols with validation
+  - Progress on 6j symbols implementation
+  - Enhanced test infrastructure
+
+### Fixed
+- Resolved type safety issues in graph-core
+- Fixed Sigma settings type issues in GraphManager
+- Improved error handling in graph builders
+
 ## [2025-05-07]
 
 ### Added

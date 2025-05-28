@@ -2,26 +2,31 @@
 
 ## Architecture Overview
 
-The system follows a dual architecture approach with a standalone quantum library and a visualization application:
+The system follows a modular package architecture with clear separation of concerns between quantum computations, graph operations, and visualization:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│                    Spin Network System                          │
-│                                                                 │
-├─────────────────────────────┐   ┌─────────────────────────────┐ │
-│                             │   │                             │ │
-│    Quantum Library          │   │    Visualization App        │ │
-│    ┌───────────────────┐    │   │    ┌───────────────────┐    │ │
-│    │  Core             │    │   │    │  App State        │    │ │
-│    │  ┌─────────────┐  │    │   │    │  (Redux)          │    │ │
-│    │  │ Types       │  │    │   │    └───────────────────┘    │ │
-│    │  │ Math Adapter│  │    │   │              │               │ │
-│    │  │ Validation  │  │    │   │              ▼               │ │
-│    │  └─────────────┘  │    │   │    ┌───────────────────┐    │ │
-│    │                   │    │   │    │                   │    │ │
-│    │  ┌─────────────┐  │    │   │    │  Components       │    │ │
-│    │  │ Quantum     │◄─┼────┼───┼────┤                   │    │ │
+┌──────────────────────────────────────────────────────────────────────┐
+│                      Spin Network System                             │
+│                                                                      │
+├─────────────────┐  ┌─────────────────┐  ┌──────────────────────────┐│
+│                 │  │                 │  │                          ││
+│  @spin-network/ │  │  @spin-network/ │  │     graph-test-app      ││
+│     quantum     │  │    graph-core   │  │                          ││
+│  ┌───────────┐  │  │  ┌───────────┐  │  │  ┌──────────────────┐   ││
+│  │Angular Mom│  │  │  │  Graph    │  │  │  │Redux State       │   ││
+│  │Wigner Sym │  │  │  │ Builders  │  │  │  │  - Graph State   │   ││
+│  │Intertwiner│  │  │  │ Adapters  │  │  │  │  - Quantum State │   ││
+│  └───────────┘  │  │  └───────────┘  │  │  └──────────────────┘   ││
+│        ▲        │  │        ▲        │  │           ▲              ││
+│        │        │  │        │        │  │           │              ││
+│  ┌───────────┐  │  │  ┌───────────┐  │  │  ┌──────────────────┐   ││
+│  │  Core     │  │  │  │  Core     │  │  │  │@spin-network/    │   ││
+│  │Operations │◄─┼──┼──┤Interface  │◄─┼──┼──┤graph-ui          │   ││
+│  └───────────┘  │  │  └───────────┘  │  │  │  - GraphCanvas   │   ││
+│                 │  │                 │  │  │  - Controls       │   ││
+└─────────────────┘  └─────────────────┘  │  └──────────────────┘   ││
+                                          └──────────────────────────┘│
+```─┼────┼───┼────┤                   │    │ │
 │    │  │ Matrix      │  │    │   │    │                   │    │ │
 │    │  │ State Vector│  │    │   │    │                   │    │ │
 │    │  └─────────────┘  │    │   │    └───────────────────┘    │ │
@@ -940,7 +945,54 @@ This pattern provides robust handling of eigendecomposition with:
 - Hermitian property detection
 - Comprehensive error handling
 
-### 6. Validation Function Pattern
+### 6. Graph Builder Pattern
+
+The graph-core package implements a functional builder pattern for graph creation:
+
+```typescript
+export interface GraphBuilderOptions {
+  nodes?: number;
+  rows?: number;
+  cols?: number;
+  probability?: number;
+  periodic?: boolean;
+}
+
+export type GraphBuilder = (options: GraphBuilderOptions) => IGraph;
+
+// Example builder implementation
+export const createLattice2D: GraphBuilder = ({ rows, cols, periodic = false }) => {
+  validatePositiveIntegers({ rows, cols });
+  const graph = new GraphologyAdapter();
+  
+  // Build nodes
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const id = `${i}-${j}`;
+      graph.addNode(id, { x: j, y: i });
+      
+      // Add edges
+      if (j > 0) graph.addEdge(`${i}-${j-1}`, id);
+      if (i > 0) graph.addEdge(`${i-1}-${j}`, id);
+      if (periodic) {
+        if (j === cols-1) graph.addEdge(id, `${i}-0`);
+        if (i === rows-1) graph.addEdge(id, `0-${j}`);
+      }
+    }
+  }
+  
+  return graph;
+};
+```
+
+This pattern provides:
+- Type-safe builder functions
+- Consistent options interface
+- Input validation
+- Flexible graph construction
+- Support for periodic boundaries
+
+### 7. Validation Function Pattern
 
 The library implements a consistent pattern for validation functions:
 

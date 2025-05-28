@@ -13,6 +13,9 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
+| META-1 | Memory Bank Content Update | 🔄 | HIGH | 2025-05-11 | [tasks/META-1.md] | Updated progress.md, CHANGELOG.md, systemPatterns.md |
+| META-2 | Maintain Quantum Package Component Index | 🔄 | HIGH | 2025-05-14 | [tasks/META-2.md] | Updated with Wigner symbols, geometry modules |
+| META-3 | Create Component Indices for Graph Packages | ✅ | HIGH | 2025-05-29 | [tasks/META-3.md] | Created and documented graph-core and graph-ui indices |
 | T69 | Implement Intertwiner Module in packages/quantum | 🆕 | HIGH | 2025-05-28 | [tasks/T69.md] | Port existing intertwiner functionality to unified quantum framework |
 | T68 | Implement Zotero Paper Test Cases for Quantum Module | 🔄 | MEDIUM | 2025-05-26 | [tasks/T68.md] | Phase 1 Complete - Basic quantum distance calculations with Provost-Vallee paper examples |
 | T67 | Tetrahedron Quantum State Construction | 🆕 | HIGH | 2025-05-24 | [tasks/T67.md] | Ready to start - builds on T66 multi-spin coupling foundation |

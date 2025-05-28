@@ -1,6 +1,12 @@
-*Last Updated: May 23, 2025*
+*Last Updated: May 29, 2025*
 
 # Table of Contents
+
+> Recent Updates:
+> - Added Wigner Symbols module (T55c)
+> - Added Quantum Geometry module
+> - Added Multi-spin state handling
+> - Added Angular Momentum composition
 
 1. [Overview](#overview)
 2. [Core Types and Interfaces](#level-0-core-types-and-interfaces)
@@ -8,15 +14,18 @@
 4. [Quantum States](#level-2-quantum-states)
 5. [Quantum Operators](#level-3-quantum-operators)
 6. [Angular Momentum](#level-4-angular-momentum)
-7. [Quantum Circuits](#level-5-quantum-circuits-planned)
-8. [Dependency Graph](#dependency-graph)
-9. [Usage Example Dependencies](#usage-example-dependencies)
+   - [Core Operations](#core-angularmomentumcorets)
+   - [Wigner Symbols](#wignersymbols-angularmomentumwignersymbolsts)
+   - [Composition](#composition-angularmomentumcompositionts)
+   - [Multi-spin States](#multispinstate-angularmomentummultispinstatets)
+7. [Quantum Geometry](#level-5-quantum-geometry)
+   - [Distance Metrics](#quantumdistance-geometryquantumdistancets)
+8. [Quantum Circuits](#quantum-circuits-planned)
+9. [Dependency Graph](#dependency-graph)
 10. [API Status and Stability](#api-status-and-stability)
 11. [Performance Considerations](#performance-considerations)
-12. [Implementation Index](#implementation-index)
-13. [Error Handling](#error-handling)
-14. [Testing and Validation](#testing-and-validation)
-15. [NPM Package](#npm-package)
+12. [Testing and Validation](#testing-and-validation)
+13. [NPM Package](#npm-package)
 
 ## Overview
 This index provides a hierarchical view of the quantum package components, ordered by their dependencies. Components at each level may depend on components from previous levels but not on components from later levels.
@@ -234,6 +243,7 @@ Location: `src/operators/`
 Location: `src/angularMomentum/`
 
 ### core (`angularMomentum/core.ts`)
+Core angular momentum operations and state management.
 
 **Functions:**
 - `createJmState`
@@ -254,14 +264,106 @@ Location: `src/angularMomentum/`
 - `jmExpectationValue`
 - `createCoherentState`
 
+### wignerSymbols (`angularMomentum/wignerSymbols.ts`)
+Wigner 3j, 6j, and 9j symbol calculations.
+
+**Functions:**
+- `wigner3j` - Calculate Wigner 3j symbols
+- `validate3jTriangles` - Triangle inequality validation for 3j
+- `wigner6j` - Calculate Wigner 6j symbols (in progress)
+- `validate6jTriangles` - Triangle inequality validation for 6j
+- `cgCoefficient` - Clebsch-Gordan coefficient calculation
+
+### composition (`angularMomentum/composition.ts`)
+Angular momentum composition and coupling.
+
+**Functions:**
+- `coupleSpins` - Couple multiple spin states
+- `uncoupleSpins` - Decompose coupled states
+- `computeCGSeries` - Compute CG decomposition series
+
+### multiSpinState (`angularMomentum/multiSpinState.ts`)
+Multi-spin state management.
+
+**Classes:**
+- `MultiSpinState` - Handle multiple coupled spins
+
+**Functions:**
+- `createMultiSpinState` - Create multi-spin states
+- `decomposeState` - Decompose into individual spins
+
+## Level 5: Quantum Geometry
+Location: `src/geometry/`
+
+### quantumDistance (`geometry/quantumDistance.ts`)
+Quantum geometric calculations and metrics.
+
+**Functions:**
+- `fidelity` - Calculate quantum state fidelity
+- `traceDistance` - Calculate trace distance between states
+- `buresDistance` - Calculate Bures distance
+- `quantumAngle` - Calculate quantum angle between states
+- `fisherInformation` - Calculate quantum Fisher information
+- `relativeEntropy` - Calculate quantum relative entropy
+
 ## Dependency Graph
-*This section needs to be filled with appropriate content.*
+
+```mermaid
+graph TD
+    %% Core Level
+    Core[Core Types & Interfaces] --> Utils[Utilities]
+    Core --> States[Quantum States]
+    
+    %% Utilities Level
+    Utils --> States
+    Utils --> Operators[Quantum Operators]
+    
+    %% States Level
+    States --> Operators
+    States --> AngularMom[Angular Momentum]
+    
+    %% Operators Level
+    Operators --> AngularMom
+    Operators --> Geometry[Quantum Geometry]
+    
+    %% Angular Momentum Level
+    AngularMom --> WignerSym[Wigner Symbols]
+    AngularMom --> MultiSpin[Multi-spin States]
+    
+    %% Geometry Level
+    Geometry --> States
+    
+    %% Composition
+    WignerSym --> Composition[Angular Momentum Composition]
+    MultiSpin --> Composition
+```
 
 ## Usage Example Dependencies
 *This section needs to be filled with appropriate content.*
 
 ## API Status and Stability
-*This section needs to be filled with appropriate content.*
+
+### Stable APIs (Production Ready)
+- Core Types and Interfaces
+- Utilities and Basic Operations
+- Quantum States
+- Basic Quantum Operators
+- Angular Momentum Core
+
+### Beta APIs (Testing)
+- Wigner 3j Symbols
+- Quantum Geometry
+- Multi-spin State Management
+
+### Alpha APIs (In Development)
+- Wigner 6j and 9j Symbols
+- Angular Momentum Composition
+- Quantum Circuit Module (Planned)
+
+### Breaking Changes
+- Complex number handling migrated to math.js (T59, T60)
+- StateVector interface updated to support properties
+- Angular momentum operator creation functions standardized
 
 ## Performance Considerations
 *This section needs to be filled with appropriate content.*
