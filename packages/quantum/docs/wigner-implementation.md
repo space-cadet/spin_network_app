@@ -3,6 +3,32 @@
 *Created: 2025-05-26*
 *Implementation Phase: Phase 1 Complete (3j symbols)*
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Mathematical Foundation](#mathematical-foundation)
+   - 2.1 [Wigner 3j Symbols](#wigner-3j-symbols)
+   - 2.2 [Relationship to Clebsch-Gordan Coefficients](#relationship-to-clebsch-gordan-coefficients)
+3. [Implementation Details](#implementation-details)
+   - 3.1 [Core Implementation](#core-implementation-wignersymbolsts)
+   - 3.2 [Main Function: wigner3j()](#main-function-wigner3j)
+   - 3.3 [Validation Functions](#validation-functions)
+4. [Implementation History and Debugging](#implementation-history-and-debugging)
+   - 4.1 [Initial Challenges](#initial-challenges)
+   - 4.2 [Authoritative Sources Consulted](#authoritative-sources-consulted)
+   - 4.3 [Verified Test Cases](#verified-test-cases)
+5. [Symmetry Properties](#symmetry-properties)
+6. [Current Test Results (Phase 1)](#current-test-results-phase-1)
+7. [Future Implementation Phases](#future-implementation-phases)
+   - 7.1 [Phase 2: Wigner 6j Symbols](#phase-2-wigner-6j-symbols)
+   - 7.2 [Phase 3: Wigner 9j Symbols](#phase-3-wigner-9j-symbols)
+8. [Performance Considerations](#performance-considerations)
+9. [API Reference](#api-reference)
+10. [Usage Examples](#usage-examples)
+11. [Error Handling](#error-handling)
+12. [References](#references)
+13. [Conclusion](#conclusion)
+
 ## Overview
 
 This document provides comprehensive documentation for the Wigner symbols implementation in the quantum mechanics library. The implementation follows a phased approach, with Phase 1 focusing on Wigner 3j symbols.
@@ -17,17 +43,13 @@ Wigner 3j symbols are fundamental coefficients in quantum angular momentum theor
 
 The relationship between Wigner 3j symbols and Clebsch-Gordan coefficients is:
 
-```
-⟨j₁ m₁ j₂ m₂ | j₃ m₃⟩ = (-1)^(j₁-j₂+m₃) * √(2j₃+1) * Wigner3j(j₁, j₂, j₃, m₁, m₂, -m₃)
-```
+$$\langle j_1 m_1 j_2 m_2 | j_3 m_3 \rangle = (-1)^{j_1-j_2+m_3} \sqrt{2j_3+1} \begin{pmatrix} j_1 & j_2 & j_3 \\ m_1 & m_2 & -m_3 \end{pmatrix}$$
 
 Therefore, the Wigner 3j symbol is:
 
-```
-Wigner3j(j₁, j₂, j₃, m₁, m₂, m₃) = (-1)^(j₁-j₂-m₃) / √(2j₃+1) * ⟨j₁ m₁ j₂ m₂ | j₃ -m₃⟩
-```
+$$\begin{pmatrix} j_1 & j_2 & j_3 \\ m_1 & m_2 & m_3 \end{pmatrix} = \frac{(-1)^{j_1-j_2-m_3}}{\sqrt{2j_3+1}} \langle j_1 m_1 j_2 m_2 | j_3 -m_3 \rangle$$
 
-**Key Implementation Detail**: The critical insight is that the Clebsch-Gordan coefficient uses `-m₃` in its last argument, not `m₃`.
+**Key Implementation Detail**: The critical insight is that the Clebsch-Gordan coefficient uses $-m_3$ in its last argument, not $m_3$.
 
 ## Implementation Details
 
@@ -45,9 +67,9 @@ export function wigner3j(
 **Algorithm Steps:**
 
 1. **Validation**: Check quantum number constraints
-   - Triangle inequalities: |j₁-j₂| ≤ j₃ ≤ j₁+j₂
-   - Magnetic quantum number bounds: |mᵢ| ≤ jᵢ
-   - Conservation: m₁ + m₂ + m₃ = 0
+   - Triangle inequalities: $|j_1-j_2| \leq j_3 \leq j_1+j_2$
+   - Magnetic quantum number bounds: $|m_i| \leq j_i$
+   - Conservation: $m_1 + m_2 + m_3 = 0$
 
 2. **Clebsch-Gordan Coefficient Retrieval**:
    ```typescript
@@ -80,7 +102,7 @@ Comprehensive validation including:
 - Non-negative j values
 - Magnetic quantum number bounds
 - Triangle inequalities
-- Conservation law: m₁ + m₂ + m₃ = 0
+- Conservation law: $m_1 + m_2 + m_3 = 0$
 
 ## Implementation History and Debugging
 
@@ -89,8 +111,8 @@ Comprehensive validation including:
 The implementation faced several challenges that were systematically resolved:
 
 #### 1. Normalization Factor Error
-- **Initial Issue**: Used `sqrt(2*j3+1)` based on some sources
-- **Resolution**: Corrected to `1/sqrt(2*j3+1)` based on verified formula
+- **Initial Issue**: Used $\sqrt{2j_3+1}$ based on some sources
+- **Resolution**: Corrected to $\frac{1}{\sqrt{2j_3+1}}$ based on verified formula
 - **Impact**: Fixed magnitude of calculated values
 
 #### 2. Critical CG Coefficient Argument Error
@@ -133,19 +155,13 @@ wigner3j(1, 1, 2, 1, 1, -2) = 0.4472135954999579
 Wigner 3j symbols exhibit 72 symmetry operations, including:
 
 1. **Even Permutations** (invariant):
-   ```
-   (j₁ j₂ j₃; m₁ m₂ m₃) = (j₂ j₃ j₁; m₂ m₃ m₁) = (j₃ j₁ j₂; m₃ m₁ m₂)
-   ```
+   $$\begin{pmatrix} j_1 & j_2 & j_3 \\ m_1 & m_2 & m_3 \end{pmatrix} = \begin{pmatrix} j_2 & j_3 & j_1 \\ m_2 & m_3 & m_1 \end{pmatrix} = \begin{pmatrix} j_3 & j_1 & j_2 \\ m_3 & m_1 & m_2 \end{pmatrix}$$
 
 2. **Odd Permutations** (phase factor):
-   ```
-   (j₁ j₂ j₃; m₁ m₂ m₃) = (-1)^(j₁+j₂+j₃) * (j₂ j₁ j₃; m₂ m₁ m₃)
-   ```
+   $$\begin{pmatrix} j_1 & j_2 & j_3 \\ m_1 & m_2 & m_3 \end{pmatrix} = (-1)^{j_1+j_2+j_3} \begin{pmatrix} j_2 & j_1 & j_3 \\ m_2 & m_1 & m_3 \end{pmatrix}$$
 
 3. **Sign Reversal**:
-   ```
-   (j₁ j₂ j₃; m₁ m₂ m₃) = (-1)^(j₁+j₂+j₃) * (j₁ j₂ j₃; -m₁ -m₂ -m₃)
-   ```
+   $$\begin{pmatrix} j_1 & j_2 & j_3 \\ m_1 & m_2 & m_3 \end{pmatrix} = (-1)^{j_1+j_2+j_3} \begin{pmatrix} j_1 & j_2 & j_3 \\ -m_1 & -m_2 & -m_3 \end{pmatrix}$$
 
 ## Current Test Results (Phase 1)
 
@@ -160,9 +176,10 @@ The core calculation is now mathematically correct, with remaining failures prim
 
 ### Phase 2: Wigner 6j Symbols
 - **Mathematical Foundation**: Racah coefficients and 3j symbol products
-- **Key Relationship**: W(j₁,j₂,j₃;l₁,l₂,l₃) = (-1)^(j₁+j₂+l₁+l₂) * {j₁ j₂ j₃; l₁ l₂ l₃}
+- **Key Relationship**: $W(j_1,j_2,j_3;l_1,l_2,l_3) = (-1)^{j_1+j_2+l_1+l_2} \left\{\begin{array}{ccc} j_1 & j_2 & j_3 \\ l_1 & l_2 & l_3 \end{array}\right\}$
 - **Implementation**: Sum over 3j products with coupling structure
 - **Symmetries**: 144 symmetry operations
+- **Reference**: See [wigner-6j-theory.md](./wigner-6j-theory.md) for detailed mathematical theory
 
 ### Phase 3: Wigner 9j Symbols
 - **Mathematical Foundation**: Products of 6j symbols
@@ -251,8 +268,8 @@ The implementation includes comprehensive error handling for:
 
 1. **Invalid quantum numbers**: Non-integer or half-integer values
 2. **Triangle inequality violations**: j values not satisfying coupling rules
-3. **Magnetic quantum number bounds**: |m| > j conditions
-4. **Conservation violations**: m₁ + m₂ + m₃ ≠ 0
+3. **Magnetic quantum number bounds**: $|m| > j$ conditions
+4. **Conservation violations**: $m_1 + m_2 + m_3 \neq 0$
 
 All invalid cases return `Complex(0, 0)` rather than throwing exceptions.
 
@@ -260,10 +277,11 @@ All invalid cases return `Complex(0, 0)` rather than throwing exceptions.
 
 1. **Edmonds, A. R.** (1957). *Angular Momentum in Quantum Mechanics*. Princeton University Press.
 2. **Messiah, A.** (1962). *Quantum Mechanics, Vol. 2*. North-Holland.
-3. **Sage Mathematics Documentation**: Wigner coefficient functions
-4. **SymPy Documentation**: Physics module Wigner symbols
-5. **Wolfram MathWorld**: Wigner 3j-Symbol entry
-6. **Wikipedia**: 3-j symbol and Clebsch-Gordan coefficient articles
+3. **Varshalovich, D.A., Moskalev, A.N., and Khersonskii, V.K.** (1988). *Quantum Theory of Angular Momentum*. World Scientific. See also [wigner-6j-theory.md](./wigner-6j-theory.md) for extracted 6j symbol theory.
+4. **Sage Mathematics Documentation**: Wigner coefficient functions
+5. **SymPy Documentation**: Physics module Wigner symbols
+6. **Wolfram MathWorld**: Wigner 3j-Symbol entry
+7. **Wikipedia**: 3-j symbol and Clebsch-Gordan coefficient articles
 
 ## Conclusion
 
