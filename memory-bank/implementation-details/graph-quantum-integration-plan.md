@@ -4,6 +4,11 @@
 
 This document outlines the comprehensive plan for restructuring the library to create proper abstract graph tools that can be integrated with the quantum module to construct graph state vectors with quantum states on edges and intertwiner tensors on nodes.
 
+## Related Documents
+
+- [Graph Library Analysis](./graph-library-analysis.md): Analysis of graph libraries and core implementation details
+- [Graph UI Implementation Plan](./graph-ui-implementation-plan.md): Details the UI component architecture for graph visualization
+
 ## 1. Current State Analysis
 
 The codebase currently has several key components:
@@ -41,6 +46,12 @@ packages/
 │   │   ├── core/    (Basic graph implementations)
 │   │   ├── utils/   (Utility functions)
 │   │   └── algorithms/ (Graph algorithms)
+│
+├── graph-ui/        (Graph visualization components)
+│   ├── src/
+│   │   ├── components/ (React components)
+│   │   ├── hooks/     (Graph interaction hooks)
+│   │   └── state/     (UI state management)
 │
 ├── tensor-core/     (Tensor operations)
 │   ├── src/
