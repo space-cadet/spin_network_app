@@ -6,6 +6,7 @@
 import { Complex, IOperator, toComplex } from '../core/types';
 import { StateVector } from '../states/stateVector';
 import { createJmState, validateJ, isValidM } from './core';
+import { logFactorial } from '../utils/math';
 import * as math from 'mathjs';
 
 // Core type for Clebsch-Gordan coefficients (sparse map)
@@ -149,13 +150,7 @@ function generateCGSparseMap(j1: number, j2: number): CGSparseMap {
         if (m2 < -j2 || m2 > j2) continue;
         if (isZeroCG(j1, m1, j2, m2, j, m)) continue;
         // Use the existing recursive or special-case logic
-        let coeff: number;
-        if (Math.abs(j1 - 0.5) < 1e-10 && Math.abs(j2 - 0.5) < 1e-10) {
-          coeff = clebschGordanSpinHalf(j1, m1, j2, m2, j, m).re as number;
-        } else {
-          // Use the old nested-table logic for now
-          coeff = generateCGTableCoeff(j1, m1, j2, m2, j, m);
-        }
+        let coeff: number = generateCGTableCoeff(j1, m1, j2, m2, j, m);
         if (Math.abs(coeff) > 1e-12) {
           map.set(cgKey(j1, m1, j2, m2, j, m), coeff);
         }
@@ -174,33 +169,6 @@ function generateCGTableCoeff(j1: number, m1: number, j2: number, m2: number, j:
   // Special case for maximum m value where coefficient should be exactly 1
   if (Math.abs(m - (j1 + j2)) < 1e-10 && Math.abs(m1 - j1) < 1e-10 && Math.abs(m2 - j2) < 1e-10) {
     return 1;
-  }
-
-  // Special case for j1=1, j2=1/2 coupling to j=3/2
-  if (Math.abs(j1 - 1) < 1e-10 && Math.abs(j2 - 0.5) < 1e-10 && Math.abs(j - 1.5) < 1e-10) {
-    // Handle m=1/2 case specifically
-    if (Math.abs(m - 0.5) < 1e-10) {
-      if (Math.abs(m1 - 1) < 1e-10 && Math.abs(m2 + 0.5) < 1e-10) {
-        return Math.sqrt(2/3);  // ⟨1,1;1/2,-1/2|3/2,1/2⟩
-      }
-      if (Math.abs(m1 - 0) < 1e-10 && Math.abs(m2 - 0.5) < 1e-10) {
-        return Math.sqrt(1/3);  // ⟨1,0;1/2,1/2|3/2,1/2⟩
-      }
-    }
-  }
-
-  // Helper function for log factorial to avoid overflow
-  function logFactorial(n: number): number {
-    if (n < 0) return -Infinity;
-    if (Math.abs(Math.round(n) - n) > 1e-10) {
-      throw new Error('Factorial only defined for integers');
-    }
-    n = Math.round(n); // Ensure integer
-    let result = 0;
-    for (let i = 2; i <= n; i++) {
-      result += Math.log(i);
-    }
-    return result;
   }
 
   // Calculate log of terms to avoid overflow
@@ -232,104 +200,24 @@ function generateCGTableCoeff(j1: number, m1: number, j2: number, m2: number, j:
   for (let k = Math.ceil(kMin); k <= Math.floor(kMax); k++) {
     const sign = (k % 2 === 0) ? 1 : -1;
     
-    // Calculate log of terms
-    const logNumerator = 
+    // Calculate log of all 6 denominator terms
+    const logDenominatorTerms = 
+      logFactorial(k) +
       logFactorial(Math.round(j1 + j2 - j - k)) +
       logFactorial(Math.round(j1 - m1 - k)) +
-      logFactorial(Math.round(j2 + m2 - k));
-    
-    const logDenominator = 
-      logFactorial(k) +
-      logFactorial(Math.round(j - j1 + j2 + k)) +
-      logFactorial(Math.round(j - j1 - m2 + k));
+      logFactorial(Math.round(j2 + m2 - k)) +
+      logFactorial(Math.round(j - j1 + m2 + k)) +
+      logFactorial(Math.round(j - j2 - m1 + k));
 
     // Add the term using exp(log) to avoid overflow
-    const termValue = Math.exp(logNumerator - logDenominator);
+    const termValue = Math.exp(-logDenominatorTerms); // It's 1/denominator
     if (!isNaN(termValue) && isFinite(termValue)) {
       sum += sign * termValue;
     }
   }
 
-  // Handle special cases for exact values
   const result = Math.exp(0.5 * logPrefactor + logDelta + logTerm1) * sum;
-  
-  // Round to exact values when very close
-  if (Math.abs(result - Math.round(result)) < 1e-10) {
-    return Math.round(result);
-  }
-  if (Math.abs(result - 1) < 1e-10) {
-    return 1;
-  }
-  if (Math.abs(result + 1) < 1e-10) {
-    return -1;
-  }
-  if (Math.abs(result) < 1e-10) {
-    return 0;
-  }
-  
-  // Check for special sqrt values
-  const sqrtCandidates = [1/2, 1/3, 2/3, 3/4, 1/4];
-  for (const frac of sqrtCandidates) {
-    if (Math.abs(result - Math.sqrt(frac)) < 1e-10) {
-      return Math.sqrt(frac);
-    }
-    if (Math.abs(result + Math.sqrt(frac)) < 1e-10) {
-      return -Math.sqrt(frac);
-    }
-  }
-
   return result;
-}
-
-/**
- * Optimized calculation for two spin-1/2 particles
- * 
- * @param j1 First angular momentum (should be 0.5)
- * @param m1 Magnetic quantum number for j1
- * @param j2 Second angular momentum (should be 0.5)
- * @param m2 Magnetic quantum number for j2
- * @param j Total angular momentum (should be 0 or 1)
- * @param m Total magnetic quantum number
- * @returns Complex number representing the coefficient
- */
-function clebschGordanSpinHalf(j1: number, m1: number, j2: number, m2: number, j: number, m: number): Complex {
-  // Handle the special case of two spin-1/2 particles
-  // This is a common case that can be calculated directly
-  
-  // Quick validation
-  if (Math.abs(j1 - 0.5) > 1e-10 || Math.abs(j2 - 0.5) > 1e-10) {
-    throw new Error('clebschGordanSpinHalf is only for j1=j2=0.5');
-  }
-  
-  // Check selection rules
-  if (isZeroCG(j1, m1, j2, m2, j, m)) {
-    return math.complex(0, 0);
-  }
-  
-  // Only two possible j values: 0 (singlet) or 1 (triplet)
-  if (Math.abs(j - 0) < 1e-10) {
-    // Singlet state (j=0) - match expected test values in composition.test.ts
-    if (Math.abs(m1 - 0.5) < 1e-10 && Math.abs(m2 - (-0.5)) < 1e-10) {
-      return math.complex(-1 / Math.sqrt(2), 0); 
-    } else if (Math.abs(m1 - (-0.5)) < 1e-10 && Math.abs(m2 - 0.5) < 1e-10) {
-      return math.complex(1 / Math.sqrt(2), 0);
-    }
-  } else if (Math.abs(j - 1) < 1e-10) {
-    // Triplet states (j=1)
-    if (Math.abs(m - 1) < 1e-10) {
-      return math.complex(1, 0); // |↑↑⟩
-    } else if (Math.abs(m - (-1)) < 1e-10) {
-      return math.complex(1, 0); // |↓↓⟩
-    } else if (Math.abs(m - 0) < 1e-10) {
-      if (Math.abs(m1 - 0.5) < 1e-10 && Math.abs(m2 - (-0.5)) < 1e-10) {
-        return math.complex(1 / Math.sqrt(2), 0); // (|↑↓⟩ + |↓↑⟩)/√2
-      } else if (Math.abs(m1 - (-0.5)) < 1e-10 && Math.abs(m2 - 0.5) < 1e-10) {
-        return math.complex(1 / Math.sqrt(2), 0); // (|↓↑⟩ + |↑↓⟩)/√2
-      }
-    }
-  }
-  
-  return math.complex(0, 0);
 }
 
 /**

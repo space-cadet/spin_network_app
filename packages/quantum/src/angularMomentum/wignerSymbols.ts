@@ -5,6 +5,7 @@
 
 import { Complex } from '../core/types';
 import { clebschGordan } from './composition';
+import { logFactorial, triangleCoefficient } from '../utils/math';
 import * as math from 'mathjs';
 
 /**
@@ -119,8 +120,8 @@ export function wigner3j(
   // NOTE: Critical fix - using -m3 as the last argument
   const cgCoeff = clebschGordan(j1, m1, j2, m2, j3, -m3);
   
-  // Phase factor: (-1)^(j1-j2-m3)
-  const phase = phaseFactor(j1 - j2 - m3);
+  // Phase factor: (-1)^(j1-j2+m3)
+  const phase = phaseFactor(j1 - j2 + m3);
   
   // Normalization factor: 1/sqrt(2*j3+1)
   const normalization = 1 / Math.sqrt(2 * j3 + 1);
@@ -186,11 +187,14 @@ export function wigner3jSymmetry(
 }
 
 /**
- * Calculates Wigner 6j symbol using Racah formula
+ * Calculates Wigner 6j symbol using Racah's formula
  * 
- * The 6j symbol is calculated using:
- * {j1 j2 j3}  = Σ_k (-1)^k * product of four 3j symbols
- * {l1 l2 l3}
+ * Uses the explicit sum formula:
+ * {j1 j2 j3} = Delta(j1,j2,j3)Delta(j1,l2,l3)Delta(l1,j2,l3)Delta(l1,l2,j3) ×
+ * {l1 l2 l3}   Σ_z (-1)^z [(z-j1-j2-j3)!(z-j1-l2-l3)!(z-l1-j2-l3)!(z-l1-l2-j3)! ×
+ *                         (j1+j2+l1+l2-z)!(j2+j3+l2+l3-z)!(j3+j1+l3+l1-z)!]^(-1)
+ * 
+ * where Delta(a,b,c) is the triangle coefficient.
  * 
  * @param j1 Angular momentum j1
  * @param j2 Angular momentum j2
@@ -214,45 +218,60 @@ export function wigner6j(
     return math.complex(0, 0);
   }
 
-  // Simple implementation using relation to 3j symbols
-  // {j1 j2 j3} = Σ_{m1,m2,m3,m4,m5,m6} 
-  // {l1 l2 l3}   (j1 j2 j3; m1 m2 m3)(j1 l2 l3; m1 m5 m6)(l1 j2 l3; m4 m2 m6)(l1 l2 j3; m4 m5 m3)
-  
-  let sum = math.complex(0, 0);
-  
-  // Sum over all valid m values
-  for (let m1 = -j1; m1 <= j1; m1++) {
-    for (let m2 = -j2; m2 <= j2; m2++) {
-      for (let m3 = -j3; m3 <= j3; m3++) {
-        if (Math.abs(m1 + m2 + m3) > 1e-10) continue; // Selection rule
-        
-        for (let m4 = -l1; m4 <= l1; m4++) {
-          for (let m5 = -l2; m5 <= l2; m5++) {
-            for (let m6 = -l3; m6 <= l3; m6++) {
-              if (Math.abs(m1 + m5 + m6) > 1e-10) continue; // Selection rule
-              if (Math.abs(m4 + m2 + m6) > 1e-10) continue; // Selection rule  
-              if (Math.abs(m4 + m5 + m3) > 1e-10) continue; // Selection rule
-              
-              // Four 3j symbols
-              const threej1 = wigner3j(j1, j2, j3, m1, m2, m3);
-              const threej2 = wigner3j(j1, l2, l3, m1, m5, m6);
-              const threej3 = wigner3j(l1, j2, l3, m4, m2, m6);
-              const threej4 = wigner3j(l1, l2, j3, m4, m5, m3);
-              
-              // Product of all four 3j symbols
-              let product = math.multiply(threej1, threej2);
-              product = math.multiply(product, threej3);
-              product = math.multiply(product, threej4);
-              
-              sum = math.add(sum, product) as Complex;
-            }
-          }
-        }
-      }
+  // Calculate triangle coefficients
+  const delta1 = triangleCoefficient(j1, j2, j3);
+  const delta2 = triangleCoefficient(j1, l2, l3);
+  const delta3 = triangleCoefficient(l1, j2, l3);
+  const delta4 = triangleCoefficient(l1, l2, j3);
+
+  // If any triangle coefficient is zero, the 6j symbol is zero
+  if (delta1 === 0 || delta2 === 0 || delta3 === 0 || delta4 === 0) {
+    return math.complex(0, 0);
+  }
+
+  // Calculate sum limits
+  const zMin = Math.max(
+    j1 + j2 + j3,
+    j1 + l2 + l3,
+    l1 + j2 + l3,
+    l1 + l2 + j3
+  );
+  const zMax = Math.min(
+    j1 + j2 + l1 + l2,
+    j2 + j3 + l2 + l3,
+    j3 + j1 + l3 + l1
+  );
+
+  // Calculate sum using log factorials for numerical stability
+  let sumLog = -Infinity;
+  for (let z = Math.round(zMin); z <= Math.round(zMax); z++) {
+    // Calculate log of denominator terms
+    const logDenom = (
+      logFactorial(z - Math.round(j1 + j2 + j3)) +
+      logFactorial(z - Math.round(j1 + l2 + l3)) +
+      logFactorial(z - Math.round(l1 + j2 + l3)) +
+      logFactorial(z - Math.round(l1 + l2 + j3)) +
+      logFactorial(Math.round(j1 + j2 + l1 + l2 - z)) +
+      logFactorial(Math.round(j2 + j3 + l2 + l3 - z)) +
+      logFactorial(Math.round(j3 + j1 + l3 + l1 - z))
+    );
+
+    // Add term to sum (in log space)
+    const logTerm = -logDenom;
+    if (sumLog === -Infinity) {
+      sumLog = logTerm;
+    } else {
+      // Use log sum exp trick for numerical stability
+      const maxLog = Math.max(sumLog, logTerm);
+      sumLog = maxLog + Math.log(Math.exp(sumLog - maxLog) + Math.exp(logTerm - maxLog));
     }
   }
 
-  return sum;
+  // Calculate final result
+  const phaseFactor = Math.pow(-1, Math.round(j1 + j2 + j3 + l1 + l2 + l3));
+  const result = phaseFactor * delta1 * delta2 * delta3 * delta4 * Math.exp(sumLog);
+
+  return math.complex(result, 0);
 }
 
 export function wigner9j(
