@@ -24,6 +24,26 @@ export function isValidTriangle(j1: number, j2: number, j3: number): boolean {
 }
 
 /**
+ * Validates all four triangle conditions for Wigner 6j symbols
+ * 
+ * @param j1 Angular momentum j1
+ * @param j2 Angular momentum j2
+ * @param j3 Angular momentum j3
+ * @param l1 Angular momentum l1
+ * @param l2 Angular momentum l2
+ * @param l3 Angular momentum l3
+ * @returns true if all triangle conditions are satisfied
+ */
+function validate6jTriangles(j1: number, j2: number, j3: number, l1: number, l2: number, l3: number): boolean {
+  return (
+    isValidTriangle(j1, j2, j3) &&
+    isValidTriangle(j1, l2, l3) &&
+    isValidTriangle(l1, j2, l3) &&
+    isValidTriangle(l1, l2, j3)
+  );
+}
+
+/**
  * Calculates phase factor (-1)^n
  * 
  * @param n Power for phase factor
@@ -165,13 +185,74 @@ export function wigner3jSymmetry(
   }
 }
 
-// Placeholder for future implementations
+/**
+ * Calculates Wigner 6j symbol using Racah formula
+ * 
+ * The 6j symbol is calculated using:
+ * {j1 j2 j3}  = Σ_k (-1)^k * product of four 3j symbols
+ * {l1 l2 l3}
+ * 
+ * @param j1 Angular momentum j1
+ * @param j2 Angular momentum j2
+ * @param j3 Angular momentum j3
+ * @param l1 Angular momentum l1
+ * @param l2 Angular momentum l2
+ * @param l3 Angular momentum l3
+ * @returns Wigner 6j symbol value
+ */
 export function wigner6j(
   j1: number, j2: number, j3: number,
   l1: number, l2: number, l3: number
 ): Complex {
-  // TODO: Implement in Phase 2
-  return math.complex(0, 0);
+  // Validate all triangle conditions
+  if (!validate6jTriangles(j1, j2, j3, l1, l2, l3)) {
+    return math.complex(0, 0);
+  }
+
+  // Check for negative angular momenta
+  if (j1 < 0 || j2 < 0 || j3 < 0 || l1 < 0 || l2 < 0 || l3 < 0) {
+    return math.complex(0, 0);
+  }
+
+  // Simple implementation using relation to 3j symbols
+  // {j1 j2 j3} = Σ_{m1,m2,m3,m4,m5,m6} 
+  // {l1 l2 l3}   (j1 j2 j3; m1 m2 m3)(j1 l2 l3; m1 m5 m6)(l1 j2 l3; m4 m2 m6)(l1 l2 j3; m4 m5 m3)
+  
+  let sum = math.complex(0, 0);
+  
+  // Sum over all valid m values
+  for (let m1 = -j1; m1 <= j1; m1++) {
+    for (let m2 = -j2; m2 <= j2; m2++) {
+      for (let m3 = -j3; m3 <= j3; m3++) {
+        if (Math.abs(m1 + m2 + m3) > 1e-10) continue; // Selection rule
+        
+        for (let m4 = -l1; m4 <= l1; m4++) {
+          for (let m5 = -l2; m5 <= l2; m5++) {
+            for (let m6 = -l3; m6 <= l3; m6++) {
+              if (Math.abs(m1 + m5 + m6) > 1e-10) continue; // Selection rule
+              if (Math.abs(m4 + m2 + m6) > 1e-10) continue; // Selection rule  
+              if (Math.abs(m4 + m5 + m3) > 1e-10) continue; // Selection rule
+              
+              // Four 3j symbols
+              const threej1 = wigner3j(j1, j2, j3, m1, m2, m3);
+              const threej2 = wigner3j(j1, l2, l3, m1, m5, m6);
+              const threej3 = wigner3j(l1, j2, l3, m4, m2, m6);
+              const threej4 = wigner3j(l1, l2, j3, m4, m5, m3);
+              
+              // Product of all four 3j symbols
+              let product = math.multiply(threej1, threej2);
+              product = math.multiply(product, threej3);
+              product = math.multiply(product, threej4);
+              
+              sum = math.add(sum, product) as Complex;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return sum;
 }
 
 export function wigner9j(

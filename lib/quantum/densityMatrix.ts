@@ -2,7 +2,7 @@
  * Density matrix implementation for mixed quantum states and operations
  */
 
-import { Complex, StateVector, OperatorType, DensityMatrix, QuantumChannel, Operator } from './types';
+import { Complex, IStateVector, OperatorType, DensityMatrix, QuantumChannel, Operator } from './types';
 import { MatrixOperator } from './operator';
 import { multiplyMatrices } from './matrixOperations';
 import * as math from 'mathjs';
@@ -46,7 +46,7 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Applies density matrix to state vector
    */
-  apply(state: StateVector): StateVector {
+  apply(state: IStateVector): IStateVector {
     return this.operator.apply(state);
   }
 
@@ -154,7 +154,7 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Creates density matrix from pure state
    */
-  static fromPureState(state: StateVector): DensityMatrix {
+  static fromPureState(state: IStateVector): DensityMatrix {
     const dim = state.dimension;
     const matrix = Array(dim).fill(null).map(() => 
       Array(dim).fill(null).map(() => math.complex(0,  0))
@@ -176,7 +176,7 @@ export class DensityMatrixOperator implements DensityMatrix {
   /**
    * Creates density matrix from mixed state
    */
-  static mixedState(states: StateVector[], probabilities: number[]): DensityMatrix {
+  static mixedState(states: IStateVector[], probabilities: number[]): DensityMatrix {
     if (states.length !== probabilities.length) {
       throw new Error('Number of states must match number of probabilities');
     }
@@ -377,7 +377,7 @@ function subtractOperators(a: Operator, b: Operator): Operator {
 function isOperatorZero(operator: Operator, tolerance: number = 1e-10): boolean {
   const matrix = operator.toMatrix();
   return matrix.every(row => 
-    row.every(elem => math.abs(elem) < tolerance)
+    row.every(elem => math.abs(elem).re < tolerance)
   );
 }
 
