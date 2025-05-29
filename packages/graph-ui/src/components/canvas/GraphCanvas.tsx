@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import Sigma from 'sigma';
+import { NodeCircleProgram, EdgeLineProgram } from 'sigma/rendering';
 import { GraphCanvasProps } from '../../types/graph';
 import { useGraphInstance } from '../../hooks/useGraphInstance';
 
@@ -46,10 +47,15 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     
     // Initialize Sigma with the current graph
     sigmaRef.current = new Sigma(graphInstance, containerRef.current, {
+      nodeProgramClasses: {
+        default: NodeCircleProgram,
+        circle: NodeCircleProgram
+      },
+      edgeProgramClasses: {
+        default: EdgeLineProgram,
+        line: EdgeLineProgram
+      },
       renderEdgeLabels: true,
-      defaultNodeType: 'circle',
-      defaultEdgeType: 'line',
-      nodeProgramClasses: {},
       nodeReducer: (node, data) => ({
         ...data,
         size: data.size || 10,

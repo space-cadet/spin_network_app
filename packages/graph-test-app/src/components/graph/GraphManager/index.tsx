@@ -1,7 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import Sigma from 'sigma';
+import { NodeCircleProgram, EdgeLineProgram } from 'sigma/rendering';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
+import { GraphologyAdapter } from '../../../../graph-core/src/core/GraphologyAdapter';
+
+// Global reference to the current graph instance
+let currentGraphInstance: GraphologyAdapter | null = null;
+
+// Function to set the current graph (called from GraphBuilderControls)
+export const setCurrentGraphInstance = (graph: GraphologyAdapter | null) => {
+  currentGraphInstance = graph;
+};
 
 interface GraphManagerProps {
   className?: string;
@@ -10,13 +20,13 @@ interface GraphManagerProps {
 export const GraphManager: React.FC<GraphManagerProps> = ({ className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sigmaRef = useRef<Sigma | null>(null);
-  const currentGraph = useSelector((state: RootState) => state.graph.currentGraph);
+  const graphId = useSelector((state: RootState) => state.graph.graphId);
 
   // Initialize or update Sigma when graph changes
   useEffect(() => {
-    if (!containerRef.current || !currentGraph) return;
+    if (!containerRef.current || !currentGraphInstance || !graphId) return;
 
-    const graphInstance = currentGraph.getGraphologyInstance();
+    const graphInstance = currentGraphInstance.getGraphologyInstance();
     
     // Kill existing Sigma instance
     if (sigmaRef.current) {
@@ -26,24 +36,31 @@ export const GraphManager: React.FC<GraphManagerProps> = ({ className }) => {
     
     // Initialize Sigma with the current graph
     sigmaRef.current = new Sigma(graphInstance, containerRef.current, {
-      nodeColor: '#6366f1',
-      edgeColor: '#94a3b8',
-      nodeSize: 8,
-      edgeSize: 2,
+      nodeProgramClasses: {
+        default: NodeCircleProgram,
+        circle: NodeCircleProgram,
+        lattice: NodeCircleProgram,
+        triangular_lattice: NodeCircleProgram
+      },
+      edgeProgramClasses: {
+        default: EdgeLineProgram,
+        line: EdgeLineProgram,
+        lattice_edge: EdgeLineProgram,
+        triangular_edge: EdgeLineProgram
+      },
+      renderLabels: true,
+      labelFont: 'Arial',
       labelSize: 12,
       labelWeight: 'bold',
-      nodeType: 'circle',
-      edgeType: 'line',
       labelDensity: 1,
-      labelGridCellSize: 100,
-      labelFont: 'Arial'
-    } as any);
+      labelGridCellSize: 100
+    });
 
     return () => {
       sigmaRef.current?.kill();
       sigmaRef.current = null;
     };
-  }, [currentGraph]);
+  }, [graphId]);
 
   return (
     <div 

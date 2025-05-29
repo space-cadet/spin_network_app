@@ -2,6 +2,8 @@ import React, { useState, ChangeEvent } from 'react';
 import { Play } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setGraph } from '../../store/graphSlice';
+import { setCurrentGraphInstance } from '../graph/GraphManager';
+import { IGraphNode, IGraphEdge } from '../../../../graph-core/src/core/types';
 import * as builders from '../../../../graph-core/src/core/builders';
 
 type BuilderType = 
@@ -127,8 +129,38 @@ export const GraphBuilderControls: React.FC = () => {
         graphInstance.setEdgeAttribute(edgeId, 'color', '#94a3b8');
       });
       
-      // Dispatch the graph to Redux store
-      dispatch(setGraph(generatedGraph));
+      // Extract serializable data from the GraphologyAdapter
+      const nodes: IGraphNode[] = [];
+      const edges: IGraphEdge[] = [];
+      
+      graphInstance.forEachNode((nodeId, attributes) => {
+        nodes.push({
+          id: nodeId,
+          type: attributes?.type || 'default',
+          properties: attributes || {}
+        });
+      });
+      
+      graphInstance.forEachEdge((edgeId, attributes, source, target) => {
+        edges.push({
+          id: edgeId,
+          sourceId: source,
+          targetId: target,
+          type: attributes?.type || 'default',
+          directed: attributes?.directed || false,
+          properties: attributes || {}
+        });
+      });
+      
+      // Store the graph instance for rendering
+      setCurrentGraphInstance(generatedGraph);
+      
+      // Dispatch only serializable data to Redux
+      dispatch(setGraph({
+        nodes,
+        edges,
+        graphId: `graph_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      }));
       
     } catch (error) {
       console.error('Error generating graph:', error);
