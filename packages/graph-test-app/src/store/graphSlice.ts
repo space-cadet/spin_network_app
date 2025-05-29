@@ -12,13 +12,15 @@ interface GraphState {
   edges: IGraphEdge[];
   selectedElementId: string | null;
   graphId: string | null; // Just store an identifier instead of the whole object
+  renderMode: '2d' | '3d';
 }
 
 const initialState: GraphState = {
   nodes: [],
   edges: [],
   selectedElementId: null,
-  graphId: null
+  graphId: null,
+  renderMode: '2d'
 };
 
 export const graphSlice = createSlice({
@@ -53,6 +55,9 @@ export const graphSlice = createSlice({
       state.graphId = action.payload.graphId;
       state.nodes = action.payload.nodes;
       state.edges = action.payload.edges;
+    },
+    setRenderMode: (state, action: PayloadAction<'2d' | '3d'>) => {
+      state.renderMode = action.payload;
     }
   }
 });
@@ -64,7 +69,8 @@ export const {
   removeEdge, 
   setSelectedElement,
   clearGraph,
-  setGraph 
+  setGraph,
+  setRenderMode 
 } = graphSlice.actions;
 
 export default graphSlice.reducer;

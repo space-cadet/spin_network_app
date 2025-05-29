@@ -2,6 +2,7 @@ import React from 'react';
 import { Activity, Plus, Link, GitBranch, Share2, Grid } from 'lucide-react';
 import { BackendSelector } from '../common/BackendSelector';
 import { GraphBuilderControls } from './GraphBuilderControls';
+import { RendererSelector } from './RendererSelector';
 
 export const ControlPanel: React.FC = () => { 
   return (
@@ -17,6 +18,11 @@ export const ControlPanel: React.FC = () => {
           Graph Backend
         </label>
         <BackendSelector />
+      </div>
+
+      {/* Renderer Selection */}
+      <div className="mb-6">
+        <RendererSelector />
       </div>
 
       {/* Control Buttons - Grouped by functionality */}

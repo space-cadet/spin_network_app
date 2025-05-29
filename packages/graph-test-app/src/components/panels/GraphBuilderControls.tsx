@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent } from 'react';
 import { Play } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setGraph } from '../../store/graphSlice';
-import { setCurrentGraphInstance } from '../graph/GraphManager';
+import { setCurrentGraphInstance } from '../graph/renderers';
 import { IGraphNode, IGraphEdge } from '../../../../graph-core/src/core/types';
 import * as builders from '../../../../graph-core/src/core/builders';
 
