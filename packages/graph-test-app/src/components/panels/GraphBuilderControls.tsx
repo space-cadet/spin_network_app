@@ -1,8 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Play } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { setGraph } from '../../store/graphSlice';
-import { setCurrentGraphInstance } from '../graph/renderers';
+import { setGraph, setGraphInstance } from '../../store/graphSlice';
 import { IGraphNode, IGraphEdge } from '../../../../graph-core/src/core/types';
 import * as builders from '../../../../graph-core/src/core/builders';
 
@@ -92,36 +91,15 @@ export const GraphBuilderControls: React.FC = () => {
           return;
       }
       
-      // Apply some styling and positioning to the generated graph
+      // Apply only visual styling (NO coordinates - handled by layout engine)
       const graphInstance = generatedGraph.getGraphologyInstance();
       
-      // For lattice graphs, use logical coordinates for positioning
-      if (selectedBuilder.includes('lattice') || selectedBuilder === 'triangularLattice') {
-        graphInstance.forEachNode((nodeId, attributes) => {
-          const latticeX = attributes.latticeX || 0;
-          const latticeY = attributes.latticeY || 0;
-          const latticePos = attributes.latticePosition || 0;
-          
-          // Set visualization coordinates based on lattice coordinates
-          graphInstance.setNodeAttribute(nodeId, 'x', latticeX * 50 || latticePos * 50);
-          graphInstance.setNodeAttribute(nodeId, 'y', latticeY * 50 || 0);
-          graphInstance.setNodeAttribute(nodeId, 'size', 8);
-          graphInstance.setNodeAttribute(nodeId, 'color', '#3b82f6');
-        });
-      } else {
-        // For non-lattice graphs, apply circular layout
-        const nodeCount = graphInstance.order;
-        let index = 0;
-        graphInstance.forEachNode((nodeId) => {
-          const angle = (2 * Math.PI * index) / nodeCount;
-          const radius = Math.min(200, nodeCount * 20);
-          graphInstance.setNodeAttribute(nodeId, 'x', radius * Math.cos(angle));
-          graphInstance.setNodeAttribute(nodeId, 'y', radius * Math.sin(angle));
-          graphInstance.setNodeAttribute(nodeId, 'size', 8);
-          graphInstance.setNodeAttribute(nodeId, 'color', '#3b82f6');
-          index++;
-        });
-      }
+      // Apply default visual properties only
+      graphInstance.forEachNode((nodeId) => {
+        graphInstance.setNodeAttribute(nodeId, 'size', 8);
+        graphInstance.setNodeAttribute(nodeId, 'color', '#3b82f6');
+        // NOTE: x,y coordinates will be set by the layout engine in SigmaRenderer
+      });
       
       // Style edges
       graphInstance.forEachEdge((edgeId) => {
@@ -152,10 +130,10 @@ export const GraphBuilderControls: React.FC = () => {
         });
       });
       
-      // Store the graph instance for rendering
-      setCurrentGraphInstance(generatedGraph);
+      // Store the graph instance in Redux
+      dispatch(setGraphInstance(generatedGraph));
       
-      // Dispatch only serializable data to Redux
+      // Dispatch serializable data to Redux
       dispatch(setGraph({
         nodes,
         edges,

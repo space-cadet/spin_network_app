@@ -1,66 +1,95 @@
 import React, { useEffect, useRef } from 'react';
 import Sigma from 'sigma';
 import { NodeCircleProgram, EdgeLineProgram } from 'sigma/rendering';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
-import { GraphologyAdapter } from '../../../../graph-core/src/core/GraphologyAdapter';
+import Graph from 'graphology';
+import { Attributes } from 'graphology-types';
+import { IRenderGraph } from '@spin-network/graph-ui/src/types/rendering';
 
-// Global reference to the current graph instance
-let currentGraphInstance: GraphologyAdapter | null = null;
-
-// Function to set the current graph (called from GraphBuilderControls)
-export const setCurrentGraphInstance = (graph: GraphologyAdapter | null) => {
-  currentGraphInstance = graph;
-};
-
-interface SigmaRendererProps {
-  className?: string;
+interface NodeAttributes extends Attributes {
+  x: number;
+  y: number;
+  color?: string;
+  size?: number;
+  label?: string;
 }
 
-export const SigmaRenderer: React.FC<SigmaRendererProps> = ({ className }) => {
+interface EdgeAttributes extends Attributes {
+  color?: string;
+  size?: number;
+}
+
+interface SigmaRendererProps {
+  renderGraph: IRenderGraph;
+  className?: string;
+  onNodeClick?: (nodeId: string) => void;
+  onEdgeClick?: (edgeId: string) => void;
+}
+
+export const SigmaRenderer: React.FC<SigmaRendererProps> = ({ 
+  renderGraph,
+  className,
+  onNodeClick,
+  onEdgeClick 
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sigmaRef = useRef<Sigma | null>(null);
-  const graphId = useSelector((state: RootState) => state.graph.graphId);
 
-  // Initialize or update Sigma when graph changes
   useEffect(() => {
-    if (!containerRef.current || !currentGraphInstance || !graphId) return;
+    if (!containerRef.current) return;
 
-    const graphInstance = currentGraphInstance.getGraphologyInstance();
-    
-    // Kill existing Sigma instance
     if (sigmaRef.current) {
       sigmaRef.current.kill();
       sigmaRef.current = null;
     }
-    
-    // Initialize Sigma with the current graph
-    sigmaRef.current = new Sigma(graphInstance, containerRef.current, {
+
+    const graph = new Graph<NodeAttributes, EdgeAttributes>();
+
+    renderGraph.getAllRenderNodes().forEach(([nodeId, node]) => {
+      graph.addNode(nodeId, {
+        x: node.position.x,
+        y: node.position.y,
+        color: node.renderProps?.color || '#6366f1',
+        size: node.renderProps?.size || 8,
+        label: nodeId
+      });
+    });
+
+    renderGraph.getAllRenderEdges().forEach(([edgeId, edge]) => {
+      graph.addEdge(edge.source, edge.target, {
+        color: edge.renderProps?.color || '#94a3b8',
+        size: edge.renderProps?.size || 2
+      });
+    });
+
+    sigmaRef.current = new Sigma(graph, containerRef.current, {
       nodeProgramClasses: {
         default: NodeCircleProgram,
-        circle: NodeCircleProgram,
-        lattice: NodeCircleProgram,
-        triangular_lattice: NodeCircleProgram
       },
       edgeProgramClasses: {
         default: EdgeLineProgram,
-        line: EdgeLineProgram,
-        lattice_edge: EdgeLineProgram,
-        triangular_edge: EdgeLineProgram
       },
       renderLabels: true,
-      labelFont: 'Arial',
-      labelSize: 12,
-      labelWeight: 'bold',
-      labelDensity: 1,
-      labelGridCellSize: 100
+      defaultNodeColor: '#6366f1',
+      defaultEdgeColor: '#94a3b8'
     });
 
+    const handleNodeClick = ({ node }: { node: string }) => onNodeClick?.(node);
+    const handleEdgeClick = ({ edge }: { edge: string }) => onEdgeClick?.(edge);
+
+    if (onNodeClick) {
+      sigmaRef.current.on('clickNode', handleNodeClick);
+    }
+    if (onEdgeClick) {
+      sigmaRef.current.on('clickEdge', handleEdgeClick);
+    }
+
     return () => {
-      sigmaRef.current?.kill();
-      sigmaRef.current = null;
+      if (sigmaRef.current) {
+        sigmaRef.current.kill();
+        sigmaRef.current = null;
+      }
     };
-  }, [graphId]);
+  }, [renderGraph, onNodeClick, onEdgeClick]);
 
   return (
     <div 

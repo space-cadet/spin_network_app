@@ -1,17 +1,8 @@
 import React, { useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
-import { GraphologyAdapter } from '../../../../graph-core/src/core/GraphologyAdapter';
 import * as THREE from 'three';
-
-// Global reference to the current graph instance (shared with SigmaRenderer)
-let currentGraphInstance: GraphologyAdapter | null = null;
-
-export const setCurrentGraphInstance = (graph: GraphologyAdapter | null) => {
-  currentGraphInstance = graph;
-};
+import { IRenderGraph } from '@spin-network/graph-ui/src/types/rendering';
 
 interface Node3DData {
   id: string;
@@ -27,19 +18,35 @@ interface Edge3DData {
   color: string;
 }
 
+interface ThreeFiberRendererProps {
+  renderGraph: IRenderGraph;
+  className?: string;
+  onNodeClick?: (nodeId: string) => void;
+  onEdgeClick?: (edgeId: string) => void;
+}
+
 interface GraphNodes3DProps {
   nodes: Node3DData[];
+  onNodeClick?: (nodeId: string) => void;
 }
 
 interface GraphEdges3DProps {
   edges: Edge3DData[];
+  onEdgeClick?: (edgeId: string) => void;
 }
 
-const GraphNodes3D: React.FC<GraphNodes3DProps> = ({ nodes }) => {
+const GraphNodes3D: React.FC<GraphNodes3DProps> = ({ nodes, onNodeClick }) => {
   return (
     <>
       {nodes.map((node) => (
-        <mesh key={node.id} position={node.position}>
+        <mesh 
+          key={node.id} 
+          position={node.position}
+          onClick={(e) => {
+            e.stopPropagation();
+            onNodeClick?.(node.id);
+          }}
+        >
           <sphereGeometry args={[node.size / 10, 16, 16]} />
           <meshStandardMaterial color={node.color} />
         </mesh>
@@ -48,7 +55,7 @@ const GraphNodes3D: React.FC<GraphNodes3DProps> = ({ nodes }) => {
   );
 };
 
-const GraphEdges3D: React.FC<GraphEdges3DProps> = ({ edges }) => {
+const GraphEdges3D: React.FC<GraphEdges3DProps> = ({ edges, onEdgeClick }) => {
   return (
     <>
       {edges.map((edge) => {
@@ -65,7 +72,7 @@ const GraphEdges3D: React.FC<GraphEdges3DProps> = ({ edges }) => {
         quaternion.setFromRotationMatrix(orientation);
         
         return (
-          <mesh key={edge.id} position={position.toArray()} quaternion={quaternion.toArray()}>
+          <mesh key={edge.id} position={position.toArray()} quaternion={[quaternion.x, quaternion.y, quaternion.z, quaternion.w]}>
             <cylinderGeometry args={[0.02, 0.02, length, 8]} />
             <meshStandardMaterial color={edge.color} />
           </mesh>
@@ -75,58 +82,41 @@ const GraphEdges3D: React.FC<GraphEdges3DProps> = ({ edges }) => {
   );
 };
 
-interface ThreeFiberRendererProps {
-  className?: string;
-}
-
-export const ThreeFiberRenderer: React.FC<ThreeFiberRendererProps> = ({ className }) => {
-  const graphId = useSelector((state: RootState) => state.graph.graphId);
-
+export const ThreeFiberRenderer: React.FC<ThreeFiberRendererProps> = ({ 
+  renderGraph,
+  className,
+  onNodeClick,
+  onEdgeClick
+}) => {
   const { nodes3D, edges3D } = useMemo(() => {
-    if (!currentGraphInstance || !graphId) {
-      return { nodes3D: [], edges3D: [] };
-    }
-
-    const graphInstance = currentGraphInstance.getGraphologyInstance();
     const nodes3D: Node3DData[] = [];
     const edges3D: Edge3DData[] = [];
     
-    // Convert 2D positions to 3D (add z-coordinate)
-    graphInstance.forEachNode((nodeId, attributes) => {
-      const x = attributes.x || 0;
-      const y = attributes.y || 0;
-      const z = Math.random() * 100 - 50; // Random z for now
-      
+    renderGraph.getAllRenderNodes().forEach(([nodeId, node]) => {
       nodes3D.push({
         id: nodeId,
-        position: [x, y, z],
-        color: attributes.color || '#3b82f6',
-        size: attributes.size || 8
+        position: [node.position.x, node.position.y, node.position.z],
+        color: node.renderProps?.color || '#9ca3af',
+        size: node.renderProps?.size || 5
       });
     });
 
-    // Create edge data with 3D positions
-    const nodePositions = new Map<string, [number, number, number]>();
-    nodes3D.forEach(node => {
-      nodePositions.set(node.id, node.position);
-    });
-
-    graphInstance.forEachEdge((edgeId, attributes, source, target) => {
-      const sourcePos = nodePositions.get(source);
-      const targetPos = nodePositions.get(target);
+    renderGraph.getAllRenderEdges().forEach(([edgeId, edge]) => {
+      const sourcePos = renderGraph.getNodePosition(edge.source);
+      const targetPos = renderGraph.getNodePosition(edge.target);
       
       if (sourcePos && targetPos) {
         edges3D.push({
           id: edgeId,
-          sourcePosition: sourcePos,
-          targetPosition: targetPos,
-          color: attributes.color || '#94a3b8'
+          sourcePosition: [sourcePos.x, sourcePos.y, sourcePos.z],
+          targetPosition: [targetPos.x, targetPos.y, targetPos.z],
+          color: edge.renderProps?.color || '#9ca3af'
         });
       }
     });
 
     return { nodes3D, edges3D };
-  }, [graphId]);
+  }, [renderGraph]);
 
   return (
     <div className={`w-full h-full ${className || ''}`} style={{ minHeight: '400px' }}>
@@ -134,14 +124,12 @@ export const ThreeFiberRenderer: React.FC<ThreeFiberRendererProps> = ({ classNam
         <PerspectiveCamera makeDefault position={[200, 200, 200]} />
         <OrbitControls enablePan enableZoom enableRotate />
         
-        {/* Lighting */}
         <ambientLight intensity={0.6} />
         <directionalLight position={[10, 10, 5]} intensity={0.8} />
         <pointLight position={[-10, -10, -10]} intensity={0.4} />
         
-        {/* Graph Components */}
-        <GraphNodes3D nodes={nodes3D} />
-        <GraphEdges3D edges={edges3D} />
+        <GraphNodes3D nodes={nodes3D} onNodeClick={onNodeClick} />
+        <GraphEdges3D edges={edges3D} onEdgeClick={onEdgeClick} />
       </Canvas>
     </div>
   );

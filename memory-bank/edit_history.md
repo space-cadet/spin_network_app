@@ -1,7 +1,26 @@
 # Edit History
-*Last Updated: 2025-05-29 20:29 IST*
+### 2025-05-29
 
-## 2025-05-29
+#### 23:55 - T71: Phase 5 Complete - Clean Architecture Implementation
+- Fixed `packages/graph-core/src/core/builders.ts` - Replaced lattice1D path delegation with proper lattice implementation using ILatticePosition, added metadata to all builders
+- Fixed `packages/graph-ui/src/types/rendering.ts` - Removed duplicate interface definitions, consolidated ILayoutOptions and IRenderGraph interfaces
+- Fixed `packages/graph-ui/src/layout/StandardLayoutEngine.ts` - Added missing IGraphNode import, fixed all method type parameters from any to IGraphNode
+- Updated `packages/graph-test-app/src/components/graph/GraphCanvas.tsx` - Integrated StandardLayoutEngine with useMemo for logical → render graph transformation
+- Fixed `packages/graph-test-app/src/components/graph/renderers/ThreeFiberRenderer.tsx` - Updated to accept IRenderGraph props, removed global graph instance access, use pre-computed coordinates
+- Fixed `packages/graph-test-app/src/components/graph/renderers/SigmaRenderer.tsx` - Complete rewrite to accept IRenderGraph props, removed complex layout logic, simplified to direct coordinate consumption
+- Fixed `packages/graph-test-app/src/components/graph/renderers/index.ts` - Removed obsolete global instance management functions
+- Fixed `packages/graph-test-app/src/components/panels/GraphBuilderControls.tsx` - Updated imports to use setGraphInstance from Redux instead of renderer global functions
+- Fixed `packages/graph-test-app/src/components/graph/GraphManager/index.tsx` - Removed global instance exports, updated to use Redux graphInstance
+- Updated `memory-bank/tasks/T71.md` - Added Phase 5 completion with clean architecture implementation
+- Updated `memory-bank/tasks.md` - Updated T71 status to Phase 5 complete with architecture separation
+
+#### 22:41 - T71: SigmaRenderer and Type System Updates
+- Fixed `packages/graph-test-app/src/components/graph/renderers/SigmaRenderer.tsx` - Added NodeAttributes/EdgeAttributes interfaces, implemented coordinate initialization for lattice graphs, updated Sigma settings, added event cleanup with useCallback
+- Updated `packages/graph-test-app/tsconfig.json` - Set noUnusedLocals and noUnusedParameters to false, added allowUnusedLabels setting
+- Fixed `packages/graph-test-app/src/components/workspace/ZoomControls.tsx` - Added onZoom prop type, updated click handler implementation
+- Updated `packages/graph-test-app/src/store/graphSlice.ts` - Added graphInstance to state interface, fixed setGraphInstance action typing
+- Updated `memory-bank/tasks/T71.md` - Added Phase 4 completion details
+- Updated `memory-bank/tasks.md` - Updated T71 status to Phase 4 complete
 
 ### 20:24 - T71: Layout Engine Implementation - COMPLETE
 - Created `packages/graph-ui/src/layout/` - New directory structure for layout system

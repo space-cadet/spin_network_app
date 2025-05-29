@@ -55,106 +55,39 @@ export interface IRenderEdge {
   readonly metadata?: Record<string, any>;  // Original edge metadata
 }
 
-/**
- * Complete render graph structure
- */
-export interface IRenderGraph {
-  readonly nodes: IRenderNode[];
-  readonly edges: IRenderEdge[];
-  readonly metadata?: Record<string, any>;  // Original graph metadata
-}
+
 
 // --- Layout Configuration ---
 
-/**
- * Layout algorithm types
- */
-export type LayoutType = '2d-grid' | '2d-force' | '3d-force' | '3d-sphere';
-
-/**
- * Layout configuration options
- */
-export interface ILayoutOptions {
-  readonly type: LayoutType;
-  readonly dimensions: 2 | 3;
-  readonly spacing?: number;
-  readonly preserveTopology?: boolean;
-  readonly centerGraph?: boolean;
-}
-
 export type LayoutAlgorithm = 
-  | 'preserve_logical'  // Maintain mathematical structure (default for lattices)
-  | 'force_directed'    // Physical simulation layouts
-  | 'circular'          // Circular arrangements  
-  | 'hierarchical'      // Tree-like layouts
-  | 'random';           // Random positioning
+  | 'preserve_logical'
+  | 'force_directed'
+  | 'circular'
+  | 'hierarchical'
+  | 'random';
 
-/**
- * Layout computation options
- */
 export interface ILayoutOptions {
   readonly algorithm: LayoutAlgorithm;
   readonly dimensions: 2 | 3;
-  readonly preserveTopology?: boolean;  // Keep 2D graphs planar in 3D
+  readonly spacing?: number;
   readonly bounds?: { 
     readonly width: number; 
     readonly height: number; 
     readonly depth?: number; 
   };
-  readonly spacing?: number;             // Distance between elements
-  readonly iterations?: number;          // For iterative algorithms
-  readonly [key: string]: any;          // Algorithm-specific options
 }
 
 // --- Render Graph Interface ---
 
-/**
- * Graph with visual representation (wraps logical graph + coordinates)
- */
 export interface IRenderGraph {
-  /**
-   * Get the underlying logical graph structure
-   */
   getLogicalGraph(): IGraph;
-  
-  /**
-   * Get all nodes with rendering coordinates
-   */
   getAllRenderNodes(): readonly [string, IRenderNode][];
-  
-  /**
-   * Get all edges with rendering properties
-   */
   getAllRenderEdges(): readonly [string, IRenderEdge][];
-  
-  /**
-   * Get specific node with rendering coordinates
-   */
   getRenderNode(nodeId: string): IRenderNode | undefined;
-  
-  /**
-   * Get specific edge with rendering properties
-   */
   getRenderEdge(edgeId: string): IRenderEdge | undefined;
-  
-  /**
-   * Get visual position of a node
-   */
   getNodePosition(nodeId: string): IRenderPosition | undefined;
-  
-  /**
-   * Update visual position of a node
-   */
   setNodePosition(nodeId: string, position: IRenderPosition): void;
-  
-  /**
-   * Update visual properties of a node
-   */
   setNodeRenderProps(nodeId: string, props: IRenderProperties): void;
-  
-  /**
-   * Update visual properties of an edge
-   */
   setEdgeRenderProps(edgeId: string, props: IRenderProperties): void;
 }
 

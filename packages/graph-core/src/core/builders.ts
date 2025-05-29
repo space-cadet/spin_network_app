@@ -11,6 +11,17 @@ export function empty(nodeCount: number): GraphologyAdapter {
   const adapter = new GraphologyAdapter();
   const generatedGraph = emptyGenerator(Graphology, nodeCount);
   adapter.setGraph(generatedGraph);
+  
+  // Add metadata for empty graph
+  adapter.setMetadata({
+    type: 'empty_graph',
+    topology: 'planar',
+    dimensions: 2,
+    parameters: { nodeCount },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
   return adapter;
 }
 
@@ -57,6 +68,17 @@ export function path(nodeCount: number): GraphologyAdapter {
   const adapter = new GraphologyAdapter();
   const generatedGraph = pathGenerator(Graphology, nodeCount);
   adapter.setGraph(generatedGraph);
+  
+  // Add metadata for path graph  
+  adapter.setMetadata({
+    type: 'path_graph',
+    topology: 'tree',
+    dimensions: 1,
+    parameters: { nodeCount },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
   return adapter;
 }
 
@@ -82,14 +104,50 @@ export function randomSparse(nodeCount: number, probability: number): Graphology
   const adapter = new GraphologyAdapter();
   const generatedGraph = erdosRenyi.sparse(Graphology, {order: nodeCount, probability});
   adapter.setGraph(generatedGraph);
+  
+  // Add metadata for sparse random graph
+  adapter.setMetadata({
+    type: 'random_sparse_graph',
+    topology: 'planar',
+    dimensions: 2,
+    parameters: { nodeCount, probability },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
   return adapter;
 }
 
 // === Lattice Generators ===
 
 export function lattice1D(length: number): GraphologyAdapter {
-  // 1D lattice is just a path graph
-  return path(length);
+  const adapter = new GraphologyAdapter();
+  const graph = new Graphology();
+  
+  for (let i = 0; i < length; i++) {
+    const latticePosition: ILatticePosition = { i, j: 0 };
+    graph.addNode(i.toString(), { 
+      latticePosition,
+      type: 'lattice' 
+    });
+  }
+  
+  for (let i = 0; i < length - 1; i++) {
+    graph.addEdge(i.toString(), (i + 1).toString(), { type: 'lattice_edge' });
+  }
+  
+  adapter.setGraph(graph);
+  
+  adapter.setMetadata({
+    type: '1d_lattice',
+    topology: 'tree',
+    dimensions: 1,
+    parameters: { length },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
+  return adapter;
 }
 
 export function lattice2D(width: number, height: number): GraphologyAdapter {
