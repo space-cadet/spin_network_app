@@ -1,6 +1,6 @@
 import { matrix, Matrix } from 'mathjs';
 import Graphology from 'graphology';
-import { IGraph, IGraphNode, IGraphEdge, IGraphElement, IPropertyMap, EdgeWeightFunction, ITraversalOptions } from './types';
+import { IGraph, IGraphNode, IGraphEdge, IGraphElement, IPropertyMap, EdgeWeightFunction, ITraversalOptions, IGraphMetadata } from './types';
 
 type GraphNodeAttributes = {
   type: string;
@@ -15,6 +15,7 @@ type GraphEdgeAttributes = {
 
 export class GraphologyAdapter implements IGraph {
   private graph: Graphology<GraphNodeAttributes, GraphEdgeAttributes>;
+  private metadata?: IGraphMetadata;
 
   constructor() {
     this.graph = new Graphology<GraphNodeAttributes, GraphEdgeAttributes>({
@@ -246,6 +247,17 @@ export class GraphologyAdapter implements IGraph {
   clear(): IGraph {
     this.graph.clear();
     return this;
+  }
+
+  // --- Metadata Operations (NO rendering knowledge) ---
+
+  setMetadata(metadata: IGraphMetadata): IGraph {
+    this.metadata = metadata;
+    return this;
+  }
+
+  getMetadata(): IGraphMetadata | undefined {
+    return this.metadata;
   }
 
   private extractProperties(attributes: GraphNodeAttributes | GraphEdgeAttributes): IPropertyMap {

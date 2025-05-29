@@ -5,6 +5,7 @@ import {
 } from 'graphology-generators/classic';
 import { erdosRenyi } from 'graphology-generators/random';
 import { GraphologyAdapter } from './GraphologyAdapter';
+import { ILatticePosition } from './types';
 
 export function empty(nodeCount: number): GraphologyAdapter {
   const adapter = new GraphologyAdapter();
@@ -39,6 +40,16 @@ export function complete(nodeCount: number): GraphologyAdapter {
     }
   }
   
+  // Add metadata for complete graph
+  adapter.setMetadata({
+    type: 'complete_graph',
+    topology: 'planar',
+    dimensions: 2,
+    parameters: { nodeCount },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
   return adapter;
 }
 
@@ -53,6 +64,17 @@ export function random(nodeCount: number, probability: number): GraphologyAdapte
   const adapter = new GraphologyAdapter();
   const generatedGraph = erdosRenyi(Graphology, {order: nodeCount, probability});
   adapter.setGraph(generatedGraph);
+  
+  // Add metadata for random graph
+  adapter.setMetadata({
+    type: 'random_graph',
+    topology: 'planar',
+    dimensions: 2,
+    parameters: { nodeCount, probability },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
   return adapter;
 }
 
@@ -74,38 +96,49 @@ export function lattice2D(width: number, height: number): GraphologyAdapter {
   const adapter = new GraphologyAdapter();
   const graph = new Graphology();
   
-  // Create nodes with logical lattice coordinates
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const nodeId = `${x},${y}`;
+  // Create nodes with logical lattice identifiers (NO coordinates)
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      const nodeId = `${i},${j}`;
+      const latticePosition: ILatticePosition = { i, j };
       graph.addNode(nodeId, { 
-        latticeX: x, 
-        latticeY: y, 
+        latticePosition,
         type: 'lattice' 
       });
     }
   }
   
   // Add edges to 4-neighbors (up, down, left, right)
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const nodeId = `${x},${y}`;
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      const nodeId = `${i},${j}`;
       
       // Right neighbor
-      if (x < width - 1) {
-        const rightId = `${x + 1},${y}`;
+      if (i < width - 1) {
+        const rightId = `${i + 1},${j}`;
         graph.addEdge(nodeId, rightId, { type: 'lattice_edge' });
       }
       
       // Down neighbor  
-      if (y < height - 1) {
-        const downId = `${x},${y + 1}`;
+      if (j < height - 1) {
+        const downId = `${i},${j + 1}`;
         graph.addEdge(nodeId, downId, { type: 'lattice_edge' });
       }
     }
   }
   
   adapter.setGraph(graph);
+  
+  // Add metadata describing mathematical structure
+  adapter.setMetadata({
+    type: '2d_lattice',
+    topology: 'planar',
+    dimensions: 2,
+    parameters: { width, height },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
   return adapter;
 }
 
@@ -113,10 +146,11 @@ export function lattice1DPeriodic(length: number): GraphologyAdapter {
   const adapter = new GraphologyAdapter();
   const graph = new Graphology();
   
-  // Create nodes with logical lattice coordinates
+  // Create nodes with logical lattice identifiers (NO coordinates)
   for (let i = 0; i < length; i++) {
+    const latticePosition: ILatticePosition = { i, j: 0 };
     graph.addNode(i.toString(), { 
-      latticePosition: i, 
+      latticePosition,
       type: 'lattice' 
     });
   }
@@ -128,6 +162,17 @@ export function lattice1DPeriodic(length: number): GraphologyAdapter {
   }
   
   adapter.setGraph(graph);
+  
+  // Add metadata describing 1D periodic structure
+  adapter.setMetadata({
+    type: '1d_periodic_lattice',
+    topology: 'torus',
+    dimensions: 1,
+    parameters: { length },
+    isFinite: true,
+    isPeriodic: true
+  });
+  
   return adapter;
 }
 
@@ -135,36 +180,47 @@ export function lattice2DPeriodic(width: number, height: number): GraphologyAdap
   const adapter = new GraphologyAdapter();
   const graph = new Graphology();
   
-  // Create nodes with logical lattice coordinates
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const nodeId = `${x},${y}`;
+  // Create nodes with logical lattice identifiers (NO coordinates)
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      const nodeId = `${i},${j}`;
+      const latticePosition: ILatticePosition = { i, j };
       graph.addNode(nodeId, { 
-        latticeX: x, 
-        latticeY: y, 
+        latticePosition,
         type: 'lattice' 
       });
     }
   }
   
   // Add edges with periodic boundary conditions (torus)
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const nodeId = `${x},${y}`;
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      const nodeId = `${i},${j}`;
       
       // Right neighbor (with wraparound)
-      const rightX = (x + 1) % width;
-      const rightId = `${rightX},${y}`;
+      const rightI = (i + 1) % width;
+      const rightId = `${rightI},${j}`;
       graph.addEdge(nodeId, rightId, { type: 'lattice_edge' });
       
       // Down neighbor (with wraparound)
-      const downY = (y + 1) % height;
-      const downId = `${x},${downY}`;
+      const downJ = (j + 1) % height;
+      const downId = `${i},${downJ}`;
       graph.addEdge(nodeId, downId, { type: 'lattice_edge' });
     }
   }
   
   adapter.setGraph(graph);
+  
+  // Add metadata describing torus topology
+  adapter.setMetadata({
+    type: '2d_periodic_lattice',
+    topology: 'torus',
+    dimensions: 2,
+    parameters: { width, height },
+    isFinite: true,
+    isPeriodic: true
+  });
+  
   return adapter;
 }
 
@@ -172,44 +228,55 @@ export function triangularLattice(width: number, height: number): GraphologyAdap
   const adapter = new GraphologyAdapter();
   const graph = new Graphology();
   
-  // Create nodes with logical lattice coordinates
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const nodeId = `${x},${y}`;
+  // Create nodes with logical lattice identifiers (NO coordinates)
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      const nodeId = `${i},${j}`;
+      const latticePosition: ILatticePosition = { i, j };
       graph.addNode(nodeId, { 
-        latticeX: x, 
-        latticeY: y, 
+        latticePosition,
         type: 'triangular_lattice' 
       });
     }
   }
   
   // Add edges: 4-neighbors + 2 diagonal neighbors for triangular lattice
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const nodeId = `${x},${y}`;
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      const nodeId = `${i},${j}`;
       
       // Right neighbor
-      if (x < width - 1) {
-        graph.addEdge(nodeId, `${x + 1},${y}`, { type: 'triangular_edge' });
+      if (i < width - 1) {
+        graph.addEdge(nodeId, `${i + 1},${j}`, { type: 'triangular_edge' });
       }
       
       // Down neighbor
-      if (y < height - 1) {
-        graph.addEdge(nodeId, `${x},${y + 1}`, { type: 'triangular_edge' });
+      if (j < height - 1) {
+        graph.addEdge(nodeId, `${i},${j + 1}`, { type: 'triangular_edge' });
       }
       
       // Diagonal neighbors for triangular lattice
-      if (x < width - 1 && y < height - 1) {
-        graph.addEdge(nodeId, `${x + 1},${y + 1}`, { type: 'triangular_edge' });
+      if (i < width - 1 && j < height - 1) {
+        graph.addEdge(nodeId, `${i + 1},${j + 1}`, { type: 'triangular_edge' });
       }
       
-      if (x > 0 && y < height - 1) {
-        graph.addEdge(nodeId, `${x - 1},${y + 1}`, { type: 'triangular_edge' });
+      if (i > 0 && j < height - 1) {
+        graph.addEdge(nodeId, `${i - 1},${j + 1}`, { type: 'triangular_edge' });
       }
     }
   }
   
   adapter.setGraph(graph);
+  
+  // Add metadata describing triangular structure
+  adapter.setMetadata({
+    type: 'triangular_lattice',
+    topology: 'planar',
+    dimensions: 2,
+    parameters: { width, height },
+    isFinite: true,
+    isPeriodic: false
+  });
+  
   return adapter;
 }

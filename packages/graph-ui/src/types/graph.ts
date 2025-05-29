@@ -1,33 +1,26 @@
 import { GraphologyAdapter } from '../../../graph-core/src/core/GraphologyAdapter';
+import { IRenderNode, IRenderEdge, IRenderGraph } from './rendering';
 
+/**
+ * Props for the GraphCanvas component
+ */
 export interface GraphCanvasProps {
   className?: string;
   graph?: GraphologyAdapter;
-  defaultNodes?: GraphNode[];
-  defaultEdges?: GraphEdge[];
+  defaultNodes?: IRenderNode[];
+  defaultEdges?: IRenderEdge[];
   onNodeClick?: (nodeId: string) => void;
   onEdgeClick?: (edgeId: string) => void;
 }
 
-export interface GraphNode {
-  id: string;
-  label?: string;
-  x?: number;
-  y?: number;
-  size?: number;
-  color?: string;
-}
-
-export interface GraphEdge {
-  source: string;
-  target: string;
-  size?: number;
-  color?: string;
-}
-
+/**
+ * State for graph visualization
+ */
 export interface GraphState {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
+  renderGraph?: IRenderGraph;
   selectedNodeId?: string;
   selectedEdgeId?: string;
+  isLayouting?: boolean;
 }
+
+// Note: GraphNode and GraphEdge interfaces have been replaced by IRenderNode/IRenderEdge

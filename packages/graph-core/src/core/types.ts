@@ -18,6 +18,53 @@ export interface IPropertyMap {
   readonly [key: string]: PropertyValue;
 }
 
+// --- Logical Position Types (NO RENDERING COORDINATES) ---
+
+/**
+ * Abstract lattice position identifiers (NOT pixel coordinates)
+ */
+export interface ILatticePosition {
+  readonly i: number;
+  readonly j: number;
+  readonly k?: number;  // For 3D lattices
+}
+
+/**
+ * Hierarchical position in tree-like structures
+ */
+export interface IHierarchyPosition {
+  readonly level: number;
+  readonly index: number;
+}
+
+/**
+ * Logical identifiers for abstract positioning (NO visual coordinates)
+ */
+export interface ILogicalIdentifiers {
+  readonly latticePosition?: ILatticePosition;
+  readonly hierarchyPosition?: IHierarchyPosition;
+  readonly networkId?: string;
+}
+
+// --- Graph Metadata Types ---
+
+/**
+ * Mathematical topology types
+ */
+export type GraphTopology = 'planar' | 'torus' | 'sphere' | 'hyperbolic' | 'tree';
+
+/**
+ * Graph metadata describing mathematical properties (NO visual properties)
+ */
+export interface IGraphMetadata {
+  readonly type: string;                    // Graph type identifier
+  readonly topology: GraphTopology;         // Mathematical topology
+  readonly dimensions: number;               // Logical dimensionality (2D, 3D, etc.)
+  readonly parameters: IPropertyMap;        // Construction parameters
+  readonly isFinite: boolean;                // Whether graph has finite size
+  readonly isPeriodic?: boolean;             // Whether graph has periodic boundaries
+}
+
 // --- Base Element Types ---
 
 /**
@@ -188,6 +235,10 @@ export interface IGraph {
   // Matrix operations
   toAdjacencyMatrix(weightFn?: EdgeWeightFunction): Matrix;
   toLaplacianMatrix(weightFn?: EdgeWeightFunction): Matrix;
+  
+  // Metadata operations (NO rendering knowledge)
+  setMetadata(metadata: IGraphMetadata): IGraph;
+  getMetadata(): IGraphMetadata | undefined;
   
   // Utility operations
   hasNode(nodeId: string): boolean;
