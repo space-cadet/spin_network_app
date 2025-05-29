@@ -84,11 +84,14 @@ export class GraphologyAdapter implements IGraph {
       throw new Error(`Graph.edge: could not find the "${edge.targetId}" target node in the graph.`);
     }
 
-    this.graph.addEdge(edge.sourceId, edge.targetId, {
-      ...edge.properties,
-      type: edge.type,
-      directed: edge.directed
-    } as GraphEdgeAttributes);
+    // Check if edge already exists to avoid duplicate error
+    if (!this.graph.hasEdge(edge.sourceId, edge.targetId)) {
+      this.graph.addEdge(edge.sourceId, edge.targetId, {
+        ...edge.properties,
+        type: edge.type,
+        directed: edge.directed
+      } as GraphEdgeAttributes);
+    }
     return this;
   }
 

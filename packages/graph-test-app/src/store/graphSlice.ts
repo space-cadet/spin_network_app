@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { IGraphNode, IGraphEdge } from '../../../graph-core/src/core/types';
-import { GraphologyAdapter } from "@spin-network/graph-core/src/core/GraphologyAdapter";
+import { IGraphNode, IGraphEdge, IGraphMetadata } from '../../../graph-core/src/core/types';
 
 interface SerializableGraphData {
   nodes: IGraphNode[];
   edges: IGraphEdge[];
   graphId: string;
+  metadata?: IGraphMetadata;
 }
 
 interface GraphState {
@@ -13,7 +13,7 @@ interface GraphState {
   edges: IGraphEdge[];
   selectedElementId: string | null;
   graphId: string | null;
-  graphInstance: GraphologyAdapter | null;
+  metadata: IGraphMetadata | null;
   renderMode: '2d' | '3d';
 }
 
@@ -22,7 +22,7 @@ const initialState: GraphState = {
   edges: [],
   selectedElementId: null,
   graphId: null,
-  graphInstance: null,
+  metadata: null,
   renderMode: '2d'
 };
 
@@ -53,18 +53,16 @@ export const graphSlice = createSlice({
       state.edges = [];
       state.selectedElementId = null;
       state.graphId = null;
-      state.graphInstance = null;
+      state.metadata = null;
     },
     setGraph: (state, action: PayloadAction<SerializableGraphData>) => {
       state.graphId = action.payload.graphId;
       state.nodes = action.payload.nodes;
       state.edges = action.payload.edges;
+      state.metadata = action.payload.metadata || null;
     },
     setRenderMode: (state, action: PayloadAction<'2d' | '3d'>) => {
       state.renderMode = action.payload;
-    },
-    setGraphInstance: (state, action: PayloadAction<GraphologyAdapter | null>) => {
-      state.graphInstance = action.payload;
     }
   }
 });
@@ -77,8 +75,7 @@ export const {
   setSelectedElement,
   clearGraph,
   setGraph,
-  setRenderMode,
-  setGraphInstance
+  setRenderMode
 } = graphSlice.actions;
 
 export default graphSlice.reducer;

@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Play } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { setGraph, setGraphInstance } from '../../store/graphSlice';
+import { setGraph } from '../../store/graphSlice';
 import { IGraphNode, IGraphEdge } from '../../../../graph-core/src/core/types';
 import * as builders from '../../../../graph-core/src/core/builders';
 
@@ -130,14 +130,15 @@ export const GraphBuilderControls: React.FC = () => {
         });
       });
       
-      // Store the graph instance in Redux
-      dispatch(setGraphInstance(generatedGraph));
+      // Extract metadata from generated graph
+      const metadata = generatedGraph.getMetadata();
       
       // Dispatch serializable data to Redux
       dispatch(setGraph({
         nodes,
         edges,
-        graphId: `graph_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        graphId: `graph_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        metadata
       }));
       
     } catch (error) {

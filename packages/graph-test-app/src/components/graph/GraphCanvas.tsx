@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { SigmaRenderer, ThreeFiberRenderer } from './renderers';
 import { StandardLayoutEngine } from '@spin-network/graph-ui/src/layout/StandardLayoutEngine';
+import { GraphologyAdapter } from '@spin-network/graph-core/src/core/GraphologyAdapter';
 
 interface GraphCanvasProps {
   onNodeClick?: (nodeId: string) => void;
@@ -16,10 +17,30 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   className
 }) => {
   const renderMode = useSelector((state: RootState) => state.graph.renderMode);
-  const graphInstance = useSelector((state: RootState) => state.graph.graphInstance);
+  const nodes = useSelector((state: RootState) => state.graph.nodes);
+  const edges = useSelector((state: RootState) => state.graph.edges);
+  const metadata = useSelector((state: RootState) => state.graph.metadata);
 
   const renderGraph = useMemo(() => {
-    if (!graphInstance) return null;
+    if (nodes.length === 0) return null;
+    
+    // Reconstruct GraphologyAdapter from serializable data
+    const graphInstance = new GraphologyAdapter();
+    
+    // Add nodes
+    nodes.forEach(node => {
+      graphInstance.addNode(node);
+    });
+    
+    // Add edges
+    edges.forEach(edge => {
+      graphInstance.addEdge(edge);
+    });
+    
+    // Restore metadata for proper layout algorithm selection
+    if (metadata) {
+      graphInstance.setMetadata(metadata);
+    }
     
     const layoutEngine = new StandardLayoutEngine();
     return layoutEngine.transformToRender(graphInstance, {
@@ -27,12 +48,12 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       dimensions: renderMode === '3d' ? 3 : 2,
       spacing: 100
     });
-  }, [graphInstance, renderMode]);
+  }, [nodes, edges, metadata, renderMode]);
 
   if (!renderGraph) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <p className="text-gray-500">No graph loaded</p>
+        <p className="text-gray-500">No graph loaded. Generate a graph to begin.</p>
       </div>
     );
   }

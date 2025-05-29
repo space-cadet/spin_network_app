@@ -47,7 +47,7 @@ const GraphNodes3D: React.FC<GraphNodes3DProps> = ({ nodes, onNodeClick }) => {
             onNodeClick?.(node.id);
           }}
         >
-          <sphereGeometry args={[node.size / 10, 16, 16]} />
+          <sphereGeometry args={[Math.max(node.size * 0.5, 3), 16, 16]} />
           <meshStandardMaterial color={node.color} />
         </mesh>
       ))}
@@ -66,14 +66,15 @@ const GraphEdges3D: React.FC<GraphEdges3DProps> = ({ edges, onEdgeClick }) => {
         const position = start.clone().add(direction.clone().multiplyScalar(0.5));
         
         // Calculate rotation to align cylinder with edge direction
-        const orientation = new THREE.Matrix4();
-        orientation.lookAt(start, end, new THREE.Vector3(0, 1, 0));
+        // Cylinders are aligned along Y-axis by default, so we need to rotate to align with direction
+        const up = new THREE.Vector3(0, 1, 0);
+        direction.normalize();
         const quaternion = new THREE.Quaternion();
-        quaternion.setFromRotationMatrix(orientation);
+        quaternion.setFromUnitVectors(up, direction);
         
         return (
-          <mesh key={edge.id} position={position.toArray()} quaternion={[quaternion.x, quaternion.y, quaternion.z, quaternion.w]}>
-            <cylinderGeometry args={[0.02, 0.02, length, 8]} />
+          <mesh key={edge.id} position={position.toArray()} quaternion={quaternion}>
+            <cylinderGeometry args={[0.5, 0.5, length, 8]} />
             <meshStandardMaterial color={edge.color} />
           </mesh>
         );
@@ -88,15 +89,31 @@ export const ThreeFiberRenderer: React.FC<ThreeFiberRendererProps> = ({
   onNodeClick,
   onEdgeClick
 }) => {
-  const { nodes3D, edges3D } = useMemo(() => {
+  const { nodes3D, edges3D, cameraPosition } = useMemo(() => {
     const nodes3D: Node3DData[] = [];
     const edges3D: Edge3DData[] = [];
     
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    
     renderGraph.getAllRenderNodes().forEach(([nodeId, node]) => {
+      const x = node.position.x;
+      const y = node.position.y;
+      const z = node.position.z;
+      
+      // Track bounds
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+      minZ = Math.min(minZ, z);
+      maxZ = Math.max(maxZ, z);
+      
       nodes3D.push({
         id: nodeId,
-        position: [node.position.x, node.position.y, node.position.z],
-        color: node.renderProps?.color || '#9ca3af',
+        position: [x, y, z],
+        color: node.renderProps?.color || '#3b82f6',
         size: node.renderProps?.size || 5
       });
     });
@@ -110,18 +127,36 @@ export const ThreeFiberRenderer: React.FC<ThreeFiberRendererProps> = ({
           id: edgeId,
           sourcePosition: [sourcePos.x, sourcePos.y, sourcePos.z],
           targetPosition: [targetPos.x, targetPos.y, targetPos.z],
-          color: edge.renderProps?.color || '#9ca3af'
+          color: edge.renderProps?.color || '#94a3b8'
         });
       }
     });
 
-    return { nodes3D, edges3D };
+    // Calculate camera position based on graph bounds
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const centerZ = (minZ + maxZ) / 2;
+    
+    const rangeX = maxX - minX;
+    const rangeY = maxY - minY;
+    const rangeZ = maxZ - minZ;
+    const maxRange = Math.max(rangeX, rangeY, rangeZ);
+    
+    // Position camera at a distance that fits the entire graph
+    const distance = Math.max(maxRange * 2, 50);
+    const cameraPosition: [number, number, number] = [
+      centerX + distance,
+      centerY + distance,
+      centerZ + distance
+    ];
+
+    return { nodes3D, edges3D, cameraPosition };
   }, [renderGraph]);
 
   return (
     <div className={`w-full h-full ${className || ''}`} style={{ minHeight: '400px' }}>
       <Canvas>
-        <PerspectiveCamera makeDefault position={[200, 200, 200]} />
+        <PerspectiveCamera makeDefault position={cameraPosition} />
         <OrbitControls enablePan enableZoom enableRotate />
         
         <ambientLight intensity={0.6} />
