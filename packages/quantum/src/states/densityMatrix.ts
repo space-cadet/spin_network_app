@@ -13,6 +13,7 @@ import { normalizeMatrix } from '../utils/matrixOperations';
  * Implementation of density matrix operations
  */
 export class DensityMatrixOperator implements IDensityMatrix {
+  readonly objectType: 'operator' = 'operator';  // Inherits from IOperator
   readonly dimension: number;
   readonly type: OperatorType = 'hermitian';
   private operator: MatrixOperator;
@@ -65,7 +66,7 @@ export class DensityMatrixOperator implements IDensityMatrix {
   /**
    * Returns adjoint (same as original for density matrix)
    */
-  adjoint(): IOperator {
+  adjoint(): IDensityMatrix {
     return this;  // Density matrices are Hermitian
   }
 
@@ -219,6 +220,13 @@ export class DensityMatrixOperator implements IDensityMatrix {
    */
   tensorProduct(other: IOperator): IOperator {
     return this.operator.tensorProduct(other);
+  }
+
+  /**
+   * Calculates the operator norm
+   */
+  norm(): number {
+    return this.operator.norm();
   }
 
   /**

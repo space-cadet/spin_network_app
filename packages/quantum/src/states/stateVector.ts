@@ -35,6 +35,7 @@ export interface JComponentMetadata {
 }
 
 export class StateVector implements IStateVector {
+  readonly objectType: 'state' = 'state';  // Discriminator property
   readonly dimension: number;
   readonly amplitudes: Complex[];
   readonly basis?: string;

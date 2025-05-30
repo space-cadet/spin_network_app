@@ -32,6 +32,7 @@ export function ensureComplex(value: Complex): Complex {
  * Represents a quantum state vector
  */
 export interface IStateVector {
+  readonly objectType: 'state';  // Discriminator property
   dimension: number;      // Hilbert space dimension
   amplitudes: Complex[];  // State vector amplitudes in computational basis
   basis?: string;        // Optional basis label
@@ -66,6 +67,7 @@ export type OperatorType = 'unitary' | 'hermitian' | 'projection' | 'general' | 
  * Base interface for quantum operators
  */
 export interface IOperator {
+  readonly objectType: 'operator';  // Discriminator property
   dimension: number;      // Hilbert space dimension  
   type: OperatorType;    // Type of operator
   
@@ -81,6 +83,7 @@ export interface IOperator {
   scale(scalar: Complex): IOperator;        // Scale operator by complex number
   add(other: IOperator): IOperator;          // Add two operators
   eigenDecompose(): { values: Complex[]; vectors: IOperator[] };
+  norm(): number;                          // Calculate operator norm
   
   // Utility methods
   isZero(tolerance?: number): boolean;      // Test if operator is identically zero
@@ -111,4 +114,43 @@ export interface IDensityMatrix extends IOperator {
 export interface IQuantumChannel {
   apply(state: IDensityMatrix): IDensityMatrix;         // Apply channel to state
   getOperators(): IOperator[];                            // Get operator representation
+}
+
+/**
+ * Unified quantum object type - union of all quantum objects
+ */
+export type QuantumObject = IStateVector | IOperator;
+
+/**
+ * Type guards for runtime discrimination
+ */
+export function isState(obj: QuantumObject): obj is IStateVector {
+  return obj.objectType === 'state';
+}
+
+export function isOperator(obj: QuantumObject): obj is IOperator {
+  return obj.objectType === 'operator';
+}
+
+export function isDensityMatrix(obj: IOperator): obj is IDensityMatrix {
+  return 'purity' in obj && 'vonNeumannEntropy' in obj;
+}
+
+/**
+ * Utility functions for unified operations
+ */
+export function adjoint(obj: QuantumObject): QuantumObject {
+  if (isState(obj)) {
+    // For states, adjoint creates a bra (conceptually - return conjugate transpose as operator)
+    throw new Error('Adjoint of state vector not implemented - use innerProduct instead');
+  }
+  return obj.adjoint();
+}
+
+export function norm(obj: QuantumObject): number {
+  return obj.norm();
+}
+
+export function getObjectType(obj: QuantumObject): 'state' | 'operator' {
+  return obj.objectType;
 }

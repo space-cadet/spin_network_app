@@ -1,5 +1,9 @@
 matrixFunctions.test.ts
-wignerSymbols.test.ts
+wigner3j.test.ts
+composition.test.ts
+wigner6j.test.ts
+indexing.test.ts
+quantumDistance.test.ts
 eigendecomposition.test.ts
 integration.test.ts
 eigen.test.ts

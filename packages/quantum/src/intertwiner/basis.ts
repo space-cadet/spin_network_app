@@ -104,29 +104,29 @@ export function constructBasisVector(
       if (Math.abs(m12) > intermediateJ + 1e-10) continue;
       
       const cg1 = clebschGordan(j1, m1, j2, m2, intermediateJ, m12);
-      if (Math.abs(cg1) < 1e-10) continue;
+      if (math.abs(cg1).re < 1e-10) continue;
 
       for (const m3 of mValues[2]) {
         for (const m4 of mValues[3]) {
           // Second coupling: j3 ⊗ j4 → intermediateJ  
           const m34 = m3 + m4;
-          if (Math.abs(m34) > intermediateJ + 1e-10) continue;
+          if (math.abs(m34) > intermediateJ + 1e-10) continue;
           
           // For total J=0, need m12 + m34 = 0
-          if (Math.abs(m12 + m34) > 1e-10) continue;
+          if (math.abs(m12 + m34) > 1e-10) continue;
           
           const cg2 = clebschGordan(j3, m3, j4, m4, intermediateJ, m34);
-          if (Math.abs(cg2) < 1e-10) continue;
+          if (math.abs(cg2).re < 1e-10) continue;
 
           // Final coupling: intermediateJ ⊗ intermediateJ → 0
           const cgFinal = clebschGordan(intermediateJ, m12, intermediateJ, m34, 0, 0);
-          if (Math.abs(cgFinal) < 1e-10) continue;
+          if (math.abs(cgFinal).re < 1e-10) continue;
 
           // Calculate tensor product index
           const index = calculateTensorIndex([m1, m2, m3, m4], [j1, j2, j3, j4]);
           
           if (index >= 0 && index < totalDim) {
-            coefficients[index] += cg1 * cg2 * cgFinal;
+            coefficients[index] += cg1.re * cg2.re * cgFinal.re;
           }
         }
       }
@@ -338,14 +338,14 @@ function constructThreeValentBasis(edgeSpins: number[]): IntertwinerBasisState[]
     for (const m2 of mValues[1]) {
       for (const m3 of mValues[2]) {
         // Check m-conservation
-        if (Math.abs(m1 + m2 + m3) > 1e-10) continue;
+        if (math.abs(m1 + m2 + m3) > 1e-10) continue;
         
         const cg = clebschGordan(j1, m1, j2, m2, j3, m3);
-        if (Math.abs(cg) < 1e-10) continue;
+        if (math.abs(cg).re < 1e-10) continue;
         
         const index = calculateTensorIndex([m1, m2, m3], [j1, j2, j3]);
         if (index >= 0 && index < totalDim) {
-          coefficients[index] = math.complex(cg, 0);
+          coefficients[index] = math.complex(cg.re, 0);
         }
       }
     }

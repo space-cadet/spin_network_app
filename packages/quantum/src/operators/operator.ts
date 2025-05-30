@@ -48,6 +48,7 @@ export function createZeroMatrix(dimension: number): Complex[][] {
  * Implementation of operator using matrix representation
  */
 export class MatrixOperator implements IOperator {
+  readonly objectType: 'operator' = 'operator';  // Discriminator property
   readonly dimension: number;
   readonly type: OperatorType;
   private matrix: ComplexMatrix;
@@ -556,6 +557,20 @@ export class MatrixOperator implements IOperator {
       const proj = new MatrixOperator([vectorMatrix], 'projection');
       return sum ? sum.add(proj) : proj;
     });
+  }
+
+  /**
+   * Calculates the operator norm (Frobenius norm)
+   */
+  norm(): number {
+    let sum = 0;
+    for (let i = 0; i < this.dimension; i++) {
+      for (let j = 0; j < this.dimension; j++) {
+        const element = this.matrix[i][j];
+        sum += element.re * element.re + element.im * element.im;
+      }
+    }
+    return Math.sqrt(sum);
   }
 
   /**
