@@ -5,7 +5,7 @@
  * with quantum objects (states, operators) using graph-core infrastructure.
  */
 
-import { QuantumObject, isState, isOperator, IOperator } from '../../src/core/types';
+import { QuantumObject, isState, isOperator } from '../../src/core/types';
 import { StateVector } from '../../src/states/stateVector';
 import { PauliX, PauliZ } from '../../src/operators/gates';
 import { GraphologyAdapter } from '../../../graph-core/src/core/GraphologyAdapter';
@@ -13,48 +13,48 @@ import { path } from '../../../graph-core/src/core/builders';
 import { IGraph, IGraphNode, IGraphEdge } from '../../../graph-core/src/core/types';
 import * as math from 'mathjs';
 
-// Quantum-labeled graph using graph-core infrastructure
+// Quantum-labeled graph using QuantumObject for flexible labeling
 interface QuantumGraphPOC extends IGraph {
-  // Quantum labeling methods
-  setVertexQuantumState(nodeId: string, state: StateVector): void;
-  getVertexQuantumState(nodeId: string): StateVector | undefined;
-  setEdgeQuantumOperator(edgeId: string, operator: IOperator): void;
-  getEdgeQuantumOperator(edgeId: string): IOperator | undefined;
+  // Flexible quantum labeling methods
+  setVertexQuantumObject(nodeId: string, obj: QuantumObject): void;
+  getVertexQuantumObject(nodeId: string): QuantumObject | undefined;
+  setEdgeQuantumObject(edgeId: string, obj: QuantumObject): void;
+  getEdgeQuantumObject(edgeId: string): QuantumObject | undefined;
   
   // Graph-core adapter
   getGraphAdapter(): GraphologyAdapter;
 }
 
-// Implementation of quantum-labeled graph (renamed to QuantumGraph in full implementation)
+// Implementation of quantum-labeled graph
 class QuantumGraph implements QuantumGraphPOC {
   private adapter: GraphologyAdapter;
-  private quantumNodes: Map<string, StateVector> = new Map();
-  private quantumEdges: Map<string, IOperator> = new Map();
+  private quantumNodes: Map<string, QuantumObject> = new Map();
+  private quantumEdges: Map<string, QuantumObject> = new Map();
 
   constructor(baseGraph?: GraphologyAdapter) {
     this.adapter = baseGraph || new GraphologyAdapter();
   }
 
-  // Quantum labeling methods
-  setVertexQuantumState(nodeId: string, state: StateVector): void {
+  // Flexible quantum labeling methods
+  setVertexQuantumObject(nodeId: string, obj: QuantumObject): void {
     if (!this.adapter.hasNode(nodeId)) {
       throw new Error(`Node ${nodeId} does not exist in graph`);
     }
-    this.quantumNodes.set(nodeId, state);
+    this.quantumNodes.set(nodeId, obj);
   }
 
-  getVertexQuantumState(nodeId: string): StateVector | undefined {
+  getVertexQuantumObject(nodeId: string): QuantumObject | undefined {
     return this.quantumNodes.get(nodeId);
   }
 
-  setEdgeQuantumOperator(edgeId: string, operator: IOperator): void {
+  setEdgeQuantumObject(edgeId: string, obj: QuantumObject): void {
     if (!this.adapter.hasEdge(edgeId)) {
       throw new Error(`Edge ${edgeId} does not exist in graph`);
     }
-    this.quantumEdges.set(edgeId, operator);
+    this.quantumEdges.set(edgeId, obj);
   }
 
-  getEdgeQuantumOperator(edgeId: string): IOperator | undefined {
+  getEdgeQuantumObject(edgeId: string): QuantumObject | undefined {
     return this.quantumEdges.get(edgeId);
   }
 
@@ -124,19 +124,19 @@ function createQuantumGraphPOC(): QuantumGraphPOC {
   superposition.setState(0, math.complex(1/Math.sqrt(2), 0));
   superposition.setState(1, math.complex(1/Math.sqrt(2), 0));
 
-  // Label vertices with quantum states (using node IDs from path graph)
+  // Label vertices with quantum objects (states in this example)
   const nodes = quantumGraph.getNodes();
   if (nodes.length >= 3) {
-    quantumGraph.setVertexQuantumState(nodes[0].id, state0);
-    quantumGraph.setVertexQuantumState(nodes[1].id, state1); 
-    quantumGraph.setVertexQuantumState(nodes[2].id, superposition);
+    quantumGraph.setVertexQuantumObject(nodes[0].id, state0);
+    quantumGraph.setVertexQuantumObject(nodes[1].id, state1); 
+    quantumGraph.setVertexQuantumObject(nodes[2].id, superposition);
   }
 
-  // Label edges with quantum operators
+  // Label edges with quantum objects (operators in this example)
   const edges = quantumGraph.getEdges();
   if (edges.length >= 2) {
-    quantumGraph.setEdgeQuantumOperator(edges[0].id, PauliX);
-    quantumGraph.setEdgeQuantumOperator(edges[1].id, PauliZ);
+    quantumGraph.setEdgeQuantumObject(edges[0].id, PauliX);
+    quantumGraph.setEdgeQuantumObject(edges[1].id, PauliZ);
   }
 
   return quantumGraph;
@@ -153,27 +153,35 @@ function analyzeGraph(graph: QuantumGraphPOC): void {
   console.log(`Graph size: ${graph.nodeCount} vertices, ${graph.edgeCount} edges`);
   
   // Analyze vertices with quantum labels
-  console.log('\nVertices with Quantum States:');
+  console.log('\nVertices with Quantum Objects:');
   for (const node of graph.getNodes()) {
-    const state = graph.getVertexQuantumState(node.id);
-    if (state) {
-      console.log(`${node.id}: State |ψ⟩, norm = ${state.norm().toFixed(3)}`);
-      console.log(`  Amplitudes: [${state.getAmplitudes().map(c => 
-        `${c.re.toFixed(3)}${c.im >= 0 ? '+' : ''}${c.im.toFixed(3)}i`
-      ).join(', ')}]`);
+    const obj = graph.getVertexQuantumObject(node.id);
+    if (obj) {
+      if (isState(obj)) {
+        console.log(`${node.id}: State |ψ⟩, norm = ${obj.norm().toFixed(3)}`);
+        console.log(`  Amplitudes: [${obj.getAmplitudes().map(c => 
+          `${c.re.toFixed(3)}${c.im >= 0 ? '+' : ''}${c.im.toFixed(3)}i`
+        ).join(', ')}]`);
+      } else if (isOperator(obj)) {
+        console.log(`${node.id}: Operator (${obj.type}), norm = ${obj.norm().toFixed(3)}`);
+      }
     } else {
-      console.log(`${node.id}: No quantum state assigned`);
+      console.log(`${node.id}: No quantum object assigned`);
     }
   }
 
   // Analyze edges with quantum labels
-  console.log('\nEdges with Quantum Operators:');
+  console.log('\nEdges with Quantum Objects:');
   for (const edge of graph.getEdges()) {
-    const operator = graph.getEdgeQuantumOperator(edge.id);
-    if (operator) {
-      console.log(`${edge.id}: ${edge.sourceId} →[${operator.type}]→ ${edge.targetId}`);
+    const obj = graph.getEdgeQuantumObject(edge.id);
+    if (obj) {
+      if (isState(obj)) {
+        console.log(`${edge.id}: ${edge.sourceId} →[State |ψ⟩]→ ${edge.targetId}`);
+      } else if (isOperator(obj)) {
+        console.log(`${edge.id}: ${edge.sourceId} →[${obj.type}]→ ${edge.targetId}`);
+      }
     } else {
-      console.log(`${edge.id}: ${edge.sourceId} →[no operator]→ ${edge.targetId}`);
+      console.log(`${edge.id}: ${edge.sourceId} →[no quantum object]→ ${edge.targetId}`);
     }
   }
 }
@@ -182,12 +190,14 @@ function analyzeGraph(graph: QuantumGraphPOC): void {
 function traverseAndApply(graph: QuantumGraphPOC, startVertex: string): void {
   console.log('\n=== Graph Traversal with Quantum Operations ===');
   
-  const startState = graph.getVertexQuantumState(startVertex);
-  if (!startState) {
+  const startObj = graph.getVertexQuantumObject(startVertex);
+  if (!startObj || !isState(startObj)) {
     console.log(`No quantum state found for vertex: ${startVertex}`);
     return;
   }
 
+  const startState = startObj as StateVector;
+  
   console.log(`Starting at ${startVertex} with state:`);
   console.log(`  |ψ₀⟩ = [${startState.getAmplitudes().map(c => 
     `${c.re.toFixed(3)}${c.im >= 0 ? '+' : ''}${c.im.toFixed(3)}i`
@@ -198,21 +208,22 @@ function traverseAndApply(graph: QuantumGraphPOC, startVertex: string): void {
   
   for (const edge of connectedEdges) {
     if (edge.sourceId === startVertex) {
-      const operator = graph.getEdgeQuantumOperator(edge.id);
+      const edgeObj = graph.getEdgeQuantumObject(edge.id);
       
-      if (operator) {
-        console.log(`\nApplying ${operator.type} operator via edge ${edge.id}:`);
+      if (edgeObj && isOperator(edgeObj)) {
+        console.log(`\nApplying ${edgeObj.type} operator via edge ${edge.id}:`);
         
         try {
-          const resultState = operator.apply(startState);
+          const resultState = edgeObj.apply(startState);
           console.log(`  |ψ₁⟩ = [${resultState.getAmplitudes().map(c => 
             `${c.re.toFixed(3)}${c.im >= 0 ? '+' : ''}${c.im.toFixed(3)}i`
           ).join(', ')}]`);
           console.log(`  Result norm: ${resultState.norm().toFixed(3)}`);
           
           // Check if target vertex state matches
-          const targetState = graph.getVertexQuantumState(edge.targetId);
-          if (targetState) {
+          const targetObj = graph.getVertexQuantumObject(edge.targetId);
+          if (targetObj && isState(targetObj)) {
+            const targetState = targetObj as StateVector;
             const similarity = Math.abs(resultState.innerProduct(targetState).re);
             console.log(`  Similarity to target ${edge.targetId}: ${similarity.toFixed(3)}`);
           }
@@ -242,10 +253,10 @@ export function runQuantumGraphPOC(): void {
     
     console.log('\n✅ POC completed successfully!');
     console.log('\nThis demonstrates:');
-    console.log('• Vertices labeled with quantum states');
-    console.log('• Edges labeled with quantum operators');
+    console.log('• Flexible quantum object labeling (vertices and edges)');
+    console.log('• Type-safe quantum object discrimination');
     console.log('• Graph traversal with quantum operations');
-    console.log('• Type-safe quantum object handling');
+    console.log('• Support for states, operators, and density matrices');
     
   } catch (error) {
     console.error('❌ POC failed:', error);
