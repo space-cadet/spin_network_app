@@ -19,7 +19,8 @@
  */
 
 import * as math from 'mathjs';
-import { Complex, IOperator, toComplex } from '../core/types';
+import { Complex, IOperator, IStateVector, toComplex } from '../core/types';
+import { StateVector } from '../states/stateVector';
 
 // ==================== Type Definitions ====================
 
@@ -1073,4 +1074,73 @@ export function isUnitary(
     }
 
     return true;
+}
+
+/**
+ * Orthogonalizes a set of state vectors using modified Gram-Schmidt process
+ *
+ * This function provides a convenient wrapper around the internal degenerate
+ * eigenvector orthogonalization for use with IStateVector objects. It:
+ * 1. Converts IStateVector objects to ComplexMatrix format
+ * 2. Groups vectors by eigenvalue (assumes all have same eigenvalue)
+ * 3. Applies the validated orthogonalization algorithm
+ * 4. Converts back to IStateVector objects
+ *
+ * Useful for:
+ * - Orthogonalizing intertwiner basis states
+ * - Processing degenerate quantum states
+ * - Ensuring orthonormal bases in quantum calculations
+ *
+ * @param stateVectors - Array of state vectors to orthogonalize
+ * @param precision - Numerical threshold for orthogonality (default: 1e-10)
+ * @returns Array of orthogonalized state vectors
+ * @throws Error if state vectors have different dimensions
+ */
+export function orthogonalizeStateVectors(
+    stateVectors: IStateVector[],
+    precision: number = NUMERICAL_THRESHOLD
+): IStateVector[] {
+    if (stateVectors.length === 0) {
+        return [];
+    }
+
+    // Validate dimensions
+    const dimension = stateVectors[0].dimension;
+    for (const state of stateVectors) {
+        if (state.dimension !== dimension) {
+            throw new Error(`All state vectors must have same dimension. Expected ${dimension}, got ${state.dimension}`);
+        }
+    }
+
+    // Convert to ComplexMatrix format (each state vector is a column)
+    const complexMatrix: ComplexMatrix = stateVectors.map(state => state.getAmplitudes());
+
+    // Create dummy eigenvalues (all the same since we want to orthogonalize as a group)
+    const eigenvalues: Complex[] = stateVectors.map(() => math.complex(1, 0));
+
+    // Group all vectors together (they all have the same dummy eigenvalue)
+    const groups = new Map<string, ComplexMatrix>();
+    groups.set('1,0', complexMatrix);
+
+    // Apply orthogonalization
+    const orthogonalizedMatrix = orthogonalizeDegenerateEigenvectors(groups, precision);
+
+    // Convert back to IStateVector objects
+    const result: IStateVector[] = [];
+    for (let i = 0; i < orthogonalizedMatrix.length && i < stateVectors.length; i++) {
+        const originalState = stateVectors[i];
+        const orthogonalizedAmplitudes = orthogonalizedMatrix[i];
+        
+        // Create new StateVector with orthogonalized amplitudes
+        const newState = new StateVector(
+            dimension,
+            orthogonalizedAmplitudes,
+            originalState.basis ? `orth(${originalState.basis})` : 'orthogonalized',
+            originalState.properties
+        );
+        
+        result.push(newState);
+    }
+
+    return result;
 }
