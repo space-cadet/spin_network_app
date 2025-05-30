@@ -3,8 +3,10 @@
  */
 
 import { runQuantumGraphPOC } from './quantumGraphPOC';
+import { runCompositeQuantumGraphPOC } from './entangledGraphPOC';
 
 // Simple test runner
 // if (require.main === module) {
-  runQuantumGraphPOC();
+  // runQuantumGraphPOC();
+runCompositeQuantumGraphPOC();
 // }
