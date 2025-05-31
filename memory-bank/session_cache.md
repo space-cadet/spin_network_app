@@ -2,22 +2,25 @@
 *Last Updated: 2025-05-30 19:25 IST*
 
 ## Current Session
-**Started**: 2025-05-30 16:45 IST
+**Started**: 2025-05-31 00:15 IST
 **Focus Task**: T73 - Implement Quantum Graph Data Structure
-**Status**: 🔄 **BELL CHAIN EXAMPLE CREATED** - Simple example implemented, entanglement limitations identified
-**Session File**: `sessions/2025-05-30-afternoon.md`
+**Status**: 🔄 **PHASE 3A COMPLETE** - General operation infrastructure implemented
+**Session File**: `sessions/2025-05-31-night.md`
 
 ## Session Work Completed
-- ✅ **Bell Chain Example**: Created simple Bell state chain example (200 lines) with configurable vertices and boundary conditions
-- ✅ **Limitations Identified**: Current implementation creates static graph structure without genuine entanglement 
-- ✅ **Entanglement Plan**: Created comprehensive implementation plan for quantum graph entanglement support
-- ✅ **Task Documentation**: Updated T73 with Bell chain limitations analysis and requirements for genuine entanglement
-- ✅ **Memory Bank Updates**: Updated tasks.md, edit_history.md, and error log with session work
+- ✅ **Phase 3A Complete**: General operation infrastructure implemented with arbitrary element operations
+- ✅ **Enhanced QuantumGraph**: Added composite manager integration and three operation methods
+- ✅ **CompositeQuantumManager**: Created as separate class for proper type organization
+- ✅ **Operations Module**: Created general.ts with functions for arbitrary graph subsets
+- ✅ **Measurement Support**: Added measureSubsystem for quantum measurements on arbitrary vertices
+- ✅ **Proper Architecture**: Separated interfaces from implementations, organized operation functions
 
-## Key Insights from Session
-- **Static vs Dynamic**: Current Bell chain creates graph topology with quantum labels but no actual entanglement
-- **Architectural Gap**: QuantumGraph needs CompositeStateManager for multi-vertex quantum states
-- **Implementation Path**: 6-phase plan created for transitioning from static to dynamic quantum graphs
+## Key Implementation Details
+- **Three Operation Methods**: applyVertexOperation, applyEdgeOperation, applyOperation for mixed elements
+- **Composite Priority**: Get/set methods check composite states first, fall back to individual states
+- **General Operations**: Eight functions supporting arbitrary operations on arbitrary element subsets
+- **Type Safety**: Proper separation of interfaces (types.ts) and class implementations
+- **Extensible Design**: Operations module can be extended with domain-specific functions
 
 ### Completed Tasks - T71 Phase 6 Complete  
 - ✅ **Redux Serialization Fix**: Removed non-serializable GraphologyAdapter from Redux state, added metadata storage
@@ -111,41 +114,36 @@
 
 ### T73: Implement Quantum Graph Data Structure
 **Status**: 🔄 **Priority**: HIGH
-**Started**: 2025-05-30 **Last**: 2025-05-30 23:55 IST
-**Context**: **PLANNING COMPLETE** - Composite POC validated, graph-state entanglement requirements documented
+**Started**: 2025-05-30 **Last**: 2025-05-31 01:00 IST
+**Context**: **PHASE 3A COMPLETE** - General operation infrastructure implemented with arbitrary element operations
 **Key Files**:
-- `memory-bank/tasks/T73.md` ✅ - Updated with simplified naming and graph-state entanglement planning
-- `packages/quantum/examples/poc/quantumGraphPOC.ts` ✅ - Updated POC using T72 QuantumObject for flexible labeling
-- `packages/quantum/examples/poc/entangledGraphPOC.ts` ✅ - Composite POC with shortened variable names (QCompManager, CompQGraph)
-- `packages/quantum/src/QGraph/types.ts` ✅ - Core interfaces for quantum graph module
-- `packages/quantum/src/QGraph/QuantumGraph.ts` ✅ - Main implementation class with flexible quantum labeling
-- `packages/quantum/src/QGraph/utils.ts` ✅ - Utility functions for analysis and traversal
-- `packages/quantum/src/QGraph/index.ts` ✅ - Public API exports
-- `packages/quantum/docs/graph-entanglement-plan.md` ✅ - Comprehensive plan with composite system operation guide
+- `packages/quantum/src/qgraph/QuantumGraph.ts` ✅ - Enhanced with composite manager and three operation methods
+- `packages/quantum/src/qgraph/CompositeQuantumManager.ts` ✅ - Separate class for composite state management
+- `packages/quantum/src/qgraph/types.ts` ✅ - Proper interface organization (no class definitions)
+- `packages/quantum/src/qgraph/operations/general.ts` ✅ - General operation functions for arbitrary subsets
+- `packages/quantum/src/qgraph/operations/index.ts` ✅ - Operations module exports
+- `packages/quantum/src/qgraph/index.ts` ✅ - Enhanced with operations and composite manager exports
+- `packages/quantum/docs/graph-entanglement-plan.md` ✅ - Updated with Phase 3A completion details
 **Progress**:
 1. ✅ **POC COMPLETE**: Working demonstration with quantum object labeling on graph-core infrastructure
-2. ✅ **POC UPDATED**: Modified to use T72 QuantumObject for flexible labeling (vertices/edges can have any quantum objects)
-3. ✅ **PHASE 1 COMPLETE**: Core QuantumGraph module implemented with 4 core files
-4. ✅ **BELL CHAIN EXAMPLE**: Simple demonstration with limitations identified - no genuine entanglement
-5. ✅ **ENTANGLEMENT PLAN**: Comprehensive implementation strategy documented (6-phase plan)
-6. ✅ **COMPOSITE POC IMPLEMENTED**: Successful validation with simplified naming
-   - QCompManager (shortened from CompositeQuantumManager) for multi-element quantum states
-   - CompQGraph (shortened from CompositeQuantumGraph) implementation
-   - Bell states across vertex pairs (dim 4, norm 1.0)
-   - Toric code plaquettes across 4 edges (dim 16, norm 1.0)
-   - Composite priority system prevents element overlaps
-   - Backward compatibility with single-element states
-   - Gate operations: Bell states created via Hadamard + CNOT instead of manual construction
-7. ✅ **GRAPH-STATE ENTANGLEMENT PLANNING**: Next phase requirements documented
-   - Problem identified: Current system attaches pre-entangled objects instead of creating entanglement from graph states
-   - Solution designed: Graph-level operations to act ON existing graph-attached states
-   - Implementation path: Initialize with individual states, apply operations to create entanglement
-   - Step-by-step guide: Detailed composite system operation explanation documented
-8. ⬜ **Phase 3**: Graph-State Entanglement Operations - Create entanglement ON existing graph states rather than attaching pre-entangled objects
-9. ⬜ **Phase 4**: Domain builders (spin networks, circuits, tensor networks ~400 lines)
-10. ⬜ **Phase 5**: Integration & examples
-11. ⬜ **Phase 6**: Testing and documentation
-**Achievement**: Validated composite quantum object architecture with simplified naming. Documented clear path to creating entanglement through graph operations rather than external attachment. Ready for implementation of graph-level entanglement operations.
+2. ✅ **POC UPDATED**: Modified to use T72 QuantumObject for flexible labeling
+3. ✅ **PHASE 1 COMPLETE**: Core QuantumGraph module implemented
+4. ✅ **BELL CHAIN EXAMPLE**: Simple demonstration with limitations identified
+5. ✅ **ENTANGLEMENT PLAN**: Comprehensive implementation strategy documented
+6. ✅ **COMPOSITE POC IMPLEMENTED**: Successful validation with composite infrastructure
+7. ✅ **GRAPH-STATE ENTANGLEMENT PLANNING**: Requirements documented for operations ON existing states
+8. ✅ **PHASE 3A COMPLETE**: General Operation Infrastructure Implemented
+   - Enhanced QuantumGraph with composite manager integration
+   - Three operation methods: applyVertexOperation, applyEdgeOperation, applyOperation
+   - CompositeQuantumManager as separate class for proper type organization
+   - General operations module with eight utility functions
+   - measureSubsystem method for arbitrary vertex measurements
+   - Proper file organization: interfaces in types.ts, implementations separate
+9. ⬜ **Phase 3B**: Enhanced Operation Implementation - Tensor product, state extraction, composite merging/splitting
+10. ⬜ **Phase 4**: Domain builders (spin networks, circuits, tensor networks)
+11. ⬜ **Phase 5**: Integration & examples
+12. ⬜ **Phase 6**: Testing and documentation
+**Achievement**: General operation infrastructure complete. Framework supports arbitrary quantum operations on arbitrary graph element subsets. Foundation in place for creating entanglement ON existing graph states through dynamic operations.
 
 ### T72: Implement Root QuantumObject Type
 **Status**: ✅ **Priority**: MEDIUM

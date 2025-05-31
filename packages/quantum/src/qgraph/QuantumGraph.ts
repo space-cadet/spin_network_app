@@ -2,8 +2,9 @@
  * Core QuantumGraph implementation
  */
 
-import { QuantumObject } from '../core/types';
-import { IQuantumGraph } from './types';
+import { QuantumObject, IOperator, IStateVector } from '../core/types';
+import { IQuantumGraph, MeasurementResult } from './types';
+import { CompositeQuantumManager } from './CompositeQuantumManager';
 import { GraphologyAdapter } from '../../../graph-core/src/core/GraphologyAdapter';
 import { IGraph, IGraphNode, IGraphEdge } from '../../../graph-core/src/core/types';
 
@@ -14,9 +15,11 @@ export class QuantumGraph implements IQuantumGraph {
   private adapter: GraphologyAdapter;
   private quantumNodes: Map<string, QuantumObject> = new Map();
   private quantumEdges: Map<string, QuantumObject> = new Map();
+  private compositeManager: CompositeQuantumManager;
 
   constructor(baseGraph?: GraphologyAdapter) {
     this.adapter = baseGraph || new GraphologyAdapter();
+    this.compositeManager = new CompositeQuantumManager();
   }
 
   // Quantum labeling methods
@@ -28,7 +31,8 @@ export class QuantumGraph implements IQuantumGraph {
   }
 
   getVertexQuantumObject(nodeId: string): QuantumObject | undefined {
-    return this.quantumNodes.get(nodeId);
+    // Check composite first, fallback to individual
+    return this.compositeManager.getCompositeForElement(nodeId) || this.quantumNodes.get(nodeId);
   }
 
   setEdgeQuantumObject(edgeId: string, obj: QuantumObject): void {
@@ -39,7 +43,8 @@ export class QuantumGraph implements IQuantumGraph {
   }
 
   getEdgeQuantumObject(edgeId: string): QuantumObject | undefined {
-    return this.quantumEdges.get(edgeId);
+    // Check composite first, fallback to individual
+    return this.compositeManager.getCompositeForElement(edgeId) || this.quantumEdges.get(edgeId);
   }
 
   // Utility methods
@@ -57,6 +62,113 @@ export class QuantumGraph implements IQuantumGraph {
 
   clearEdgeQuantumObject(edgeId: string): void {
     this.quantumEdges.delete(edgeId);
+  }
+
+  // Composite quantum object management
+  setCompositeQuantumObject(elementIds: string[], obj: QuantumObject): void {
+    this.compositeManager.setComposite(elementIds, obj);
+  }
+
+  getCompositeQuantumObject(elementIds: string[]): QuantumObject | undefined {
+    return this.compositeManager.getComposite(elementIds);
+  }
+
+  // General quantum operations
+  applyVertexOperation(vertexIds: string[], operator: IOperator): void {
+    // Extract current subsystem state
+    const currentStates = vertexIds.map(id => this.getVertexQuantumObject(id)).filter(Boolean) as QuantumObject[];
+    
+    if (currentStates.length === 0) {
+      throw new Error('No quantum objects found on specified vertices');
+    }
+
+    // For now, apply operator to first state (placeholder implementation)
+    if (currentStates.length === 1 && currentStates[0].objectType === 'state') {
+      const newState = operator.apply(currentStates[0] as IStateVector);
+      
+      if (vertexIds.length === 1) {
+        // Single vertex operation - update individual state
+        this.setVertexQuantumObject(vertexIds[0], newState);
+      } else {
+        // Multi-vertex operation - create composite
+        this.setCompositeQuantumObject(vertexIds, newState);
+      }
+    }
+  }
+
+  applyEdgeOperation(edgeIds: string[], operator: IOperator): void {
+    // Extract current subsystem state  
+    const currentStates = edgeIds.map(id => this.getEdgeQuantumObject(id)).filter(Boolean) as QuantumObject[];
+    
+    if (currentStates.length === 0) {
+      throw new Error('No quantum objects found on specified edges');
+    }
+
+    // For now, apply operator to first state (placeholder implementation)
+    if (currentStates.length === 1 && currentStates[0].objectType === 'state') {
+      const newState = operator.apply(currentStates[0] as IStateVector);
+      
+      if (edgeIds.length === 1) {
+        // Single edge operation - update individual state
+        this.setEdgeQuantumObject(edgeIds[0], newState);
+      } else {
+        // Multi-edge operation - create composite
+        this.setCompositeQuantumObject(edgeIds, newState);
+      }
+    }
+  }
+
+  applyOperation(elementIds: string[], operator: IOperator): void {
+    // Determine element types and delegate appropriately
+    const vertexIds = elementIds.filter(id => this.hasNode(id));
+    const edgeIds = elementIds.filter(id => this.hasEdge(id));
+    
+    if (vertexIds.length > 0 && edgeIds.length > 0) {
+      // Mixed operation - extract states from both vertices and edges
+      const allStates = [
+        ...vertexIds.map(id => this.getVertexQuantumObject(id)),
+        ...edgeIds.map(id => this.getEdgeQuantumObject(id))
+      ].filter(Boolean) as QuantumObject[];
+      
+      if (allStates.length === 0) {
+        throw new Error('No quantum objects found on specified elements');
+      }
+
+      // Apply to first state and create composite (placeholder implementation)
+      if (allStates[0].objectType === 'state') {
+        const newState = operator.apply(allStates[0] as IStateVector);
+        this.setCompositeQuantumObject(elementIds, newState);
+      }
+    } else if (vertexIds.length > 0) {
+      this.applyVertexOperation(vertexIds, operator);
+    } else if (edgeIds.length > 0) {
+      this.applyEdgeOperation(edgeIds, operator);
+    } else {
+      throw new Error('No valid graph elements found in elementIds');
+    }
+  }
+
+  measureSubsystem(vertexIds: string[], projector?: IOperator): MeasurementResult {
+    // Extract subsystem state
+    const subsystemState = this.getCompositeQuantumObject(vertexIds) || 
+                          this.getVertexQuantumObject(vertexIds[0]);
+    
+    if (!subsystemState || subsystemState.objectType !== 'state') {
+      throw new Error('No quantum state found for measurement');
+    }
+
+    const state = subsystemState as IStateVector;
+    
+    // Simple measurement implementation (placeholder)
+    const probability = state.norm() ** 2;
+    const outcome = Math.random() < 0.5 ? 0 : 1;
+    
+    return {
+      outcome,
+      probability,
+      postMeasurementState: state,
+      measuredSubsystem: vertexIds
+    };
   }
 
   // Access to underlying graph adapter

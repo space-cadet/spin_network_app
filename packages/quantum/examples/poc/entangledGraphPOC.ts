@@ -161,7 +161,7 @@ function applyHadamard(state: StateVector, qubitIndex: number): StateVector {
   const newState = new StateVector(state.dimension);
   
   for (let i = 0; i < state.dimension; i++) {
-    const amplitude = state.getAmplitude(i);
+    const amplitude = state.getAmplitudes()[i];
     if (amplitude.re === 0 && amplitude.im === 0) continue;
     
     // Check if target qubit is 0 or 1
@@ -171,13 +171,13 @@ function applyHadamard(state: StateVector, qubitIndex: number): StateVector {
     if (qubitValue === 0) {
       // |0⟩ → (|0⟩ + |1⟩)/√2
       const factor = math.divide(amplitude, Math.sqrt(2));
-      newState.setState(i, math.add(newState.getAmplitude(i), factor));
-      newState.setState(flippedIndex, math.add(newState.getAmplitude(flippedIndex), factor));
+      newState.setState(i, math.add(newState.getAmplitudes()[i], factor));
+      newState.setState(flippedIndex, math.add(newState.getAmplitudes()[flippedIndex], factor));
     } else {
       // |1⟩ → (|0⟩ - |1⟩)/√2
       const factor = math.divide(amplitude, Math.sqrt(2));
-      newState.setState(flippedIndex, math.add(newState.getAmplitude(flippedIndex), factor));
-      newState.setState(i, math.subtract(newState.getAmplitude(i), factor));
+      newState.setState(flippedIndex, math.add(newState.getAmplitudes()[flippedIndex], factor));
+      newState.setState(i, math.subtract(newState.getAmplitudes()[i], factor));
     }
   }
   
@@ -190,7 +190,7 @@ function applyCNOT(state: StateVector, controlQubit: number, targetQubit: number
   const newState = new StateVector(state.dimension);
   
   for (let i = 0; i < state.dimension; i++) {
-    const amplitude = state.getAmplitude(i);
+    const amplitude = state.getAmplitudes()[i];
     if (amplitude.re === 0 && amplitude.im === 0) continue;
     
     const controlValue = (i >> (n - 1 - controlQubit)) & 1;
@@ -198,10 +198,10 @@ function applyCNOT(state: StateVector, controlQubit: number, targetQubit: number
     if (controlValue === 1) {
       // Flip target qubit
       const flippedIndex = i ^ (1 << (n - 1 - targetQubit));
-      newState.setState(flippedIndex, math.add(newState.getAmplitude(flippedIndex), amplitude));
+      newState.setState(flippedIndex, math.add(newState.getAmplitudes()[flippedIndex], amplitude));
     } else {
       // No change
-      newState.setState(i, math.add(newState.getAmplitude(i), amplitude));
+      newState.setState(i, math.add(newState.getAmplitudes()[i], amplitude));
     }
   }
   
@@ -230,7 +230,7 @@ function applyStabilizerGenerator(state: StateVector): StateVector {
   // Simplified stabilizer: creates equal superposition of even parity states
   // In full toric code, this would be X₁X₂X₃X₄ stabilizer
   for (let i = 0; i < state.dimension; i++) {
-    const amplitude = state.getAmplitude(i);
+    const amplitude = state.getAmplitudes()[i];
     if (amplitude.re === 0 && amplitude.im === 0) continue;
     
     // Count number of 1s (parity)

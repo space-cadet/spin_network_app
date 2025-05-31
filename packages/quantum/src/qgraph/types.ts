@@ -2,7 +2,7 @@
  * Type definitions for quantum graph module
  */
 
-import { QuantumObject } from '../core/types';
+import { QuantumObject, IStateVector } from '../core/types';
 import { IGraph } from '../../../graph-core/src/core/types';
 
 /**
@@ -64,4 +64,23 @@ export interface QuantumTraversalResult {
     operator?: QuantumObject;
     result?: QuantumObject;
   }>;
+}
+
+/**
+ * Interface for composite quantum manager
+ */
+export interface ICompositeQuantumManager {
+  setComposite(elementIds: string[], obj: QuantumObject): void;
+  getComposite(elementIds: string[]): QuantumObject | undefined;
+  getCompositeForElement(elementId: string): QuantumObject | undefined;
+}
+
+/**
+ * Result of quantum measurement operation
+ */
+export interface MeasurementResult {
+  outcome: number;
+  probability: number;
+  postMeasurementState: IStateVector;
+  measuredSubsystem: string[];
 }

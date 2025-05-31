@@ -122,9 +122,50 @@ class CompositeQuantumGraph {
 
 **Next Phase Ready**: Entanglement operations (CNOT, Bell state creation, measurement)
 
-### Phase 3: Graph-State Entanglement Operations (NEXT - 3-4 days) 
+### Phase 3: Graph-State Entanglement Operations (IN PROGRESS - 3-4 days) 
 
-**Current Status**: POC demonstrates composite system infrastructure. Next step is to create entanglement ON existing graph states rather than attaching pre-entangled objects.
+**Current Status**: Phase 3A Complete - General operation infrastructure implemented. QuantumGraph now supports arbitrary operations on arbitrary element subsets with composite state management.
+
+#### Phase 3A: General Operation Infrastructure ✅ COMPLETE
+
+**Implementation Summary**:
+The general operation infrastructure provides a foundation for applying arbitrary quantum operations to arbitrary subsets of graph elements. This addresses the core requirement to create entanglement ON existing graph states rather than attaching pre-entangled objects.
+
+**Files Implemented**:
+- `packages/quantum/src/qgraph/QuantumGraph.ts` (+80 lines) - Enhanced with composite manager and operation methods
+- `packages/quantum/src/qgraph/CompositeQuantumManager.ts` (30 lines) - Separate class for composite state management  
+- `packages/quantum/src/qgraph/operations/general.ts` (150 lines) - General operation functions
+- `packages/quantum/src/qgraph/operations/index.ts` (15 lines) - Operations module exports
+- `packages/quantum/src/qgraph/types.ts` (updated) - Proper interface separation, removed class definitions
+
+**Key Features Implemented**:
+- **Three Operation Methods**: 
+  - `applyVertexOperation(vertexIds[], operator)` - Apply to vertex subsets
+  - `applyEdgeOperation(edgeIds[], operator)` - Apply to edge subsets  
+  - `applyOperation(elementIds[], operator)` - Apply to mixed vertex/edge subsets
+- **Composite State Integration**: Get/set methods check composite states first, fall back to individual
+- **General Operations Module**: Eight functions for arbitrary operations on graph subsets
+- **Measurement Support**: `measureSubsystem(vertexIds[], projector?)` for quantum measurements
+- **Proper Type Organization**: Interfaces in types.ts, class implementations in separate files
+- **Utility Functions**: Validation, dimension calculation, state extraction/insertion
+
+**Current Capabilities**:
+- Apply arbitrary quantum operators to arbitrary vertex/edge subsets
+- Automatic composite state creation for multi-element operations  
+- State extraction and insertion with composite priority
+- Basic measurement operations with outcome calculation
+- Validation and dimension calculation for subsystems
+- Mixed vertex/edge operations with element type detection
+
+**Architecture Benefits**:
+- **General vs Specific**: Framework supports arbitrary operations instead of predefined gate sequences
+- **Type Safety**: Proper separation of interfaces and implementations
+- **Extensibility**: Operations module can be extended with domain-specific functions
+- **Composability**: Basic operations can be combined to create complex quantum circuits
+
+#### Phase 3B: Enhanced Operation Implementation (NEXT - 2-3 days)
+
+**Required Enhancements** (Current placeholder implementations need upgrading):
 
 #### Composite System Step-by-Step Operation
 
