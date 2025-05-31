@@ -26,3 +26,9 @@ export * from './utils/oscillator';
 
 // Export angular momentum module
 export * from './angularMomentum';
+
+// Export quantum graph module
+export * from './qgraph';
+
+// Export geometry module
+export * from './geometry';

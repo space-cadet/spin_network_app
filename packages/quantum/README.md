@@ -14,6 +14,9 @@ A TypeScript library for quantum mechanical calculations and spin network simula
 - Angular momentum algebra (J₊, J₋, Jz, J²)
 - Wigner symbols (3j, 6j, 9j)
 - Angular momentum composition
+- Quantum graph structures and operations
+- Composite quantum system management
+- Geometric quantum distance calculations
 
 ## Core Components
 
@@ -125,6 +128,40 @@ Comprehensive angular momentum algebra:
 - `wigner3j(j1: number, j2: number, j3: number, m1: number, m2: number, m3: number)` - 3j symbols
 - `wigner6j(j1: number, j2: number, j3: number, l1: number, l2: number, l3: number)` - 6j symbols
 - `wigner9j(...)` - 9j symbols
+
+### Quantum Graphs
+Graph-based quantum system representation:
+- `QuantumGraph` - Core quantum graph implementation
+- `CompositeQuantumManager` - Managing composite quantum systems
+- `analyzeQuantumGraph(graph)` - Graph structure analysis
+- `traverseWithQuantumOps(graph, options)` - Quantum-aware graph traversal
+- `printQuantumGraphAnalysis(analysis)` - Display graph analysis results
+
+```typescript
+import { QuantumGraph, analyzeQuantumGraph } from '@spin-network/quantum';
+
+// Create quantum graph
+const qgraph = new QuantumGraph();
+
+// Add quantum nodes and edges
+qgraph.addNode('qubit1', { state: StateVector.computationalBasis(2, 0) });
+qgraph.addNode('qubit2', { state: StateVector.computationalBasis(2, 1) });
+qgraph.addEdge('qubit1', 'qubit2', { entanglement: 0.5 });
+
+// Analyze graph structure
+const analysis = analyzeQuantumGraph(qgraph);
+```
+
+### Geometry
+Quantum geometric operations:
+- `quantumDistance(state1, state2)` - Fubini-Study distance between quantum states
+- Geometric measures for quantum state spaces
+
+```typescript
+import { quantumDistance } from '@spin-network/quantum';
+
+const distance = quantumDistance(state1, state2);
+```
 
 ## Examples
 
