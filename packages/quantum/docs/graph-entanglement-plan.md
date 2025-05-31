@@ -122,18 +122,87 @@ class CompositeQuantumGraph {
 
 **Next Phase Ready**: Entanglement operations (CNOT, Bell state creation, measurement)
 
-### Phase 3: Entanglement Operations (3-4 days)
+### Phase 3: Graph-State Entanglement Operations (NEXT - 3-4 days) 
+
+**Current Status**: POC demonstrates composite system infrastructure. Next step is to create entanglement ON existing graph states rather than attaching pre-entangled objects.
+
+#### Composite System Step-by-Step Operation
+
+The current POC composite system works as follows:
+
+1. **Composite Manager Structure**
+   - `QCompManager` maintains two maps: `composites` (composite ID → quantum object) and `elementToComposite` (element ID → composite ID)
+   - Composite ID created by sorting element IDs and joining with underscore for consistent lookup
+
+2. **Setting Composite Relationships**
+   - `setComposite(elementIds[], obj)` stores quantum object under composite ID
+   - Each individual element maps to the composite ID in reverse lookup
+   - Example: Bell state spanning vertices "0,0" and "0,1" creates composite ID "0,0_0,1"
+
+3. **Retrieval with Composite Priority**
+   - `getCompositeForElement(elementId)` returns composite object if element is part of one
+   - `getNodeQObj(nodeId)` always returns composite state when element belongs to composite
+   - Individual states only allowed if element not already in composite
+
+4. **Composite Object Creation**
+   - Current: Pre-created Bell states and plaquette operators attached to multiple elements
+   - **Issue**: States created externally, then attached to graph - not generated from graph operations
+
+#### Required Changes for Graph-State Entanglement
+
+**Problem**: Current system attaches pre-entangled objects to graph elements instead of creating entanglement from existing graph states.
+
+**Solution**: Transform to act ON graph states themselves:
+
+1. **Initialize Graph with Individual States**
+   - All vertices start with individual |0⟩ states
+   - All edges start with individual |0⟩ states  
+   - No composite objects initially - pure product state
+
+2. **Graph-Level Gate Operations**
+   - `applyVertexGate(vertexId, gate)` - acts on single vertex state
+   - `applyEdgeGate(edgeId, gate)` - acts on single edge state
+   - `applyTwoVertexGate(vertex1, vertex2, gate)` - creates entanglement between vertices
+   - `applyMultiEdgeGate(edgeIds[], gate)` - creates entanglement between edges
+
+3. **Entanglement Creation Process**
+   - Apply Hadamard to vertex A: |0⟩ → (|0⟩ + |1⟩)/√2
+   - Apply CNOT between vertex A and B: creates Bell state across both
+   - System automatically converts individual states to composite when entanglement occurs
+
+4. **State Management During Operations**
+   - Detect when operations create entanglement
+   - Automatically merge individual states into composites
+   - Update composite manager mappings
+   - Remove individual states that become part of composites
+
+5. **Operation Interface**
+   - `graph.entangleVertices([v1, v2], bellCircuit)`
+   - `graph.createPlaquette([e1, e2, e3, e4], stabilizerOp)`
+   - Operations work on existing graph-attached states, not external objects
 
 **File**: `packages/quantum/src/qgraph/operations/entanglement.ts` (~200 lines)
 ```typescript
-// Bell state creation
-function createBellPair(graph: QuantumGraph, vertex1: string, vertex2: string): void;
+// Graph-state entanglement operations
+function entangleVertices(graph: QuantumGraph, vertex1: string, vertex2: string): void {
+  // Get existing individual states from graph
+  const state1 = graph.getVertexQuantumObject(vertex1);
+  const state2 = graph.getVertexQuantumObject(vertex2);
+  
+  // Apply Hadamard to first vertex
+  graph.applyVertexGate(vertex1, new HadamardGate());
+  
+  // Apply CNOT to create Bell state
+  graph.applyTwoVertexGate(vertex1, vertex2, new CNOTGate());
+  
+  // System automatically creates composite state
+}
 
-// Multi-vertex entanglement (GHZ states, W states)
+// Multi-vertex entanglement from product states
 function createGHZState(graph: QuantumGraph, vertexIds: string[]): void;
 function createWState(graph: QuantumGraph, vertexIds: string[]): void;
 
-// Controlled operations across composites
+// Controlled operations across existing graph states
 function applyControlledOperation(
   graph: QuantumGraph, 
   controlVertices: string[], 
@@ -141,7 +210,7 @@ function applyControlledOperation(
   operator: IOperator
 ): void;
 
-// Partial measurement and decoherence
+// Partial measurement splits composites back to individual states
 function partialMeasure(
   graph: QuantumGraph, 
   vertexIds: string[], 

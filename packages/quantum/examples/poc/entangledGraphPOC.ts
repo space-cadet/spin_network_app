@@ -14,7 +14,7 @@ import { IGraph, IGraphNode, IGraphEdge } from '../../../graph-core/src/core/typ
 import * as math from 'mathjs';
 
 // Simple composite quantum object manager
-class CompositeQuantumManager {
+class QCompManager {
   private composites: Map<string, QuantumObject> = new Map();
   private elementToComposite: Map<string, string> = new Map();
 
@@ -44,41 +44,41 @@ class CompositeQuantumManager {
 }
 
 // Enhanced quantum-labeled graph with composite support
-interface CompositeQuantumGraphPOC extends IGraph {
+interface ICompQGraph extends IGraph {
   // Composite quantum labeling methods
-  setCompositeQuantumObject(elementIds: string[], obj: QuantumObject): void;
-  getCompositeQuantumObject(elementIds: string[]): QuantumObject | undefined;
+  setCompQObj(elementIds: string[], obj: QuantumObject): void;
+  getCompQObj(elementIds: string[]): QuantumObject | undefined;
   
   // Backward compatible single-element methods
-  setVertexQuantumObject(nodeId: string, obj: QuantumObject): void;
-  getVertexQuantumObject(nodeId: string): QuantumObject | undefined;
-  setEdgeQuantumObject(edgeId: string, obj: QuantumObject): void;
-  getEdgeQuantumObject(edgeId: string): QuantumObject | undefined;
+  setNodeQObj(nodeId: string, obj: QuantumObject): void;
+  getNodeQObj(nodeId: string): QuantumObject | undefined;
+  setEdgeQObj(edgeId: string, obj: QuantumObject): void;
+  getEdgeQObj(edgeId: string): QuantumObject | undefined;
   
   // Graph-core adapter
   getGraphAdapter(): GraphologyAdapter;
 }
 
 // Implementation with composite quantum object support
-class CompositeQuantumGraph implements CompositeQuantumGraphPOC {
+class CompQGraph implements ICompQGraph {
   private adapter: GraphologyAdapter;
-  private compositeManager: CompositeQuantumManager = new CompositeQuantumManager();
+  private compositeManager: QCompManager = new QCompManager();
 
   constructor(baseGraph?: GraphologyAdapter) {
     this.adapter = baseGraph || new GraphologyAdapter();
   }
 
   // Composite quantum labeling methods
-  setCompositeQuantumObject(elementIds: string[], obj: QuantumObject): void {
+  setCompQObj(elementIds: string[], obj: QuantumObject): void {
     this.compositeManager.setComposite(elementIds, obj);
   }
 
-  getCompositeQuantumObject(elementIds: string[]): QuantumObject | undefined {
+  getCompQObj(elementIds: string[]): QuantumObject | undefined {
     return this.compositeManager.getComposite(elementIds);
   }
 
   // Backward compatible methods - check composite first, allow individual assignment
-  setVertexQuantumObject(nodeId: string, obj: QuantumObject): void {
+  setNodeQObj(nodeId: string, obj: QuantumObject): void {
     if (!this.adapter.hasNode(nodeId)) {
       throw new Error(`Node ${nodeId} does not exist in graph`);
     }
@@ -88,12 +88,12 @@ class CompositeQuantumGraph implements CompositeQuantumGraphPOC {
     }
   }
 
-  getVertexQuantumObject(nodeId: string): QuantumObject | undefined {
+  getNodeQObj(nodeId: string): QuantumObject | undefined {
     // Always return composite state if element is part of one (composite priority)
     return this.compositeManager.getCompositeForElement(nodeId);
   }
 
-  setEdgeQuantumObject(edgeId: string, obj: QuantumObject): void {
+  setEdgeQObj(edgeId: string, obj: QuantumObject): void {
     if (!this.adapter.hasEdge(edgeId)) {
       throw new Error(`Edge ${edgeId} does not exist in graph`);
     }
@@ -103,7 +103,7 @@ class CompositeQuantumGraph implements CompositeQuantumGraphPOC {
     }
   }
 
-  getEdgeQuantumObject(edgeId: string): QuantumObject | undefined {
+  getEdgeQObj(edgeId: string): QuantumObject | undefined {
     // Always return composite state if element is part of one (composite priority)
     return this.compositeManager.getCompositeForElement(edgeId);
   }
@@ -155,26 +155,112 @@ class CompositeQuantumGraph implements CompositeQuantumGraphPOC {
   clear(): IGraph { return this.adapter.clear(); }
 }
 
-// Create Bell state (|00⟩ + |11⟩)/√2
+// Apply Hadamard gate to single qubit in multi-qubit state
+function applyHadamard(state: StateVector, qubitIndex: number): StateVector {
+  const n = Math.log2(state.dimension);
+  const newState = new StateVector(state.dimension);
+  
+  for (let i = 0; i < state.dimension; i++) {
+    const amplitude = state.getAmplitude(i);
+    if (amplitude.re === 0 && amplitude.im === 0) continue;
+    
+    // Check if target qubit is 0 or 1
+    const qubitValue = (i >> (n - 1 - qubitIndex)) & 1;
+    const flippedIndex = i ^ (1 << (n - 1 - qubitIndex));
+    
+    if (qubitValue === 0) {
+      // |0⟩ → (|0⟩ + |1⟩)/√2
+      const factor = math.divide(amplitude, Math.sqrt(2));
+      newState.setState(i, math.add(newState.getAmplitude(i), factor));
+      newState.setState(flippedIndex, math.add(newState.getAmplitude(flippedIndex), factor));
+    } else {
+      // |1⟩ → (|0⟩ - |1⟩)/√2
+      const factor = math.divide(amplitude, Math.sqrt(2));
+      newState.setState(flippedIndex, math.add(newState.getAmplitude(flippedIndex), factor));
+      newState.setState(i, math.subtract(newState.getAmplitude(i), factor));
+    }
+  }
+  
+  return newState;
+}
+
+// Apply CNOT gate (control, target qubits)
+function applyCNOT(state: StateVector, controlQubit: number, targetQubit: number): StateVector {
+  const n = Math.log2(state.dimension);
+  const newState = new StateVector(state.dimension);
+  
+  for (let i = 0; i < state.dimension; i++) {
+    const amplitude = state.getAmplitude(i);
+    if (amplitude.re === 0 && amplitude.im === 0) continue;
+    
+    const controlValue = (i >> (n - 1 - controlQubit)) & 1;
+    
+    if (controlValue === 1) {
+      // Flip target qubit
+      const flippedIndex = i ^ (1 << (n - 1 - targetQubit));
+      newState.setState(flippedIndex, math.add(newState.getAmplitude(flippedIndex), amplitude));
+    } else {
+      // No change
+      newState.setState(i, math.add(newState.getAmplitude(i), amplitude));
+    }
+  }
+  
+  return newState;
+}
+
+// Create Bell state using quantum gates: H ⊗ I then CNOT
 function createBellState(): StateVector {
-  const bellState = new StateVector(4); // 2-qubit system
-  bellState.setState(0, math.complex(1/Math.sqrt(2), 0)); // |00⟩
-  bellState.setState(3, math.complex(1/Math.sqrt(2), 0)); // |11⟩
+  // Start with |00⟩ state
+  const initialState = new StateVector(4); // 2-qubit system
+  initialState.setState(0, math.complex(1, 0)); // |00⟩
+  
+  // Apply Hadamard to first qubit: |00⟩ → (|00⟩ + |10⟩)/√2
+  const afterHadamard = applyHadamard(initialState, 0);
+  
+  // Apply CNOT with first qubit as control: (|00⟩ + |10⟩)/√2 → (|00⟩ + |11⟩)/√2
+  const bellState = applyCNOT(afterHadamard, 0, 1);
+  
   return bellState;
 }
 
-// Create toric code plaquette operator (simplified)
-function createPlaquetteOperator(): StateVector {
-  const plaquetteState = new StateVector(16); // 4-edge system
-  plaquetteState.setState(0, math.complex(1/Math.sqrt(2), 0));  // |0000⟩
-  plaquetteState.setState(15, math.complex(1/Math.sqrt(2), 0)); // |1111⟩
+// Apply stabilizer generator for toric code plaquette
+function applyStabilizerGenerator(state: StateVector): StateVector {
+  const newState = new StateVector(state.dimension);
+  
+  // Simplified stabilizer: creates equal superposition of even parity states
+  // In full toric code, this would be X₁X₂X₃X₄ stabilizer
+  for (let i = 0; i < state.dimension; i++) {
+    const amplitude = state.getAmplitude(i);
+    if (amplitude.re === 0 && amplitude.im === 0) continue;
+    
+    // Count number of 1s (parity)
+    const parity = i.toString(2).split('1').length - 1;
+    
+    if (parity % 2 === 0) {
+      // Even parity states get equal amplitudes
+      newState.setState(i, math.complex(1/Math.sqrt(2), 0));
+    }
+  }
+  
+  return newState;
+}
+
+// Create toric code plaquette using stabilizer generators
+function createPlaquetteOp(): StateVector {
+  // Start with |0000⟩ state
+  const initialState = new StateVector(16); // 4-edge system
+  initialState.setState(0, math.complex(1, 0)); // |0000⟩
+  
+  // Apply stabilizer generator to create superposition of stabilized states
+  const plaquetteState = applyStabilizerGenerator(initialState);
+  
   return plaquetteState;
 }
 
 // Create POC graphs demonstrating composite quantum objects
-function createCompositeQuantumGraphPOC(): CompositeQuantumGraphPOC {
+function createCompQGraph(): ICompQGraph {
   const baseGraph = lattice2D(2, 2); // 4 vertices, 4 edges forming a 2x2 square
-  const quantumGraph = new CompositeQuantumGraph(baseGraph);
+  const quantumGraph = new CompQGraph(baseGraph);
 
   const nodes = quantumGraph.getNodes();
   const edges = quantumGraph.getEdges();
@@ -182,15 +268,15 @@ function createCompositeQuantumGraphPOC(): CompositeQuantumGraphPOC {
   // Example 1: Multi-vertex Bell state (vertices 0 and 1)
   if (nodes.length >= 2) {
     const bellState = createBellState();
-    quantumGraph.setCompositeQuantumObject([nodes[0].id, nodes[1].id], bellState);
+    quantumGraph.setCompQObj([nodes[0].id, nodes[1].id], bellState);
     console.log(`Created Bell state across vertices ${nodes[0].id}, ${nodes[1].id}`);
   }
 
   // Example 2: Toric code plaquette (all 4 edges)
   if (edges.length >= 4) {
-    const plaquetteState = createPlaquetteOperator();
+    const plaquetteState = createPlaquetteOp();
     const allEdgeIds = edges.map(e => e.id);
-    quantumGraph.setCompositeQuantumObject(allEdgeIds, plaquetteState);
+    quantumGraph.setCompQObj(allEdgeIds, plaquetteState);
     console.log(`Created plaquette operator across edges: ${allEdgeIds.join(', ')}`);
   }
 
@@ -198,18 +284,18 @@ function createCompositeQuantumGraphPOC(): CompositeQuantumGraphPOC {
   if (nodes.length >= 4) {
     const state0 = new StateVector(2);
     state0.setState(0, math.complex(1, 0));
-    quantumGraph.setVertexQuantumObject(nodes[2].id, state0);
+    quantumGraph.setNodeQObj(nodes[2].id, state0);
     
     const state1 = new StateVector(2);
     state1.setState(1, math.complex(1, 0));
-    quantumGraph.setVertexQuantumObject(nodes[3].id, state1);
+    quantumGraph.setNodeQObj(nodes[3].id, state1);
   }
 
   return quantumGraph;
 }
 
 // Utility functions for composite quantum graph
-function analyzeCompositeGraph(graph: CompositeQuantumGraphPOC): void {
+function analyzeCompQGraph(graph: ICompQGraph): void {
   console.log('\n=== Composite Quantum Graph Analysis ===');
   
   const metadata = graph.getMetadata();
@@ -221,7 +307,7 @@ function analyzeCompositeGraph(graph: CompositeQuantumGraphPOC): void {
   console.log('\n--- Multi-Vertex Composite States ---');
   const nodes = graph.getNodes();
   if (nodes.length >= 2) {
-    const bellState = graph.getCompositeQuantumObject([nodes[0].id, nodes[1].id]);
+    const bellState = graph.getCompQObj([nodes[0].id, nodes[1].id]);
     if (bellState && isState(bellState)) {
       console.log(`Bell state spanning ${nodes[0].id}, ${nodes[1].id}:`);
       console.log(`  Dimension: ${bellState.dimension}`);
@@ -235,7 +321,7 @@ function analyzeCompositeGraph(graph: CompositeQuantumGraphPOC): void {
   const edges = graph.getEdges();
   if (edges.length >= 4) {
     const allEdgeIds = edges.map(e => e.id);
-    const plaquetteState = graph.getCompositeQuantumObject(allEdgeIds);
+    const plaquetteState = graph.getCompQObj(allEdgeIds);
     if (plaquetteState && isState(plaquetteState)) {
       console.log(`Plaquette operator spanning edges: ${allEdgeIds.join(', ')}`);
       console.log(`  Dimension: ${plaquetteState.dimension}`);
@@ -247,7 +333,7 @@ function analyzeCompositeGraph(graph: CompositeQuantumGraphPOC): void {
   // Check individual vertex states (backward compatibility)
   console.log('\n--- Individual Vertex States ---');
   for (const node of nodes) {
-    const obj = graph.getVertexQuantumObject(node.id);
+    const obj = graph.getNodeQObj(node.id);
     if (obj && isState(obj)) {
       console.log(`${node.id}: Individual state, dim = ${obj.dimension}, norm = ${obj.norm().toFixed(3)}`);
     }
@@ -255,7 +341,7 @@ function analyzeCompositeGraph(graph: CompositeQuantumGraphPOC): void {
 }
 
 // Demonstrate composite quantum operations
-function demonstrateCompositeOperations(graph: CompositeQuantumGraphPOC): void {
+function demoCompOps(graph: ICompQGraph): void {
   console.log('\n=== Composite Quantum Operations Demo ===');
   
   const nodes = graph.getNodes();
@@ -263,7 +349,7 @@ function demonstrateCompositeOperations(graph: CompositeQuantumGraphPOC): void {
 
   // Test Bell state measurement correlations
   if (nodes.length >= 2) {
-    const bellState = graph.getCompositeQuantumObject([nodes[0].id, nodes[1].id]);
+    const bellState = graph.getCompQObj([nodes[0].id, nodes[1].id]);
     if (bellState && isState(bellState)) {
       console.log('\nBell State Analysis:');
       console.log(`  Composite system: ${nodes[0].id} ⊗ ${nodes[1].id}`);
@@ -280,7 +366,7 @@ function demonstrateCompositeOperations(graph: CompositeQuantumGraphPOC): void {
   // Test plaquette operator properties
   if (edges.length >= 4) {
     const allEdgeIds = edges.map(e => e.id);
-    const plaquetteState = graph.getCompositeQuantumObject(allEdgeIds);
+    const plaquetteState = graph.getCompQObj(allEdgeIds);
     if (plaquetteState && isState(plaquetteState)) {
       console.log('\nToric Code Plaquette Analysis:');
       console.log(`  Composite system: ${allEdgeIds.join(' ⊗ ')}`);
@@ -297,22 +383,22 @@ function demonstrateCompositeOperations(graph: CompositeQuantumGraphPOC): void {
   // Demonstrate backward compatibility
   console.log('\nBackward Compatibility Check:');
   for (let i = 2; i < Math.min(4, nodes.length); i++) {
-    const individualState = graph.getVertexQuantumObject(nodes[i].id);
+    const individualState = graph.getNodeQObj(nodes[i].id);
     if (individualState && isState(individualState)) {
-      console.log(`  ${nodes[i].id}: Individual state (${individualState.dimension}D)`);
+      console.log(`${nodes[i].id}: Individual state (${individualState.dimension}D)`);
     }
   }
 }
 
 // Run the composite quantum graph POC demonstration
-export function runCompositeQuantumGraphPOC(): void {
+export function runCompQGraphPOC(): void {
   console.log('🔬 Composite Quantum Graph POC Demo');
   console.log('====================================');
   
   try {
-    const graph = createCompositeQuantumGraphPOC();
-    analyzeCompositeGraph(graph);
-    demonstrateCompositeOperations(graph);
+    const graph = createCompQGraph();
+    analyzeCompQGraph(graph);
+    demoCompOps(graph);
     
     console.log('\n✅ Composite POC completed successfully!');
     console.log('\nThis demonstrates:');
@@ -329,11 +415,11 @@ export function runCompositeQuantumGraphPOC(): void {
 
 // Export for testing
 export { 
-  createCompositeQuantumGraphPOC, 
-  analyzeCompositeGraph, 
-  demonstrateCompositeOperations, 
-  CompositeQuantumGraph,
-  CompositeQuantumManager,
+  createCompQGraph, 
+  analyzeCompQGraph as analyzeCompositeGraph, 
+  demoCompOps as demonstrateCompositeOperations, 
+  CompQGraph,
+  QCompManager as CompositeQuantumManager,
   createBellState,
-  createPlaquetteOperator
+  createPlaquetteOp
 };
