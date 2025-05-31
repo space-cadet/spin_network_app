@@ -64,3 +64,6 @@ __marimo__
 .ipynb*
 # report files I use for debugging
 */**/*.report
+
+# Typedoc output
+packages/quantum/docs

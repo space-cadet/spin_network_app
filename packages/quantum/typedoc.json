@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs/api",
+  "theme": "default",
+  "tsconfig": "tsconfig.json",
+  "skipErrorChecking": true
+}
