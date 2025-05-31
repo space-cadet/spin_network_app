@@ -7,6 +7,12 @@ import { IQuantumGraph, MeasurementResult } from './types';
 import { CompositeQuantumManager } from './CompositeQuantumManager';
 import { GraphologyAdapter } from '../../../graph-core/src/core/GraphologyAdapter';
 import { IGraph, IGraphNode, IGraphEdge } from '../../../graph-core/src/core/types';
+import { 
+  applyQuantumOperation, 
+  partialMeasurement,
+  extractSubsystemState,
+  insertSubsystemState 
+} from './operations/general';
 
 /**
  * Implementation of quantum-labeled graph
@@ -75,100 +81,19 @@ export class QuantumGraph implements IQuantumGraph {
 
   // General quantum operations
   applyVertexOperation(vertexIds: string[], operator: IOperator): void {
-    // Extract current subsystem state
-    const currentStates = vertexIds.map(id => this.getVertexQuantumObject(id)).filter(Boolean) as QuantumObject[];
-    
-    if (currentStates.length === 0) {
-      throw new Error('No quantum objects found on specified vertices');
-    }
-
-    // For now, apply operator to first state (placeholder implementation)
-    if (currentStates.length === 1 && currentStates[0].objectType === 'state') {
-      const newState = operator.apply(currentStates[0] as IStateVector);
-      
-      if (vertexIds.length === 1) {
-        // Single vertex operation - update individual state
-        this.setVertexQuantumObject(vertexIds[0], newState);
-      } else {
-        // Multi-vertex operation - create composite
-        this.setCompositeQuantumObject(vertexIds, newState);
-      }
-    }
+    applyQuantumOperation(this, vertexIds, operator);
   }
 
   applyEdgeOperation(edgeIds: string[], operator: IOperator): void {
-    // Extract current subsystem state  
-    const currentStates = edgeIds.map(id => this.getEdgeQuantumObject(id)).filter(Boolean) as QuantumObject[];
-    
-    if (currentStates.length === 0) {
-      throw new Error('No quantum objects found on specified edges');
-    }
-
-    // For now, apply operator to first state (placeholder implementation)
-    if (currentStates.length === 1 && currentStates[0].objectType === 'state') {
-      const newState = operator.apply(currentStates[0] as IStateVector);
-      
-      if (edgeIds.length === 1) {
-        // Single edge operation - update individual state
-        this.setEdgeQuantumObject(edgeIds[0], newState);
-      } else {
-        // Multi-edge operation - create composite
-        this.setCompositeQuantumObject(edgeIds, newState);
-      }
-    }
+    applyQuantumOperation(this, edgeIds, operator);
   }
 
   applyOperation(elementIds: string[], operator: IOperator): void {
-    // Determine element types and delegate appropriately
-    const vertexIds = elementIds.filter(id => this.hasNode(id));
-    const edgeIds = elementIds.filter(id => this.hasEdge(id));
-    
-    if (vertexIds.length > 0 && edgeIds.length > 0) {
-      // Mixed operation - extract states from both vertices and edges
-      const allStates = [
-        ...vertexIds.map(id => this.getVertexQuantumObject(id)),
-        ...edgeIds.map(id => this.getEdgeQuantumObject(id))
-      ].filter(Boolean) as QuantumObject[];
-      
-      if (allStates.length === 0) {
-        throw new Error('No quantum objects found on specified elements');
-      }
-
-      // Apply to first state and create composite (placeholder implementation)
-      if (allStates[0].objectType === 'state') {
-        const newState = operator.apply(allStates[0] as IStateVector);
-        this.setCompositeQuantumObject(elementIds, newState);
-      }
-    } else if (vertexIds.length > 0) {
-      this.applyVertexOperation(vertexIds, operator);
-    } else if (edgeIds.length > 0) {
-      this.applyEdgeOperation(edgeIds, operator);
-    } else {
-      throw new Error('No valid graph elements found in elementIds');
-    }
+    applyQuantumOperation(this, elementIds, operator);
   }
 
   measureSubsystem(vertexIds: string[], projector?: IOperator): MeasurementResult {
-    // Extract subsystem state
-    const subsystemState = this.getCompositeQuantumObject(vertexIds) || 
-                          this.getVertexQuantumObject(vertexIds[0]);
-    
-    if (!subsystemState || subsystemState.objectType !== 'state') {
-      throw new Error('No quantum state found for measurement');
-    }
-
-    const state = subsystemState as IStateVector;
-    
-    // Simple measurement implementation (placeholder)
-    const probability = state.norm() ** 2;
-    const outcome = Math.random() < 0.5 ? 0 : 1;
-    
-    return {
-      outcome,
-      probability,
-      postMeasurementState: state,
-      measuredSubsystem: vertexIds
-    };
+    return partialMeasurement(this, vertexIds, projector);
   }
 
   // Access to underlying graph adapter

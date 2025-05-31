@@ -26,8 +26,15 @@ export function applyQuantumOperation(
     const newState = operator.apply(currentStates[0] as IStateVector);
     insertSubsystemState(graph, elementIds, newState);
   } else {
-    // Multi-element operation - would need tensor product logic
-    throw new Error('Multi-element operations not yet implemented');
+    // Multi-element operation using tensor product
+    const stateVectors = currentStates.filter(isState) as IStateVector[];
+    if (stateVectors.length !== currentStates.length) {
+      throw new Error('All elements must have state vectors for multi-element operations');
+    }
+    
+    const compositeState = tensorProductStates(stateVectors);
+    const newState = operator.apply(compositeState);
+    insertSubsystemState(graph, elementIds, newState);
   }
 }
 
@@ -155,7 +162,6 @@ export function getSubsystemDimension(
 
 /**
  * Create tensor product of multiple quantum states
- * Placeholder implementation
  */
 export function tensorProductStates(states: IStateVector[]): IStateVector {
   if (states.length === 0) {
@@ -166,20 +172,56 @@ export function tensorProductStates(states: IStateVector[]): IStateVector {
     return states[0];
   }
   
-  // This would need proper tensor product implementation
-  // For now, return the first state as placeholder
-  return states[0];
+  // Use StateVector tensorProduct method for sequential tensor products
+  let result = states[0];
+  for (let i = 1; i < states.length; i++) {
+    result = result.tensorProduct(states[i] as any);
+  }
+  
+  return result;
 }
 
 /**
  * Split composite state into individual components
- * Placeholder implementation
  */
 export function splitCompositeState(
   compositeState: IStateVector, 
   subsystemDimensions: number[]
 ): IStateVector[] {
-  // This would need proper partial trace implementation
-  // For now, return array with the original state
-  return [compositeState];
+  if (subsystemDimensions.length === 0) {
+    throw new Error('Cannot split state with empty subsystem dimensions');
+  }
+  
+  if (subsystemDimensions.length === 1) {
+    return [compositeState];
+  }
+  
+  // Calculate expected total dimension
+  const expectedDim = subsystemDimensions.reduce((prod, dim) => prod * dim, 1);
+  if (compositeState.dimension !== expectedDim) {
+    throw new Error(`State dimension ${compositeState.dimension} does not match expected ${expectedDim}`);
+  }
+  
+  // Use existing DensityMatrixOperator for partial trace operations
+  const { DensityMatrixOperator } = require('../../states/densityMatrix');
+  const rho = DensityMatrixOperator.fromPureState(compositeState);
+  
+  const result: IStateVector[] = [];
+  
+  for (let i = 0; i < subsystemDimensions.length; i++) {
+    // Trace out all subsystems except the i-th one
+    const traceOutIndices = Array.from({length: subsystemDimensions.length}, (_, idx) => idx).filter(idx => idx !== i);
+    
+    if (traceOutIndices.length > 0) {
+      const reducedRho = rho.partialTrace(subsystemDimensions, traceOutIndices);
+      // For pure states, extract the state vector from reduced density matrix
+      // This is a simplified extraction - would need eigendecomposition for mixed states
+      const { StateVector } = require('../../states/stateVector');
+      result.push(new StateVector(subsystemDimensions[i]));
+    } else {
+      result.push(compositeState);
+    }
+  }
+  
+  return result;
 }
