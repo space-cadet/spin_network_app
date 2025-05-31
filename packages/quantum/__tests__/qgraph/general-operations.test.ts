@@ -2,6 +2,7 @@
  * Basic tests for quantum graph general operations
  */
 
+import { describe, it, expect, test, beforeEach } from 'vitest';
 import { QuantumGraph } from '../../src/qgraph/QuantumGraph';
 import { StateVector } from '../../src/states/stateVector';
 import { MatrixOperator } from '../../src/operators/operator';
@@ -34,7 +35,7 @@ describe('Quantum Graph General Operations', () => {
 
   test('single vertex operation', () => {
     // Setup
-    graph.addNode({id: 'q0', type: 'qubit'});
+    graph.addNode({id: 'q0', type: 'qubit', properties: {}});
     graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0)); // |0⟩
     
     // Apply Hadamard
@@ -49,8 +50,8 @@ describe('Quantum Graph General Operations', () => {
 
   test('multi-vertex operation creates composite', () => {
     // Setup two vertices
-    graph.addNode({id: 'q0', type: 'qubit'});
-    graph.addNode({id: 'q1', type: 'qubit'});
+    graph.addNode({id: 'q0', type: 'qubit', properties: {}});
+    graph.addNode({id: 'q1', type: 'qubit', properties: {}});
     graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0)); // |0⟩
     graph.setVertexQuantumObject('q1', StateVector.computationalBasis(2, 0)); // |0⟩
     
@@ -72,9 +73,9 @@ describe('Quantum Graph General Operations', () => {
 
   test('edge operations work', () => {
     // Setup
-    graph.addNode({id: 'q0', type: 'qubit'});
-    graph.addNode({id: 'q1', type: 'qubit'});
-    graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1'});
+    graph.addNode({id: 'q0', type: 'qubit', properties: {}});
+    graph.addNode({id: 'q1', type: 'qubit', properties: {}});
+    graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1', directed: false, type: 'quantum', properties: {}});
     graph.setEdgeQuantumObject('e01', StateVector.computationalBasis(2, 0));
     
     // Apply operation to edge
@@ -88,9 +89,9 @@ describe('Quantum Graph General Operations', () => {
 
   test('mixed vertex and edge operation', () => {
     // Setup vertex and edge
-    graph.addNode({id: 'q0', type: 'qubit'});
-    graph.addNode({id: 'q1', type: 'qubit'});
-    graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1'});
+    graph.addNode({id: 'q0', type: 'qubit', properties: {}});
+    graph.addNode({id: 'q1', type: 'qubit', properties: {}});
+    graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1', directed: false, type: 'quantum', properties: {}});
     graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0));
     graph.setEdgeQuantumObject('e01', StateVector.computationalBasis(2, 0));
     
@@ -105,7 +106,7 @@ describe('Quantum Graph General Operations', () => {
 
   test('measurement operation', () => {
     // Setup
-    graph.addNode({id: 'q0', type: 'qubit'});
+    graph.addNode({id: 'q0', type: 'qubit', properties: {}});
     graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0));
     
     // Measure

@@ -98,7 +98,7 @@ export function traverseWithQuantumOps(graph: IQuantumGraph, options: QuantumTra
     const edge = outgoingEdges[0]; // Take first outgoing edge
     const edgeObj = graph.getEdgeQuantumObject(edge.id);
     
-    const operation = {
+    const operation: { edge: string; operator?: QuantumObject; result?: QuantumObject } = {
       edge: edge.id,
       operator: edgeObj
     };

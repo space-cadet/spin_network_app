@@ -85,8 +85,8 @@ export class GraphologyAdapter implements IGraph {
     }
 
     // Check if edge already exists to avoid duplicate error
-    if (!this.graph.hasEdge(edge.sourceId, edge.targetId)) {
-      this.graph.addEdge(edge.sourceId, edge.targetId, {
+    if (!this.graph.hasEdge(edge.id)) {
+      this.graph.addEdgeWithKey(edge.id, edge.sourceId, edge.targetId, {
         ...edge.properties,
         type: edge.type,
         directed: edge.directed
@@ -212,13 +212,16 @@ export class GraphologyAdapter implements IGraph {
     const size = adjMatrix.size()[0];
     const laplacian = adjMatrix.clone();
     
-    // Subtract the adjacency matrix from the degree matrix
+    // Create Laplacian: L = D - A (degree matrix minus adjacency matrix)
     for (let i = 0; i < size; i++) {
       let degree = 0;
       for (let j = 0; j < size; j++) {
         if (i === j) continue;
         degree += adjMatrix.get([i, j]);
+        // Negate off-diagonal elements
+        laplacian.set([i, j], -adjMatrix.get([i, j]));
       }
+      // Set diagonal to degree
       laplacian.set([i, i], degree);
     }
     

@@ -33,7 +33,7 @@ function basicVertexOperations() {
   const hadamard = createHadamardGate();
   
   // Add vertex and set initial state
-  graph.addNode({id: 'q0', type: 'qubit'});
+  graph.addNode({id: 'q0', type: 'qubit', properties: {}});
   graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0)); // |0⟩
   
   console.log('Initial state dimension:', (graph.getVertexQuantumObject('q0') as any)?.dimension);
@@ -53,8 +53,8 @@ function bellStateCreation() {
   const cnot = createCNOTGate();
   
   // Setup two qubits
-  graph.addNode({id: 'q0', type: 'qubit'});
-  graph.addNode({id: 'q1', type: 'qubit'});
+  graph.addNode({id: 'q0', type: 'qubit', properties: {}});
+  graph.addNode({id: 'q1', type: 'qubit', properties: {}});
   graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0)); // |0⟩
   graph.setVertexQuantumObject('q1', StateVector.computationalBasis(2, 0)); // |0⟩
   
@@ -84,9 +84,9 @@ function edgeOperations() {
   const hadamard = createHadamardGate();
   
   // Setup graph with edge
-  graph.addNode({id: 'q0', type: 'qubit'});
-  graph.addNode({id: 'q1', type: 'qubit'});
-  graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1'});
+  graph.addNode({id: 'q0', type: 'qubit', properties: {}});
+  graph.addNode({id: 'q1', type: 'qubit', properties: {}});
+  graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1', directed: false, type: 'quantum', properties: {}});
   
   // Assign quantum state to edge
   graph.setEdgeQuantumObject('e01', StateVector.computationalBasis(2, 0));
@@ -104,9 +104,9 @@ function mixedOperations() {
   const cnot = createCNOTGate();
   
   // Setup
-  graph.addNode({id: 'q0', type: 'qubit'});
-  graph.addNode({id: 'q1', type: 'qubit'});
-  graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1'});
+  graph.addNode({id: 'q0', type: 'qubit', properties: {}});
+  graph.addNode({id: 'q1', type: 'qubit', properties: {}});
+  graph.addEdge({id: 'e01', sourceId: 'q0', targetId: 'q1', directed: false, type: 'quantum', properties: {}});
   
   graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0));
   graph.setEdgeQuantumObject('e01', StateVector.computationalBasis(2, 0));
@@ -126,7 +126,7 @@ function measurementExample() {
   const graph = new QuantumGraph();
   
   // Setup qubit
-  graph.addNode({id: 'q0', type: 'qubit'});
+  graph.addNode({id: 'q0', type: 'qubit', properties: {}});
   graph.setVertexQuantumObject('q0', StateVector.computationalBasis(2, 0));
   
   // Measure
