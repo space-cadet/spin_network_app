@@ -244,7 +244,7 @@ export function isIdentityMatrix(matrix: ISparseMatrix, tolerance: number = 1e-1
 /**
  * Check if matrix is diagonal
  */
-export function isDiagonalMatrix(matrix: ISparseMatrix): boolean {
+export function isSparseDiagonalMatrix(matrix: ISparseMatrix): boolean {
   for (const entry of matrix.entries) {
     if (entry.row !== entry.col) {
       return false;

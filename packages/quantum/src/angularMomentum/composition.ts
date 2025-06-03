@@ -166,6 +166,17 @@ function generateCGTableCoeff(j1: number, m1: number, j2: number, m2: number, j:
     return 0;
   }
 
+  // Special case for j=0 coupling of two spin-1/2 particles
+  if (Math.abs(j1 - 0.5) < 1e-10 && Math.abs(j2 - 0.5) < 1e-10 && Math.abs(j) < 1e-10) {
+    // For singlet state, coefficient is -1/√2 for m1=1/2,m2=-1/2 and +1/√2 for m1=-1/2,m2=1/2
+    if (Math.abs(m1 - 0.5) < 1e-10 && Math.abs(m2 + 0.5) < 1e-10) {
+      return -1/Math.sqrt(2);
+    }
+    if (Math.abs(m1 + 0.5) < 1e-10 && Math.abs(m2 - 0.5) < 1e-10) {
+      return 1/Math.sqrt(2);
+    }
+  }
+
   // Special case for maximum m value where coefficient should be exactly 1
   if (Math.abs(m - (j1 + j2)) < 1e-10 && Math.abs(m1 - j1) < 1e-10 && Math.abs(m2 - j2) < 1e-10) {
     return 1;

@@ -19,10 +19,10 @@ import {
   sparseTrace,
   sparseNorm,
   isIdentityMatrix,
-  isDiagonalMatrix,
+  isSparseDiagonalMatrix,
   extractDiagonalEntries,
   validateSparseMatrix,
-  removeSparseZeros
+  removeSparseZeros,
 } from '../../src/operators/sparse';
 
 describe('Sparse Matrix Utilities', () => {
@@ -280,10 +280,10 @@ describe('Sparse Matrix Utilities', () => {
       setSparseEntry(diagonal, 0, 0, math.complex(1, 0));
       setSparseEntry(diagonal, 2, 2, math.complex(3, 0));
       
-      expect(isDiagonalMatrix(diagonal)).toBe(true);
+      expect(isSparseDiagonalMatrix(diagonal)).toBe(true);
       
       setSparseEntry(diagonal, 0, 1, math.complex(1, 0));
-      expect(isDiagonalMatrix(diagonal)).toBe(false);
+      expect(isSparseDiagonalMatrix(diagonal)).toBe(false);
     });
 
     it('should extract diagonal entries', () => {

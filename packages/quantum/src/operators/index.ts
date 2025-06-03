@@ -4,6 +4,8 @@
  */
 
 export * from './operator';
+export * from './specialized';
+export * from './sparse';
 export * from './algebra';
 export * from './gates';
 export * from './measurement';

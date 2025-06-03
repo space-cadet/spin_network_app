@@ -1,4 +1,6 @@
 matrixFunctions.test.ts
+sparse.test.ts
+composition.test.ts
 wigner3j.test.ts
 composition.test.ts
 wigner6j.test.ts

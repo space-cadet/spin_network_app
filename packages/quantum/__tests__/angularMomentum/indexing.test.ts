@@ -309,6 +309,12 @@ describe('Angular Momentum Indexing Consistency', () => {
       
       // ⟨1/2,1/2;1/2,-1/2|0,0⟩ = -1/√2
       const cg3 = clebschGordan(j1, 0.5, j2, -0.5, 0, 0);
+
+      console.log("CG Coefficients:");
+      console.log("cg1: ", cg1);
+      console.log("cg2: ", cg2);
+      console.log("cg3: ", cg3);
+
       expect(Number(math.abs(cg3))).toBeCloseTo(1/Math.sqrt(2), 10);
     });
   });

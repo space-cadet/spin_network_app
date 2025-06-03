@@ -6,6 +6,7 @@ import { Complex, IStateVector, OperatorType, IOperator } from '../core/types';
 import { StateVector } from '../states/stateVector';
 import { validateMatDims, validateMatchDims, validatePartialTrace } from '../utils/validation';
 import { eigenDecomposition } from '../utils/matrixOperations';
+import { IdentityOperator, DiagonalOperator, isDiagonalMatrix } from './specialized';
 import * as math from 'mathjs';
 
 // Define ComplexMatrix type using math.js Complex type
@@ -392,12 +393,8 @@ export class MatrixOperator implements IOperator {
   /**
    * Creates the identity operator of given dimension
    */
-  static identity(dimension: number): MatrixOperator {
-    const matrix = Array(dimension).fill(null)
-      .map((_, i) => Array(dimension).fill(null)
-        .map((_, j) => i === j ? math.complex(1, 0) : math.complex(0, 0))
-      );
-    return new MatrixOperator(matrix, 'unitary');
+  static identity(dimension: number): IOperator {
+    return new IdentityOperator(dimension);
   }
 
   /**
@@ -409,6 +406,37 @@ export class MatrixOperator implements IOperator {
         .map(() => math.complex(0, 0))
       );
     return new MatrixOperator(matrix);
+  }
+
+  /**
+   * Create optimized operator based on matrix structure
+   */
+  static createOptimized(matrix: ComplexMatrix, type?: OperatorType): IOperator {
+    const dimension = matrix.length;
+    
+    // Check for identity matrix
+    let isIdentity = true;
+    for (let i = 0; i < dimension && isIdentity; i++) {
+      for (let j = 0; j < dimension && isIdentity; j++) {
+        const expected = i === j ? 1 : 0;
+        const element = matrix[i][j];
+        if (Math.abs(element.re - expected) > 1e-12 || Math.abs(element.im) > 1e-12) {
+          isIdentity = false;
+        }
+      }
+    }
+    if (isIdentity) {
+      return new IdentityOperator(dimension);
+    }
+    
+    // Check for diagonal matrix
+    if (isDiagonalMatrix(matrix)) {
+      const diagonal = matrix.map((row, i) => math.clone(row[i]));
+      return new DiagonalOperator(diagonal);
+    }
+    
+    // Default to standard matrix operator
+    return new MatrixOperator(matrix, type);
   }
 
   /**
