@@ -3,6 +3,25 @@
 
 ### 2025-06-03
 
+#### 22:30 - T76: Debug quantum walk probability violations - update memory bank files
+- Updated `memory-bank/session_cache.md` - Changed status to debugging ongoing, documented persistent probability violations
+- Updated `memory-bank/tasks/T76.md` - Changed status from complete to debugging, documented critical bugs and attempted fixes
+- Updated `memory-bank/tasks.md` - Changed T76 status to debugging with probability violation summary
+- Updated `packages/quantum/docs/random-walk-plan.md` - Added debugging section with violation analysis and next session priorities
+
+#### 22:26 - T76: Replace manual matrix multiplication with proper operator methods
+- Fixed `packages/quantum/src/algorithms/quantumWalk/QuantumWalk2D.ts` - Replaced manual matrix-vector multiplication in applyCoin method with StateVector and MatrixOperator.apply()
+
+#### 22:05 - T76: Fix test structure to eliminate walker instance reuse
+- Fixed `packages/quantum/__tests__/algorithms/quantumWalk/quantumWalk.test.ts` - Multiple steps test now creates fresh walker instances
+- Fixed `packages/quantum/__tests__/algorithms/quantumWalk/quantumWalk.test.ts` - Spreading analysis test now creates fresh walker instances
+
+#### 22:02 - T76: Add debugging test for getPositionDistribution method
+- Updated `packages/quantum/__tests__/algorithms/quantumWalk/quantumWalk.test.ts` - Added specific test for position distribution calculation isolating coin operation
+
+#### 21:58 - T76: Attempt to fix applyShift amplitude duplication bug
+- Fixed `packages/quantum/src/algorithms/quantumWalk/QuantumWalk2D.ts` - Rewrote applyShift method to use clean zero-filled target array instead of copying source
+
 #### 21:50 - T76: Complete Quantum Random Walk Implementation with Bug Fix
 - Created `packages/quantum/src/algorithms/quantumWalk/QuantumWalk2D.ts` - Main 2D quantum walk class implementation (150+ lines)
 - Created `packages/quantum/src/algorithms/quantumWalk/types.ts` - Type definitions for Position2D, CoinDirection enum, IQuantumWalk2D interface

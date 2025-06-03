@@ -99,22 +99,23 @@ export class QuantumWalk2D implements IQuantumWalk2D {
     
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
-        // Apply coin operator to the 4 coin states at position (x,y)
+        // Extract the 4 coin states at position (x,y)
         const coinStates: Complex[] = [];
         for (let coin = 0; coin < 4; coin++) {
           const index = this.getStateIndex({x, y}, coin);
           coinStates.push(this.state.getState(index));
         }
         
-        // Matrix-vector multiplication for coin operation
-        const coinMatrix = this.coinOperator.toMatrix();
-        for (let i = 0; i < 4; i++) {
-          let sum = math.complex(0, 0);
-          for (let j = 0; j < 4; j++) {
-            sum = math.add(sum, math.multiply(coinMatrix[i][j], coinStates[j])) as Complex;
-          }
-          const newIndex = this.getStateIndex({x, y}, i);
-          newAmplitudes[newIndex] = sum;
+        // Create state vector for the 4 coin states at this position
+        const coinStateVector = new StateVector(4, coinStates);
+        
+        // Apply coin operator using proper operator method
+        const newCoinState = this.coinOperator.apply(coinStateVector);
+        
+        // Place results back into full state vector
+        for (let coin = 0; coin < 4; coin++) {
+          const index = this.getStateIndex({x, y}, coin);
+          newAmplitudes[index] = newCoinState.getState(coin);
         }
       }
     }
@@ -123,7 +124,7 @@ export class QuantumWalk2D implements IQuantumWalk2D {
   }
 
   private applyShift(): void {
-    const newAmplitudes: Complex[] = [...this.state.amplitudes];
+    const newAmplitudes: Complex[] = Array(this.state.dimension).fill(math.complex(0, 0));
     
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
@@ -153,12 +154,13 @@ export class QuantumWalk2D implements IQuantumWalk2D {
           }
           
           if (canMove) {
-            // Move amplitude from current to new position
+            // Place amplitude at new position
             const newIndex = this.getStateIndex({x: newX, y: newY}, coin);
-            newAmplitudes[currentIndex] = math.subtract(newAmplitudes[currentIndex], amplitude) as Complex;
             newAmplitudes[newIndex] = math.add(newAmplitudes[newIndex], amplitude) as Complex;
+          } else {
+            // Amplitude stays at current position
+            newAmplitudes[currentIndex] = math.add(newAmplitudes[currentIndex], amplitude) as Complex;
           }
-          // If can't move, amplitude stays at current position (no change needed)
         }
       }
     }

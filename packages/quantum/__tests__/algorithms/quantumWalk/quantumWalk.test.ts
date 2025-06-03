@@ -8,6 +8,44 @@ import { QuantumWalk2D } from '../../../src/algorithms/quantumWalk';
 
 describe('QuantumWalk2D', () => {
   
+  it('should correctly calculate position distribution from known state', () => {
+    console.log('\n=== Position Distribution Test ===');
+    const lattice = lattice2D(5, 5);
+    const walker = new QuantumWalk2D(lattice, { x: 1, y: 1 });
+    
+    // Get initial state - should be 100% at position (1,1) with UP coin
+    const initialDist = walker.getPositionDistribution();
+    console.log('Initial distribution:');
+    initialDist.forEach((prob, pos) => {
+      console.log(`  Position ${pos}: ${(prob * 100).toFixed(4)}%`);
+    });
+    
+    const totalInitial = Array.from(initialDist.values()).reduce((sum, p) => sum + p, 0);
+    console.log(`Total initial probability: ${(totalInitial * 100).toFixed(4)}%`);
+    
+    expect(totalInitial).toBeCloseTo(1.0, 12);
+    expect(initialDist.size).toBe(1);
+    expect(initialDist.get('1,1')).toBeCloseTo(1.0, 12);
+    
+    // Test after coin operation only (no shift)
+    // Manually access the internal state to test coin operation in isolation
+    const walkerAny = walker as any;
+    walkerAny.applyCoin();
+    
+    const afterCoinDist = walker.getPositionDistribution();
+    console.log('\nAfter coin operation only:');
+    afterCoinDist.forEach((prob, pos) => {
+      console.log(`  Position ${pos}: ${(prob * 100).toFixed(4)}%`);
+    });
+    
+    const totalAfterCoin = Array.from(afterCoinDist.values()).reduce((sum, p) => sum + p, 0);
+    console.log(`Total after coin: ${(totalAfterCoin * 100).toFixed(4)}%`);
+    
+    expect(totalAfterCoin).toBeCloseTo(1.0, 12);
+    expect(afterCoinDist.size).toBe(1);
+    expect(afterCoinDist.get('1,1')).toBeCloseTo(1.0, 12);
+  });
+
   it('should initialize with correct state normalization', () => {
     console.log('\n=== Initialization Test ===');
     const lattice = lattice2D(5, 5);
@@ -47,10 +85,10 @@ describe('QuantumWalk2D', () => {
   it('should preserve probability after multiple steps', () => {
     console.log('\n=== Multiple Steps Test ===');
     const lattice = lattice2D(7, 7);
-    const walker = new QuantumWalk2D(lattice, { x: 3, y: 3 });
     
-    for (let steps = 1; steps <= 5; steps++) {
-      walker.step();
+    for (let steps = 1; steps <= 10; steps++) {
+      const walker = new QuantumWalk2D(lattice, { x: 3, y: 3 });
+      walker.evolve(steps);
       const distribution = walker.getPositionDistribution();
       const totalProb = Array.from(distribution.values()).reduce((sum, p) => sum + p, 0);
       
@@ -85,12 +123,12 @@ describe('QuantumWalk2D', () => {
   it('should show spreading behavior', () => {
     console.log('\n=== Spreading Analysis ===');
     const lattice = lattice2D(11, 11);
-    const walker = new QuantumWalk2D(lattice, { x: 5, y: 5 });
     
     const spreadData: Array<{steps: number, positions: number, maxDist: number}> = [];
     
     for (let steps = 0; steps <= 10; steps += 2) {
-      if (steps > 0) walker.evolve(2);
+      const walker = new QuantumWalk2D(lattice, { x: 5, y: 5 });
+      if (steps > 0) walker.evolve(steps);
       
       const distribution = walker.getPositionDistribution();
       let maxDist = 0;
