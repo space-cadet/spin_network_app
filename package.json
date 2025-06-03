@@ -1,0 +1,18 @@
+{
+  "name": "spin-network-app",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Quantum spin network visualization and simulation",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm run build --workspaces --if-present",
+    "test": "pnpm run test --workspaces --if-present",
+    "clean": "pnpm run clean --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

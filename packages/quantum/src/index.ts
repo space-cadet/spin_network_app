@@ -32,3 +32,6 @@ export * from './qgraph';
 
 // Export geometry module
 export * from './geometry';
+
+// Export algorithms module
+export * from './algorithms/quantumWalk';

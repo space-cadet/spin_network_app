@@ -13,7 +13,7 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
-| T76 | Quantum Random Walk Implementation | 🔄 | HIGH | 2025-06-03 | [tasks/T76.md] | 2D quantum random walk using existing packages/quantum and packages/graph-core infrastructure |
+| T76 | Quantum Random Walk Implementation | ✅ | HIGH | 2025-06-03 | [tasks/T76.md] | **COMPLETE** - 2D quantum walk MWE with probability conservation fix |
 | T75 | Implement Tensor Network Module | 🆕 | HIGH | 2025-06-03 | [tasks/T75.md] | Core tensor network operations for memory-efficient quantum computation |
 | T74 | Optimize Quantum Operator Performance | 🔄 | HIGH | 2025-05-30 | [tasks/T74.md] | **PHASE 2 COMPLETE** - Specialized operators implemented with comprehensive optimizations |
 | T73b | Extracting Subsystem State Using Partial Trace | ⬜ | HIGH | 2025-06-03 | [tasks/T73b.md] | Fix dimension mismatch in quantum graph operations using partial trace |

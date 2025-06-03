@@ -12,11 +12,14 @@ overrides:
 
 importers:
 
+  .:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+
   packages/graph-core:
     dependencies:
-      '@spin-network/quantum':
-        specifier: workspace:^0.1.0
-        version: link:../quantum
       dexie:
         specifier: 4.0.11
         version: 4.0.11
@@ -302,6 +305,9 @@ importers:
 
   packages/quantum:
     dependencies:
+      '@spin-network/graph-core':
+        specifier: workspace:^0.1.0
+        version: link:../graph-core
       '@types/mathjs':
         specifier: ^9.4.2
         version: 9.4.2
