@@ -4,7 +4,7 @@
 ## Tasks Overview
 - **Active Tasks:** 34
 - **Paused Tasks:** 4  
-- **Completed Tasks:** 31
+- **Completed Tasks:** 32
 - **Latest Task ID:** T75
 
 ## Task Registry
@@ -15,7 +15,8 @@
 |----|-------|--------|----------|---------|------|
 | T75 | Implement Tensor Network Module | 🆕 | HIGH | 2025-06-03 | [tasks/T75.md] | Core tensor network operations for memory-efficient quantum computation |
 | T74 | Optimize Quantum Operator Performance | 🔄 | HIGH | 2025-05-30 | [tasks/T74.md] | Implementation plan complete - sparse storage optimizations for 10-12 qubit operations |
-| T73a | Quantum Graph Testing and Examples | 🔄 | MEDIUM | 2025-05-31 | [tasks/T73a.md] | Testing and examples implementation in progress for quantum graph module |
+| T73b | Extracting Subsystem State Using Partial Trace | ⬜ | HIGH | 2025-06-03 | [tasks/T73b.md] | Fix dimension mismatch in quantum graph operations using partial trace |
+| T73a | Quantum Graph Testing and Examples | ✅ | MEDIUM | 2025-05-31 | [tasks/T73a.md] | **COMPLETE** - Testing and examples for quantum graph module with design boundaries documented |
 | T73 | Implement Quantum Graph Data Structure | ✅ | HIGH | 2025-05-30 | [tasks/T73.md] | **COMPLETE** - Full quantum graph functionality validated for circuit-model quantum computation |
 | T72 | Implement Root QuantumObject Type | ✅ | MEDIUM | 2025-05-30 | [tasks/T72.md] | Unified union type for all quantum objects |
 | META-1 | Memory Bank Content Update | 🔄 | HIGH | 2025-05-11 | [tasks/META-1.md] | Updated progress.md, CHANGELOG.md, systemPatterns.md |

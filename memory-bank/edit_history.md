@@ -3,6 +3,11 @@
 
 ### 2025-06-03
 
+#### 23:50 - T73b: Created subsystem extraction task and implementation plan
+- Created `memory-bank/tasks/T73b.md` - Task specification for fixing quantum graph dimension mismatch using partial trace
+- Created `packages/quantum/docs/subsystem-extraction-plan.md` - Simplified 70-line implementation plan following KIRSS principles
+- Updated `memory-bank/tasks.md` - Added T73b entry, marked T73a as complete, updated task counts
+
 #### 00:15 - T75: Task Creation and Documentation Complete
 - Created `memory-bank/tasks/T75.md` - Comprehensive tensor network module implementation task with 6-phase plan leveraging existing infrastructure
 - Updated `memory-bank/tasks.md` - Added T75 to active tasks, updated task ID counter, dependencies, priority queue
