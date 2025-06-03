@@ -5,7 +5,7 @@
 - **Active Tasks:** 34
 - **Paused Tasks:** 4  
 - **Completed Tasks:** 31
-- **Latest Task ID:** T74
+- **Latest Task ID:** T75
 
 ## Task Registry
 *Last Updated: 2025-05-28 16:30 IST*
@@ -13,6 +13,7 @@
 ## Active Tasks
 | ID | Title | Status | Priority | Started | File |
 |----|-------|--------|----------|---------|------|
+| T75 | Implement Tensor Network Module | 🆕 | HIGH | 2025-06-03 | [tasks/T75.md] | Core tensor network operations for memory-efficient quantum computation |
 | T74 | Optimize Quantum Operator Performance | 🔄 | HIGH | 2025-05-30 | [tasks/T74.md] | Implementation plan complete - sparse storage optimizations for 10-12 qubit operations |
 | T73a | Quantum Graph Testing and Examples | 🔄 | MEDIUM | 2025-05-31 | [tasks/T73a.md] | Testing and examples implementation in progress for quantum graph module |
 | T73 | Implement Quantum Graph Data Structure | ✅ | HIGH | 2025-05-30 | [tasks/T73.md] | **COMPLETE** - Full quantum graph functionality validated for circuit-model quantum computation |
@@ -600,6 +601,7 @@ This task implements the graph-core component of the larger T64 Graph-Quantum In
 | T38 | Implement Intertwiner Tensor Initialization | 2025-04-24 | T36, T20 |
 
 ## Dependencies
+- **T75** → Depends on → **T72 (QuantumObject), T73 (QuantumGraph), T64a (graph-core)**
 - **T71** → Depends on → **T64a, T64c**
 - **T69a** → Depends on → **T69**
 - **T69** → Depends on → **T55a (angular momentum), T55b (CG coefficients), packages/quantum infrastructure**
@@ -638,13 +640,14 @@ This task implements the graph-core component of the larger T64 Graph-Quantum In
 - **T48** → None
 
 ## Priority Queue
-1. **T65**: Release @spin-network/quantum as Standalone NPM Package
-2. **T64**: Graph-Quantum Integration Restructuring - foundational library redesign
-2. **T62**: Fix eigenDecomposition implementation for proper complex value handling
-3. **T61**: Implement quantum circuit module (circuit.ts)
-4. **T57**: Complete examples enhancement with comprehensive structure
-5. **T36**: Complete tensor operations module implementation
-6. **T52**: Complete API documentation
+1. **T75**: Implement Tensor Network Module - memory-efficient quantum computation
+2. **T65**: Release @spin-network/quantum as Standalone NPM Package
+3. **T64**: Graph-Quantum Integration Restructuring - foundational library redesign
+4. **T62**: Fix eigenDecomposition implementation for proper complex value handling
+5. **T61**: Implement quantum circuit module (circuit.ts)
+6. **T57**: Complete examples enhancement with comprehensive structure
+7. **T36**: Complete tensor operations module implementation
+8. **T52**: Complete API documentation
 
 ## Meta Tasks
 *Last Updated: May 14, 2025*
