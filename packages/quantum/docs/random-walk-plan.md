@@ -179,11 +179,64 @@ const visualData = analyzer.prepareVisualizationData();
 - Integration with quantum circuits
 - Tensor network representations
 
+## Memory Requirements and Performance Analysis
+
+### Memory Usage for 2D Quantum Walks
+
+For a width × height lattice with 4-dimensional coin space:
+
+**Dense Implementation (Current packages/quantum):**
+- State vector: 4 × width × height complex numbers = 32 × width × height bytes
+- Operators as full matrices: (4 × width × height)² complex numbers
+
+**Practical Limits with Dense Operators:**
+- 10×10 lattice: ~13 KB state vector, ~1.6 GB operators
+- 15×15 lattice: ~29 KB state vector, ~8.4 GB operators  
+- 20×20 lattice: ~51 KB state vector, ~25 GB operators
+
+**Sparse Implementation (T74 Infrastructure):**
+- State vector: 32 × width × height bytes (unchanged)
+- Coin operator: ~32 bytes (4×4 dense matrix)
+- Shift operator: ~32 × width × height bytes (sparse storage)
+
+**Practical Limits with Sparse Operators:**
+- 10×10 lattice: ~16 KB total memory
+- 50×50 lattice: ~400 KB total memory
+- 100×100 lattice: ~1.6 MB total memory
+
+### Performance Scaling
+
+**Current Infrastructure Limitations:**
+- Dense operators limit practical usage to ~15×15 lattices
+- Memory usage scales quadratically O((width × height)²)
+- Evolution becomes prohibitively expensive
+
+**With T74 Sparse Infrastructure:**
+- Linear memory scaling O(width × height)
+- Enables 100×100+ lattice simulations
+- Matrix-free evolution for large systems
+
+### Implementation Strategy
+
+**Phase 1: Dense Implementation**
+- Use current StateVector and MatrixOperator infrastructure
+- Target lattices up to 15×15 for initial validation
+- Implement full mathematical framework
+
+**Phase 2: Sparse Optimization (Post-T74)**
+- Leverage T74 sparse operator infrastructure
+- Implement matrix-free shift operations
+- Enable large-scale quantum walk simulations
+
 ## Dependencies
 
 ### Required Packages
 - packages/quantum: StateVector, IOperator, math.js integration
 - packages/graph-core: lattice builders, IGraph interface
+
+### Optional Sparse Infrastructure
+- T74 sparse operator implementation (for large lattices)
+- Enables quantum walks on 50×50+ lattices with reasonable memory usage
 
 ### No Additional Dependencies
 - Leverages existing infrastructure completely

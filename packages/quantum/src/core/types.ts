@@ -117,6 +117,35 @@ export interface IQuantumChannel {
 }
 
 /**
+ * Sparse matrix entry representation
+ */
+export interface ISparseEntry {
+  row: number;
+  col: number;
+  value: Complex;
+}
+
+/**
+ * Sparse matrix representation
+ */
+export interface ISparseMatrix {
+  rows: number;
+  cols: number;
+  entries: ISparseEntry[];
+  nnz: number;  // Number of non-zero entries
+}
+
+/**
+ * Interface for sparse operator operations
+ */
+export interface ISparseOperator extends IOperator {
+  readonly sparse: true;
+  getSparseMatrix(): ISparseMatrix;
+  toSparse(): ISparseMatrix;
+  fromSparse(sparse: ISparseMatrix): ISparseOperator;
+}
+
+/**
  * Unified quantum object type - union of all quantum objects
  */
 export type QuantumObject = IStateVector | IOperator;
