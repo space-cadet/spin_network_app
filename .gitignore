@@ -66,4 +66,4 @@ __marimo__
 */**/*.report
 
 # Typedoc output
-packages/quantum/docs
+# packages/quantum/docs
