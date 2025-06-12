@@ -1,6 +1,20 @@
 # Edit History
 *Created: May 30, 2025*
 
+### 2025-06-12
+
+#### 19:23 - T76: COMPLETE - Quantum Walk Probability Conservation Fix
+- Fixed `packages/quantum/src/algorithms/quantumWalk/QuantumWalk2D.ts` - Replaced amplitude accumulation with coin state reflection at boundaries
+- Updated `packages/quantum/docs/random-walk-plan.md` - Updated implementation status from debugging to complete, documented boundary reflection solution
+- Updated `memory-bank/tasks/T76.md` - Changed status to complete, added resolution summary and progress tracking
+- Updated `memory-bank/tasks.md` - Updated T76 status to complete with fix description
+
+#### 19:15 - T76: Literature Comparison and Problem Diagnosis
+- Conducted comprehensive literature review of quantum walk algorithms using web search
+- Identified that reflecting boundaries can preserve unitarity with proper implementation
+- Diagnosed root cause: amplitude accumulation violates unitarity principle
+- Determined solution: coin state reflection instead of amplitude accumulation
+
 ### 2025-06-03
 
 #### 22:30 - T76: Debug quantum walk probability violations - update memory bank files

@@ -135,32 +135,43 @@ export class QuantumWalk2D implements IQuantumWalk2D {
           // Skip if amplitude is zero
           if (Math.abs(amplitude.re) < 1e-15 && Math.abs(amplitude.im) < 1e-15) continue;
           
-          // Determine new position based on coin state
+          // Determine new position and handle boundary reflection
           let newX = x, newY = y;
-          let canMove = false;
+          let effectiveCoin = coin;
           
-          if (coin === CoinDirection.UP && y > 0) {
-            newY = y - 1;
-            canMove = true;
-          } else if (coin === CoinDirection.DOWN && y < this.height - 1) {
-            newY = y + 1;
-            canMove = true;
-          } else if (coin === CoinDirection.LEFT && x > 0) {
-            newX = x - 1;
-            canMove = true;
-          } else if (coin === CoinDirection.RIGHT && x < this.width - 1) {
-            newX = x + 1;
-            canMove = true;
+          if (coin === CoinDirection.UP) {
+            if (y > 0) {
+              newY = y - 1;
+            } else {
+              // Reflect at top boundary: UP becomes DOWN
+              effectiveCoin = CoinDirection.DOWN;
+            }
+          } else if (coin === CoinDirection.DOWN) {
+            if (y < this.height - 1) {
+              newY = y + 1;
+            } else {
+              // Reflect at bottom boundary: DOWN becomes UP
+              effectiveCoin = CoinDirection.UP;
+            }
+          } else if (coin === CoinDirection.LEFT) {
+            if (x > 0) {
+              newX = x - 1;
+            } else {
+              // Reflect at left boundary: LEFT becomes RIGHT
+              effectiveCoin = CoinDirection.RIGHT;
+            }
+          } else if (coin === CoinDirection.RIGHT) {
+            if (x < this.width - 1) {
+              newX = x + 1;
+            } else {
+              // Reflect at right boundary: RIGHT becomes LEFT
+              effectiveCoin = CoinDirection.LEFT;
+            }
           }
           
-          if (canMove) {
-            // Place amplitude at new position
-            const newIndex = this.getStateIndex({x: newX, y: newY}, coin);
-            newAmplitudes[newIndex] = math.add(newAmplitudes[newIndex], amplitude) as Complex;
-          } else {
-            // Amplitude stays at current position
-            newAmplitudes[currentIndex] = math.add(newAmplitudes[currentIndex], amplitude) as Complex;
-          }
+          // Place amplitude at new position with effective coin state
+          const newIndex = this.getStateIndex({x: newX, y: newY}, effectiveCoin);
+          newAmplitudes[newIndex] = math.add(newAmplitudes[newIndex], amplitude) as Complex;
         }
       }
     }
